@@ -1,4 +1,9 @@
 export type ActionMessageKey =
+  | "album.created"
+  | "album.invalidSubmission"
+  | "album.updated"
+  | "countdown.created"
+  | "countdown.invalidSubmission"
   | "auth.invite.accepted"
   | "auth.invite.coupleFull"
   | "auth.invite.created"
@@ -7,6 +12,8 @@ export type ActionMessageKey =
   | "auth.magicLink.sent"
   | "auth.magicLink.unreachable"
   | "auth.signInRequired"
+  | "futureNote.created"
+  | "futureNote.invalidSubmission"
   | "list.checklist.created"
   | "list.checklist.updated"
   | "list.checklistItem.added"
@@ -16,6 +23,8 @@ export type ActionMessageKey =
   | "memory.fileTooLarge"
   | "memory.missingContent"
   | "memory.unsupportedType"
+  | "trip.created"
+  | "trip.invalidSubmission"
   | "unexpectedError";
 
 export interface ActionState {

@@ -102,6 +102,8 @@ export const TravelAtlasShell = (): ReactElement => {
 
           return (
             <button
+              aria-label={stop.title}
+              aria-pressed={isActive}
               className={cn("absolute", stop.positionClassName)}
               key={stop.id}
               onClick={() => setSelectedStopId(stop.id)}
@@ -153,6 +155,7 @@ export const TravelAtlasShell = (): ReactElement => {
         <div className="space-y-2">
           {atlasStops.map((stop) => (
             <button
+              aria-pressed={stop.id === selectedStop.id}
               className={cn(
                 "w-full rounded-[1.35rem] border px-4 py-3 text-left shadow-whisper transition-transform hover:-translate-y-0.5",
                 stop.id === selectedStop.id

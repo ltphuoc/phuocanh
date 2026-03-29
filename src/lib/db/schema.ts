@@ -4,7 +4,7 @@ export interface DrizzleBaselineEntity {
   readonly status: "planned_mirror" | "sql_authoritative";
 }
 
-export const phaseOneTableBaseline: readonly DrizzleBaselineEntity[] = [
+export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
   { name: "public.couples", sourceMigration: "20260327214000_phase1_mvp.sql", status: "planned_mirror" },
   {
     name: "public.couple_memberships",
@@ -34,7 +34,39 @@ export const phaseOneTableBaseline: readonly DrizzleBaselineEntity[] = [
     sourceMigration: "20260327214000_phase1_mvp.sql",
     status: "planned_mirror",
   },
+  {
+    name: "public.countdowns",
+    sourceMigration: "20260329110000_phase2_slice1_countdowns_future_notes.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.future_notes",
+    sourceMigration: "20260329110000_phase2_slice1_countdowns_future_notes.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.future_note_contents",
+    sourceMigration: "20260329110000_phase2_slice1_countdowns_future_notes.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.trips",
+    sourceMigration: "20260329153000_phase2_slice2_trips_foundation.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.albums",
+    sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.album_items",
+    sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
+    status: "planned_mirror",
+  },
 ] as const;
+
+export const phaseOneTableBaseline = appTableBaseline;
 
 export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
@@ -50,6 +82,21 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.memories_on_this_day(uuid, text)",
     sourceMigration: "20260327233000_phase1_hardening.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.create_album_with_items(uuid, text, text, uuid[])",
+    sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.add_album_items(uuid, uuid[])",
+    sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.enforce_album_has_items()",
+    sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
     status: "sql_authoritative",
   },
   {

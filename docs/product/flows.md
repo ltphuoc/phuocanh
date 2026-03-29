@@ -167,6 +167,161 @@ User-visible errors:
 - Validation failure
 - Insert/update failure
 
+## Flow 9: Create Countdown
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/countdowns`.
+2. `CreateCountdownForm` validates `title`, `kind`, `targetAt`, and optional `note`.
+3. Form converts the selected date into a UTC ISO timestamp and submits `FormData`.
+4. `createCountdownAction` requires ready couple context.
+5. Action validates the payload with `createCountdownSchema`.
+6. Action inserts a couple-scoped `countdowns` row with `created_by_user_id`.
+7. Action revalidates `/countdowns`.
+8. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+
+Redirects:
+- None.
+
+User-visible errors:
+- Missing or invalid title/date/kind
+- Missing active couple membership
+- Unexpected database write failure
+
+## Flow 10: Create Future Note
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/future-notes`.
+2. `CreateFutureNoteForm` validates `title`, `unlockAt`, and `body`.
+3. Form converts the selected unlock date into a UTC ISO timestamp and submits `FormData`.
+4. `createFutureNoteAction` requires ready couple context.
+5. Action validates the payload with `createFutureNoteSchema`.
+6. Action inserts the `future_notes` metadata row first.
+7. Action inserts the `future_note_contents` body row second.
+8. If the body insert fails, the action attempts rollback of the metadata row.
+9. Action revalidates `/future-notes`.
+10. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+
+Redirects:
+- None.
+
+User-visible errors:
+- Missing or invalid title/body/unlock date
+- Missing active couple membership
+- Metadata or content write failure
+
+## Flow 11: Read Locked And Unlocked Future Notes
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/future-notes`.
+2. Server route resolves couple context and calls `getFutureNotesPageData(...)`.
+3. The helper reads couple-scoped `future_notes` metadata ordered by `unlock_at`.
+4. Notes with `unlock_at > now()` are returned as locked metadata only.
+5. Notes with `unlock_at <= now()` are treated as unlocked.
+6. Only unlocked note IDs are then used to read `future_note_contents`.
+7. UI renders locked notes without bodies and unlocked notes with bodies.
+
+Redirects:
+- Invalid auth/couple state follows the normal app auth gate redirect rules.
+
+User-visible errors:
+- Generic route failure if metadata or unlocked-content reads fail unexpectedly
+
+## Flow 12: Create Trip
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/trips`.
+2. `CreateTripForm` validates `title`, `startDate`, `endDate`, and optional `note`.
+3. Form submits date-only values through `FormData`.
+4. `createTripAction` requires ready couple context.
+5. Action validates the payload with `createTripSchema`, including `endDate >= startDate`.
+6. Action inserts a couple-scoped `trips` row with `created_by_user_id`.
+7. Action revalidates `/trips`.
+8. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+
+Redirects:
+- None.
+
+User-visible errors:
+- Missing or invalid title/date range
+- End date before start date
+- Missing active couple membership
+- Unexpected database write failure
+
+## Flow 13: Create Album From Trip Detail
+Preconditions:
+- User is in `ready` couple context.
+- User opens a real trip detail route: `/trips/[tripId]`.
+- The trip has no linked album yet.
+- The trip has eligible `memory_media` whose parent memory `happened_at` falls inside the trip window.
+
+Steps:
+1. Server route resolves couple context and calls `getTripDetailData(...)`.
+2. The helper reads the trip, checks for an existing album, reads in-range memories, reads eligible `memory_media`, signs media URLs, and returns remaining candidates.
+3. `CreateAlbumForm` validates `title`, optional `description`, and selected `memoryMediaIds`.
+4. `createAlbumAction` requires ready couple context and validates the payload.
+5. Action calls `create_album_with_items(...)`.
+6. RPC enforces:
+   - one album per trip
+   - active couple membership
+   - no duplicate submitted media IDs
+   - selected media belongs to the couple
+   - selected media falls inside the trip window
+7. RPC creates the `albums` row and initial `album_items` transactionally.
+8. Action revalidates `/albums` and `/trips/[tripId]`.
+9. Trip detail re-renders into the linked-album state.
+
+Redirects:
+- Invalid or foreign trip IDs return `notFound()` before the form is available.
+
+User-visible errors:
+- Missing title
+- No media selected
+- Duplicate or invalid media selection
+- Trip not found
+- Trip already has an album
+- Unexpected RPC/database failure
+
+## Flow 14: Add More Media To An Existing Album
+Preconditions:
+- User is in `ready` couple context.
+- User opens a real trip detail route: `/trips/[tripId]`.
+- The trip already has a linked album.
+- Remaining eligible media still exists for that album/trip window.
+
+Steps:
+1. Server route resolves couple context and calls `getTripDetailData(...)`.
+2. The helper returns the linked album summary plus only the eligible media not already attached.
+3. `AddAlbumItemsForm` validates the selected `memoryMediaIds`.
+4. `addAlbumItemsAction` requires ready couple context and validates the payload.
+5. Action calls `add_album_items(...)`.
+6. RPC enforces:
+   - active couple membership
+   - no duplicate submitted media IDs
+   - album exists inside the member’s couple scope
+   - selected media belongs to the couple
+   - selected media falls inside the linked trip window
+   - selected media is not already attached
+7. RPC appends new `album_items` rows with new `position` values.
+8. Action revalidates `/albums`, `/albums/[albumId]`, and `/trips/[tripId]`.
+9. Trip detail and album detail re-render with the new media set.
+
+Redirects:
+- Invalid or foreign trip IDs return `notFound()` before the add form is available.
+
+User-visible errors:
+- No media selected
+- Duplicate or invalid media selection
+- Album not found
+- Unexpected RPC/database failure
+
 ## Route Entry Flow
 - `/` is a pure redirect route.
 - Unauthenticated -> `/login`

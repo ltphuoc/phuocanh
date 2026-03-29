@@ -12,8 +12,8 @@ import { PageReveal } from "@/components/ui/page-reveal";
 import { SectionCard } from "@/components/ui/section-card";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
 import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
+import { signMemoryMediaStorageItems } from "@/lib/server/memory-media";
 import { getMemoryDetailData } from "@/lib/server/phase-one-data";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 interface MemoryDetailPageProps {
   readonly params: Promise<{
@@ -49,19 +49,7 @@ export default async function MemoryDetailPage({
     notFound();
   }
 
-  const supabase = await createSupabaseServerClient();
-  const mediaUrls = await Promise.all(
-    memory.media.map(async (media) => {
-      const { data, error } = await supabase.storage
-        .from("memory-media")
-        .createSignedUrl(media.storagePath, 60 * 15);
-
-      return {
-        ...media,
-        signedUrl: error || !data?.signedUrl ? null : data.signedUrl,
-      };
-    }),
-  );
+  const mediaUrls = await signMemoryMediaStorageItems(memory.media);
 
   const firstLine = memory.note?.trim().split("\n")[0] ?? t("header.quoteFallback");
   const happenedAtDate = new Date(memory.happenedAt);

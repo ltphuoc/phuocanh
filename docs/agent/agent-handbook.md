@@ -41,7 +41,9 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical “what exist
 - Auth flow, invite acceptance, couple bootstrap, and callback redirect handling
 - Any change touching `couples`, `couple_memberships`, invite lifecycle, RLS, RPCs, or storage policies
 - Any schema change that edits TypeScript mirrors without matching SQL migrations
-- Any work that assumes `/chat`, `/map`, `/trips`, `/albums/[albumId]`, `/countdowns`, `/future-notes`, `/games`, `/games/[mode]`, `/stats`, or `/settings` are live data features
+- Any work that assumes `/chat`, `/map`, `/games`, `/games/[mode]`, `/stats`, or `/settings` are live data features
+- Any work that changes the trip/album contract without also reviewing the trip-rooted album rules in `docs/product/business-rules.md`
+- Any work that skips `docs/engineering/route-capability-matrix.md` and invents route status from older logs or shell polish alone
 
 ## Forbidden Actions
 - Do not insert directly into `public.couples` or `public.couple_memberships` from app code.
@@ -50,6 +52,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical “what exist
 - Do not treat decision logs or changelog entries as the canonical description of current behavior.
 - Do not add backend assumptions to shell-only or mock-only routes without also adding schema/contracts/docs.
 - Do not change the storage path contract for memory media without reviewing storage policies and rollback behavior.
+- Do not add a second album upload pipeline without reviewing the existing `memory_media` contract first.
 
 ## Required Validation Before PR
 - `pnpm lint`

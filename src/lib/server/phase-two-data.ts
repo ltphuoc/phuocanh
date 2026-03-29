@@ -1,0 +1,605 @@
+import { compareAsc, differenceInCalendarDays, parseISO } from "date-fns";
+import { z } from "zod";
+import type { CoupleContext } from "@/lib/server/couple-context";
+import { signMemoryMediaStorageItems } from "@/lib/server/memory-media";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
+import { toUtcDateEndExclusiveIso, toUtcDateStartIso } from "@/lib/utils/date-input";
+
+export type TripStatus = "planned" | "active" | "completed";
+
+export interface CountdownCard {
+  readonly daysFromToday: number;
+  readonly id: string;
+  readonly kind: Database["public"]["Enums"]["countdown_kind"];
+  readonly note: string | null;
+  readonly targetAt: string;
+  readonly title: string;
+}
+
+export interface CountdownsPageData {
+  readonly past: readonly CountdownCard[];
+  readonly upcoming: readonly CountdownCard[];
+}
+
+export interface LockedFutureNoteCard {
+  readonly id: string;
+  readonly status: "locked";
+  readonly title: string;
+  readonly unlockAt: string;
+}
+
+export interface UnlockedFutureNoteCard {
+  readonly body: string | null;
+  readonly id: string;
+  readonly status: "unlocked";
+  readonly title: string;
+  readonly unlockAt: string;
+}
+
+export interface FutureNotesPageData {
+  readonly locked: readonly LockedFutureNoteCard[];
+  readonly unlocked: readonly UnlockedFutureNoteCard[];
+}
+
+export interface TripCard {
+  readonly endDate: string;
+  readonly id: string;
+  readonly note: string | null;
+  readonly startDate: string;
+  readonly status: TripStatus;
+  readonly title: string;
+}
+
+export interface TripsPageData {
+  readonly active: readonly TripCard[];
+  readonly completed: readonly TripCard[];
+  readonly planned: readonly TripCard[];
+}
+
+export interface AlbumSummary {
+  readonly coverMediaType: Database["public"]["Enums"]["media_type"] | null;
+  readonly coverSignedUrl: string | null;
+  readonly description: string | null;
+  readonly id: string;
+  readonly itemCount: number;
+  readonly title: string;
+  readonly trip: TripCard;
+}
+
+export interface AlbumsPageData {
+  readonly albums: readonly AlbumSummary[];
+}
+
+export interface AlbumMediaCandidate {
+  readonly happenedAt: string;
+  readonly id: string;
+  readonly locationName: string | null;
+  readonly mediaType: Database["public"]["Enums"]["media_type"];
+  readonly note: string | null;
+  readonly signedUrl: string | null;
+}
+
+export interface TripDetailAlbumSummary {
+  readonly coverMediaType: Database["public"]["Enums"]["media_type"] | null;
+  readonly coverSignedUrl: string | null;
+  readonly description: string | null;
+  readonly id: string;
+  readonly itemCount: number;
+  readonly title: string;
+}
+
+export interface TripDetailData extends TripCard {
+  readonly album: TripDetailAlbumSummary | null;
+  readonly availableMedia: readonly AlbumMediaCandidate[];
+}
+
+export interface AlbumDetailData {
+  readonly description: string | null;
+  readonly id: string;
+  readonly items: readonly AlbumMediaCandidate[];
+  readonly title: string;
+  readonly trip: TripCard;
+}
+
+const albumIdSchema = z.uuid();
+const tripIdSchema = z.uuid();
+
+const getUtcDateToken = (value: string): string => value.slice(0, 10);
+
+const getTodayUtcDate = (): Date => parseISO(new Date().toISOString().slice(0, 10));
+
+const getTodayUtcDateToken = (): string => getUtcDateToken(new Date().toISOString());
+
+const compareDateTokensAscending = (left: string, right: string): number =>
+  compareAsc(parseISO(left), parseISO(right));
+
+const compareDateTokensDescending = (left: string, right: string): number =>
+  compareAsc(parseISO(right), parseISO(left));
+
+const getTripStatus = (
+  startDate: string,
+  endDate: string,
+  todayDateToken: string,
+): TripStatus => {
+  if (todayDateToken < startDate) {
+    return "planned";
+  }
+
+  if (todayDateToken > endDate) {
+    return "completed";
+  }
+
+  return "active";
+};
+
+const toCountdownCard = (
+  row: Database["public"]["Tables"]["countdowns"]["Row"],
+  todayUtcDate: Date,
+): CountdownCard => {
+  const targetDate = parseISO(getUtcDateToken(row.target_at));
+
+  return {
+    daysFromToday: differenceInCalendarDays(targetDate, todayUtcDate),
+    id: row.id,
+    kind: row.kind,
+    note: row.note,
+    targetAt: row.target_at,
+    title: row.title,
+  };
+};
+
+const toTripCard = (
+  row: Database["public"]["Tables"]["trips"]["Row"],
+  todayDateToken: string,
+): TripCard => ({
+  endDate: row.end_date,
+  id: row.id,
+  note: row.note,
+  startDate: row.start_date,
+  status: getTripStatus(row.start_date, row.end_date, todayDateToken),
+  title: row.title,
+});
+
+const toAlbumMediaCandidate = (
+  media: Database["public"]["Tables"]["memory_media"]["Row"] & {
+    readonly signedUrl: string | null;
+  },
+  memory: Database["public"]["Tables"]["memories"]["Row"],
+): AlbumMediaCandidate => ({
+  happenedAt: memory.happened_at,
+  id: media.id,
+  locationName: memory.location_name,
+  mediaType: media.media_type,
+  note: memory.note,
+  signedUrl: media.signedUrl,
+});
+
+const sortAlbumMediaCandidates = (
+  left: AlbumMediaCandidate,
+  right: AlbumMediaCandidate,
+): number => compareAsc(parseISO(right.happenedAt), parseISO(left.happenedAt));
+
+export const getCountdownsPageData = async (
+  context: CoupleContext,
+): Promise<CountdownsPageData> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("countdowns")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .order("target_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const todayUtcDate = getTodayUtcDate();
+  const countdowns = data.map((row) => toCountdownCard(row, todayUtcDate));
+
+  return {
+    past: countdowns
+      .filter((countdown) => countdown.daysFromToday < 0)
+      .sort((left, right) => compareAsc(parseISO(right.targetAt), parseISO(left.targetAt))),
+    upcoming: countdowns
+      .filter((countdown) => countdown.daysFromToday >= 0)
+      .sort((left, right) => compareAsc(parseISO(left.targetAt), parseISO(right.targetAt))),
+  };
+};
+
+export const getFutureNotesPageData = async (
+  context: CoupleContext,
+): Promise<FutureNotesPageData> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("future_notes")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .order("unlock_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const now = new Date();
+  const unlockedMetadata = data.filter(
+    (note) => compareAsc(parseISO(note.unlock_at), now) <= 0,
+  );
+  const locked = data
+    .filter((note) => compareAsc(parseISO(note.unlock_at), now) > 0)
+    .map<LockedFutureNoteCard>((note) => ({
+      id: note.id,
+      status: "locked",
+      title: note.title,
+      unlockAt: note.unlock_at,
+    }));
+
+  const unlockedIds = unlockedMetadata.map((note) => note.id);
+  const unlockedContentsQuery = unlockedIds.length
+    ? await supabase
+        .from("future_note_contents")
+        .select("future_note_id, body")
+        .in("future_note_id", unlockedIds)
+    : { data: [], error: null };
+
+  if (unlockedContentsQuery.error) {
+    throw new Error(unlockedContentsQuery.error.message);
+  }
+
+  const bodyByNoteId = new Map<string, string>();
+  unlockedContentsQuery.data.forEach((content) => {
+    bodyByNoteId.set(content.future_note_id, content.body);
+  });
+
+  return {
+    locked,
+    unlocked: unlockedMetadata
+      .map<UnlockedFutureNoteCard>((note) => ({
+        body: bodyByNoteId.get(note.id) ?? null,
+        id: note.id,
+        status: "unlocked",
+        title: note.title,
+        unlockAt: note.unlock_at,
+      }))
+      .sort((left, right) => compareAsc(parseISO(right.unlockAt), parseISO(left.unlockAt))),
+  };
+};
+
+export const getTripsPageData = async (
+  context: CoupleContext,
+): Promise<TripsPageData> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("trips")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .order("start_date", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const todayDateToken = getTodayUtcDateToken();
+  const trips = data.map((row) => toTripCard(row, todayDateToken));
+
+  return {
+    active: trips
+      .filter((trip) => trip.status === "active")
+      .sort((left, right) => compareDateTokensAscending(left.endDate, right.endDate)),
+    completed: trips
+      .filter((trip) => trip.status === "completed")
+      .sort((left, right) => compareDateTokensDescending(left.endDate, right.endDate)),
+    planned: trips
+      .filter((trip) => trip.status === "planned")
+      .sort((left, right) => compareDateTokensAscending(left.startDate, right.startDate)),
+  };
+};
+
+export const getAlbumsPageData = async (
+  context: CoupleContext,
+): Promise<AlbumsPageData> => {
+  const supabase = await createSupabaseServerClient();
+  const todayDateToken = getTodayUtcDateToken();
+  const { data: albums, error } = await supabase
+    .from("albums")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!albums.length) {
+    return {
+      albums: [],
+    };
+  }
+
+  const albumIds = albums.map((album) => album.id);
+  const tripIds = albums.map((album) => album.trip_id);
+  const [albumItemsQuery, tripsQuery] = await Promise.all([
+    supabase
+      .from("album_items")
+      .select("*")
+      .in("album_id", albumIds)
+      .order("position", { ascending: true }),
+    supabase.from("trips").select("*").in("id", tripIds),
+  ]);
+
+  if (albumItemsQuery.error) {
+    throw new Error(albumItemsQuery.error.message);
+  }
+
+  if (tripsQuery.error) {
+    throw new Error(tripsQuery.error.message);
+  }
+
+  const firstAlbumItemByAlbumId = new Map<string, Database["public"]["Tables"]["album_items"]["Row"]>();
+  const itemCountByAlbumId = new Map<string, number>();
+  albumItemsQuery.data.forEach((item) => {
+    if (!firstAlbumItemByAlbumId.has(item.album_id)) {
+      firstAlbumItemByAlbumId.set(item.album_id, item);
+    }
+
+    itemCountByAlbumId.set(item.album_id, (itemCountByAlbumId.get(item.album_id) ?? 0) + 1);
+  });
+
+  const coverMediaIds = Array.from(firstAlbumItemByAlbumId.values()).map(
+    (item) => item.memory_media_id,
+  );
+  const coverMediaQuery = coverMediaIds.length
+    ? await supabase.from("memory_media").select("*").in("id", coverMediaIds)
+    : { data: [], error: null };
+
+  if (coverMediaQuery.error) {
+    throw new Error(coverMediaQuery.error.message);
+  }
+
+  const signedCoverMedia = await signMemoryMediaStorageItems(coverMediaQuery.data);
+  const coverMediaById = new Map(
+    signedCoverMedia.map((media) => [media.id, media] as const),
+  );
+  const tripById = new Map(
+    tripsQuery.data.map((trip) => [trip.id, toTripCard(trip, todayDateToken)] as const),
+  );
+
+  return {
+    albums: albums.map((album) => {
+      const trip = tripById.get(album.trip_id);
+      if (!trip) {
+        throw new Error(`Trip ${album.trip_id} not found for album ${album.id}.`);
+      }
+
+      const firstAlbumItem = firstAlbumItemByAlbumId.get(album.id);
+      const coverMedia = firstAlbumItem
+        ? coverMediaById.get(firstAlbumItem.memory_media_id) ?? null
+        : null;
+
+      return {
+        coverMediaType: coverMedia?.media_type ?? null,
+        coverSignedUrl: coverMedia?.signedUrl ?? null,
+        description: album.description,
+        id: album.id,
+        itemCount: itemCountByAlbumId.get(album.id) ?? 0,
+        title: album.title,
+        trip,
+      };
+    }),
+  };
+};
+
+export const getTripDetailData = async (
+  context: CoupleContext,
+  tripId: string,
+): Promise<TripDetailData | null> => {
+  const parsedTripId = tripIdSchema.safeParse(tripId);
+  if (!parsedTripId.success) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const todayDateToken = getTodayUtcDateToken();
+  const { data: trips, error } = await supabase
+    .from("trips")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .eq("id", parsedTripId.data)
+    .limit(1);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const trip = trips[0];
+  if (!trip) {
+    return null;
+  }
+
+  const [albumQuery, memoriesQuery] = await Promise.all([
+    supabase
+      .from("albums")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .eq("trip_id", trip.id)
+      .limit(1),
+    supabase
+      .from("memories")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .gte("happened_at", toUtcDateStartIso(trip.start_date))
+      .lt("happened_at", toUtcDateEndExclusiveIso(trip.end_date))
+      .order("happened_at", { ascending: false }),
+  ]);
+
+  if (albumQuery.error) {
+    throw new Error(albumQuery.error.message);
+  }
+
+  if (memoriesQuery.error) {
+    throw new Error(memoriesQuery.error.message);
+  }
+
+  const album = albumQuery.data[0] ?? null;
+  const memoryIds = memoriesQuery.data.map((memory) => memory.id);
+  const eligibleMediaQuery = memoryIds.length
+    ? await supabase
+        .from("memory_media")
+        .select("*")
+        .in("memory_id", memoryIds)
+        .order("created_at", { ascending: true })
+    : { data: [], error: null };
+
+  if (eligibleMediaQuery.error) {
+    throw new Error(eligibleMediaQuery.error.message);
+  }
+
+  const albumItemsQuery = album
+    ? await supabase
+        .from("album_items")
+        .select("*")
+        .eq("album_id", album.id)
+        .order("position", { ascending: true })
+    : { data: [], error: null };
+
+  if (albumItemsQuery.error) {
+    throw new Error(albumItemsQuery.error.message);
+  }
+
+  const signedEligibleMedia = await signMemoryMediaStorageItems(eligibleMediaQuery.data);
+  const eligibleMediaById = new Map(
+    signedEligibleMedia.map((media) => [media.id, media] as const),
+  );
+  const memoryById = new Map(memoriesQuery.data.map((memory) => [memory.id, memory] as const));
+  const attachedMediaIds = new Set(albumItemsQuery.data.map((item) => item.memory_media_id));
+  const availableMedia = signedEligibleMedia
+    .filter((media) => !attachedMediaIds.has(media.id))
+    .flatMap((media) => {
+      const memory = memoryById.get(media.memory_id);
+      if (!memory) {
+        return [];
+      }
+
+      return [toAlbumMediaCandidate(media, memory)];
+    })
+    .sort(sortAlbumMediaCandidates);
+
+  const firstAlbumItem = albumItemsQuery.data[0] ?? null;
+  const coverMedia = firstAlbumItem
+    ? eligibleMediaById.get(firstAlbumItem.memory_media_id) ?? null
+    : null;
+
+  return {
+    album: album
+      ? {
+          coverMediaType: coverMedia?.media_type ?? null,
+          coverSignedUrl: coverMedia?.signedUrl ?? null,
+          description: album.description,
+          id: album.id,
+          itemCount: albumItemsQuery.data.length,
+          title: album.title,
+        }
+      : null,
+    availableMedia,
+    ...toTripCard(trip, todayDateToken),
+  };
+};
+
+export const getAlbumDetailData = async (
+  context: CoupleContext,
+  albumId: string,
+): Promise<AlbumDetailData | null> => {
+  const parsedAlbumId = albumIdSchema.safeParse(albumId);
+  if (!parsedAlbumId.success) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const todayDateToken = getTodayUtcDateToken();
+  const { data: albums, error } = await supabase
+    .from("albums")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .eq("id", parsedAlbumId.data)
+    .limit(1);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const album = albums[0];
+  if (!album) {
+    return null;
+  }
+
+  const [tripQuery, albumItemsQuery] = await Promise.all([
+    supabase
+      .from("trips")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .eq("id", album.trip_id)
+      .limit(1),
+    supabase
+      .from("album_items")
+      .select("*")
+      .eq("album_id", album.id)
+      .order("position", { ascending: true }),
+  ]);
+
+  if (tripQuery.error) {
+    throw new Error(tripQuery.error.message);
+  }
+
+  if (albumItemsQuery.error) {
+    throw new Error(albumItemsQuery.error.message);
+  }
+
+  const trip = tripQuery.data[0];
+  if (!trip) {
+    return null;
+  }
+
+  const mediaIds = albumItemsQuery.data.map((item) => item.memory_media_id);
+  const mediaQuery = mediaIds.length
+    ? await supabase.from("memory_media").select("*").in("id", mediaIds)
+    : { data: [], error: null };
+
+  if (mediaQuery.error) {
+    throw new Error(mediaQuery.error.message);
+  }
+
+  const memoryIds = mediaQuery.data.map((media) => media.memory_id);
+  const memoriesQuery = memoryIds.length
+    ? await supabase.from("memories").select("*").in("id", memoryIds)
+    : { data: [], error: null };
+
+  if (memoriesQuery.error) {
+    throw new Error(memoriesQuery.error.message);
+  }
+
+  const signedMedia = await signMemoryMediaStorageItems(mediaQuery.data);
+  const mediaById = new Map(signedMedia.map((media) => [media.id, media] as const));
+  const memoryById = new Map(memoriesQuery.data.map((memory) => [memory.id, memory] as const));
+
+  const items = albumItemsQuery.data.flatMap((item) => {
+    const media = mediaById.get(item.memory_media_id);
+    if (!media) {
+      return [];
+    }
+
+    const memory = memoryById.get(media.memory_id);
+    if (!memory) {
+      return [];
+    }
+
+    return [toAlbumMediaCandidate(media, memory)];
+  });
+
+  return {
+    description: album.description,
+    id: album.id,
+    items,
+    title: album.title,
+    trip: toTripCard(trip, todayDateToken),
+  };
+};

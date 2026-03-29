@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils/cn";
 interface FormSectionProps extends HTMLAttributes<HTMLDivElement> {
   readonly children: ReactNode;
   readonly description?: string;
+  readonly errorId?: string;
+  readonly errorMessage?: string;
   readonly htmlFor?: string;
   readonly label: string;
 }
@@ -12,6 +14,8 @@ export const FormSection = ({
   children,
   className,
   description,
+  errorId,
+  errorMessage,
   htmlFor,
   label,
   ...props
@@ -24,5 +28,10 @@ export const FormSection = ({
       {description ? <p className="ui-body-sm text-muted-foreground">{description}</p> : null}
     </div>
     {children}
+    {errorMessage ? (
+      <p className="text-sm font-medium text-primary" id={errorId}>
+        {errorMessage}
+      </p>
+    ) : null}
   </div>
 );

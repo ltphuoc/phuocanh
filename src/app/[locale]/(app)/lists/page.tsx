@@ -23,6 +23,12 @@ interface ListsPageProps {
   }>;
 }
 
+const categoryTranslationKeyByValue = {
+  food: "category.food",
+  movie: "category.movie",
+  place: "category.place",
+} as const;
+
 export const generateMetadata = async ({
   params,
 }: ListsPageProps): Promise<Metadata> => getRouteMetadata(params, "lists");
@@ -31,10 +37,14 @@ export default async function ListsPage({
   params,
 }: ListsPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
-  const [listsT, context] = await Promise.all([
+  const [listsT, wishItemFormT, context] = await Promise.all([
     getTranslations({
       locale,
       namespace: "lists",
+    }),
+    getTranslations({
+      locale,
+      namespace: "forms.wishItem",
     }),
     getReadyCoupleContextOrRedirect(locale),
   ]);
@@ -58,7 +68,7 @@ export default async function ListsPage({
                 data.wishItems.map((item) => (
                   <ListRow
                     key={item.id}
-                    meta={<Badge>{item.category}</Badge>}
+                    meta={<Badge>{wishItemFormT(categoryTranslationKeyByValue[item.category])}</Badge>}
                     subtitle={item.note}
                     title={item.title}
                   />

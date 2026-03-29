@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils/cn";
 
 interface MoreNavigationSheetProps {
   readonly activeHref: string;
+  readonly id?: string;
   readonly onClose: () => void;
   readonly open: boolean;
 }
@@ -44,6 +45,7 @@ const groupedSecondaryItems = groupNavigationItems(appSecondaryNavigationItems);
 
 export const MoreNavigationSheet = ({
   activeHref,
+  id,
   onClose,
   open,
 }: MoreNavigationSheetProps): ReactElement => {
@@ -66,6 +68,7 @@ export const MoreNavigationSheet = ({
             animate={{ opacity: 1, y: 0 }}
             className="absolute inset-x-4 bottom-4 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.92)] px-5 py-5 shadow-cloud backdrop-blur-xl"
             exit={{ opacity: 0, y: 18 }}
+            id={id}
             initial={{ opacity: 0, y: 24 }}
             transition={{ damping: 28, stiffness: 280, type: "spring" }}
           >

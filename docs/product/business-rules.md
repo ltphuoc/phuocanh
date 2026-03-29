@@ -35,8 +35,8 @@ This file is the canonical business-rule reference for the current app. If this 
 
 ## Memory And Media Rules
 - A memory currently requires either:
-- a non-empty note, or
-- one uploaded media file
+  - a non-empty note, or
+  - one uploaded media file
 - The current UI supports at most one uploaded file per memory submission, even though the data model allows multiple media rows per memory.
 - Supported media types are images and videos only.
 - The app-level upload limit is `25MB`.
@@ -50,6 +50,42 @@ This file is the canonical business-rule reference for the current app. If this 
 - Checklist item writes are authorized through the parent checklist’s couple membership in SQL.
 - Checklist item actions do not need to fetch the couple context explicitly because RLS enforces the parent checklist relationship.
 
+## Countdowns
+- Countdown kinds are `anniversary`, `birthday`, `travel`, `plan`, and `custom`.
+- Countdowns are couple-scoped and readable by active couple members only.
+- Countdown creation records the creating member in `created_by_user_id` and is authorized by RLS.
+- Countdown dates are stored as UTC timestamps, but the UI treats them as date-oriented milestones rather than timed events.
+- Past countdowns remain visible as history; the current slice does not auto-archive or auto-delete them.
+- Reminder automation, timezone-aware reminders, and background jobs are explicitly deferred.
+
+## Future Notes
+- Future-note metadata (`title`, `unlock_at`) is visible immediately to active couple members.
+- Future-note bodies are stored in a separate one-to-one table (`future_note_contents`).
+- Future-note bodies are unreadable until the parent note satisfies `unlock_at <= now()` in SQL policy.
+- Creation is a two-step mutation: metadata first, content second. If content insert fails, the app attempts rollback of the metadata row.
+- The current slice has no edit/delete UI and no reminder-delivery workflow.
+- This slice uses database policy gating, not encryption-at-rest.
+
+## Trips
+- Trips are couple-scoped and readable by active couple members only.
+- Trip creation records the creating member in `created_by_user_id` and is authorized by RLS.
+- Trip dates are stored as date-only fields (`start_date`, `end_date`), not timestamps.
+- Trip status is derived in app code as `planned`, `active`, or `completed` from the current UTC calendar day and the stored date range until a couple-level timezone model exists.
+- The database enforces `end_date >= start_date`.
+- This slice has no edit/delete flow and no stop timeline rows yet.
+
+## Albums
+- Albums are couple-scoped and readable by active couple members only.
+- Albums are rooted in `trips`, not in a separate travel hierarchy.
+- Slice 3 enforces one album per trip through a unique `albums.trip_id` constraint.
+- Albums reuse existing `memory_media`; they do not create a second upload pipeline or a second storage bucket.
+- Album creation records the creating member in `created_by_user_id` and is authorized through RLS plus the `create_album_with_items(...)` RPC.
+- Creating an album requires at least one selected media item.
+- Eligible album media is derived from couple-owned `memory_media` whose parent memory’s UTC date token falls within the trip’s `start_date..end_date` window.
+- Adding media later is allowed, but only for remaining eligible media not already attached to the album.
+- This slice has no captions, reordering, removal, delete flow, or multi-album-per-trip behavior.
+- Visited-place pins and map summaries remain downstream of the trip + album contract.
+
 ## Forbidden States
 - More than one `couples` row
 - More than two active memberships in a couple
@@ -57,6 +93,11 @@ This file is the canonical business-rule reference for the current app. If this 
 - Two active `partner_b` memberships in one couple
 - Direct app-layer join flow that writes `couples` or `couple_memberships` without RPCs
 - Storage objects in `memory-media` whose path does not begin with `couples/{uuid}/...`
+- Future-note body visibility before the parent note unlock date
+- Trip row whose `end_date` is before `start_date`
+- More than one album for the same trip in the current contract
+- Album row committed without at least one `album_items` row
+- Duplicate `album_items` rows for the same `(album_id, memory_media_id)` pair
 
 ## Enforcement Map
 - Singleton couple space: SQL unique index
@@ -66,21 +107,41 @@ This file is the canonical business-rule reference for the current app. If this 
 - Invite validity, expiration, and role assignment: SQL RPC
 - Couple membership read/write visibility: RLS helper `is_couple_member(...)`
 - Storage object access: storage policies using the couple ID embedded in the object path
+- Countdown and future-note visibility: RLS on the Phase 2 tables
+- Future-note body unlock rule: `future_note_contents_select` policy joined against `future_notes.unlock_at`
+- Trip visibility and inserts: RLS on `trips`
+- Trip date validity: `trips_date_range_check` constraint
+- Album visibility and direct insert bounds: RLS on `albums` and `album_items`
+- Trip-album uniqueness: `albums.trip_id` unique constraint
+- Album-without-items prevention: deferred `albums_require_items_trigger`
+- Album-item uniqueness: `album_items_album_media_unique` constraint
+- Multi-row album writes and eligibility enforcement: `create_album_with_items(...)` and `add_album_items(...)` RPCs
 
 ## User-Visible Failure States
 - Login can fail if Supabase Auth is unreachable.
 - Invite acceptance can fail with:
-- invalid or already used invite
-- expired invite
-- couple already full
-- not signed in
+  - invalid or already used invite
+  - expired invite
+  - couple already full
+  - not signed in
 - Memory create can fail if:
-- note and media are both empty
-- file is larger than `25MB`
-- file is not an image or video
-- upload, media metadata insert, or later writes fail
+  - note and media are both empty
+  - file is larger than `25MB`
+  - file is not an image or video
+  - upload, media metadata insert, or later writes fail
+- Countdown, future-note, and trip create can fail if:
+  - required fields are missing or invalid
+  - the authenticated user lacks active couple membership
+  - database writes fail unexpectedly
+- Album create/add can fail if:
+  - no media items are selected
+  - the selected media IDs are duplicated in the submission
+  - the trip or album is missing or outside the member’s couple scope
+  - the trip already has an album
+  - selected media does not belong to the couple or falls outside the trip window
+  - database writes fail unexpectedly
 
 ## Current Shell Boundaries
 - `/chat` is mock-only because it renders sample conversation content.
-- `/map`, `/trips`, `/trips/[tripId]`, `/albums/[albumId]`, `/countdowns`, `/future-notes`, `/games`, `/games/[mode]`, `/stats`, and `/settings` are shell-only.
+- `/map`, `/games`, `/games/[mode]`, `/stats`, and `/settings` are shell-only.
 - Shell-only and mock-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

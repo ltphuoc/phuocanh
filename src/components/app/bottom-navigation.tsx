@@ -70,6 +70,9 @@ export const BottomNavigation = (): ReactElement => {
                   <div className={cn(columnClass, "flex justify-center")} key={item.href}>
                     {isMoreItem ? (
                       <button
+                        aria-controls="mobile-more-navigation-sheet"
+                        aria-expanded={isMoreOpen}
+                        aria-haspopup="dialog"
                         className={cn(
                           "relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5",
                           active || isMoreOpen
@@ -109,6 +112,7 @@ export const BottomNavigation = (): ReactElement => {
       </nav>
       <MoreNavigationSheet
         activeHref={pathname}
+        id="mobile-more-navigation-sheet"
         onClose={() =>
           setMoreSheetState({
             open: false,

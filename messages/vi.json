@@ -22,7 +22,8 @@
       "settings": "Cài đặt | PhuocAnh",
       "stats": "Thống kê | PhuocAnh",
       "tripDetail": "Chi tiết chuyến đi | PhuocAnh",
-      "trips": "Chuyến đi | PhuocAnh"
+      "trips": "Chuyến đi | PhuocAnh",
+      "albums": "Album | PhuocAnh"
     }
   },
   "languageSwitcher": {
@@ -63,7 +64,7 @@
     },
     "items": {
       "albums": {
-        "description": "Album gắn với chuyến đi và kỷ niệm.",
+        "description": "Album được nhóm từ kỷ niệm thật theo từng chuyến đi.",
         "label": "Album"
       },
       "chat": {
@@ -204,6 +205,84 @@
       "noteLabel": "Ghi chú",
       "notePlaceholder": "Đã xảy ra chuyện gì?",
       "submit": "Lưu kỷ niệm"
+    },
+    "countdown": {
+      "kindLabel": "Loại",
+      "noteDescription": "Ngữ cảnh tuỳ chọn cho cột mốc mà hai bạn đang đếm tới.",
+      "noteLabel": "Ghi chú (tuỳ chọn)",
+      "notePlaceholder": "Đặt bàn ở quán quen của hai đứa",
+      "submit": "Lưu đếm ngược",
+      "targetDateDescription": "Ngày này được lưu như một cột mốc lịch UTC.",
+      "targetDateLabel": "Ngày mục tiêu",
+      "titleLabel": "Tiêu đề",
+      "titlePlaceholder": "Bữa tối kỷ niệm",
+      "validation": {
+        "noteMax": "Ghi chú tối đa 280 ký tự.",
+        "targetDateRequired": "Hãy chọn ngày mục tiêu.",
+        "titleMax": "Tiêu đề tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tiêu đề."
+      }
+    },
+    "futureNote": {
+      "bodyDescription": "Phần nội dung sẽ không thể đọc cho tới khi ngày mở khoá đi qua.",
+      "bodyLabel": "Nội dung ghi chú",
+      "bodyPlaceholder": "Viết điều mà hai bạn tương lai sẽ mở lại sau này.",
+      "submit": "Niêm phong ghi chú",
+      "titleLabel": "Tiêu đề",
+      "titlePlaceholder": "Cho ngày kỷ niệm tiếp theo của tụi mình",
+      "unlockDateDescription": "Mở khoá vào đầu ngày UTC đã chọn.",
+      "unlockDateLabel": "Ngày mở khoá",
+      "validation": {
+        "bodyMax": "Nội dung tối đa 2000 ký tự.",
+        "bodyRequired": "Hãy viết nội dung ghi chú.",
+        "titleMax": "Tiêu đề tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tiêu đề.",
+        "unlockDateRequired": "Hãy chọn ngày mở khoá."
+      }
+    },
+    "trip": {
+      "endDateDescription": "Hiện tại chuyến đi dùng khoảng ngày, chưa dùng thời gian cụ thể.",
+      "endDateLabel": "Ngày kết thúc",
+      "noteDescription": "Ngữ cảnh tuỳ chọn cho kế hoạch, cảm xúc hoặc lý do của chuyến đi này.",
+      "noteLabel": "Ghi chú chuyến đi (tuỳ chọn)",
+      "notePlaceholder": "Đi bộ dưới đèn lồng, ăn cả chiều và một buổi sáng thật chậm.",
+      "startDateDescription": "Chuyến đi được xem là bắt đầu từ ngày này.",
+      "startDateLabel": "Ngày bắt đầu",
+      "submit": "Lưu chuyến đi",
+      "titleLabel": "Tên chuyến đi",
+      "titlePlaceholder": "Cuối tuần dài ở Hội An",
+      "validation": {
+        "dateRangeInvalid": "Ngày kết thúc phải cùng ngày hoặc sau ngày bắt đầu.",
+        "endDateRequired": "Chọn ngày kết thúc.",
+        "noteMax": "Ghi chú chuyến đi phải có tối đa 2000 ký tự.",
+        "startDateRequired": "Chọn ngày bắt đầu.",
+        "titleMax": "Tên chuyến đi phải có tối đa 120 ký tự.",
+        "titleRequired": "Nhập tên chuyến đi."
+      }
+    },
+    "album": {
+      "addMediaDescription": "Chỉ những kỷ niệm hợp lệ còn lại mới xuất hiện ở đây. {count, plural, =0 {Chưa chọn mục nào.} one {Đã chọn # mục.} other {Đã chọn # mục.}}",
+      "addMediaLabel": "Thêm media cho chuyến đi",
+      "addMediaSubmit": "Thêm media đã chọn",
+      "descriptionDescription": "Một ghi chú ngắn giúp album này đọc lên như một chương du lịch thật.",
+      "descriptionLabel": "Ghi chú album (tuỳ chọn)",
+      "descriptionPlaceholder": "Ánh đèn lồng, bữa sáng chậm rãi và một cuộn camera thật đầy.",
+      "mediaDescription": "Chọn những kỷ niệm hợp lệ nên nằm trong album này. {count, plural, =0 {Chưa chọn mục nào.} one {Đã chọn # mục.} other {Đã chọn # mục.}}",
+      "mediaFallback": "Media chuyến đi",
+      "mediaLabel": "Media chuyến đi",
+      "mediaNoteFallback": "Không có ghi chú nào cho kỷ niệm này.",
+      "selectLabel": "Chọn",
+      "selectedLabel": "Đã chọn",
+      "submit": "Tạo album",
+      "titleLabel": "Tên album",
+      "titlePlaceholder": "Đêm đèn lồng Hội An",
+      "validation": {
+        "descriptionMax": "Ghi chú album tối đa 800 ký tự.",
+        "mediaRequired": "Hãy chọn ít nhất một mục kỷ niệm.",
+        "titleMax": "Tên album tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tên album."
+      },
+      "videoFallback": "Video"
     }
   },
   "actions": {
@@ -240,7 +319,24 @@
       "missingContent": "Hãy thêm ghi chú hoặc ít nhất một tệp media.",
       "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video."
     },
-    "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại."
+    "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại.",
+    "countdown": {
+      "created": "Đã lưu đếm ngược.",
+      "invalidSubmission": "Dữ liệu đếm ngược không hợp lệ."
+    },
+    "futureNote": {
+      "created": "Đã niêm phong ghi chú tương lai.",
+      "invalidSubmission": "Dữ liệu ghi chú tương lai không hợp lệ."
+    },
+    "trip": {
+      "created": "Đã lưu chuyến đi.",
+      "invalidSubmission": "Thông tin chuyến đi không hợp lệ."
+    },
+    "album": {
+      "created": "Đã tạo album.",
+      "invalidSubmission": "Thông tin album không hợp lệ.",
+      "updated": "Đã cập nhật album."
+    }
   },
   "errors": {
     "databaseSetupRequired": "Cần thiết lập cơ sở dữ liệu",
@@ -375,123 +471,162 @@
   },
   "trips": {
     "header": {
-      "description": "Lên kế hoạch và nhìn lại hành trình chung với timeline chuyến đi và album.",
+      "description": "Tạo, xem lại và sắp xếp các chương du lịch thật. Album giờ đã gắn vào chuyến đi; lớp bản đồ địa điểm sẽ đến tiếp theo.",
       "eyebrow": "Du lịch",
       "title": "Chuyến đi"
     },
-    "templates": {
-      "dalat": {
-        "destination": "Cuối tuần Đà Lạt",
-        "duration": "12 Jul - 14 Jul, 2026",
-        "items": "8 kỷ niệm và 2 album"
-      },
-      "hoian": {
-        "destination": "Săn đồ ăn Hội An",
-        "duration": "03 Sep - 05 Sep, 2026",
-        "items": "5 kỷ niệm và 1 album"
-      }
+    "composer": {
+      "description": "Bắt đầu bằng bản ghi chuyến đi, rồi nhóm media kỷ niệm của chuyến đó thành một album. Lớp bản đồ vẫn là slice tiếp theo.",
+      "eyebrow": "Lên kế hoạch",
+      "title": "Bắt đầu một bản ghi chuyến đi thật"
     },
-    "comingSoon": {
-      "cta": "Mở giao diện album",
-      "description": "Chỉnh sửa chuyến đi, timeline theo từng điểm dừng và album liên kết sẽ được nối khi logic du lịch Phase 2 hoàn thành.",
-      "title": "Quản lý chuyến đi"
+    "sections": {
+      "activeDescription": "Những chuyến đi có khoảng ngày bao gồm hôm nay.",
+      "activeEyebrow": "Đang diễn ra",
+      "activeTitle": "Chuyến đi đang diễn ra",
+      "completedDescription": "Các chuyến đi đã xong được giữ lại ở đây như lịch sử để neo album và lớp bản đồ về sau.",
+      "completedEyebrow": "Hành trình đã lưu",
+      "completedTitle": "Chuyến đi đã hoàn thành",
+      "plannedDescription": "Những chuyến đi đã chốt, đang mường tượng hoặc gần sẵn sàng.",
+      "plannedEyebrow": "Sắp tới",
+      "plannedTitle": "Chuyến đi đã lên kế hoạch"
     },
     "empty": {
-      "description": "Khi có dữ liệu chuyến đi thật, bảng này sẽ hiển thị hành trình đang diễn ra và đã lưu trữ.",
-      "title": "Chưa có chuyến đi liên kết"
+      "description": "Tạo chuyến đi đầu tiên để biến phần du lịch này thành dữ liệu thật của hai bạn.",
+      "title": "Chưa có chuyến đi nào"
+    },
+    "deferred": {
+      "description": "Chuyến đi và album đều đã chạy dữ liệu thật. Pin địa điểm, tuyến đường và tóm tắt bản đồ vẫn thuộc slice Phase 2 tiếp theo.",
+      "title": "Bản đồ địa điểm vẫn đang được hoãn lại"
     }
   },
   "tripDetail": {
     "header": {
-      "description": "Bố cục chi tiết chuyến đi với timeline, điểm dừng và vị trí cho album.",
-      "eyebrow": "Chi tiết hành trình"
+      "description": "{dateRange} • {duration} • {status}",
+      "eyebrow": "Chi tiết chuyến đi"
     },
-    "durationPlaceholder": "Thời lượng mẫu cho tới khi nối dữ liệu thật",
-    "itemsPlaceholder": "Chưa tải điểm dừng nào từ backend",
-    "plannedSectionsTitle": "Mục đã lên kế hoạch",
-    "plannedSections": {
-      "albums": "Album liên kết với chuyến đi này",
-      "highlights": "Tổng quan chuyến đi và điểm nhấn cảm xúc",
-      "timeline": "Timeline các địa điểm đã ghé"
-    },
-    "comingSoon": {
-      "cta": "Xem trước giao diện bản đồ",
-      "description": "Trang chi tiết này sẽ hoàn toàn chạy theo dữ liệu khi entity chuyến đi và map pin được triển khai ở Phase 2.",
-      "title": "Tích hợp timeline và bản đồ"
-    },
-    "fallbackTripLabel": "Chuyến đi"
+    "noteEmpty": "Chưa có ghi chú nào cho chuyến đi này.",
+    "noteEyebrow": "Ghi chú chuyến đi",
+    "noteTitle": "Chuyến đi này dành cho điều gì",
+    "albumLinkedEyebrow": "Album đã gắn",
+    "albumLinkedTitle": "Chuyến đi này đã có album",
+    "albumLinkedDescription": "Mở album hoặc tiếp tục thêm những kỷ niệm hợp lệ còn lại trong khung ngày của chuyến đi.",
+    "albumAddEyebrow": "Thêm tiếp",
+    "albumAddTitle": "Thêm media cho chuyến đi",
+    "albumAddDescription": "Chỉ các kỷ niệm hợp lệ chưa được nhóm vào album này mới xuất hiện ở đây.",
+    "albumGroupedTitle": "Mọi mục hợp lệ đã được nhóm",
+    "albumGroupedDescription": "Bộ kỷ niệm hiện tại của chuyến đi này đã được gắn hết vào album.",
+    "albumComposerEyebrow": "Tạo album",
+    "albumComposerTitle": "Tạo album cho chuyến đi",
+    "albumComposerDescription": "Chuyến đi này đã có kỷ niệm hợp lệ. Hãy nhóm chúng thành một album ngay tại đây; luồng tải lên vẫn nằm ở phần lưu kỷ niệm.",
+    "albumEmptyTitle": "Chưa có media hợp lệ",
+    "albumEmptyDescription": "Hãy thêm các kỷ niệm có ngày xảy ra nằm trong khung ngày của chuyến đi này, rồi tạo album từ đây.",
+    "placesDeferredTitle": "Các nơi đã ghé vẫn đến sau",
+    "placesDeferredDescription": "Slice này triển khai album trên nền chuyến đi. Pin bản đồ và tóm tắt địa điểm sẽ nằm ở slice du lịch tiếp theo."
   },
   "albumDetail": {
+    "backToTrip": "Về chuyến đi",
     "header": {
-      "description": "Bố cục album đã sẵn sàng cho nhóm media, caption và liên kết chuyến đi.",
+      "description": "{tripTitle} • {dateRange} • {itemCount}",
       "eyebrow": "Album"
     },
-    "mediaPlaceholder": {
-      "description": "Các ô ảnh và video sẽ hiển thị ở đây khi dữ liệu mục album từ storage khả dụng.",
-      "title": "Khung lưới media"
+    "summaryEyebrow": "Ghi chú album",
+    "summaryTitle": "Album này lưu điều gì",
+    "summaryEmpty": "Chưa có ghi chú nào cho album này.",
+    "tripLabel": "Chuyến đi liên kết",
+    "mediaEyebrow": "Lưới media",
+    "mediaTitle": "Media đã lưu của chuyến đi",
+    "mediaDescription": "Album này tái sử dụng media kỷ niệm đã được lưu trong khung ngày của chuyến đi.",
+    "mediaAlt": "Media album",
+    "mediaUnavailableDescription": "Signed URL của media này hiện không khả dụng.",
+    "mediaUnavailableTitle": "Không thể tải media",
+    "mediaNoteFallback": "Không có ghi chú nào cho kỷ niệm này.",
+    "empty": {
+      "description": "Album này chưa có mục media hiển thị nào.",
+      "title": "Album chưa có media"
     },
-    "highlightPlaceholder": {
-      "description": "Điểm nhấn ghim và caption của album sẽ xuất hiện trong bảng này.",
-      "title": "Khung điểm nhấn"
-    },
-    "comingSoon": {
-      "cta": "Đi tới giao diện chuyến đi",
-      "description": "Entity album, luồng tải lên và liên kết chuyến đi được lên kế hoạch cho phase tiếp theo.",
-      "title": "Nối dữ liệu album"
-    },
-    "fallbackAlbumLabel": "Album"
+    "deferredTitle": "Lớp bản đồ là bước tiếp theo",
+    "deferredDescription": "Các nơi đã ghé và phần tóm tắt bản đồ vẫn nằm sau hợp đồng chuyến đi và album."
   },
   "countdowns": {
+    "automationNote": {
+      "description": "Các đếm ngược này đã được lưu và render từ dữ liệu thật. Nhắc lịch lặp lại, lịch theo múi giờ và background job vẫn là phần theo sau.",
+      "title": "Tự động nhắc lịch vẫn đang được hoãn lại"
+    },
+    "composer": {
+      "description": "Tạo các cột mốc thật cho sinh nhật, ngày kỷ niệm, chuyến đi hay kế hoạch nhỏ. Timeline bên dưới đã chạy trên schema Phase 2 mới.",
+      "eyebrow": "Tạo sự kiện",
+      "title": "Thêm đếm ngược"
+    },
+    "empty": {
+      "past": {
+        "description": "Những ngày đã qua sẽ nằm ở đây khi một cột mốc đã đi qua.",
+        "title": "Chưa có đếm ngược đã qua"
+      },
+      "upcoming": {
+        "description": "Hãy tạo sinh nhật, ngày kỷ niệm, chuyến đi hoặc kế hoạch tuỳ chỉnh đầu tiên để cùng theo dõi.",
+        "title": "Chưa có đếm ngược sắp tới"
+      }
+    },
     "header": {
-      "description": "Theo dõi sinh nhật, ngày kỷ niệm và chuyến đi sắp tới trong một timeline dịu dàng.",
+      "description": "Theo dõi các cột mốc thật của hai bạn bằng đếm ngược có dữ liệu ngày tháng, thay vì các widget mẫu tĩnh.",
       "eyebrow": "Sự kiện",
       "title": "Đếm ngược"
     },
-    "items": {
-      "anniversaryDinner": {
-        "name": "Bữa tối kỷ niệm",
-        "type": "Kỷ niệm"
-      },
-      "birthday": {
-        "name": "Sinh nhật người ấy",
-        "type": "Sinh nhật"
-      },
-      "danangTrip": {
-        "name": "Chuyến đi Đà Nẵng",
-        "type": "Du lịch"
-      },
-      "staycation": {
-        "name": "Mini staycation",
-        "type": "Kế hoạch"
-      }
+    "kind": {
+      "anniversary": "Kỷ niệm",
+      "birthday": "Sinh nhật",
+      "custom": "Tuỳ chỉnh",
+      "plan": "Kế hoạch",
+      "travel": "Du lịch"
     },
-    "comingSoon": {
-      "cta": "Mở giao diện ghi chú tương lai",
-      "description": "Nhắc nhở lặp lại, lịch theo múi giờ và job nhắc lịch sẽ được nối với dữ liệu đếm ngược ở phase sau.",
-      "title": "Tự động nhắc lịch"
+    "sections": {
+      "pastDescription": "Những ngày đã kết thúc vẫn được giữ lại như một lưu trữ nhẹ nhàng của điều đã diễn ra.",
+      "pastEyebrow": "Đã qua",
+      "pastTitle": "Đã qua",
+      "upcomingDescription": "Cột mốc gần nhất trong tương lai luôn nằm đầu tiên.",
+      "upcomingEyebrow": "Phía trước",
+      "upcomingTitle": "Sắp tới"
     }
   },
   "futureNotes": {
+    "composer": {
+      "description": "Viết ghi chú ngay bây giờ, lưu phần nội dung trong bảng bảo vệ riêng và để cơ sở dữ liệu tự mở khoá vào ngày đã chọn.",
+      "eyebrow": "Niêm phong ghi chú",
+      "title": "Tạo ghi chú tương lai"
+    },
+    "empty": {
+      "locked": {
+        "description": "Các ghi chú đã niêm phong sẽ xuất hiện ở đây cho tới khi ngày mở khoá đi qua.",
+        "title": "Chưa có ghi chú bị khoá"
+      },
+      "unlocked": {
+        "description": "Nội dung ghi chú đã mở sẽ hiện ở đây ngay khi tới ngày đã chọn.",
+        "title": "Chưa có ghi chú đã mở"
+      }
+    },
     "header": {
-      "description": "Viết ghi chú từ bây giờ và mở cùng nhau vào ngày tương lai đã chọn.",
+      "description": "Ghi chú tương lai giờ đã là tính năng thật: metadata hiển thị ngay, còn phần nội dung vẫn không thể đọc trước ngày mở khoá.",
       "eyebrow": "Viên nang",
       "title": "Ghi chú tương lai"
     },
-    "notes": {
-      "anniversary": {
-        "subtitle": "Mở vào 12 Nov, 2026",
-        "title": "Cho ngày kỷ niệm của chúng ta"
-      },
-      "future": {
-        "subtitle": "Mở vào 01 Jan, 2027",
-        "title": "Lời nhắn cho phiên bản tương lai"
-      }
+    "sections": {
+      "lockedDescription": "Tiêu đề và ngày mở khoá vẫn hiện ra, nhưng nội dung chưa thể đọc cho tới khi policy trong database cho phép.",
+      "lockedEyebrow": "Niêm phong",
+      "lockedTitle": "Ghi chú đang khoá",
+      "unlockedDescription": "Khi ngày mở khoá đi qua, phần nội dung sẽ đọc được từ bảng content đã được bảo vệ.",
+      "unlockedEyebrow": "Đã mở",
+      "unlockedTitle": "Ghi chú đã mở"
     },
-    "comingSoon": {
-      "cta": "Mở giao diện đếm ngược",
-      "description": "Bản ghi ghi chú mã hoá thật và job mở khoá sẽ được kết nối khi mô hình backend future-note được triển khai.",
-      "title": "Luồng mở khoá"
-    }
+    "securityNote": {
+      "description": "Slice này bảo vệ phần nội dung ghi chú bằng bảng riêng và row-level policy. Mã hoá at-rest và gửi nhắc lịch vẫn là phần theo sau.",
+      "title": "Ranh giới bảo mật của slice này"
+    },
+    "status": {
+      "locked": "Đang khoá",
+      "unlocked": "Đã mở"
+    },
+    "unlockDate": "Mở vào {date}"
   },
   "games": {
     "header": {
@@ -593,12 +728,23 @@
       "photoAlt": "Ảnh kỷ niệm"
     },
     "countdown": {
+      "date": "Ngày {date}",
+      "daysAgo": "{count, plural, one {# ngày trước} other {# ngày trước}}",
       "daysLeft": "{count, plural, one {# ngày} other {# ngày}}",
-      "remaining": "còn lại"
+      "remaining": "còn lại",
+      "since": "kể từ đó",
+      "today": "Hôm nay",
+      "todayHint": "diễn ra hôm nay"
     },
     "tripCard": {
-      "badge": "Chuyến đi",
-      "eyebrow": "Viên nang chuyến đi"
+      "dateRange": "{startDate} - {endDate}",
+      "durationDays": "{count, plural, one {# ngày} other {# ngày}}",
+      "eyebrow": "Capsule chuyến đi",
+      "status": {
+        "active": "Đang diễn ra",
+        "completed": "Đã xong",
+        "planned": "Đã lên kế hoạch"
+      }
     },
     "chatThread": {
       "composerPlaceholder": "Viết điều gì đó ấm áp, vui vẻ hoặc ngắn gọn.",
@@ -618,7 +764,9 @@
         "m2": "19:14",
         "m3": "19:15",
         "m4": "19:16"
-      }
+      },
+      "attachAriaLabel": "Đính kèm media (chưa khả dụng)",
+      "sendAriaLabel": "Gửi tin nhắn (chỉ là bản mẫu)"
     },
     "travelAtlas": {
       "header": {
@@ -661,6 +809,25 @@
       "quoteFallback": "Một thế giới riêng nho nhỏ tạo nên từ những ngày bình thường, kế hoạch dịu dàng và khoảnh khắc đáng lưu giữ.",
       "since": "Ở bên nhau từ {date}. Được dệt từ những ghi chú đêm khuya, bữa sáng bình dị và những chương hai bạn luôn chọn mở lại.",
       "dayCount": "Ngày {count}"
+    },
+    "albumCard": {
+      "itemCount": "{count, plural, one {# mục} other {# mục}}",
+      "videoCoverLabel": "Bìa video"
+    }
+  },
+  "albums": {
+    "header": {
+      "description": "Duyệt các album được tạo từ media kỷ niệm thật gắn với chuyến đi.",
+      "eyebrow": "Album du lịch",
+      "title": "Album"
+    },
+    "empty": {
+      "description": "Tạo album từ trang chi tiết chuyến đi khi chuyến đó đã có media kỷ niệm hợp lệ.",
+      "title": "Chưa có album nào"
+    },
+    "deferred": {
+      "description": "Slice này nhóm media quanh các chuyến đi. Pin địa điểm và lớp bản đồ vẫn nằm ở slice du lịch tiếp theo.",
+      "title": "Các nơi đã ghé sẽ đến tiếp theo"
     }
   }
 }

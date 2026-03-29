@@ -109,7 +109,7 @@ export const appSecondaryNavigationItems: readonly AppNavigationItem[] = [
   {
     descriptionKey: "nav.items.albums.description",
     groupKey: "nav.groups.travel",
-    href: "/albums/featured",
+    href: "/albums",
     icon: Album,
     labelKey: "nav.items.albums.label",
     matchPrefixes: ["/albums"],

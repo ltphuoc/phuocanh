@@ -11,15 +11,16 @@ This file is the canonical “what exists today” route map.
 | `/home` | implemented | `getHomePageData(...)` + signed storage URLs | Story-first implemented page; not a shell |
 | `/lists` | implemented | `getHomePageData(...)` | Reads real wish/checklist data |
 | `/memories/new` | implemented | `createMemoryAction` | Real mutation flow with upload/storage behavior |
-| `/memories/[memoryId]` | implemented | `getMemoryDetailData(...)` | Reads real memory/media rows |
+| `/memories/[memoryId]` | implemented | `getMemoryDetailData(...)` + signed storage URLs | Reads real memory/media rows |
 | `/on-this-day` | implemented | `memories_on_this_day(...)` RPC + media lookup | Timezone-aware SQL-backed feature |
+| `/countdowns` | implemented | `getCountdownsPageData(...)` + `createCountdownAction` | Reminder jobs and timezone-aware schedules are still deferred |
+| `/future-notes` | implemented | `getFutureNotesPageData(...)` + `createFutureNoteAction` | Metadata is visible immediately; note bodies stay unreadable until `unlock_at <= now()` |
+| `/trips` | implemented | `getTripsPageData(...)` + `createTripAction` | Albums now attach to trips; visited-place map layers remain deferred |
+| `/trips/[tripId]` | implemented | `getTripDetailData(...)` + album actions | Route param is a real trip UUID; invalid or foreign IDs must not resolve |
+| `/albums` | implemented | `getAlbumsPageData(...)` | Albums are trip-rooted and group existing `memory_media`; no separate upload pipeline exists |
+| `/albums/[albumId]` | implemented | `getAlbumDetailData(...)` | Route param is a real album UUID; invalid or foreign IDs must not resolve |
 | `/chat` | mock-only | local mock message array in `ChatThreadPreview` | No live chat backend, presence, or attachment model exists |
-| `/map` | shell-only | none | No Mapbox or trip-pin integration is wired |
-| `/trips` | shell-only | none | Uses template content only; no trip entity exists |
-| `/trips/[tripId]` | shell-only | route param only | Param is presentation-only; do not assume backend trip lookup |
-| `/albums/[albumId]` | shell-only | route param only | Param is presentation-only; album entities are not wired |
-| `/countdowns` | shell-only | none | Widgets are placeholders only; no scheduler/job model exists |
-| `/future-notes` | shell-only | none | No encrypted notes or unlock jobs exist |
+| `/map` | shell-only | none | No Mapbox or visited-place integration is wired |
 | `/games` | shell-only | none | Hub exists, gameplay logic does not |
 | `/games/[mode]` | shell-only | route param only | Mode pages are structured shells, not live game engines |
 | `/stats` | shell-only | none | Placeholder metrics only; no analytics pipeline exists |

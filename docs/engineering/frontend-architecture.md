@@ -9,8 +9,8 @@ This file describes the current frontend operating model. It is the canonical re
 - `src/app/page.tsx`: redirect-only route that resolves auth gate state
 
 ## Route Categories
-- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`
-- `shell-only`: `/map`, `/trips`, `/trips/[tripId]`, `/albums/[albumId]`, `/countdowns`, `/future-notes`, `/games`, `/games/[mode]`, `/stats`, `/settings`
+- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`
+- `shell-only`: `/map`, `/games`, `/games/[mode]`, `/stats`, `/settings`
 - `mock-only`: `/chat`
 
 Use `docs/engineering/route-capability-matrix.md` for the full table.
@@ -24,13 +24,18 @@ Do not move server reads into client components unless the task explicitly chang
 
 ## Data Read Pattern
 - Authenticated pages first resolve couple context through `getAuthGateState()` or `getReadyCoupleContextOrRedirect()`.
-- Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, and `getMemoryDetailData(...)`.
-- Signed image URLs are created server-side before render.
+- Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, `getMemoryDetailData(...)`, `getCountdownsPageData(...)`, `getFutureNotesPageData(...)`, `getTripsPageData(...)`, `getTripDetailData(...)`, `getAlbumsPageData(...)`, and `getAlbumDetailData(...)`.
+- Signed `memory-media` URLs are created server-side through `signMemoryMediaStorageItems(...)` before render.
+- Future-note bodies stay in the server read layer; client components never fetch locked content directly.
+- Trip detail reads return `notFound()` for invalid or non-member trip IDs instead of rendering placeholder content.
+- Album detail reads return `notFound()` for invalid or non-member album IDs instead of rendering placeholder content.
 
 ## Mutation Pattern
 - Forms use `react-hook-form`, `zodResolver`, `useActionState`, `startTransition(...)`, and Sonner toasts.
+- Phase 2 planning forms also use inline field errors via `FormSection` in addition to toast feedback.
 - Server Actions are the mutation boundary for app code.
 - Couple bootstrap and invite acceptance use SQL RPCs because the invariants are DB-owned.
+- Album creation/add flows call SQL RPCs from Server Actions so multi-row album writes stay transactional and couple-scoped.
 
 ## ActionState Contract
 - `ActionState = { status: "idle" | "success" | "error"; message: string }`
@@ -48,11 +53,17 @@ Do not move server reads into client components unless the task explicitly chang
 | `createChecklistAction` | `/home`, `/lists` |
 | `addChecklistItemAction` | `/home`, `/lists` |
 | `toggleChecklistItemAction` | `/home`, `/lists` |
+| `createCountdownAction` | `/countdowns` |
+| `createFutureNoteAction` | `/future-notes` |
+| `createTripAction` | `/trips` |
+| `createAlbumAction` | `/albums`, `/trips/[tripId]` |
+| `addAlbumItemsAction` | `/albums`, `/albums/[albumId]`, `/trips/[tripId]` |
 
 ## Shared UI Structure
 - App shell: `src/app/(app)/layout.tsx`, `BottomNavigation`, `SideNavigation`, `navigation-model.ts`
 - Shared layout primitives: `AuthShell`, `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `ShellPage`
-- Shared UI/state primitives: `SectionCard`, `EmptyState`, `LoadingState`, `ListRow`, `ComingSoonCard`, `PageReveal`
+- Shared UI/state primitives: `SectionCard`, `EmptyState`, `LoadingState`, `ListRow`, `ComingSoonCard`, `PageReveal`, `CountdownWidgetTemplate`, `FutureNoteCard`, `TripCardTemplate`, `AlbumCard`
+- Phase 2 travel forms: `CreateTripForm`, `CreateAlbumForm`, `AddAlbumItemsForm`
 
 New routes should compose these primitives rather than invent new layout systems per page.
 
@@ -65,5 +76,6 @@ New routes should compose these primitives rather than invent new layout systems
 - Keep implemented reads server-first.
 - Keep auth gate decisions in `src/lib/server/couple-context.ts`.
 - Keep couple/invite invariants in SQL RPCs.
+- Keep album grouping rooted in `trips` and existing `memory_media`; do not add a second upload pipeline casually.
 - Do not introduce TanStack Query, Zustand, or `nuqs` opportunistically into routine changes. The current runtime is not structured around them yet.
 - If a task intentionally migrates data/state architecture, document it first.

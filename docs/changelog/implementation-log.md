@@ -1,5 +1,99 @@
 # Implementation Log
 
+## 2026-03-29 - Phase 2 Slice 3: Trip Albums Foundation
+
+### Delivered
+- Added Phase 2 Slice 3 migration `20260329170000_phase2_slice3_trip_albums_foundation.sql` with:
+  - `albums`
+  - `album_items`
+  - trip-rooted one-album-per-trip constraint
+  - couple-scoped RLS policies for album reads/writes
+  - deferred album integrity trigger preventing empty albums from committing
+  - transactional SQL RPCs `create_album_with_items(...)` and `add_album_items(...)`
+- Regenerated `src/lib/supabase/database.types.ts` and updated schema inventory in `src/lib/db/schema.ts`.
+- Added Phase 2 server read helpers:
+  - `getAlbumsPageData(...)`
+  - `getAlbumDetailData(...)`
+  - extended `getTripDetailData(...)` with linked album summary and remaining eligible album media
+- Added Phase 2 Server Actions:
+  - `createAlbumAction`
+  - `addAlbumItemsAction`
+- Added shared signed media helper:
+  - `signMemoryMediaStorageItems(...)`
+  - reused by home, memory detail, and album reads
+- Replaced `/albums` shell navigation target with a live albums index route.
+- Replaced `/albums/[albumId]` shell with:
+  - real album lookup
+  - linked trip summary
+  - signed image/video grid
+  - real empty state
+- Replaced the trip-detail album placeholder with:
+  - live create-album form when eligible media exists
+  - live add-more-media form when an album already exists
+  - real empty state when no eligible media exists
+- Synced product and engineering docs to mark albums implemented and moved the next slice to map foundation.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm i18n:check`
+- `pnpm i18n:audit-hardcoded`
+
+### Notes
+- Slice 3 intentionally keeps one album per trip as the v1 contract.
+- Album grouping reuses existing `memory_media`; no second upload/storage path was introduced.
+
+## 2026-03-29 - Phase 2 Slice 1: Real Countdowns + Secure Future Notes
+
+### Delivered
+- Added Phase 2 schema migration `20260329110000_phase2_slice1_countdowns_future_notes.sql` with:
+- `countdown_kind` enum
+- `countdowns`
+- `future_notes`
+- `future_note_contents`
+- RLS policies for member-scoped reads/writes and unlock-gated future-note body reads
+- Regenerated `src/lib/supabase/database.types.ts` and updated schema inventory in `src/lib/db/schema.ts`.
+- Added Phase 2 server read helpers:
+- `getCountdownsPageData(...)`
+- `getFutureNotesPageData(...)`
+- Added Phase 2 Server Actions:
+- `createCountdownAction`
+- `createFutureNoteAction`
+- future-note metadata rollback on body insert failure
+- Replaced `/countdowns` shell with:
+- live create form
+- upcoming/past sections
+- empty states
+- date-backed countdown rendering via `CountdownWidgetTemplate`
+- Replaced `/future-notes` shell with:
+- live create form
+- locked/unlocked sections
+- secure unlocked body rendering via `FutureNoteCard`
+- empty states
+- Landed shared consistency/accessibility fixes needed during the slice:
+- `/lists` wish-category badge localization parity with `/home`
+- chat composer icon button labels
+- mobile `More` toggle expanded-state semantics
+- atlas stop selected-state semantics
+- Synced product and engineering docs to mark `/countdowns` and `/future-notes` as implemented Phase 2 routes.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "select tablename from pg_tables ..."`
+- `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "select tablename, policyname from pg_policies ..."`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+- `pnpm i18n:check`
+- `pnpm i18n:audit-hardcoded`
+
+### Notes
+- Browser smoke for authenticated `/countdowns` and `/future-notes` was not run in this log entry because the local app routes are behind auth and no scripted local auth session was established in this run.
+
 ## 2026-03-27 - Phase 1 MVP
 
 ### Delivered
@@ -174,77 +268,19 @@
 - `pnpm typecheck`
 - `pnpm build`
 
-## 2026-03-29 - Docs Reconciliation (UI Restructure Sync)
+## 2026-03-29 - Phase 2 Slice 2 Trips Foundation
 
 ### Delivered
-- Updated roadmap state to reflect current code reality: Phase 2 marked `partial` due shipped UI shells with backend wiring still pending.
-- Updated architecture and decision docs to match final shell behavior:
-- mobile context strip + bottom navigation
-- grouped sidebar navigation (`Main + More`)
-- light-mode-only pastel policy
-- Added explicit user decision record for 2026-03-29 UI architecture finalization.
-- Clarified features and API-contract docs that shell routes are presentational and do not change server/data contracts.
-- Updated README notes to remove stale runtime blocker phrasing and reflect current phase state.
-
-### Notes
-- Older entries that mention temporary dependency/network blockers are preserved as historical context, not current status.
-- This reconciliation pass changes documentation only; no API, schema, or business logic behavior was modified.
-
-## 2026-03-29 - Pastel Palette Standardization and UI Consistency Pass
-
-### Delivered
-- Aligned global base tokens to the exact requested palette:
-- `--background: #FFF5E4`
-- `--surface: #FFE3E1`
-- `--soft-accent: #FFD1D1`
-- `--primary: #FF9494`
-- Kept semantic color system fully derived from the four base colors and retained light-mode-only rendering.
-- Refactored `EmptyState` icon contract from emoji string to typed `ReactNode` icon slot for consistent UI composition.
-- Replaced emoji-based placeholder markers with Lucide icons across current route implementations:
-- `/home`
-- `/lists`
-- `/on-this-day`
-- `/trips`
-- `/albums/[albumId]`
-- Updated toaster UI styling to use shared semantic tokens and remove unrelated rich status colors.
-- Updated required UI docs to match current implementation:
-- `docs/design-system.md`
-- `docs/responsive-guidelines.md`
-- `docs/ui-architecture.md`
-- `docs/product/features.md`
+- Added the `trips` table with date-range constraints, `updated_at` trigger, and couple-scoped RLS.
+- Regenerated the checked-in Supabase types and updated the baseline schema inventory.
+- Added `createTripAction` to the existing Phase 2 planning action surface.
+- Added `getTripsPageData(...)` and `getTripDetailData(...)` server helpers with grouped list reads and safe detail lookup.
+- Replaced `/trips` with a live create flow plus `active`, `planned`, and `completed` trip sections.
+- Replaced `/trips/[tripId]` with a real detail route that resolves trip UUIDs and returns `notFound()` for invalid or foreign IDs.
+- Reworked trip UI copy and card metadata to use real date ranges and durations instead of shell-only placeholder counts.
+- Updated product and engineering docs to mark trips implemented and moved the next documented slice to album/media grouping on top of trips.
 
 ### Verification
-- `pnpm lint`
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
 - `pnpm typecheck`
-- `pnpm build`
-
-## 2026-03-29 - Editorial-Romance Shell Redesign
-
-### Delivered
-- Replaced the dashboard-like shell with a story-first editorial canvas for the authenticated app.
-- Swapped typography to `Fraunces` + `Manrope` via `next/font/google`.
-- Introduced richer light-only semantic tokens, gradients, paper/glass surfaces, rounded object treatments, and rose-tinted elevation.
-- Reworked navigation into a floating mobile dock with centered memory action orb and a desktop rail with expandable grouped drawer.
-- Rebuilt home around an anniversary spotlight, featured memory storytelling, and a vertical memory ribbon.
-- Replaced generic cards with collectible memory objects and added premium shells for `/chat` and `/map`.
-- Added `motion` for shared-layout transitions and shell choreography.
-
-### Verification
-- `pnpm typecheck`
-- `pnpm build`
-
-## 2026-03-29 - Documentation Reconciliation for Editorial Redesign
-
-### Delivered
-- Updated `README.md` and the product, design, UI architecture, responsive, and engineering docs to match current code.
-- Documented the new editorial-romance direction, story-first home, Fraunces + Manrope typography, motion usage, and current route/navigation structure.
-- Clarified implemented vs presentational routes, including `/chat`, `/map`, `/trips`, `/countdowns`, `/future-notes`, `/games`, `/stats`, and `/settings`.
-- Confirmed the redesign did not add new API or database contracts.
-
-### Verification
-- Manual doc read-through against:
-- `src/app/layout.tsx`
-- `src/app/fonts.ts`
-- `src/app/globals.css`
-- `src/components/app/navigation-model.ts`
-- `package.json`

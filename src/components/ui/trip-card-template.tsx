@@ -1,35 +1,58 @@
 import type { ReactElement } from "react";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/ui/section-card";
 
 interface TripCardTemplateProps {
   readonly badgeLabel: string;
-  readonly destination: string;
-  readonly durationLabel: string;
+  readonly dateRangeLabel: string;
   readonly eyebrowLabel: string;
-  readonly itemCountLabel: string;
+  readonly href?: string;
+  readonly metaLabel: string;
+  readonly note?: string | null;
+  readonly title: string;
 }
 
 export const TripCardTemplate = ({
   badgeLabel,
-  destination,
-  durationLabel,
+  dateRangeLabel,
   eyebrowLabel,
-  itemCountLabel,
-}: TripCardTemplateProps): ReactElement => (
-  <SectionCard className="flex flex-col gap-4" surface="glass">
-    <div className="flex items-center justify-between gap-3">
-      <div>
-        <p className="ui-meta ui-couple-mark">{eyebrowLabel}</p>
-        <p className="mt-2 font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-          {destination}
-        </p>
+  href,
+  metaLabel,
+  note,
+  title,
+}: TripCardTemplateProps): ReactElement => {
+  const content = (
+    <SectionCard className="flex h-full flex-col gap-4" surface="glass">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="ui-meta">{eyebrowLabel}</p>
+          <p className="mt-2 truncate font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
+            {title}
+          </p>
+        </div>
+        <Badge variant="primary">{badgeLabel}</Badge>
       </div>
-      <Badge variant="primary">{badgeLabel}</Badge>
-    </div>
-    <p className="text-sm text-muted-foreground">{durationLabel}</p>
-    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-      {itemCountLabel}
-    </p>
-  </SectionCard>
-);
+      <p className="text-sm font-medium text-foreground/86">{dateRangeLabel}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        {metaLabel}
+      </p>
+      {note?.trim() ? (
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{note}</p>
+      ) : null}
+    </SectionCard>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link
+      className="block rounded-[var(--radius-panel)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+      href={href}
+    >
+      {content}
+    </Link>
+  );
+};

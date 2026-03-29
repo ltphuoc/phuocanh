@@ -3,8 +3,8 @@
 Private couple memory web app built with Next.js App Router + Supabase.
 
 ## Current Product State
-- `implemented`: `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`
-- `shell-only`: `/map`, `/trips`, `/trips/[tripId]`, `/albums/[albumId]`, `/countdowns`, `/future-notes`, `/games`, `/games/[mode]`, `/stats`, `/settings`
+- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`
+- `shell-only`: `/map`, `/games`, `/games/[mode]`, `/stats`, `/settings`
 - `mock-only`: `/chat`
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.

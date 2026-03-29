@@ -22,7 +22,8 @@
       "settings": "Settings | PhuocAnh",
       "stats": "Stats | PhuocAnh",
       "tripDetail": "Trip Detail | PhuocAnh",
-      "trips": "Trips | PhuocAnh"
+      "trips": "Trips | PhuocAnh",
+      "albums": "Albums | PhuocAnh"
     }
   },
   "languageSwitcher": {
@@ -63,7 +64,7 @@
     },
     "items": {
       "albums": {
-        "description": "Albums linked to trips and memories.",
+        "description": "Albums grouped from real trip memories.",
         "label": "Albums"
       },
       "chat": {
@@ -204,6 +205,84 @@
       "noteLabel": "Note",
       "notePlaceholder": "What happened?",
       "submit": "Save memory"
+    },
+    "countdown": {
+      "kindLabel": "Type",
+      "noteDescription": "Optional context for the moment you are counting toward.",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Dinner reservation at our favorite place",
+      "submit": "Save countdown",
+      "targetDateDescription": "This date is stored as a UTC calendar milestone.",
+      "targetDateLabel": "Target date",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Anniversary dinner",
+      "validation": {
+        "noteMax": "Note must be 280 characters or fewer.",
+        "targetDateRequired": "Choose a target date.",
+        "titleMax": "Title must be 120 characters or fewer.",
+        "titleRequired": "Enter a title."
+      }
+    },
+    "futureNote": {
+      "bodyDescription": "The body stays unreadable until the unlock date passes.",
+      "bodyLabel": "Note body",
+      "bodyPlaceholder": "Write something your future selves should open later.",
+      "submit": "Seal future note",
+      "titleLabel": "Title",
+      "titlePlaceholder": "For our next anniversary",
+      "unlockDateDescription": "Unlocks at the start of the selected UTC date.",
+      "unlockDateLabel": "Unlock date",
+      "validation": {
+        "bodyMax": "Note body must be 2000 characters or fewer.",
+        "bodyRequired": "Write the note body.",
+        "titleMax": "Title must be 120 characters or fewer.",
+        "titleRequired": "Enter a title.",
+        "unlockDateRequired": "Choose an unlock date."
+      }
+    },
+    "trip": {
+      "endDateDescription": "Trips use date-only ranges for now.",
+      "endDateLabel": "End date",
+      "noteDescription": "Optional context for the plan, mood, or reason behind this trip.",
+      "noteLabel": "Trip note (optional)",
+      "notePlaceholder": "Lantern walk, food crawl, and one very slow morning.",
+      "startDateDescription": "Trips become active on this date.",
+      "startDateLabel": "Start date",
+      "submit": "Save trip",
+      "titleLabel": "Trip title",
+      "titlePlaceholder": "Hoi An long weekend",
+      "validation": {
+        "dateRangeInvalid": "End date must be on or after the start date.",
+        "endDateRequired": "Choose an end date.",
+        "noteMax": "Trip note must be 2000 characters or fewer.",
+        "startDateRequired": "Choose a start date.",
+        "titleMax": "Title must be 120 characters or fewer.",
+        "titleRequired": "Enter a trip title."
+      }
+    },
+    "album": {
+      "addMediaDescription": "Only remaining eligible memories appear here. {count, plural, =0 {No items selected yet.} one {# item selected.} other {# items selected.}}",
+      "addMediaLabel": "Add more trip media",
+      "addMediaSubmit": "Add selected media",
+      "descriptionDescription": "A short note helps this album read like a real travel chapter.",
+      "descriptionLabel": "Album note (optional)",
+      "descriptionPlaceholder": "Lantern light, slow breakfasts, and one very full camera roll.",
+      "mediaDescription": "Choose the eligible memories that belong in this album. {count, plural, =0 {No items selected yet.} one {# item selected.} other {# items selected.}}",
+      "mediaFallback": "Trip media",
+      "mediaLabel": "Trip media",
+      "mediaNoteFallback": "No note was saved for this memory.",
+      "selectLabel": "Select",
+      "selectedLabel": "Selected",
+      "submit": "Create album",
+      "titleLabel": "Album title",
+      "titlePlaceholder": "Hoi An lantern nights",
+      "validation": {
+        "descriptionMax": "Album note must be 800 characters or fewer.",
+        "mediaRequired": "Select at least one memory item.",
+        "titleMax": "Album title must be 120 characters or fewer.",
+        "titleRequired": "Enter an album title."
+      },
+      "videoFallback": "Video"
     }
   },
   "actions": {
@@ -240,7 +319,24 @@
       "missingContent": "Add a note or at least one media file.",
       "unsupportedType": "Only image and video files are supported."
     },
-    "unexpectedError": "Something went wrong. Please try again."
+    "unexpectedError": "Something went wrong. Please try again.",
+    "countdown": {
+      "created": "Countdown saved.",
+      "invalidSubmission": "Countdown submission is invalid."
+    },
+    "futureNote": {
+      "created": "Future note sealed.",
+      "invalidSubmission": "Future note submission is invalid."
+    },
+    "trip": {
+      "created": "Trip saved.",
+      "invalidSubmission": "Trip submission is invalid."
+    },
+    "album": {
+      "created": "Album created.",
+      "invalidSubmission": "Album submission is invalid.",
+      "updated": "Album updated."
+    }
   },
   "errors": {
     "databaseSetupRequired": "Database setup required",
@@ -375,123 +471,162 @@
   },
   "trips": {
     "header": {
-      "description": "Plan and revisit your shared journeys with trip timelines and albums.",
+      "description": "Create, revisit, and organize real trip chapters. Albums now attach to trips; visited-place mapping comes next.",
       "eyebrow": "Travel",
       "title": "Trips"
     },
-    "templates": {
-      "dalat": {
-        "destination": "Da Lat Weekend",
-        "duration": "Jul 12 - Jul 14, 2026",
-        "items": "8 memories and 2 albums"
-      },
-      "hoian": {
-        "destination": "Hoi An Food Hunt",
-        "duration": "Sep 03 - Sep 05, 2026",
-        "items": "5 memories and 1 album"
-      }
+    "composer": {
+      "description": "Start with the trip record, then group its memory media into one album. Map layers remain the next slice.",
+      "eyebrow": "Trip planner",
+      "title": "Start a real trip record"
     },
-    "comingSoon": {
-      "cta": "Open albums shell",
-      "description": "Trip editing, stop-by-stop timelines, and linked albums will be connected once Phase 2 travel logic is implemented.",
-      "title": "Trip management"
+    "sections": {
+      "activeDescription": "Trips whose date range includes today.",
+      "activeEyebrow": "Happening now",
+      "activeTitle": "Active trips",
+      "completedDescription": "Finished trips stay here as travel history that now anchors albums and later map layers.",
+      "completedEyebrow": "Saved journeys",
+      "completedTitle": "Completed trips",
+      "plannedDescription": "Trips that are booked, imagined, or almost ready.",
+      "plannedEyebrow": "Coming next",
+      "plannedTitle": "Planned trips"
     },
     "empty": {
-      "description": "When real trip data is available, this panel will show your active and archived journeys.",
-      "title": "No connected trips yet"
+      "description": "Create your first trip to turn this travel section into real couple data.",
+      "title": "No trips yet"
+    },
+    "deferred": {
+      "description": "Trips and albums are live now. Place pins, routes, and map summaries still belong to the next Phase 2 slice.",
+      "title": "Visited-place map is still deferred"
     }
   },
   "tripDetail": {
     "header": {
-      "description": "A dedicated trip detail layout with timeline, stops, and album slots.",
-      "eyebrow": "Travel detail"
+      "description": "{dateRange} • {duration} • {status}",
+      "eyebrow": "Trip detail"
     },
-    "durationPlaceholder": "Sample duration until real data is wired",
-    "itemsPlaceholder": "0 stops loaded from backend yet",
-    "plannedSectionsTitle": "Planned sections",
-    "plannedSections": {
-      "albums": "Albums linked to this trip",
-      "highlights": "Trip overview and mood highlights",
-      "timeline": "Visited places timeline"
-    },
-    "comingSoon": {
-      "cta": "Preview map shell",
-      "description": "This detail page will become fully data-driven once trip entities and map pins are delivered in Phase 2.",
-      "title": "Trip timeline and map integration"
-    },
-    "fallbackTripLabel": "Trip"
+    "noteEmpty": "No note was added for this trip yet.",
+    "noteEyebrow": "Trip note",
+    "noteTitle": "What this trip is for",
+    "albumLinkedEyebrow": "Linked album",
+    "albumLinkedTitle": "This trip already has an album",
+    "albumLinkedDescription": "Open the album or keep adding remaining eligible memories from this trip window.",
+    "albumAddEyebrow": "Add more",
+    "albumAddTitle": "Add more trip media",
+    "albumAddDescription": "Only eligible memories not already grouped into this album appear here.",
+    "albumGroupedTitle": "Everything eligible is already grouped",
+    "albumGroupedDescription": "This trip's current memory set is already attached to the album.",
+    "albumComposerEyebrow": "Build album",
+    "albumComposerTitle": "Create the trip album",
+    "albumComposerDescription": "This trip already has eligible memories. Group them into one album now; uploads still stay in the memory flow.",
+    "albumEmptyTitle": "No eligible media yet",
+    "albumEmptyDescription": "Add memories whose happened-at date falls inside this trip window, then create the album from here.",
+    "placesDeferredTitle": "Visited places still come later",
+    "placesDeferredDescription": "This slice implements albums on top of trips. Map pins and place summaries stay in the next travel slice."
   },
   "albumDetail": {
+    "backToTrip": "Back to trip",
     "header": {
-      "description": "Album layout is ready for media grouping, captions, and trip linking.",
+      "description": "{tripTitle} • {dateRange} • {itemCount}",
       "eyebrow": "Album"
     },
-    "mediaPlaceholder": {
-      "description": "Photo and video tiles will render here once storage-backed album items are available.",
-      "title": "Media grid placeholder"
+    "summaryEyebrow": "Album note",
+    "summaryTitle": "What this album holds",
+    "summaryEmpty": "No album note was added.",
+    "tripLabel": "Linked trip",
+    "mediaEyebrow": "Media grid",
+    "mediaTitle": "Saved trip media",
+    "mediaDescription": "This album reuses memory media already saved inside the trip window.",
+    "mediaAlt": "Album media",
+    "mediaUnavailableDescription": "The signed URL for this media is unavailable.",
+    "mediaUnavailableTitle": "Could not load media",
+    "mediaNoteFallback": "No note was saved for this memory.",
+    "empty": {
+      "description": "This album does not have any visible media items yet.",
+      "title": "No album media yet"
     },
-    "highlightPlaceholder": {
-      "description": "Pinned highlights and captions from this album will appear in this panel.",
-      "title": "Highlights placeholder"
-    },
-    "comingSoon": {
-      "cta": "Go to trips shell",
-      "description": "Album entities, upload workflows, and trip associations are planned for the next feature phase.",
-      "title": "Album data wiring"
-    },
-    "fallbackAlbumLabel": "Album"
+    "deferredTitle": "Map layer is next",
+    "deferredDescription": "Visited places and map summaries still sit downstream of the trip and album contract."
   },
   "countdowns": {
+    "automationNote": {
+      "description": "These countdowns are saved and rendered from live data now. Recurring reminders, timezone-aware schedules, and background jobs remain a follow-up slice.",
+      "title": "Reminder automation is still deferred"
+    },
+    "composer": {
+      "description": "Create real date-based milestones for birthdays, anniversaries, trips, and quiet little plans. The timeline below is backed by the new Phase 2 schema.",
+      "eyebrow": "Create event",
+      "title": "Add a countdown"
+    },
+    "empty": {
+      "past": {
+        "description": "Passed dates will stay here once a milestone is behind you.",
+        "title": "No passed countdowns yet"
+      },
+      "upcoming": {
+        "description": "Create the first birthday, anniversary, trip, or custom plan you want to track together.",
+        "title": "No upcoming countdowns yet"
+      }
+    },
     "header": {
-      "description": "Track upcoming birthdays, anniversaries, and trips in one calm timeline.",
+      "description": "Track real couple milestones with date-backed countdowns instead of static sample widgets.",
       "eyebrow": "Events",
       "title": "Countdowns"
     },
-    "items": {
-      "anniversaryDinner": {
-        "name": "Anniversary dinner",
-        "type": "Anniversary"
-      },
-      "birthday": {
-        "name": "Partner birthday",
-        "type": "Birthday"
-      },
-      "danangTrip": {
-        "name": "Da Nang trip",
-        "type": "Travel"
-      },
-      "staycation": {
-        "name": "Mini staycation",
-        "type": "Plan"
-      }
+    "kind": {
+      "anniversary": "Anniversary",
+      "birthday": "Birthday",
+      "custom": "Custom",
+      "plan": "Plan",
+      "travel": "Travel"
     },
-    "comingSoon": {
-      "cta": "Open future notes shell",
-      "description": "Recurring reminders, timezone-aware scheduling, and reminder jobs will be connected with countdown data in a later phase.",
-      "title": "Reminder automation"
+    "sections": {
+      "pastDescription": "Finished dates stay visible as a calm archive of what already happened.",
+      "pastEyebrow": "Behind",
+      "pastTitle": "Passed",
+      "upcomingDescription": "The closest future milestone always stays first.",
+      "upcomingEyebrow": "Ahead",
+      "upcomingTitle": "Upcoming"
     }
   },
   "futureNotes": {
+    "composer": {
+      "description": "Write the note now, store the body in the secure content table, and let the database unlock it automatically on the chosen date.",
+      "eyebrow": "Seal note",
+      "title": "Create a future note"
+    },
+    "empty": {
+      "locked": {
+        "description": "Sealed notes will appear here until their unlock date passes.",
+        "title": "No locked notes"
+      },
+      "unlocked": {
+        "description": "Unlocked note bodies will show here as soon as their date is reached.",
+        "title": "No unlocked notes yet"
+      }
+    },
     "header": {
-      "description": "Write notes now and unlock them together at a chosen future date.",
+      "description": "Future notes are now real: metadata is visible immediately, while note bodies stay unreadable until unlock.",
       "eyebrow": "Capsules",
       "title": "Future notes"
     },
-    "notes": {
-      "anniversary": {
-        "subtitle": "Unlocks on Nov 12, 2026",
-        "title": "For our anniversary"
-      },
-      "future": {
-        "subtitle": "Unlocks on Jan 01, 2027",
-        "title": "Message for our future selves"
-      }
+    "sections": {
+      "lockedDescription": "Titles and unlock dates stay visible, but bodies remain unreadable until the database policy opens them.",
+      "lockedEyebrow": "Sealed",
+      "lockedTitle": "Locked notes",
+      "unlockedDescription": "Once the unlock date passes, the body becomes readable from the protected content table.",
+      "unlockedEyebrow": "Opened",
+      "unlockedTitle": "Unlocked notes"
     },
-    "comingSoon": {
-      "cta": "Open countdown shell",
-      "description": "Real encrypted note entries and unlock jobs will be connected once the future-note backend model is delivered.",
-      "title": "Unlock workflow"
-    }
+    "securityNote": {
+      "description": "This slice protects note bodies with a separate table plus row-level policies. Encryption-at-rest and reminder delivery are still follow-up work.",
+      "title": "Security boundary for this slice"
+    },
+    "status": {
+      "locked": "Locked",
+      "unlocked": "Unlocked"
+    },
+    "unlockDate": "Unlocks {date}"
   },
   "games": {
     "header": {
@@ -593,12 +728,23 @@
       "photoAlt": "Memory photo"
     },
     "countdown": {
+      "date": "On {date}",
+      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
       "daysLeft": "{count, plural, one {# day} other {# days}}",
-      "remaining": "remaining"
+      "remaining": "remaining",
+      "since": "since",
+      "today": "Today",
+      "todayHint": "happens today"
     },
     "tripCard": {
-      "badge": "Trip",
-      "eyebrow": "Trip capsule"
+      "dateRange": "{startDate} - {endDate}",
+      "durationDays": "{count, plural, one {# day} other {# days}}",
+      "eyebrow": "Trip capsule",
+      "status": {
+        "active": "Active",
+        "completed": "Completed",
+        "planned": "Planned"
+      }
     },
     "chatThread": {
       "composerPlaceholder": "Write something warm, playful, or tiny.",
@@ -618,7 +764,9 @@
         "m2": "7:14 PM",
         "m3": "7:15 PM",
         "m4": "7:16 PM"
-      }
+      },
+      "attachAriaLabel": "Attach media (not available yet)",
+      "sendAriaLabel": "Send message (mock only)"
     },
     "travelAtlas": {
       "header": {
@@ -661,6 +809,25 @@
       "quoteFallback": "A small private world made from ordinary days, soft plans, and moments worth keeping.",
       "since": "Together since {date}. Built from late-night notes, ordinary breakfasts, and the chapters you keep choosing to revisit.",
       "dayCount": "Day {count}"
+    },
+    "albumCard": {
+      "itemCount": "{count, plural, one {# item} other {# items}}",
+      "videoCoverLabel": "Video cover"
+    }
+  },
+  "albums": {
+    "header": {
+      "description": "Browse albums built from real trip-linked memory media.",
+      "eyebrow": "Travel albums",
+      "title": "Albums"
+    },
+    "empty": {
+      "description": "Create an album from a trip detail page once that trip has eligible memory media.",
+      "title": "No albums yet"
+    },
+    "deferred": {
+      "description": "This slice groups media around trips. Place pins and map layers still land in the next travel slice.",
+      "title": "Visited places come next"
     }
   }
 }

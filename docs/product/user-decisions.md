@@ -7,7 +7,7 @@
 - Confirmed AI direction: retrieval-first semantic memory search (Phase 4).
 - Confirmed timezone default: Asia/Ho_Chi_Minh.
 - Confirmed security hardening direction: invite acceptance and first-space bootstrap must use atomic DB RPCs, not direct table writes in app actions.
-- Confirmed execution gate: Phase 2 implementation starts only after Drizzle + Mapbox dependencies can be installed reproducibly in this environment.
+- Confirmed execution gate: Phase 2 implementation starts only after Drizzle + Mapbox dependencies can be installed reproducibly in this environment. `SUPERSEDED BY 2026-03-29 (Phase 2 SQL-first slices shipped without this dependency gate.)`
 - Local development auth redirects should support both `localhost` and `127.0.0.1` to avoid callback mismatches.
 
 ## Implementation Defaults Applied in Phase 1
@@ -18,7 +18,7 @@
 ## 2026-03-28
 - Runtime stabilization is prioritized before Phase 2 coding.
 - Upload reliability decision: configure Next.js Server Action body-size limit to `26mb` now, keep direct signed browser upload as a later hardening step.
-- Dependency-gate policy retained: no Phase 2 feature coding starts until Drizzle + Mapbox packages are installable and reproducible.
+- Dependency-gate policy retained: no Phase 2 feature coding starts until Drizzle + Mapbox packages are installable and reproducible. `SUPERSEDED BY 2026-03-29 (Phase 2 countdowns, future notes, and trips shipped SQL-first without that gate.)`
 - UI redesign direction selected: pastel pink light-mode-only style language. `SUPERSEDED BY 2026-03-29 (Editorial Redesign Lock)`
 - Responsive layout decision selected: sidebar + content for tablet/desktop, bottom navigation retained for mobile. `SUPERSEDED BY 2026-03-29 (Editorial Redesign Lock)`
 
@@ -27,6 +27,7 @@
 - Finalized visual direction: pastel pink, soft romantic, premium tone. `SUPERSEDED BY 2026-03-29 (Editorial Redesign Lock)`
 - Finalized navigation information architecture: `Main + More` grouping with mobile `More` entry. `SUPERSEDED BY 2026-03-29 (Editorial Redesign Lock)` where dock/rail details are now canonical.
 - Confirmed shell-route strategy: planned Phase 2+ screens can ship as styled presentational shells before backend wiring.
+- Phase 2 execution now follows a SQL-first path for shipped slices; Drizzle and Mapbox package availability are no longer blockers for countdowns, future notes, trips, or albums.
 
 ## 2026-03-29 (Editorial Redesign Lock)
 - Finalized visual refresh away from the earlier cute dashboard framing and toward an editorial-romance keepsake journal aesthetic.
@@ -35,3 +36,4 @@
 - Finalized mobile navigation shell: floating dock above the safe area with a centered memory action orb.
 - Finalized desktop navigation shell: slim rail plus expandable grouped drawer instead of a full sidebar.
 - Confirmed `/chat` ships as a presentational shell route before live messaging/backend contracts are implemented.
+- Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.

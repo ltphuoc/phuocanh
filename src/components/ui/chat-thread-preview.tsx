@@ -101,6 +101,7 @@ export const ChatThreadPreview = (): ReactElement => {
       <div className="mt-8 rounded-[1.6rem] border border-white/70 bg-[rgba(255,255,255,0.72)] px-4 py-3 shadow-whisper backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <button
+            aria-label={t("attachAriaLabel")}
             className="inline-flex size-10 items-center justify-center rounded-full border border-white/70 bg-[rgba(255,227,225,0.84)] text-primary shadow-whisper"
             type="button"
           >
@@ -110,6 +111,7 @@ export const ChatThreadPreview = (): ReactElement => {
             <p className="text-sm text-muted-foreground">{t("composerPlaceholder")}</p>
           </div>
           <button
+            aria-label={t("sendAriaLabel")}
             className="ui-gradient-active inline-flex size-11 items-center justify-center rounded-full text-primary-foreground shadow-cloud"
             type="button"
           >

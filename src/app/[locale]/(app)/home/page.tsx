@@ -19,8 +19,8 @@ import { SectionCard } from "@/components/ui/section-card";
 import { TimelineRibbon, type TimelineRibbonItem } from "@/components/ui/timeline-ribbon";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
 import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
+import { signMemoryMediaStorageItems } from "@/lib/server/memory-media";
 import { getHomePageData } from "@/lib/server/phase-one-data";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 interface MemoryPreview {
   readonly id: string;
@@ -59,27 +59,18 @@ export default async function HomePage({
     getReadyCoupleContextOrRedirect(locale),
   ]);
   const data = await getHomePageData(context);
-  const supabase = await createSupabaseServerClient();
 
-  const memoryPreviews: readonly MemoryPreview[] = await Promise.all(
-    data.memories.map(async (memory) => {
-      if (!memory.storagePath || memory.mediaType !== "image") {
-        return {
-          id: memory.id,
-          imageUrl: null,
-        };
-      }
-
-      const { data: signedData, error } = await supabase.storage
-        .from("memory-media")
-        .createSignedUrl(memory.storagePath, 60 * 15);
-
-      return {
-        id: memory.id,
-        imageUrl: error || !signedData?.signedUrl ? null : signedData.signedUrl,
-      };
-    }),
+  const signedMemoryPreviews = await signMemoryMediaStorageItems(
+    data.memories.map((memory) => ({
+      id: memory.id,
+      mediaType: memory.mediaType,
+      storagePath: memory.storagePath,
+    })),
   );
+  const memoryPreviews: readonly MemoryPreview[] = signedMemoryPreviews.map((memory) => ({
+    id: memory.id,
+    imageUrl: memory.mediaType === "image" ? memory.signedUrl : null,
+  }));
 
   const memoryPreviewMap = new Map<string, string | null>();
   memoryPreviews.forEach((preview) => {
