@@ -19,20 +19,25 @@
   - Trips foundation (`trips` schema + live `/trips` and `/trips/[tripId]`)
 - Implemented in Slice 3:
   - Trip albums foundation (`albums`, `album_items`, live `/albums`, live `/albums/[albumId]`)
+- Implemented in Slice 4:
+  - Visited-place atlas foundation (`visited_places`, live `/map`, live trip-level place create/read flow)
+- Implemented in follow-up foundation work:
+  - Couple timezone model (`couples.timezone`, live `/settings`, and couple-scoped day boundaries)
 - Still deferred in Phase 2:
-  - Map visited places
-  - Reminder automation, encryption-at-rest, and timezone-aware scheduling jobs
+  - Reminder automation, encryption-at-rest, and reminder-delivery jobs
 - Current route posture:
-  - `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, and `/albums/[albumId]` are backend-backed implemented routes.
-  - `/map` remains shell-only.
+  - `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, and `/settings` are backend-backed implemented routes.
 - Current schema posture: SQL migrations remain authoritative, and the Drizzle baseline artifacts are inventory only until a dedicated adoption task is scoped.
-- Next documented slice: `Visited-place map foundation`
-  - add trip-linked visited-place entities and read helpers
-  - implement `/map` on top of the existing trip + album contract
-  - keep chat and games/stats out of the remaining Phase 2 travel scope
-- Downstream implementation order after the map slice:
-  - finish any deferred travel hardening (jobs/timezone refinements if still needed)
+- Latest documented slice: `Couple timezone foundation`
+  - adds `couples.timezone` plus the `update_couple_timezone(...)` RPC
+  - makes countdowns, future notes, trips, albums, map, and settings use the saved couple timezone
+- Downstream implementation order after the timezone foundation:
   - start Phase 3 with chat backend/realtime, then games/stats backend work
+  - revisit reminder jobs later if product priority changes
+- Still deferred after the timezone foundation:
+  - reminder automation and reminder delivery jobs
+  - coordinates and route polylines
+  - provider-backed geographic tiles
 - See `docs/product/phase-2-status.md` for the living status tracker.
 
 ## Phase 3 (Advanced) - Status: shell-only and mock-only scaffolding exists

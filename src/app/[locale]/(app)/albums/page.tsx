@@ -78,7 +78,12 @@ export default async function AlbumsPage({
                 itemCountLabel={albumCardT("itemCount", { count: album.itemCount })}
                 key={album.id}
                 title={album.title}
-                tripDateRangeLabel={formatTripDateRange(album.trip, format, tripCardT)}
+                tripDateRangeLabel={formatTripDateRange(
+                  album.trip,
+                  format,
+                  tripCardT,
+                  context.timezone,
+                )}
                 tripTitle={album.trip.title}
                 videoCoverLabel={albumCardT("videoCoverLabel")}
               />

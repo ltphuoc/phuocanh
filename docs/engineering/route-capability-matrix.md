@@ -13,18 +13,18 @@ This file is the canonical “what exists today” route map.
 | `/memories/new` | implemented | `createMemoryAction` | Real mutation flow with upload/storage behavior |
 | `/memories/[memoryId]` | implemented | `getMemoryDetailData(...)` + signed storage URLs | Reads real memory/media rows |
 | `/on-this-day` | implemented | `memories_on_this_day(...)` RPC + media lookup | Timezone-aware SQL-backed feature |
-| `/countdowns` | implemented | `getCountdownsPageData(...)` + `createCountdownAction` | Reminder jobs and timezone-aware schedules are still deferred |
-| `/future-notes` | implemented | `getFutureNotesPageData(...)` + `createFutureNoteAction` | Metadata is visible immediately; note bodies stay unreadable until `unlock_at <= now()` |
-| `/trips` | implemented | `getTripsPageData(...)` + `createTripAction` | Albums now attach to trips; visited-place map layers remain deferred |
+| `/countdowns` | implemented | `getCountdownsPageData(...)` + `createCountdownAction` | Reminder jobs are still deferred; stored dates now follow the saved couple timezone |
+| `/future-notes` | implemented | `getFutureNotesPageData(...)` + `createFutureNoteAction` | Metadata is visible immediately; note bodies stay unreadable until `unlock_at <= now()` and unlock timing follows the saved couple timezone |
+| `/trips` | implemented | `getTripsPageData(...)` + `createTripAction` | Trips are the root for both albums and visited places |
 | `/trips/[tripId]` | implemented | `getTripDetailData(...)` + album actions | Route param is a real trip UUID; invalid or foreign IDs must not resolve |
 | `/albums` | implemented | `getAlbumsPageData(...)` | Albums are trip-rooted and group existing `memory_media`; no separate upload pipeline exists |
 | `/albums/[albumId]` | implemented | `getAlbumDetailData(...)` | Route param is a real album UUID; invalid or foreign IDs must not resolve |
+| `/map` | implemented | `getMapPageData(...)` + `visited_places` | Atlas is provider-free and trip-linked; no coordinates, tiles, or route polylines exist yet |
 | `/chat` | mock-only | local mock message array in `ChatThreadPreview` | No live chat backend, presence, or attachment model exists |
-| `/map` | shell-only | none | No Mapbox or visited-place integration is wired |
 | `/games` | shell-only | none | Hub exists, gameplay logic does not |
 | `/games/[mode]` | shell-only | route param only | Mode pages are structured shells, not live game engines |
 | `/stats` | shell-only | none | Placeholder metrics only; no analytics pipeline exists |
-| `/settings` | shell-only | navigation model only | Acts as a “More” hub, not a real settings backend |
+| `/settings` | implemented | `getReadyCoupleContextOrRedirect()` + `updateCoupleTimezoneAction` | Owns the shared couple timezone only; account/privacy/per-user settings are still deferred |
 
 ## Status Definitions
 - `implemented`: backed by current runtime data or auth logic

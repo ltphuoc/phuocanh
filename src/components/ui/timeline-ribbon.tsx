@@ -10,10 +10,12 @@ export interface TimelineRibbonItem extends Omit<MemoryCardProps, "variant"> {
 
 interface TimelineRibbonProps {
   readonly items: readonly TimelineRibbonItem[];
+  readonly timeZone: string;
 }
 
 export const TimelineRibbon = async ({
   items,
+  timeZone,
 }: TimelineRibbonProps): Promise<ReactElement> => {
   const format = await getFormatter();
 
@@ -26,6 +28,7 @@ export const TimelineRibbon = async ({
           ? item.happenedAt
           : format.dateTime(date, {
               month: "long",
+              timeZone,
               year: "numeric",
             });
         const previousDate =
@@ -34,6 +37,7 @@ export const TimelineRibbon = async ({
           previousDate && !Number.isNaN(previousDate.getTime())
             ? format.dateTime(previousDate, {
                 month: "long",
+                timeZone,
                 year: "numeric",
               })
             : null;
@@ -56,6 +60,7 @@ export const TimelineRibbon = async ({
                 locationName={item.locationName}
                 mediaType={item.mediaType}
                 note={item.note}
+                timeZone={timeZone}
               />
             </div>
           </div>

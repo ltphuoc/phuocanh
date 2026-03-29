@@ -12,7 +12,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 | 4 | Counter yêu nhau bao lâu | 1 | implemented |
 | 5 | Danh sách nơi muốn đi / món muốn ăn / phim muốn xem | 1 | implemented |
 | 6 | Checklist hoàn thành | 1 | implemented |
-| 7 | Map các nơi đã đi cùng nhau | 2 | shell-only |
+| 7 | Map các nơi đã đi cùng nhau | 2 | implemented |
 | 8 | Album theo từng chuyến đi | 2 | implemented |
 | 9 | Countdown sinh nhật / anniversary / chuyến đi | 2 | implemented |
 | 10 | Private couple chat | 3 | mock-only |
@@ -26,6 +26,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 | 18 | Couple AI Memory Search | 4 | planned |
 | 19 | Các stats vui | 3 | shell-only |
 | 20 | Trips foundation | 2 | implemented |
+| 21 | Shared couple timezone + date boundaries | 2 | implemented |
 
 ## Phase 1 Notes
 - Implemented authentication with magic-link + invite acceptance flow.
@@ -52,7 +53,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
 - `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
 - `mock-only`: `/chat` now exists as a styled route with sample conversation content, but no live messaging backend exists.
-- `shell-only`: `/map`, `/games`, `/games/[mode]`, `/stats`, and `/settings` are still presentational route shells only.
+- `shell-only`: `/games`, `/games/[mode]`, and `/stats` are still presentational route shells only.
 
 ## Phase 2 Slice 1 (2026-03-29)
 - `implemented`: `/countdowns` now reads and writes live Phase 2 countdown rows.
@@ -71,7 +72,20 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: `/albums/[albumId]` now renders real signed album media and linked trip data.
 - `implemented`: `/trips/[tripId]` now supports creating the trip album and adding remaining eligible media later.
 - `implemented`: album grouping reuses existing `memory_media`; no second upload pipeline was introduced.
-- `deferred`: visited-place map layers remain the only remaining Phase 2 travel feature slice.
+
+## Phase 2 Slice 4 (2026-03-29)
+- `implemented`: visited places now exist as real trip-linked entities backed by `visited_places`.
+- `implemented`: `/map` now renders a real provider-free atlas grouped by trip and backed by live visited-place rows.
+- `implemented`: `/trips/[tripId]` now supports creating visited places and reading the ordered trip place log.
+- `implemented`: the atlas slice keeps the travel contract rooted in trips and does not add Mapbox or coordinate fields yet.
+- `deferred`: coordinates, route polylines, and provider-backed geographic tiles remain follow-up travel work rather than part of this slice.
+
+## Couple Timezone Foundation (2026-03-29)
+- `implemented`: `/settings` now owns the shared couple timezone instead of acting as a shell-only More hub.
+- `implemented`: countdown and future-note forms now submit date-only values and the server derives stored instants from the saved couple timezone.
+- `implemented`: relationship-day math, on-this-day, trip status, album media eligibility, album detail dates, trip dates, and map dates now use the saved couple timezone.
+- `implemented`: changing the couple timezone preserves visible countdown and future-note calendar dates instead of shifting them unexpectedly.
+- `deferred`: per-user timezone overrides and reminder delivery remain out of scope.
 
 ## Phase 3 Carry-Forward
 - `mock-only`: `/chat` remains a designed conversation surface only and sits in the Phase 3 track.

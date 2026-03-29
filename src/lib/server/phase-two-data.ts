@@ -1,10 +1,16 @@
-import { compareAsc, differenceInCalendarDays, parseISO } from "date-fns";
+import { compareAsc, parseISO } from "date-fns";
 import { z } from "zod";
 import type { CoupleContext } from "@/lib/server/couple-context";
 import { signMemoryMediaStorageItems } from "@/lib/server/memory-media";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
-import { toUtcDateEndExclusiveIso, toUtcDateStartIso } from "@/lib/utils/date-input";
+import {
+  getCurrentDateTokenInTimeZone,
+  getDateTokenForInstantInTimeZone,
+  getDaysBetweenDateTokens,
+  toTimeZoneDateEndExclusiveIso,
+  toTimeZoneDateStartIso,
+} from "@/lib/utils/couple-timezone";
 
 export type TripStatus = "planned" | "active" | "completed";
 
@@ -57,6 +63,27 @@ export interface TripsPageData {
   readonly planned: readonly TripCard[];
 }
 
+export interface VisitedPlaceCard {
+  readonly id: string;
+  readonly note: string | null;
+  readonly title: string;
+  readonly visitedOn: string;
+}
+
+export interface TripVisitedPlaceCard extends VisitedPlaceCard {
+  readonly trip: TripCard;
+}
+
+export interface MapTripGroup {
+  readonly trip: TripCard;
+  readonly visitedPlaces: readonly VisitedPlaceCard[];
+}
+
+export interface MapPageData {
+  readonly trips: readonly MapTripGroup[];
+  readonly visitedPlaces: readonly TripVisitedPlaceCard[];
+}
+
 export interface AlbumSummary {
   readonly coverMediaType: Database["public"]["Enums"]["media_type"] | null;
   readonly coverSignedUrl: string | null;
@@ -92,6 +119,7 @@ export interface TripDetailAlbumSummary {
 export interface TripDetailData extends TripCard {
   readonly album: TripDetailAlbumSummary | null;
   readonly availableMedia: readonly AlbumMediaCandidate[];
+  readonly visitedPlaces: readonly VisitedPlaceCard[];
 }
 
 export interface AlbumDetailData {
@@ -104,12 +132,6 @@ export interface AlbumDetailData {
 
 const albumIdSchema = z.uuid();
 const tripIdSchema = z.uuid();
-
-const getUtcDateToken = (value: string): string => value.slice(0, 10);
-
-const getTodayUtcDate = (): Date => parseISO(new Date().toISOString().slice(0, 10));
-
-const getTodayUtcDateToken = (): string => getUtcDateToken(new Date().toISOString());
 
 const compareDateTokensAscending = (left: string, right: string): number =>
   compareAsc(parseISO(left), parseISO(right));
@@ -135,12 +157,13 @@ const getTripStatus = (
 
 const toCountdownCard = (
   row: Database["public"]["Tables"]["countdowns"]["Row"],
-  todayUtcDate: Date,
+  todayDateToken: string,
+  timeZone: string,
 ): CountdownCard => {
-  const targetDate = parseISO(getUtcDateToken(row.target_at));
+  const targetDateToken = getDateTokenForInstantInTimeZone(row.target_at, timeZone);
 
   return {
-    daysFromToday: differenceInCalendarDays(targetDate, todayUtcDate),
+    daysFromToday: getDaysBetweenDateTokens(targetDateToken, todayDateToken),
     id: row.id,
     kind: row.kind,
     note: row.note,
@@ -175,6 +198,24 @@ const toAlbumMediaCandidate = (
   signedUrl: media.signedUrl,
 });
 
+const toVisitedPlaceCard = (
+  row: Database["public"]["Tables"]["visited_places"]["Row"],
+): VisitedPlaceCard => ({
+  id: row.id,
+  note: row.note,
+  title: row.title,
+  visitedOn: row.visited_on,
+});
+
+const toVisitedPlaceSummaryCard = (
+  visitedPlace: TripVisitedPlaceCard,
+): VisitedPlaceCard => ({
+  id: visitedPlace.id,
+  note: visitedPlace.note,
+  title: visitedPlace.title,
+  visitedOn: visitedPlace.visitedOn,
+});
+
 const sortAlbumMediaCandidates = (
   left: AlbumMediaCandidate,
   right: AlbumMediaCandidate,
@@ -194,8 +235,8 @@ export const getCountdownsPageData = async (
     throw new Error(error.message);
   }
 
-  const todayUtcDate = getTodayUtcDate();
-  const countdowns = data.map((row) => toCountdownCard(row, todayUtcDate));
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
+  const countdowns = data.map((row) => toCountdownCard(row, todayDateToken, context.timezone));
 
   return {
     past: countdowns
@@ -279,7 +320,7 @@ export const getTripsPageData = async (
     throw new Error(error.message);
   }
 
-  const todayDateToken = getTodayUtcDateToken();
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const trips = data.map((row) => toTripCard(row, todayDateToken));
 
   return {
@@ -295,11 +336,81 @@ export const getTripsPageData = async (
   };
 };
 
+export const getMapPageData = async (
+  context: CoupleContext,
+): Promise<MapPageData> => {
+  const supabase = await createSupabaseServerClient();
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
+  const { data: visitedPlaceRows, error } = await supabase
+    .from("visited_places")
+    .select("*")
+    .eq("couple_id", context.coupleId)
+    .order("visited_on", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!visitedPlaceRows.length) {
+    return {
+      trips: [],
+      visitedPlaces: [],
+    };
+  }
+
+  const tripIds = Array.from(new Set(visitedPlaceRows.map((visitedPlace) => visitedPlace.trip_id)));
+  const { data: trips, error: tripsError } = await supabase
+    .from("trips")
+    .select("*")
+    .in("id", tripIds);
+
+  if (tripsError) {
+    throw new Error(tripsError.message);
+  }
+
+  const tripById = new Map(
+    trips.map((trip) => [trip.id, toTripCard(trip, todayDateToken)] as const),
+  );
+  const visitedPlaces = visitedPlaceRows.map<TripVisitedPlaceCard>((visitedPlace) => {
+    const trip = tripById.get(visitedPlace.trip_id);
+    if (!trip) {
+      throw new Error(`Trip ${visitedPlace.trip_id} not found for visited place ${visitedPlace.id}.`);
+    }
+
+    return {
+      ...toVisitedPlaceCard(visitedPlace),
+      trip,
+    };
+  });
+  const tripsById = new Map<string, { trip: TripCard; visitedPlaces: VisitedPlaceCard[] }>();
+
+  visitedPlaces.forEach((visitedPlace) => {
+    const existingGroup = tripsById.get(visitedPlace.trip.id);
+    const nextVisitedPlace = toVisitedPlaceSummaryCard(visitedPlace);
+
+    if (existingGroup) {
+      existingGroup.visitedPlaces.push(nextVisitedPlace);
+      return;
+    }
+
+    tripsById.set(visitedPlace.trip.id, {
+      trip: visitedPlace.trip,
+      visitedPlaces: [nextVisitedPlace],
+    });
+  });
+
+  return {
+    trips: Array.from(tripsById.values()),
+    visitedPlaces,
+  };
+};
+
 export const getAlbumsPageData = async (
   context: CoupleContext,
 ): Promise<AlbumsPageData> => {
   const supabase = await createSupabaseServerClient();
-  const todayDateToken = getTodayUtcDateToken();
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: albums, error } = await supabase
     .from("albums")
     .select("*")
@@ -399,7 +510,7 @@ export const getTripDetailData = async (
   }
 
   const supabase = await createSupabaseServerClient();
-  const todayDateToken = getTodayUtcDateToken();
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: trips, error } = await supabase
     .from("trips")
     .select("*")
@@ -416,7 +527,7 @@ export const getTripDetailData = async (
     return null;
   }
 
-  const [albumQuery, memoriesQuery] = await Promise.all([
+  const [albumQuery, memoriesQuery, visitedPlacesQuery] = await Promise.all([
     supabase
       .from("albums")
       .select("*")
@@ -427,9 +538,16 @@ export const getTripDetailData = async (
       .from("memories")
       .select("*")
       .eq("couple_id", context.coupleId)
-      .gte("happened_at", toUtcDateStartIso(trip.start_date))
-      .lt("happened_at", toUtcDateEndExclusiveIso(trip.end_date))
+      .gte("happened_at", toTimeZoneDateStartIso(trip.start_date, context.timezone))
+      .lt("happened_at", toTimeZoneDateEndExclusiveIso(trip.end_date, context.timezone))
       .order("happened_at", { ascending: false }),
+    supabase
+      .from("visited_places")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .eq("trip_id", trip.id)
+      .order("visited_on", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   if (albumQuery.error) {
@@ -438,6 +556,10 @@ export const getTripDetailData = async (
 
   if (memoriesQuery.error) {
     throw new Error(memoriesQuery.error.message);
+  }
+
+  if (visitedPlacesQuery.error) {
+    throw new Error(visitedPlacesQuery.error.message);
   }
 
   const album = albumQuery.data[0] ?? null;
@@ -501,6 +623,7 @@ export const getTripDetailData = async (
         }
       : null,
     availableMedia,
+    visitedPlaces: visitedPlacesQuery.data.map((visitedPlace) => toVisitedPlaceCard(visitedPlace)),
     ...toTripCard(trip, todayDateToken),
   };
 };
@@ -515,7 +638,7 @@ export const getAlbumDetailData = async (
   }
 
   const supabase = await createSupabaseServerClient();
-  const todayDateToken = getTodayUtcDateToken();
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: albums, error } = await supabase
     .from("albums")
     .select("*")

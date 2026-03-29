@@ -38,6 +38,7 @@ const renderMediaTile = (
   },
   format: Awaited<ReturnType<typeof getFormatter>>,
   t: Awaited<ReturnType<typeof getTranslations<"albumDetail">>>,
+  timeZone: string,
 ): ReactElement => {
   const happenedAt = parseISO(item.happenedAt);
   const happenedAtLabel = Number.isNaN(happenedAt.getTime())
@@ -45,6 +46,7 @@ const renderMediaTile = (
     : format.dateTime(happenedAt, {
         day: "numeric",
         month: "short",
+        timeZone,
         year: "numeric",
       });
 
@@ -119,7 +121,7 @@ export default async function AlbumDetailPage({
     notFound();
   }
 
-  const tripDateRangeLabel = formatTripDateRange(album.trip, format, tripCardT);
+  const tripDateRangeLabel = formatTripDateRange(album.trip, format, tripCardT, context.timezone);
   const tripDurationLabel = formatTripDuration(album.trip, tripCardT);
   const albumItemCountLabel = albumCardT("itemCount", { count: album.items.length });
   const coverItem = album.items[0] ?? null;
@@ -193,7 +195,9 @@ export default async function AlbumDetailPage({
           {album.items.length ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {album.items.map((item) => (
-                <div key={item.id}>{renderMediaTile(item, format, albumDetailT)}</div>
+                <div key={item.id}>
+                  {renderMediaTile(item, format, albumDetailT, context.timezone)}
+                </div>
               ))}
             </div>
           ) : (

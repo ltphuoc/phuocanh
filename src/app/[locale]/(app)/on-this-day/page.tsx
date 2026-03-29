@@ -83,6 +83,7 @@ export default async function OnThisDayPage({
                         locationName={memory.locationName}
                         mediaType={memory.mediaType}
                         note={memory.note}
+                        timeZone={context.timezone}
                         variant="anniversary"
                       />
                     </div>
@@ -97,6 +98,7 @@ export default async function OnThisDayPage({
                       locationName={memory.locationName}
                       mediaType={memory.mediaType}
                       note={memory.note}
+                      timeZone={context.timezone}
                       variant="compact"
                     />
                   ))}

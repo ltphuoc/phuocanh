@@ -1,7 +1,7 @@
 import { differenceInCalendarDays } from "date-fns";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { TripCard, TripStatus } from "@/lib/server/phase-two-data";
-import { parseDateInputValueAsUtc } from "@/lib/utils/date-input";
+import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
 
 export const tripStatusTranslationKeyByValue = {
   active: "status.active",
@@ -13,21 +13,22 @@ export const formatTripDateRange = (
   trip: Pick<TripCard, "endDate" | "startDate">,
   format: Awaited<ReturnType<typeof getFormatter>>,
   t: Awaited<ReturnType<typeof getTranslations<"ui.tripCard">>>,
+  timeZone: string,
 ): string => {
-  const startDate = parseDateInputValueAsUtc(trip.startDate);
-  const endDate = parseDateInputValueAsUtc(trip.endDate);
+  const startDate = parseDateInputValueInTimeZone(trip.startDate, timeZone);
+  const endDate = parseDateInputValueInTimeZone(trip.endDate, timeZone);
 
   return t("dateRange", {
     endDate: format.dateTime(endDate, {
       day: "numeric",
       month: "short",
-      timeZone: "UTC",
+      timeZone,
       year: "numeric",
     }),
     startDate: format.dateTime(startDate, {
       day: "numeric",
       month: "short",
-      timeZone: "UTC",
+      timeZone,
       year: "numeric",
     }),
   });
@@ -39,8 +40,8 @@ export const formatTripDuration = (
 ): string => {
   const durationDays =
     differenceInCalendarDays(
-      parseDateInputValueAsUtc(trip.endDate),
-      parseDateInputValueAsUtc(trip.startDate),
+      parseDateInputValueInTimeZone(trip.endDate, "UTC"),
+      parseDateInputValueInTimeZone(trip.startDate, "UTC"),
     ) + 1;
 
   return t("durationDays", {

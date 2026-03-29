@@ -23,8 +23,12 @@ export type ActionMessageKey =
   | "memory.fileTooLarge"
   | "memory.missingContent"
   | "memory.unsupportedType"
+  | "settings.timezone.invalidSubmission"
+  | "settings.timezone.updated"
   | "trip.created"
   | "trip.invalidSubmission"
+  | "visitedPlace.created"
+  | "visitedPlace.invalidSubmission"
   | "unexpectedError";
 
 export interface ActionState {

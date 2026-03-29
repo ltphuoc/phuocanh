@@ -45,3 +45,9 @@
 - Chosen motion layer: adopt `motion` for shared-layout transitions, dock state animation, and gentle reveal choreography.
 - Chosen responsive shell pattern: floating mobile dock with centered memory action orb, plus slim desktop rail with expandable grouped drawer.
 - Chosen `/chat` delivery strategy: ship a presentational conversation shell first without inventing backend contracts or data models.
+- Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
+
+## 2026-03-29 (Visited-Place Atlas Foundation)
+- Chosen visited-place contract: add manual trip-linked `visited_places` rows rather than auto-deriving stops from `memories.location_name`.
+- Chosen map delivery strategy: ship a provider-free atlas UI first, grouped by trip, without introducing Mapbox, coordinates, or new environment requirements.
+- Chosen travel hierarchy rule: keep visited places rooted in `trips` alongside albums rather than inventing a parallel place hierarchy.

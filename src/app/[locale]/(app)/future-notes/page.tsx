@@ -1,4 +1,5 @@
 import { CalendarClock, LockKeyhole, Sparkles } from "lucide-react";
+import { parseISO } from "date-fns";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactElement } from "react";
@@ -27,14 +28,15 @@ const formatUnlockDate = (
   unlockAt: string,
   format: Awaited<ReturnType<typeof getFormatter>>,
   t: Awaited<ReturnType<typeof getTranslations<"futureNotes">>>,
+  timeZone: string,
 ): string => {
-  const date = new Date(unlockAt);
+  const date = parseISO(unlockAt);
   const dateLabel = Number.isNaN(date.getTime())
     ? unlockAt.slice(0, 10)
     : format.dateTime(date, {
         day: "numeric",
         month: "short",
-        timeZone: "UTC",
+        timeZone,
         year: "numeric",
       });
 
@@ -100,7 +102,12 @@ export default async function FutureNotesPage({
                   status={note.status}
                   statusLabel={futureNotesT("status.locked")}
                   title={note.title}
-                  unlockDateLabel={formatUnlockDate(note.unlockAt, format, futureNotesT)}
+                  unlockDateLabel={formatUnlockDate(
+                    note.unlockAt,
+                    format,
+                    futureNotesT,
+                    context.timezone,
+                  )}
                 />
               ))}
             </ResponsiveGrid>
@@ -135,7 +142,12 @@ export default async function FutureNotesPage({
                   status={note.status}
                   statusLabel={futureNotesT("status.unlocked")}
                   title={note.title}
-                  unlockDateLabel={formatUnlockDate(note.unlockAt, format, futureNotesT)}
+                  unlockDateLabel={formatUnlockDate(
+                    note.unlockAt,
+                    format,
+                    futureNotesT,
+                    context.timezone,
+                  )}
                 />
               ))}
             </ResponsiveGrid>

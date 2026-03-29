@@ -21,11 +21,13 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `createChecklistAction` | `title` | `ActionState` | Revalidates `/home`, `/lists` |
 | `addChecklistItemAction` | `checklistId`, `text` | `ActionState` | Revalidates `/home`, `/lists` |
 | `toggleChecklistItemAction` | `checklistItemId`, `nextDone` | `ActionState` | Revalidates `/home`, `/lists` |
-| `createCountdownAction` | `title`, `kind`, `targetAt`, `note?` | `ActionState` | Inserts into `countdowns`; revalidates `/countdowns` only |
-| `createFutureNoteAction` | `title`, `unlockAt`, `body` | `ActionState` | Inserts metadata + body rows; revalidates `/future-notes` only |
+| `createCountdownAction` | `title`, `kind`, `targetDate`, `note?` | `ActionState` | Derives the stored UTC instant from the couple timezone; revalidates `/countdowns` only |
+| `createFutureNoteAction` | `title`, `unlockDate`, `body` | `ActionState` | Derives the stored UTC instant from the couple timezone; inserts metadata + body rows; revalidates `/future-notes` only |
 | `createTripAction` | `title`, `startDate`, `endDate`, `note?` | `ActionState` | Inserts into `trips`; revalidates `/trips` only |
+| `createVisitedPlaceAction` | `tripId`, `title`, `visitedOn`, `note?` | `ActionState` | Inserts into `visited_places`; revalidates `/map` and `/trips/[tripId]` |
 | `createAlbumAction` | `tripId`, `title`, `description?`, `memoryMediaIds[]` | `ActionState` | Calls `create_album_with_items(...)`; revalidates `/albums` and `/trips/[tripId]` |
 | `addAlbumItemsAction` | `albumId`, `tripId`, `memoryMediaIds[]` | `ActionState` | Calls `add_album_items(...)`; revalidates `/albums`, `/albums/[albumId]`, and `/trips/[tripId]` |
+| `updateCoupleTimezoneAction` | `timeZone` | `ActionState` | Calls `update_couple_timezone(...)`; revalidates `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, and `/map` |
 
 ## Error Conventions
 - Server Actions return user-facing error messages through `ActionState`.
@@ -35,7 +37,7 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - couple full
   - sign-in required
 - Memory creation returns validation or storage/database failure messages directly.
-- Countdown, future-note, trip, and album mutations return validation errors through `countdown.invalidSubmission`, `futureNote.invalidSubmission`, `trip.invalidSubmission`, and `album.invalidSubmission`.
+- Countdown, future-note, trip, visited-place, album, and couple-timezone mutations return validation errors through `countdown.invalidSubmission`, `futureNote.invalidSubmission`, `trip.invalidSubmission`, `visitedPlace.invalidSubmission`, `album.invalidSubmission`, and `settings.timezone.invalidSubmission`.
 - `/auth/callback` does not return a JSON error payload; it redirects to `/login` on callback failure.
 
 ## Route Handler
@@ -48,10 +50,14 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 ## Database RPCs Used By App Layer
 - `bootstrap_first_couple(started_date, couple_name)`
   - Auth gate bootstrap path only
-  - Returns `couple_id`, `role`, `started_at`, `name`
+  - Returns `couple_id`, `role`, `started_at`, `name`, `timezone`
 - `accept_couple_invite(invite_token)`
   - Invite acceptance path only
   - Returns `couple_id`, assigned `role`
+- `update_couple_timezone(target_couple_id, target_timezone)`
+  - Shared timezone mutation path only
+  - Validates active membership plus IANA timezone validity
+  - Preserves existing countdown and future-note calendar dates while rewriting stored UTC instants
 - `memories_on_this_day(target_couple_id, target_timezone)`
   - On-this-day read model
   - Returns memory rows filtered by calendar day
@@ -66,16 +72,20 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 
 ## Phase 2 Read Model
 - `getCountdownsPageData(context)`
-  - Reads couple-scoped countdown rows and splits them into `upcoming` and `past`
+  - Reads couple-scoped countdown rows and splits them into `upcoming` and `past` using the saved couple timezone
 - `getFutureNotesPageData(context)`
   - Reads future-note metadata, then reads unlocked bodies from `future_note_contents`
 - `getTripsPageData(context)`
-  - Reads couple-scoped trip rows and groups them into `active`, `planned`, and `completed`
+  - Reads couple-scoped trip rows and groups them into `active`, `planned`, and `completed` using the saved couple timezone
 - `getTripDetailData(context, tripId)`
   - Reads one couple-scoped trip row
+  - Reads trip-scoped `visited_places` ordered by `visited_on`, then `created_at`
   - Returns the linked album summary or `null`
   - Returns remaining eligible media candidates for create/add album flows
   - Returns `null` for missing or invalid IDs
+- `getMapPageData(context)`
+  - Reads couple-scoped `visited_places` ordered newest-first
+  - Groups them by trip for the atlas read model
 - `getAlbumsPageData(context)`
   - Reads couple-scoped albums with linked trip summaries and album cover/count metadata
 - `getAlbumDetailData(context, albumId)`
@@ -86,8 +96,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 
 ## Non-Contracts
 - Shell-only and mock-only routes do not imply backend/API support.
-- `/chat`, `/map`, `/games`, `/games/[mode]`, `/stats`, and `/settings` add no new runtime API surface today.
-- Reminder jobs, encryption-at-rest, realtime chat, captions, album reordering, and visited-place map pins are not part of the current runtime contract.
+- `/chat`, `/games`, `/games/[mode]`, and `/stats` add no new runtime API surface today.
+- Reminder jobs, encryption-at-rest, realtime chat, coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract.
 
 ## Compatibility Rule
 - There is no external versioned API today.

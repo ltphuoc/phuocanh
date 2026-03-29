@@ -3,7 +3,7 @@
 ## 2026-03-27
 - Confirmed phased delivery workflow: implement Phase 1, stop, report, then ask whether to continue.
 - Confirmed private scope: exactly two users in one couple space.
-- Confirmed map provider default for roadmap: Mapbox (Phase 2).
+- Confirmed map provider default for roadmap: Mapbox (Phase 2). `SUPERSEDED BY 2026-03-29 (Visited-place atlas foundation shipped provider-free; tile-provider work is deferred.)`
 - Confirmed AI direction: retrieval-first semantic memory search (Phase 4).
 - Confirmed timezone default: Asia/Ho_Chi_Minh.
 - Confirmed security hardening direction: invite acceptance and first-space bootstrap must use atomic DB RPCs, not direct table writes in app actions.
@@ -28,6 +28,9 @@
 - Finalized navigation information architecture: `Main + More` grouping with mobile `More` entry. `SUPERSEDED BY 2026-03-29 (Editorial Redesign Lock)` where dock/rail details are now canonical.
 - Confirmed shell-route strategy: planned Phase 2+ screens can ship as styled presentational shells before backend wiring.
 - Phase 2 execution now follows a SQL-first path for shipped slices; Drizzle and Mapbox package availability are no longer blockers for countdowns, future notes, trips, or albums.
+- Confirmed couple-time policy: one shared timezone per couple for this slice; no per-user override yet.
+- Confirmed timezone-change semantics: preserve visible countdown and future-note calendar dates rather than preserving the previous absolute instant.
+- Confirmed `/settings` graduates from shell-only to the shared-timezone control surface.
 
 ## 2026-03-29 (Editorial Redesign Lock)
 - Finalized visual refresh away from the earlier cute dashboard framing and toward an editorial-romance keepsake journal aesthetic.
@@ -37,3 +40,4 @@
 - Finalized desktop navigation shell: slim rail plus expandable grouped drawer instead of a full sidebar.
 - Confirmed `/chat` ships as a presentational shell route before live messaging/backend contracts are implemented.
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
+- Confirmed visited-place atlas v1: ship trip-linked `visited_places` and a provider-free atlas first; coordinates and Mapbox-backed tiles remain deferred.

@@ -212,7 +212,7 @@
       "noteLabel": "Note (optional)",
       "notePlaceholder": "Dinner reservation at our favorite place",
       "submit": "Save countdown",
-      "targetDateDescription": "This date is stored as a UTC calendar milestone.",
+      "targetDateDescription": "This date is saved against your couple timezone and keeps the selected calendar day.",
       "targetDateLabel": "Target date",
       "titleLabel": "Title",
       "titlePlaceholder": "Anniversary dinner",
@@ -230,7 +230,7 @@
       "submit": "Seal future note",
       "titleLabel": "Title",
       "titlePlaceholder": "For our next anniversary",
-      "unlockDateDescription": "Unlocks at the start of the selected UTC date.",
+      "unlockDateDescription": "Unlocks at the start of the selected date in your couple timezone.",
       "unlockDateLabel": "Unlock date",
       "validation": {
         "bodyMax": "Note body must be 2000 characters or fewer.",
@@ -238,6 +238,17 @@
         "titleMax": "Title must be 120 characters or fewer.",
         "titleRequired": "Enter a title.",
         "unlockDateRequired": "Choose an unlock date."
+      }
+    },
+    "settingsTimezone": {
+      "currentValue": "Current timezone: {timeZone}",
+      "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
+      "label": "Couple timezone",
+      "placeholder": "Asia/Ho_Chi_Minh",
+      "submit": "Save timezone",
+      "validation": {
+        "invalid": "Enter a valid IANA timezone.",
+        "required": "Enter a timezone."
       }
     },
     "trip": {
@@ -283,6 +294,23 @@
         "titleRequired": "Enter an album title."
       },
       "videoFallback": "Video"
+    },
+    "visitedPlace": {
+      "noteDescription": "Optional context for why this stop mattered.",
+      "noteLabel": "Place note (optional)",
+      "notePlaceholder": "Lanterns overhead, two iced coffees, and the kind of quiet we wanted to keep.",
+      "submit": "Save visited place",
+      "titleLabel": "Place title",
+      "titlePlaceholder": "An Bang beach sunrise",
+      "validation": {
+        "noteMax": "Place note must be 800 characters or fewer.",
+        "titleMax": "Place title must be 120 characters or fewer.",
+        "titleRequired": "Enter a place title.",
+        "visitedOnRange": "Choose a date inside this trip window.",
+        "visitedOnRequired": "Choose the date you visited this place."
+      },
+      "visitedOnDescription": "Visited places must stay inside the trip date range.",
+      "visitedOnLabel": "Visited on"
     }
   },
   "actions": {
@@ -336,6 +364,16 @@
       "created": "Album created.",
       "invalidSubmission": "Album submission is invalid.",
       "updated": "Album updated."
+    },
+    "visitedPlace": {
+      "created": "Visited place saved.",
+      "invalidSubmission": "Visited place submission is invalid."
+    },
+    "settings": {
+      "timezone": {
+        "invalidSubmission": "Timezone submission is invalid.",
+        "updated": "Couple timezone updated."
+      }
     }
   },
   "errors": {
@@ -463,20 +501,25 @@
   },
   "map": {
     "header": {
-      "description": "A soft atlas surface where places, routes, and memories blend into one travel chapter.",
+      "description": "A real atlas of the places you have already pinned inside your trip chapters.",
       "eyebrow": "Travel map",
       "quote": "Routes should feel remembered, not engineered.",
       "title": "Places map"
+    },
+    "empty": {
+      "cta": "Add places from trips",
+      "description": "Save your first visited place from a trip detail page and the atlas will start filling with real stops.",
+      "title": "No visited places yet"
     }
   },
   "trips": {
     "header": {
-      "description": "Create, revisit, and organize real trip chapters. Albums now attach to trips; visited-place mapping comes next.",
+      "description": "Create, revisit, and organize real trip chapters with linked albums and visited places.",
       "eyebrow": "Travel",
       "title": "Trips"
     },
     "composer": {
-      "description": "Start with the trip record, then group its memory media into one album. Map layers remain the next slice.",
+      "description": "Start with the trip record, then add visited places and group eligible memories into one album.",
       "eyebrow": "Trip planner",
       "title": "Start a real trip record"
     },
@@ -484,7 +527,7 @@
       "activeDescription": "Trips whose date range includes today.",
       "activeEyebrow": "Happening now",
       "activeTitle": "Active trips",
-      "completedDescription": "Finished trips stay here as travel history that now anchors albums and later map layers.",
+      "completedDescription": "Finished trips stay here as travel history that now anchors albums and saved places.",
       "completedEyebrow": "Saved journeys",
       "completedTitle": "Completed trips",
       "plannedDescription": "Trips that are booked, imagined, or almost ready.",
@@ -496,8 +539,8 @@
       "title": "No trips yet"
     },
     "deferred": {
-      "description": "Trips and albums are live now. Place pins, routes, and map summaries still belong to the next Phase 2 slice.",
-      "title": "Visited-place map is still deferred"
+      "description": "Trips, albums, and the atlas are live now. Coordinates, routes, and provider-backed geographic tiles remain deferred.",
+      "title": "Geographic layers still come later"
     }
   },
   "tripDetail": {
@@ -521,8 +564,19 @@
     "albumComposerDescription": "This trip already has eligible memories. Group them into one album now; uploads still stay in the memory flow.",
     "albumEmptyTitle": "No eligible media yet",
     "albumEmptyDescription": "Add memories whose happened-at date falls inside this trip window, then create the album from here.",
-    "placesDeferredTitle": "Visited places still come later",
-    "placesDeferredDescription": "This slice implements albums on top of trips. Map pins and place summaries stay in the next travel slice."
+    "placesComposerDescription": "Add the stops you actually visited during this trip. Each saved place appears here and in the shared atlas.",
+    "placesComposerEyebrow": "Add a stop",
+    "placesComposerTitle": "Save a real visited place",
+    "placesDescription": "This trip can now hold the places you visited, not just the date range and album.",
+    "placesEmptyDescription": "Save the first stop from this trip and it will appear here in order.",
+    "placesEmptyTitle": "No visited places yet",
+    "placesEyebrow": "Visited places",
+    "placesListDescription": "Stops stay ordered by the day you visited them inside this trip window.",
+    "placesListEyebrow": "Saved stops",
+    "placesListTitle": "Trip place log",
+    "placesNoteFallback": "No place note was added yet.",
+    "placesTitle": "Map this trip with real places",
+    "placesVisitedOn": "Visited {date}"
   },
   "albumDetail": {
     "backToTrip": "Back to trip",
@@ -545,12 +599,12 @@
       "description": "This album does not have any visible media items yet.",
       "title": "No album media yet"
     },
-    "deferredTitle": "Map layer is next",
-    "deferredDescription": "Visited places and map summaries still sit downstream of the trip and album contract."
+    "deferredTitle": "Geographic layer still comes later",
+    "deferredDescription": "Visited places are live now. Coordinates, routes, and provider-backed geographic layers still sit downstream of the current travel contract."
   },
   "countdowns": {
     "automationNote": {
-      "description": "These countdowns are saved and rendered from live data now. Recurring reminders, timezone-aware schedules, and background jobs remain a follow-up slice.",
+      "description": "These countdowns now follow the saved couple timezone. Recurring reminders and background jobs remain a follow-up slice.",
       "title": "Reminder automation is still deferred"
     },
     "composer": {
@@ -619,7 +673,7 @@
       "unlockedTitle": "Unlocked notes"
     },
     "securityNote": {
-      "description": "This slice protects note bodies with a separate table plus row-level policies. Encryption-at-rest and reminder delivery are still follow-up work.",
+      "description": "This slice protects note bodies with a separate table plus row-level policies, and unlock timing now follows the saved couple timezone. Encryption-at-rest and reminder delivery are still follow-up work.",
       "title": "Security boundary for this slice"
     },
     "status": {
@@ -697,16 +751,16 @@
   },
   "settings": {
     "header": {
-      "description": "Use this screen as the 'More' hub for secondary sections while core logic remains unchanged.",
+      "description": "Set the shared couple timezone here, then jump to the rest of the secondary sections from the same screen.",
       "eyebrow": "More",
       "title": "Settings and extras"
     },
     "openShell": "Open the {label} shell page.",
-    "description": "This settings page currently acts as the mobile and desktop More entry. Account/privacy controls will be added in a future phase.",
-    "comingSoon": {
-      "cta": "Back to home",
-      "description": "Preference controls and profile-level settings remain out of scope for this UI-only pass.",
-      "title": "Settings controls"
+    "description": "This screen now owns the couple timezone. Account, privacy, and per-user preferences still remain downstream.",
+    "timezone": {
+      "description": "Choose the single shared timezone that should define local-midnight boundaries across countdowns, future notes, albums, trips, and map views.",
+      "eyebrow": "Timezone",
+      "title": "Set the couple clock"
     }
   },
   "ui": {
@@ -770,31 +824,26 @@
     },
     "travelAtlas": {
       "header": {
-        "badge": "Route glow",
-        "description": "The map becomes part scrapbook, part itinerary, part memory drawer.",
+        "badge": "{count, plural, one {# saved place} other {# saved places}}",
+        "description": "Real stops now collect into one provider-free atlas, grouped by the trip chapter they belong to.",
         "eyebrow": "Travel atlas",
         "title": "Places that changed the story"
       },
-      "stops": {
-        "daLat": {
-          "count": "8 keepsakes",
-          "date": "Jul 12",
-          "note": "Rain, strawberries, and the walk back when the town felt all blush and fog.",
-          "title": "Da Lat"
-        },
-        "daNang": {
-          "count": "4 keepsakes",
-          "date": "Oct 20",
-          "note": "Ocean air, a slow evening, and one of your favorite photos together.",
-          "title": "Da Nang"
-        },
-        "hoiAn": {
-          "count": "5 keepsakes",
-          "date": "Sep 03",
-          "note": "Lantern light, too many snacks, and a promise to stay longer next time.",
-          "title": "Hoi An"
-        }
+      "noteFallback": "No place note was added for this stop yet.",
+      "side": {
+        "description": "Pick a trip chapter, then move through the real places you saved inside it.",
+        "eyebrow": "Trip chapters",
+        "title": "Browse the atlas by trip"
+      },
+      "tripCount": "{count, plural, one {# place} other {# places}}",
+      "tripStatus": {
+        "active": "Active trip",
+        "completed": "Completed trip",
+        "planned": "Planned trip"
       }
+      ,
+      "tripWindow": "{start} to {end}",
+      "visitedOn": "Visited {date}"
     },
     "anniversarySpotlight": {
       "empty": {
@@ -826,8 +875,8 @@
       "title": "No albums yet"
     },
     "deferred": {
-      "description": "This slice groups media around trips. Place pins and map layers still land in the next travel slice.",
-      "title": "Visited places come next"
+      "description": "Albums now sit alongside visited places in the travel model. Coordinates, routes, and provider-backed map tiles remain deferred.",
+      "title": "Geographic polish comes later"
     }
   }
 }

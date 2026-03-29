@@ -19,7 +19,13 @@ Status values:
 - Phase 2 Slice 3 is implemented for:
   - `/albums`
   - `/albums/[albumId]`
-- Remaining Phase 2 work is now concentrated in the visited-place/map slice only.
+- Phase 2 Slice 4 is implemented for:
+  - `/map`
+  - trip-linked visited-place create/read flow on `/trips/[tripId]`
+- Couple timezone foundation is implemented for:
+  - `/settings`
+  - shared day-boundary logic across countdowns, future notes, trips, albums, map, on-this-day, and relationship-day math
+- All planned user-facing Phase 2 routes are now implemented.
 
 ## Checklist
 | Item | Status | Notes |
@@ -28,7 +34,8 @@ Status values:
 | Future notes | `done` | Real schema, secure split body table, unlock-gated reads, Server Action rollback path, and live route UI are implemented. |
 | Trips | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, and live route UI are implemented. |
 | Albums | `done` | Real trip-rooted schema, RPC-backed mutations, signed media reads, `/albums` index, `/albums/[albumId]` detail, and trip-detail album flows are implemented. |
-| Map visited places | `partial` | `/map` and `TravelAtlasShell` exist, but there is no visited-place schema, no pin model, and no Mapbox wiring. |
+| Map visited places | `done` | `visited_places`, `getMapPageData(...)`, provider-free atlas UI, and trip-level visited-place create/read flow are implemented. |
+| Couple timezone foundation | `done` | `couples.timezone`, `update_couple_timezone(...)`, `updateCoupleTimezoneAction`, live `/settings`, and couple-time day-boundary/date rendering are implemented. |
 
 ## Foundational Cleanup Landed In Earlier Slices
 | Item | Status | Notes |
@@ -37,6 +44,7 @@ Status values:
 | Shell accessibility | `done` | Icon-only composer buttons expose labels, mobile `More` toggle exposes expanded state, and atlas stop selection state is exposed. |
 | Lists localization consistency | `done` | `/lists` renders translated wish-category labels like `/home`. |
 | New-form validation UX | `done` | New Phase 2 forms add inline field errors in addition to the shared toast contract. |
+| Couple-time semantics | `done` | Countdowns/future notes now store selected local dates through the shared timezone, and trip/album/on-this-day reads no longer depend on UTC day boundaries. |
 
 ## Slice 1 Delivered
 1. Added `countdowns`, `future_notes`, and `future_note_contents` schema with RLS.
@@ -65,38 +73,26 @@ Status values:
 8. Replaced the trip-detail album placeholder with real album create/add flows and empty states.
 9. Synced docs/specs to the delivered runtime and moved the next slice to map foundation.
 
-## Next Slice
-Objective:
-- Establish visited-place/map foundation on top of the existing trip + album contract and move `/map` from shell-only to implemented.
+## Slice 4 Delivered
+1. Added the `visited_places` schema with trip-linked date-window enforcement and couple-scoped RLS.
+2. Regenerated Supabase types and updated schema inventory docs/code.
+3. Added `getMapPageData(...)` and extended `getTripDetailData(...)` with ordered trip visited places.
+4. Added `createVisitedPlaceAction` with narrow `/map` and `/trips/[tripId]` revalidation.
+5. Replaced the `/map` shell with a live provider-free atlas grouped by trip.
+6. Replaced the trip-detail places placeholder with a real create form, ordered place log, and empty state.
+7. Synced docs/specs to the delivered runtime and closed the user-facing Phase 2 travel slice.
 
-Decision-Complete Deliverables:
-- Add trip-linked visited-place table(s) and regenerate the typed Supabase surface.
-- Add server read helpers for `/map` and any trip-linked map summary UI needed.
-- Define the first real map contract on top of trips rather than inventing a parallel place model.
-- Replace the shell-only route content on `/map` with real data-backed UI.
-- Keep chat and games/stats explicitly out of the remaining Phase 2 travel scope.
-
-Non-Goals For That Slice:
-- No chat backend or realtime work.
-- No gameplay or stats backend work.
-- No broad travel refactor beyond the map foundation needed for current routes.
-
-Success Criteria:
-- `/map` becomes implemented with a real read model.
-- The visited-place contract is explicitly linked to `trips` rather than inventing a separate hierarchy.
-- `docs/product` and `docs/engineering` remain aligned in the same change set.
-
-## Implementation Order After Slice 3
-1. Add visited-place/map schema and rendering on top of the trip + album model.
-2. Start the Phase 3 track with chat backend/realtime scope.
-3. Continue with games/stats backend work.
+## Implementation Order After Slice 4
+1. Start the Phase 3 track with chat backend/realtime scope.
+2. Continue with games/stats backend work.
+3. Revisit reminder jobs only if asynchronous delivery becomes a near-term product priority.
 
 ## Risks And Deferred Items
 - Reminder automation is still deferred; countdowns do not schedule jobs yet.
 - Future note bodies are policy-gated, but encryption-at-rest is not implemented.
-- Trip status is currently derived against the UTC calendar day until a couple-level timezone model exists.
+- There is still only one shared timezone per couple; no per-user timezone override exists.
 - Albums currently allow one album per trip only; captions, reordering, removal, and multi-album-per-trip remain deferred.
-- Map surfaces still need a coherent visited-place model on top of the now-live trip + album contract.
+- The atlas is provider-free; coordinates, route polylines, and provider-backed geographic tiles remain deferred.
 
 ## Phase 3 Carry-Forward
 - `/chat` remains mock-only and is no longer tracked as remaining Phase 2 scope.

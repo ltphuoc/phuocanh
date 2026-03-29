@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils/cn";
 
 interface CreateAlbumFormProps {
   readonly candidates: readonly AlbumMediaOption[];
+  readonly timeZone: string;
   readonly tripId: string;
 }
 
@@ -92,6 +93,7 @@ const renderMediaPreview = (
 
 export const CreateAlbumForm = ({
   candidates,
+  timeZone,
   tripId,
 }: CreateAlbumFormProps): ReactElement => {
   const { t: actionsT } = useI18n("actions");
@@ -207,6 +209,7 @@ export const CreateAlbumForm = ({
               : format.dateTime(happenedAt, {
                   day: "numeric",
                   month: "short",
+                  timeZone,
                   year: "numeric",
                 });
 

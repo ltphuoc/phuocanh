@@ -1,7 +1,11 @@
-import { differenceInDays, parseISO, startOfDay } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 import type { CoupleContext } from "@/lib/server/couple-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
+import {
+  getCurrentDateTokenInTimeZone,
+  parseDateInputValueInTimeZone,
+} from "@/lib/utils/couple-timezone";
 
 interface MemoryCard {
   readonly happenedAt: string;
@@ -52,8 +56,6 @@ interface MemoryDetailData {
   }[];
   readonly note: string | null;
 }
-
-const DEFAULT_COUPLE_TIMEZONE = "Asia/Ho_Chi_Minh";
 
 const toMemoryCard = (
   memory: Database["public"]["Tables"]["memories"]["Row"],
@@ -143,9 +145,10 @@ export const getHomePageData = async (
     title: checklist.title,
   }));
 
-  const relationshipDays = differenceInDays(
-    startOfDay(new Date()),
-    startOfDay(parseISO(context.coupleStartedAt)),
+  const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
+  const relationshipDays = differenceInCalendarDays(
+    parseDateInputValueInTimeZone(todayDateToken, context.timezone),
+    parseDateInputValueInTimeZone(context.coupleStartedAt, context.timezone),
   );
 
   return {
@@ -167,7 +170,7 @@ export const getOnThisDayData = async (
   const supabase = await createSupabaseServerClient();
   const { data: memories, error } = await supabase.rpc("memories_on_this_day", {
     target_couple_id: context.coupleId,
-    target_timezone: DEFAULT_COUPLE_TIMEZONE,
+    target_timezone: context.timezone,
   });
 
   if (error) {

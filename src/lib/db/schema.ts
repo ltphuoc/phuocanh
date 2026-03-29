@@ -5,7 +5,11 @@ export interface DrizzleBaselineEntity {
 }
 
 export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
-  { name: "public.couples", sourceMigration: "20260327214000_phase1_mvp.sql", status: "planned_mirror" },
+  {
+    name: "public.couples",
+    sourceMigration: "20260329223000_couple_timezone_foundation.sql",
+    status: "planned_mirror",
+  },
   {
     name: "public.couple_memberships",
     sourceMigration: "20260327214000_phase1_mvp.sql",
@@ -64,6 +68,11 @@ export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
     sourceMigration: "20260329170000_phase2_slice3_trip_albums_foundation.sql",
     status: "planned_mirror",
   },
+  {
+    name: "public.visited_places",
+    sourceMigration: "20260329193000_phase2_slice4_visited_places_atlas_foundation.sql",
+    status: "planned_mirror",
+  },
 ] as const;
 
 export const phaseOneTableBaseline = appTableBaseline;
@@ -102,6 +111,16 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.is_couple_member(uuid)",
     sourceMigration: "20260327214000_phase1_mvp.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.is_valid_timezone(text)",
+    sourceMigration: "20260329223000_couple_timezone_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.update_couple_timezone(uuid, text)",
+    sourceMigration: "20260329223000_couple_timezone_foundation.sql",
     status: "sql_authoritative",
   },
   {

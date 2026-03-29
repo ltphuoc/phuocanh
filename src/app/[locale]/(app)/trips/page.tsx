@@ -44,6 +44,7 @@ const renderTripSection = (
   section: TripSectionDefinition,
   format: Awaited<ReturnType<typeof getFormatter>>,
   tripCardT: Awaited<ReturnType<typeof getTranslations<"ui.tripCard">>>,
+  timeZone: string,
 ): ReactElement | null => {
   if (!section.trips.length) {
     return null;
@@ -67,7 +68,7 @@ const renderTripSection = (
           {section.trips.map((trip) => (
             <TripCardTemplate
               badgeLabel={tripCardT(tripStatusTranslationKeyByValue[trip.status])}
-              dateRangeLabel={formatTripDateRange(trip, format, tripCardT)}
+              dateRangeLabel={formatTripDateRange(trip, format, tripCardT, timeZone)}
               eyebrowLabel={tripCardT("eyebrow")}
               href={`/trips/${trip.id}`}
               key={trip.id}
@@ -151,7 +152,7 @@ export default async function TripsPage({
       </PageReveal>
 
       {totalTrips > 0 ? (
-        sections.map((section) => renderTripSection(section, format, tripCardT))
+        sections.map((section) => renderTripSection(section, format, tripCardT, context.timezone))
       ) : (
         <PageReveal delay={0.08}>
           <EmptyState

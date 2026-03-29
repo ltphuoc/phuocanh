@@ -11,18 +11,22 @@ import { requireReadyCoupleContext } from "@/lib/server/couple-context";
 import {
   createSupabaseServerClient,
 } from "@/lib/supabase/server";
+import {
+  isSupportedCoupleTimeZone,
+  toTimeZoneDateStartIso,
+} from "@/lib/utils/couple-timezone";
 
 const createCountdownSchema = z.object({
   kind: z.enum(["anniversary", "birthday", "travel", "plan", "custom"]),
   note: z.string().trim().max(280).optional(),
-  targetAt: z.iso.datetime(),
+  targetDate: z.iso.date(),
   title: z.string().trim().min(1).max(120),
 });
 
 const createFutureNoteSchema = z.object({
   body: z.string().trim().min(1).max(2000),
   title: z.string().trim().min(1).max(120),
-  unlockAt: z.iso.datetime(),
+  unlockDate: z.iso.date(),
 });
 
 const createTripSchema = z
@@ -50,6 +54,17 @@ const addAlbumItemsSchema = z.object({
   tripId: z.uuid(),
 });
 
+const createVisitedPlaceSchema = z.object({
+  note: z.string().trim().max(800).optional(),
+  title: z.string().trim().min(1).max(120),
+  tripId: z.uuid(),
+  visitedOn: z.iso.date(),
+});
+
+const updateCoupleTimezoneSchema = z.object({
+  timeZone: z.string().trim().min(1).refine(isSupportedCoupleTimeZone),
+});
+
 const ALBUM_MUTATION_ERROR_MESSAGES = new Set([
   "ALBUM_ITEMS_REQUIRED",
   "ALBUM_NOT_FOUND",
@@ -58,6 +73,9 @@ const ALBUM_MUTATION_ERROR_MESSAGES = new Set([
   "TRIP_ALBUM_ALREADY_EXISTS",
   "TRIP_NOT_FOUND",
 ]);
+
+const INVALID_VISITED_PLACE_ERROR_CODES = new Set(["23503", "23514", "42501"]);
+const INVALID_TIMEZONE_RPC_MESSAGES = new Set(["INVALID_TIMEZONE"]);
 
 export const createCountdownAction = async (
   _previousState: ActionState,
@@ -68,7 +86,7 @@ export const createCountdownAction = async (
     const parsed = createCountdownSchema.parse({
       kind: formData.get("kind"),
       note: formData.get("note"),
-      targetAt: formData.get("targetAt"),
+      targetDate: formData.get("targetDate"),
       title: formData.get("title"),
     });
 
@@ -78,7 +96,7 @@ export const createCountdownAction = async (
       created_by_user_id: context.userId,
       kind: parsed.kind,
       note: parsed.note || null,
-      target_at: parsed.targetAt,
+      target_at: toTimeZoneDateStartIso(parsed.targetDate, context.timezone),
       title: parsed.title,
     });
 
@@ -108,7 +126,7 @@ export const createFutureNoteAction = async (
     const parsed = createFutureNoteSchema.parse({
       body: formData.get("body"),
       title: formData.get("title"),
-      unlockAt: formData.get("unlockAt"),
+      unlockDate: formData.get("unlockDate"),
     });
 
     const supabase = await createSupabaseServerClient();
@@ -118,7 +136,7 @@ export const createFutureNoteAction = async (
         couple_id: context.coupleId,
         created_by_user_id: context.userId,
         title: parsed.title,
-        unlock_at: parsed.unlockAt,
+        unlock_at: toTimeZoneDateStartIso(parsed.unlockDate, context.timezone),
       })
       .select("id")
       .limit(1);
@@ -283,6 +301,117 @@ export const addAlbumItemsAction = async (
     }
 
     console.error("Failed to add album items", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const createVisitedPlaceAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const context = await requireReadyCoupleContext();
+    const parsed = createVisitedPlaceSchema.parse({
+      note: formData.get("note"),
+      title: formData.get("title"),
+      tripId: formData.get("tripId"),
+      visitedOn: formData.get("visitedOn"),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { data: trips, error: tripError } = await supabase
+      .from("trips")
+      .select("id, start_date, end_date")
+      .eq("couple_id", context.coupleId)
+      .eq("id", parsed.tripId)
+      .limit(1);
+
+    if (tripError) {
+      console.error("Failed to validate visited place trip", tripError);
+      return createErrorState("unexpectedError");
+    }
+
+    const trip = trips[0];
+    if (!trip) {
+      return createErrorState("visitedPlace.invalidSubmission");
+    }
+
+    if (parsed.visitedOn < trip.start_date || parsed.visitedOn > trip.end_date) {
+      return createErrorState("visitedPlace.invalidSubmission");
+    }
+
+    const { error } = await supabase.from("visited_places").insert({
+      couple_id: context.coupleId,
+      created_by_user_id: context.userId,
+      note: parsed.note || null,
+      title: parsed.title,
+      trip_id: parsed.tripId,
+      visited_on: parsed.visitedOn,
+    });
+
+    if (error) {
+      if (error.code && INVALID_VISITED_PLACE_ERROR_CODES.has(error.code)) {
+        return createErrorState("visitedPlace.invalidSubmission");
+      }
+
+      console.error("Failed to create visited place", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateLocalizedPath("/map");
+    revalidateLocalizedPath(`/trips/${parsed.tripId}`);
+    return createSuccessState("visitedPlace.created");
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState("visitedPlace.invalidSubmission");
+    }
+
+    console.error("Failed to create visited place", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const updateCoupleTimezoneAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const context = await requireReadyCoupleContext();
+    const parsed = updateCoupleTimezoneSchema.parse({
+      timeZone: formData.get("timeZone"),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("update_couple_timezone", {
+      target_couple_id: context.coupleId,
+      target_timezone: parsed.timeZone,
+    });
+
+    if (error) {
+      if (INVALID_TIMEZONE_RPC_MESSAGES.has(error.message)) {
+        return createErrorState("settings.timezone.invalidSubmission");
+      }
+
+      console.error("Failed to update couple timezone", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateLocalizedPath("/settings");
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/on-this-day");
+    revalidateLocalizedPath("/countdowns");
+    revalidateLocalizedPath("/future-notes");
+    revalidateLocalizedPath("/trips");
+    revalidateLocalizedPath("/albums");
+    revalidateLocalizedPath("/map");
+
+    return createSuccessState("settings.timezone.updated");
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState("settings.timezone.invalidSubmission");
+    }
+
+    console.error("Failed to update couple timezone", error);
     return createErrorState("unexpectedError");
   }
 };

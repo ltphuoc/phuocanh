@@ -1,4 +1,5 @@
 import { BellRing, CalendarHeart, Hourglass } from "lucide-react";
+import { parseISO } from "date-fns";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactElement } from "react";
@@ -61,14 +62,15 @@ const formatCountdownDate = (
   countdown: CountdownCard,
   format: Awaited<ReturnType<typeof getFormatter>>,
   t: Awaited<ReturnType<typeof getTranslations<"ui.countdown">>>,
+  timeZone: string,
 ): string => {
-  const date = new Date(countdown.targetAt);
+  const date = parseISO(countdown.targetAt);
   const dateLabel = Number.isNaN(date.getTime())
     ? countdown.targetAt.slice(0, 10)
     : format.dateTime(date, {
         day: "numeric",
         month: "short",
-        timeZone: "UTC",
+        timeZone,
         year: "numeric",
       });
 
@@ -140,7 +142,12 @@ export default async function CountdownsPage({
                   key={countdown.id}
                   note={countdown.note}
                   remainingLabel={getCountdownMetaLabel(countdown, countdownUiT)}
-                  targetDateLabel={formatCountdownDate(countdown, format, countdownUiT)}
+                  targetDateLabel={formatCountdownDate(
+                    countdown,
+                    format,
+                    countdownUiT,
+                    context.timezone,
+                  )}
                 />
               ))}
             </ResponsiveGrid>
@@ -176,7 +183,12 @@ export default async function CountdownsPage({
                   key={countdown.id}
                   note={countdown.note}
                   remainingLabel={getCountdownMetaLabel(countdown, countdownUiT)}
-                  targetDateLabel={formatCountdownDate(countdown, format, countdownUiT)}
+                  targetDateLabel={formatCountdownDate(
+                    countdown,
+                    format,
+                    countdownUiT,
+                    context.timezone,
+                  )}
                 />
               ))}
             </ResponsiveGrid>

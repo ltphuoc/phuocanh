@@ -24,6 +24,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `trips`
 - `albums`
 - `album_items`
+- `visited_places`
 
 ## Core Relationships
 - One `couples` row -> many `couple_memberships`
@@ -32,11 +33,13 @@ This file summarizes the current schema. The authoritative source is always `sup
 - One `checklists` row -> many `checklist_items`
 - One `future_notes` row -> one `future_note_contents`
 - One `trips` row -> at most one `albums` row in the current contract
+- One `trips` row -> many `visited_places`
 - One `albums` row -> many `album_items`
 - One `album_items` row -> one existing `memory_media` row
 
 ## Critical Constraints
 - Global singleton couple space via unique expression index on `couples ((true))`
+- `couples.timezone` must be a valid IANA timezone name
 - Max two active memberships per couple via trigger
 - Unique active role per couple via partial unique index on `(couple_id, role)` where `status = 'active'`
 - Unique invite token
@@ -47,6 +50,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `albums` must not commit without at least one linked `album_items` row
 - `album_items` is unique on `(album_id, memory_media_id)`
 - `album_items.position > 0`
+- `visited_places.visited_on` must fall inside the parent trip date range at insert time
 
 ## Security Posture
 - RLS is enabled across app tables.
@@ -58,13 +62,26 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `albums` and `album_items` are couple-scoped through RLS.
 - Direct `album_items` inserts are additionally bounded by the parent trip window through policy checks.
 - `albums_require_items_trigger` blocks empty albums from committing, even if a caller bypasses the RPC path.
+- `visited_places` is couple-scoped through RLS and additionally bounded by the parent trip window through policy checks.
 
 ## RPCs In Use
 - `bootstrap_first_couple(started_date date, couple_name text)`
 - `accept_couple_invite(invite_token text)`
+- `update_couple_timezone(target_couple_id uuid, target_timezone text)`
 - `memories_on_this_day(target_couple_id uuid, target_timezone text)`
 - `create_album_with_items(target_trip_id uuid, album_title text, album_description text, selected_memory_media_ids uuid[])`
 - `add_album_items(target_album_id uuid, selected_memory_media_ids uuid[])`
+
+## Couple Timezone Foundation
+- `couples`
+  - now includes a shared `timezone` field
+  - defaults to `Asia/Ho_Chi_Minh`
+  - is validated against `pg_timezone_names` through SQL
+- `bootstrap_first_couple(...)`
+  - now returns the stored `timezone` along with couple identity fields
+- `update_couple_timezone(...)`
+  - updates the shared couple timezone transactionally
+  - preserves visible calendar dates for existing `countdowns.target_at` and `future_notes.unlock_at`
 
 ## Current Drizzle Posture
 - `drizzle.config.ts` and `src/lib/db/schema.ts` exist as baseline artifacts only.
@@ -74,9 +91,11 @@ This file summarizes the current schema. The authoritative source is always `sup
 ## Phase 2 Slice 1 Tables
 - `countdowns`
   - couple-scoped milestone rows with `kind`, `title`, optional `note`, and `target_at`
+  - stored as UTC instants derived from the selected date in the saved couple timezone
   - writable/readable by active couple members through RLS
 - `future_notes`
   - couple-scoped metadata rows with `title` and `unlock_at`
+  - stored as UTC instants derived from the selected date in the saved couple timezone
   - metadata is visible immediately to active couple members
 - `future_note_contents`
   - separate protected body table keyed by `future_note_id`
@@ -97,5 +116,11 @@ This file summarizes the current schema. The authoritative source is always `sup
   - preserves explicit display order via `position`
   - writable/readable by active couple members through RLS and RPC validation
 
+## Phase 2 Slice 4 Tables
+- `visited_places`
+  - couple-scoped trip-linked place rows with `title`, optional `note`, and `visited_on`
+  - writable/readable by active couple members through RLS
+  - acts as the provider-free atlas data source for `/map`
+
 ## Remaining Shell-Only / Mock-Only Route Impact
-- `/chat`, `/map`, `/games`, `/games/[mode]`, `/stats`, and `/settings` still do not add schema by themselves.
+- `/chat`, `/games`, `/games/[mode]`, and `/stats` still do not add schema by themselves.

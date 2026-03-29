@@ -358,6 +358,7 @@ export type Database = {
           id: string
           name: string | null
           started_at: string
+          timezone: string
           updated_at: string
         }
         Insert: {
@@ -365,6 +366,7 @@ export type Database = {
           id?: string
           name?: string | null
           started_at: string
+          timezone?: string
           updated_at?: string
         }
         Update: {
@@ -372,6 +374,7 @@ export type Database = {
           id?: string
           name?: string | null
           started_at?: string
+          timezone?: string
           updated_at?: string
         }
         Relationships: []
@@ -576,6 +579,57 @@ export type Database = {
           },
         ]
       }
+      visited_places: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by_user_id: string
+          id: string
+          note: string | null
+          title: string
+          trip_id: string
+          updated_at: string
+          visited_on: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          note?: string | null
+          title: string
+          trip_id: string
+          updated_at?: string
+          visited_on: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          note?: string | null
+          title?: string
+          trip_id?: string
+          updated_at?: string
+          visited_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visited_places_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visited_places_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wish_items: {
         Row: {
           category: Database["public"]["Enums"]["wish_category"]
@@ -646,6 +700,7 @@ export type Database = {
           name: string
           role: Database["public"]["Enums"]["membership_role"]
           started_at: string
+          timezone: string
         }[]
       }
       create_album_with_items: {
@@ -658,6 +713,7 @@ export type Database = {
         Returns: string
       }
       is_couple_member: { Args: { target_couple_id: string }; Returns: boolean }
+      is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean }
       memories_on_this_day: {
         Args: { target_couple_id: string; target_timezone?: string }
         Returns: {
@@ -676,6 +732,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      update_couple_timezone: {
+        Args: { target_couple_id: string; target_timezone: string }
+        Returns: {
+          couple_id: string
+          timezone: string
+        }[]
       }
     }
     Enums: {
@@ -824,3 +887,4 @@ export const Constants = {
     },
   },
 } as const
+

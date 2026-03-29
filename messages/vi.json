@@ -212,7 +212,7 @@
       "noteLabel": "Ghi chú (tuỳ chọn)",
       "notePlaceholder": "Đặt bàn ở quán quen của hai đứa",
       "submit": "Lưu đếm ngược",
-      "targetDateDescription": "Ngày này được lưu như một cột mốc lịch UTC.",
+      "targetDateDescription": "Ngày này được lưu theo múi giờ chung của hai bạn và giữ nguyên ngày lịch đã chọn.",
       "targetDateLabel": "Ngày mục tiêu",
       "titleLabel": "Tiêu đề",
       "titlePlaceholder": "Bữa tối kỷ niệm",
@@ -230,7 +230,7 @@
       "submit": "Niêm phong ghi chú",
       "titleLabel": "Tiêu đề",
       "titlePlaceholder": "Cho ngày kỷ niệm tiếp theo của tụi mình",
-      "unlockDateDescription": "Mở khoá vào đầu ngày UTC đã chọn.",
+      "unlockDateDescription": "Mở khoá vào đầu ngày đã chọn theo múi giờ chung của hai bạn.",
       "unlockDateLabel": "Ngày mở khoá",
       "validation": {
         "bodyMax": "Nội dung tối đa 2000 ký tự.",
@@ -238,6 +238,17 @@
         "titleMax": "Tiêu đề tối đa 120 ký tự.",
         "titleRequired": "Hãy nhập tiêu đề.",
         "unlockDateRequired": "Hãy chọn ngày mở khoá."
+      }
+    },
+    "settingsTimezone": {
+      "currentValue": "Múi giờ hiện tại: {timeZone}",
+      "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
+      "label": "Múi giờ của cặp đôi",
+      "placeholder": "Asia/Ho_Chi_Minh",
+      "submit": "Lưu múi giờ",
+      "validation": {
+        "invalid": "Hãy nhập một múi giờ IANA hợp lệ.",
+        "required": "Hãy nhập múi giờ."
       }
     },
     "trip": {
@@ -283,6 +294,23 @@
         "titleRequired": "Hãy nhập tên album."
       },
       "videoFallback": "Video"
+    },
+    "visitedPlace": {
+      "noteDescription": "Ngữ cảnh tuỳ chọn cho lý do nơi này đáng nhớ.",
+      "noteLabel": "Ghi chú địa điểm (tuỳ chọn)",
+      "notePlaceholder": "Đèn lồng phía trên đầu, hai ly cà phê đá và một khoảng lặng tụi mình muốn giữ lại.",
+      "submit": "Lưu địa điểm đã ghé",
+      "titleLabel": "Tên địa điểm",
+      "titlePlaceholder": "Bình minh ở biển An Bàng",
+      "validation": {
+        "noteMax": "Ghi chú địa điểm tối đa 800 ký tự.",
+        "titleMax": "Tên địa điểm tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tên địa điểm.",
+        "visitedOnRange": "Hãy chọn ngày nằm trong khung chuyến đi này.",
+        "visitedOnRequired": "Hãy chọn ngày đã ghé địa điểm này."
+      },
+      "visitedOnDescription": "Địa điểm đã ghé phải nằm trong khoảng ngày của chuyến đi.",
+      "visitedOnLabel": "Đã ghé vào"
     }
   },
   "actions": {
@@ -336,6 +364,16 @@
       "created": "Đã tạo album.",
       "invalidSubmission": "Thông tin album không hợp lệ.",
       "updated": "Đã cập nhật album."
+    },
+    "visitedPlace": {
+      "created": "Đã lưu địa điểm đã ghé.",
+      "invalidSubmission": "Thông tin địa điểm đã ghé không hợp lệ."
+    },
+    "settings": {
+      "timezone": {
+        "invalidSubmission": "Thông tin múi giờ không hợp lệ.",
+        "updated": "Đã cập nhật múi giờ của cặp đôi."
+      }
     }
   },
   "errors": {
@@ -463,20 +501,25 @@
   },
   "map": {
     "header": {
-      "description": "Một bề mặt atlas nhẹ nhàng nơi địa điểm, lộ trình và kỷ niệm hòa vào một chương du lịch.",
+      "description": "Một atlas thật cho các địa điểm hai bạn đã ghim bên trong những chương chuyến đi.",
       "eyebrow": "Bản đồ du lịch",
       "quote": "Lộ trình nên gợi cảm giác được nhớ lại, không phải được kỹ thuật hóa.",
       "title": "Bản đồ địa điểm"
+    },
+    "empty": {
+      "cta": "Thêm địa điểm từ chuyến đi",
+      "description": "Lưu địa điểm đã ghé đầu tiên từ trang chi tiết chuyến đi và atlas sẽ bắt đầu đầy lên bằng các điểm dừng thật.",
+      "title": "Chưa có địa điểm đã ghé"
     }
   },
   "trips": {
     "header": {
-      "description": "Tạo, xem lại và sắp xếp các chương du lịch thật. Album giờ đã gắn vào chuyến đi; lớp bản đồ địa điểm sẽ đến tiếp theo.",
+      "description": "Tạo, xem lại và sắp xếp các chương du lịch thật với album và địa điểm đã ghé được liên kết.",
       "eyebrow": "Du lịch",
       "title": "Chuyến đi"
     },
     "composer": {
-      "description": "Bắt đầu bằng bản ghi chuyến đi, rồi nhóm media kỷ niệm của chuyến đó thành một album. Lớp bản đồ vẫn là slice tiếp theo.",
+      "description": "Bắt đầu bằng bản ghi chuyến đi, rồi thêm địa điểm đã ghé và nhóm các kỷ niệm hợp lệ thành một album.",
       "eyebrow": "Lên kế hoạch",
       "title": "Bắt đầu một bản ghi chuyến đi thật"
     },
@@ -484,7 +527,7 @@
       "activeDescription": "Những chuyến đi có khoảng ngày bao gồm hôm nay.",
       "activeEyebrow": "Đang diễn ra",
       "activeTitle": "Chuyến đi đang diễn ra",
-      "completedDescription": "Các chuyến đi đã xong được giữ lại ở đây như lịch sử để neo album và lớp bản đồ về sau.",
+      "completedDescription": "Các chuyến đi đã xong được giữ lại ở đây như lịch sử để neo album và các địa điểm đã ghé.",
       "completedEyebrow": "Hành trình đã lưu",
       "completedTitle": "Chuyến đi đã hoàn thành",
       "plannedDescription": "Những chuyến đi đã chốt, đang mường tượng hoặc gần sẵn sàng.",
@@ -496,8 +539,8 @@
       "title": "Chưa có chuyến đi nào"
     },
     "deferred": {
-      "description": "Chuyến đi và album đều đã chạy dữ liệu thật. Pin địa điểm, tuyến đường và tóm tắt bản đồ vẫn thuộc slice Phase 2 tiếp theo.",
-      "title": "Bản đồ địa điểm vẫn đang được hoãn lại"
+      "description": "Chuyến đi, album và atlas đều đã chạy dữ liệu thật. Tọa độ, tuyến đường và lớp bản đồ theo provider vẫn còn được hoãn lại.",
+      "title": "Lớp địa lý vẫn đến sau"
     }
   },
   "tripDetail": {
@@ -521,8 +564,19 @@
     "albumComposerDescription": "Chuyến đi này đã có kỷ niệm hợp lệ. Hãy nhóm chúng thành một album ngay tại đây; luồng tải lên vẫn nằm ở phần lưu kỷ niệm.",
     "albumEmptyTitle": "Chưa có media hợp lệ",
     "albumEmptyDescription": "Hãy thêm các kỷ niệm có ngày xảy ra nằm trong khung ngày của chuyến đi này, rồi tạo album từ đây.",
-    "placesDeferredTitle": "Các nơi đã ghé vẫn đến sau",
-    "placesDeferredDescription": "Slice này triển khai album trên nền chuyến đi. Pin bản đồ và tóm tắt địa điểm sẽ nằm ở slice du lịch tiếp theo."
+    "placesComposerDescription": "Thêm những nơi hai bạn thật sự đã ghé trong chuyến đi này. Mỗi địa điểm đã lưu sẽ xuất hiện ở đây và trong atlas chung.",
+    "placesComposerEyebrow": "Thêm điểm dừng",
+    "placesComposerTitle": "Lưu một địa điểm đã ghé thật",
+    "placesDescription": "Chuyến đi này giờ có thể giữ các nơi đã ghé, không chỉ khoảng ngày và album.",
+    "placesEmptyDescription": "Lưu điểm dừng đầu tiên của chuyến đi này và nó sẽ xuất hiện ở đây theo đúng thứ tự.",
+    "placesEmptyTitle": "Chưa có địa điểm đã ghé",
+    "placesEyebrow": "Địa điểm đã ghé",
+    "placesListDescription": "Các điểm dừng được giữ theo đúng ngày đã ghé trong khung chuyến đi này.",
+    "placesListEyebrow": "Điểm dừng đã lưu",
+    "placesListTitle": "Nhật ký địa điểm của chuyến đi",
+    "placesNoteFallback": "Chưa có ghi chú nào cho địa điểm này.",
+    "placesTitle": "Vẽ chuyến đi này bằng địa điểm thật",
+    "placesVisitedOn": "Đã ghé vào {date}"
   },
   "albumDetail": {
     "backToTrip": "Về chuyến đi",
@@ -545,12 +599,12 @@
       "description": "Album này chưa có mục media hiển thị nào.",
       "title": "Album chưa có media"
     },
-    "deferredTitle": "Lớp bản đồ là bước tiếp theo",
-    "deferredDescription": "Các nơi đã ghé và phần tóm tắt bản đồ vẫn nằm sau hợp đồng chuyến đi và album."
+    "deferredTitle": "Lớp địa lý vẫn đến sau",
+    "deferredDescription": "Các nơi đã ghé đã chạy dữ liệu thật. Tọa độ, tuyến đường và lớp bản đồ theo provider vẫn nằm sau hợp đồng du lịch hiện tại."
   },
   "countdowns": {
     "automationNote": {
-      "description": "Các đếm ngược này đã được lưu và render từ dữ liệu thật. Nhắc lịch lặp lại, lịch theo múi giờ và background job vẫn là phần theo sau.",
+      "description": "Các đếm ngược này giờ tuân theo múi giờ chung đã lưu. Nhắc lịch lặp lại và background job vẫn là phần theo sau.",
       "title": "Tự động nhắc lịch vẫn đang được hoãn lại"
     },
     "composer": {
@@ -619,7 +673,7 @@
       "unlockedTitle": "Ghi chú đã mở"
     },
     "securityNote": {
-      "description": "Slice này bảo vệ phần nội dung ghi chú bằng bảng riêng và row-level policy. Mã hoá at-rest và gửi nhắc lịch vẫn là phần theo sau.",
+      "description": "Slice này bảo vệ phần nội dung ghi chú bằng bảng riêng và row-level policy, còn thời điểm mở khoá giờ tuân theo múi giờ chung đã lưu. Mã hoá at-rest và gửi nhắc lịch vẫn là phần theo sau.",
       "title": "Ranh giới bảo mật của slice này"
     },
     "status": {
@@ -697,16 +751,16 @@
   },
   "settings": {
     "header": {
-      "description": "Dùng màn hình này làm trung tâm More cho các mục phụ trong khi logic lõi vẫn giữ nguyên.",
+      "description": "Thiết lập múi giờ chung ở đây rồi đi tiếp tới các mục phụ khác từ cùng màn hình này.",
       "eyebrow": "Thêm",
       "title": "Cài đặt và mở rộng"
     },
     "openShell": "Mở giao diện mẫu {label}.",
-    "description": "Trang cài đặt này hiện đóng vai trò điểm vào More cho cả mobile và desktop. Các điều khiển tài khoản/quyền riêng tư sẽ được thêm ở phase sau.",
-    "comingSoon": {
-      "cta": "Về trang chủ",
-      "description": "Điều khiển tuỳ chọn và cài đặt cấp hồ sơ nằm ngoài phạm vi của bản UI-only này.",
-      "title": "Điều khiển cài đặt"
+    "description": "Màn hình này giờ quản lý múi giờ chung của hai bạn. Tài khoản, quyền riêng tư và tuỳ chọn theo từng người vẫn nằm ở các phase sau.",
+    "timezone": {
+      "description": "Chọn một múi giờ chung duy nhất để xác định mốc nửa đêm cục bộ cho đếm ngược, ghi chú tương lai, album, chuyến đi và bản đồ.",
+      "eyebrow": "Múi giờ",
+      "title": "Đặt đồng hồ chung"
     }
   },
   "ui": {
@@ -770,31 +824,26 @@
     },
     "travelAtlas": {
       "header": {
-        "badge": "Ánh sáng lộ trình",
-        "description": "Bản đồ trở thành một phần scrapbook, một phần lịch trình, một phần ngăn kéo ký ức.",
+        "badge": "{count, plural, one {# địa điểm đã lưu} other {# địa điểm đã lưu}}",
+        "description": "Các điểm dừng thật giờ được gom vào một atlas không phụ thuộc provider, theo từng chương chuyến đi của hai bạn.",
         "eyebrow": "Bản đồ hành trình",
         "title": "Những nơi đã thay đổi câu chuyện"
       },
-      "stops": {
-        "daLat": {
-          "count": "8 kỷ vật",
-          "date": "12 Jul",
-          "note": "Mưa, dâu tây, và quãng đường đi bộ về khi cả thị trấn ửng hồng trong sương.",
-          "title": "Đà Lạt"
-        },
-        "daNang": {
-          "count": "4 kỷ vật",
-          "date": "20 Oct",
-          "note": "Gió biển, một buổi tối chậm rãi, và một trong những tấm ảnh đôi bạn thích nhất.",
-          "title": "Đà Nẵng"
-        },
-        "hoiAn": {
-          "count": "5 kỷ vật",
-          "date": "03 Sep",
-          "note": "Đèn lồng, ăn vặt quá trời, và lời hứa lần sau ở lại lâu hơn.",
-          "title": "Hội An"
-        }
+      "noteFallback": "Chưa có ghi chú nào cho điểm dừng này.",
+      "side": {
+        "description": "Chọn một chương chuyến đi, rồi đi qua các địa điểm thật hai bạn đã lưu bên trong nó.",
+        "eyebrow": "Chương chuyến đi",
+        "title": "Duyệt atlas theo chuyến đi"
+      },
+      "tripCount": "{count, plural, one {# địa điểm} other {# địa điểm}}",
+      "tripStatus": {
+        "active": "Chuyến đi đang diễn ra",
+        "completed": "Chuyến đi đã hoàn thành",
+        "planned": "Chuyến đi đã lên kế hoạch"
       }
+      ,
+      "tripWindow": "{start} đến {end}",
+      "visitedOn": "Đã ghé vào {date}"
     },
     "anniversarySpotlight": {
       "empty": {
@@ -826,8 +875,8 @@
       "title": "Chưa có album nào"
     },
     "deferred": {
-      "description": "Slice này nhóm media quanh các chuyến đi. Pin địa điểm và lớp bản đồ vẫn nằm ở slice du lịch tiếp theo.",
-      "title": "Các nơi đã ghé sẽ đến tiếp theo"
+      "description": "Album giờ đã đứng cùng các địa điểm đã ghé trong mô hình du lịch. Tọa độ, tuyến đường và lớp bản đồ theo provider vẫn còn được hoãn lại.",
+      "title": "Phần hoàn thiện địa lý sẽ đến sau"
     }
   }
 }

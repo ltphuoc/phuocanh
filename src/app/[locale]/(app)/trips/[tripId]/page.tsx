@@ -6,16 +6,19 @@ import { notFound } from "next/navigation";
 import type { ReactElement } from "react";
 import { AddAlbumItemsForm } from "@/components/forms/add-album-items-form";
 import { CreateAlbumForm } from "@/components/forms/create-album-form";
+import { CreateVisitedPlaceForm } from "@/components/forms/create-visited-place-form";
 import { ResponsiveGrid } from "@/components/layout/responsive-grid";
 import { ShellPage } from "@/components/layout/shell-page";
 import { AlbumCard } from "@/components/ui/album-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ListRow } from "@/components/ui/list-row";
 import { PageReveal } from "@/components/ui/page-reveal";
 import { SectionCard } from "@/components/ui/section-card";
 import { TripCardTemplate } from "@/components/ui/trip-card-template";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
 import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
 import { getTripDetailData } from "@/lib/server/phase-two-data";
+import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
 import {
   formatTripDateRange,
   formatTripDuration,
@@ -32,6 +35,18 @@ interface TripDetailPageProps {
 export const generateMetadata = async ({
   params,
 }: TripDetailPageProps): Promise<Metadata> => getRouteMetadata(params, "tripDetail");
+
+const formatVisitedPlaceDate = (
+  visitedOn: string,
+  format: Awaited<ReturnType<typeof getFormatter>>,
+  timeZone: string,
+): string =>
+  format.dateTime(parseDateInputValueInTimeZone(visitedOn, timeZone), {
+    day: "numeric",
+    month: "short",
+    timeZone,
+    year: "numeric",
+  });
 
 export default async function TripDetailPage({
   params,
@@ -65,7 +80,7 @@ export default async function TripDetailPage({
     notFound();
   }
 
-  const dateRangeLabel = formatTripDateRange(trip, format, tripCardT);
+  const dateRangeLabel = formatTripDateRange(trip, format, tripCardT, context.timezone);
   const durationLabel = formatTripDuration(trip, tripCardT);
   const statusLabel = tripCardT(tripStatusTranslationKeyByValue[trip.status]);
   const albumItemCountLabel = trip.album
@@ -165,6 +180,7 @@ export default async function TripDetailPage({
                   <AddAlbumItemsForm
                     albumId={trip.album.id}
                     candidates={trip.availableMedia}
+                    timeZone={context.timezone}
                     tripId={trip.id}
                   />
                 ) : (
@@ -193,7 +209,11 @@ export default async function TripDetailPage({
                 {tripDetailT("albumComposerDescription")}
               </p>
             </div>
-            <CreateAlbumForm candidates={trip.availableMedia} tripId={trip.id} />
+            <CreateAlbumForm
+              candidates={trip.availableMedia}
+              timeZone={context.timezone}
+              tripId={trip.id}
+            />
           </SectionCard>
         </PageReveal>
       ) : (
@@ -207,16 +227,78 @@ export default async function TripDetailPage({
       )}
 
       <PageReveal delay={0.14}>
-        <SectionCard className="flex flex-col gap-3" padding="comfortable" surface="paper">
-          <div className="flex items-center gap-3">
-            <MapPinned aria-hidden="true" className="size-5 text-primary" strokeWidth={2.1} />
-            <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
-              {tripDetailT("placesDeferredTitle")}
+        <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="paper">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-primary">
+              <MapPinned aria-hidden="true" className="size-4" strokeWidth={2.1} />
+              <p className="ui-meta">{tripDetailT("placesEyebrow")}</p>
+            </div>
+            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+              {tripDetailT("placesTitle")}
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {tripDetailT("placesDescription")}
             </p>
           </div>
-          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            {tripDetailT("placesDeferredDescription")}
-          </p>
+
+          <ResponsiveGrid columns={2}>
+            <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="glass">
+              <div className="space-y-2">
+                <p className="ui-meta">{tripDetailT("placesComposerEyebrow")}</p>
+                <h3 className="font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
+                  {tripDetailT("placesComposerTitle")}
+                </h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {tripDetailT("placesComposerDescription")}
+                </p>
+              </div>
+              <CreateVisitedPlaceForm
+                endDate={trip.endDate}
+                startDate={trip.startDate}
+                tripId={trip.id}
+              />
+            </SectionCard>
+
+            {trip.visitedPlaces.length ? (
+              <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="paper">
+                <div className="space-y-2">
+                  <p className="ui-meta">{tripDetailT("placesListEyebrow")}</p>
+                  <h3 className="font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
+                    {tripDetailT("placesListTitle")}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {tripDetailT("placesListDescription")}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {trip.visitedPlaces.map((visitedPlace) => (
+                        <ListRow
+                          key={visitedPlace.id}
+                          meta={
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                          {visitedPlace.note?.trim() || tripDetailT("placesNoteFallback")}
+                        </p>
+                      }
+                      subtitle={tripDetailT("placesVisitedOn", {
+                        date: formatVisitedPlaceDate(
+                          visitedPlace.visitedOn,
+                          format,
+                          context.timezone,
+                        ),
+                      })}
+                      title={visitedPlace.title}
+                    />
+                  ))}
+                </div>
+              </SectionCard>
+            ) : (
+              <EmptyState
+                description={tripDetailT("placesEmptyDescription")}
+                icon={<MapPinned aria-hidden="true" className="size-4" strokeWidth={2.1} />}
+                title={tripDetailT("placesEmptyTitle")}
+              />
+            )}
+          </ResponsiveGrid>
         </SectionCard>
       </PageReveal>
     </ShellPage>

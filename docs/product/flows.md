@@ -173,13 +173,14 @@ Preconditions:
 
 Steps:
 1. User opens `/countdowns`.
-2. `CreateCountdownForm` validates `title`, `kind`, `targetAt`, and optional `note`.
-3. Form converts the selected date into a UTC ISO timestamp and submits `FormData`.
+2. `CreateCountdownForm` validates `title`, `kind`, `targetDate`, and optional `note`.
+3. Form submits the selected date as a date-only value in `FormData`.
 4. `createCountdownAction` requires ready couple context.
 5. Action validates the payload with `createCountdownSchema`.
-6. Action inserts a couple-scoped `countdowns` row with `created_by_user_id`.
-7. Action revalidates `/countdowns`.
-8. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+6. Action converts `targetDate` into the stored UTC instant at local midnight in the saved couple timezone.
+7. Action inserts a couple-scoped `countdowns` row with `created_by_user_id`.
+8. Action revalidates `/countdowns`.
+9. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
 - None.
@@ -195,15 +196,16 @@ Preconditions:
 
 Steps:
 1. User opens `/future-notes`.
-2. `CreateFutureNoteForm` validates `title`, `unlockAt`, and `body`.
-3. Form converts the selected unlock date into a UTC ISO timestamp and submits `FormData`.
+2. `CreateFutureNoteForm` validates `title`, `unlockDate`, and `body`.
+3. Form submits the selected unlock date as a date-only value in `FormData`.
 4. `createFutureNoteAction` requires ready couple context.
 5. Action validates the payload with `createFutureNoteSchema`.
-6. Action inserts the `future_notes` metadata row first.
-7. Action inserts the `future_note_contents` body row second.
-8. If the body insert fails, the action attempts rollback of the metadata row.
-9. Action revalidates `/future-notes`.
-10. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+6. Action converts `unlockDate` into the stored UTC instant at local midnight in the saved couple timezone.
+7. Action inserts the `future_notes` metadata row first.
+8. Action inserts the `future_note_contents` body row second.
+9. If the body insert fails, the action attempts rollback of the metadata row.
+10. Action revalidates `/future-notes`.
+11. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
 - None.
@@ -320,6 +322,75 @@ User-visible errors:
 - No media selected
 - Duplicate or invalid media selection
 - Album not found
+- Unexpected RPC/database failure
+
+## Flow 15: Create Visited Place From Trip Detail
+Preconditions:
+- User is in `ready` couple context.
+- User opens a real trip detail route: `/trips/[tripId]`.
+
+Steps:
+1. Server route resolves couple context and calls `getTripDetailData(...)`.
+2. The helper reads the trip and its existing `visited_places` rows ordered by `visited_on`, then `created_at`.
+3. `CreateVisitedPlaceForm` validates `title`, `visitedOn`, and optional `note`.
+4. `createVisitedPlaceAction` requires ready couple context and validates the payload.
+5. Action re-reads the trip inside the current couple scope.
+6. Action rejects submissions whose `visitedOn` falls outside the trip window.
+7. Action inserts the couple-scoped `visited_places` row with `created_by_user_id`.
+8. Action revalidates `/map` and `/trips/[tripId]`.
+9. Trip detail and `/map` re-render with the new place.
+
+Redirects:
+- Invalid or foreign trip IDs return `notFound()` before the form is available.
+
+User-visible errors:
+- Missing or invalid title/date
+- Trip not found
+- `visitedOn` outside the trip window
+- Unexpected database write failure
+
+## Flow 16: Read Provider-Free Atlas Map
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/map`.
+2. Server route resolves couple context and calls `getMapPageData(...)`.
+3. The helper reads couple-scoped `visited_places` ordered by newest `visited_on`, then `created_at`.
+4. The helper reads only the trips referenced by those places and maps them into grouped atlas sections.
+5. UI renders the provider-free atlas with:
+   - selectable visited-place detail
+   - trip-grouped navigation
+   - empty state when there are no visited places yet
+
+Redirects:
+- Invalid auth/couple state follows the normal app auth gate redirect rules.
+
+User-visible errors:
+- Generic route failure if the map read fails unexpectedly
+
+## Flow 17: Update Couple Timezone
+Preconditions:
+- User is in `ready` couple context.
+
+Steps:
+1. User opens `/settings`.
+2. Server route resolves couple context and renders the current `couples.timezone` value.
+3. `UpdateCoupleTimezoneForm` validates `timeZone` against the supported IANA timezone list.
+4. `updateCoupleTimezoneAction` requires ready couple context and validates the payload.
+5. Action calls `update_couple_timezone(...)`.
+6. RPC validates active membership and timezone validity.
+7. RPC rewrites existing countdown and future-note instants so they keep the same visible calendar date in the new timezone.
+8. RPC updates `couples.timezone`.
+9. Action revalidates `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, and `/map`.
+10. The affected routes re-render against the new couple timezone.
+
+Redirects:
+- Invalid auth/couple state follows the normal app auth gate redirect rules.
+
+User-visible errors:
+- Missing or invalid timezone
+- Missing active couple membership
 - Unexpected RPC/database failure
 
 ## Route Entry Flow

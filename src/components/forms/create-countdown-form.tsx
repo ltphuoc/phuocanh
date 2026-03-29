@@ -20,7 +20,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
 import { initialActionState } from "@/lib/actions/action-state";
-import { formatDateInputValue, toUtcDateStartIso } from "@/lib/utils/date-input";
+import { formatDateInputValue } from "@/lib/utils/date-input";
 
 const buildCreateCountdownSchema = (
   t: ReturnType<typeof useI18n<"forms.countdown">>["t"],
@@ -99,7 +99,7 @@ export const CreateCountdownForm = (): ReactElement => {
     const payload = new FormData();
     payload.set("kind", values.kind);
     payload.set("note", values.note ?? "");
-    payload.set("targetAt", toUtcDateStartIso(values.targetDate));
+    payload.set("targetDate", values.targetDate);
     payload.set("title", values.title);
 
     startTransition(() => {

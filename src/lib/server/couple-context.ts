@@ -1,10 +1,13 @@
-import { format } from "date-fns";
 import { redirect } from "next/navigation";
 import type { Locale } from "@/i18n/routing";
 import { isSchemaCacheMissMessage, SchemaReadinessError } from "@/lib/errors";
 import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
+import {
+  DEFAULT_COUPLE_TIMEZONE,
+  getCurrentDateTokenInTimeZone,
+} from "@/lib/utils/couple-timezone";
 
 type MembershipRole = Database["public"]["Enums"]["membership_role"];
 
@@ -14,6 +17,7 @@ interface CoupleContext {
   readonly coupleStartedAt: string;
   readonly email: string | null;
   readonly role: MembershipRole;
+  readonly timezone: string;
   readonly userId: string;
 }
 
@@ -43,6 +47,7 @@ interface CoupleRow {
   readonly id: string;
   readonly name: string | null;
   readonly started_at: string;
+  readonly timezone: string;
 }
 
 const DEFAULT_COUPLE_NAME = "Our Space";
@@ -73,7 +78,7 @@ const getCoupleById = async (coupleId: string): Promise<CoupleRow | null> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("couples")
-    .select("id, name, started_at")
+    .select("id, name, started_at, timezone")
     .eq("id", coupleId)
     .limit(1);
 
@@ -93,7 +98,7 @@ const bootstrapCoupleForUser = async (
   email: string | null,
 ): Promise<CoupleContext | null> => {
   const supabase = await createSupabaseServerClient();
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = getCurrentDateTokenInTimeZone(DEFAULT_COUPLE_TIMEZONE);
   // The first authenticated user claims the singleton couple space in SQL so UI redirects
   // cannot race or create duplicate spaces from app-layer writes.
   const { data: bootstrappedRows, error } = await supabase.rpc("bootstrap_first_couple", {
@@ -122,6 +127,7 @@ const bootstrapCoupleForUser = async (
     coupleStartedAt: bootstrappedCouple.started_at,
     email,
     role: bootstrappedCouple.role,
+    timezone: bootstrappedCouple.timezone,
     userId,
   };
 };
@@ -152,6 +158,7 @@ export const getAuthGateState = async (): Promise<AuthGateState> => {
         coupleStartedAt: couple.started_at,
         email: user.email ?? null,
         role: membership.role,
+        timezone: couple.timezone,
         userId: user.id,
       },
       status: "ready",

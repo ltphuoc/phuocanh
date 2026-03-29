@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import type { ReactElement } from "react";
 import { FeaturedMemoryObject } from "@/components/ui/memory-card";
 import { SectionCard } from "@/components/ui/section-card";
+import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
 
 interface AnniversarySpotlightMemory {
   readonly happenedAt: string;
@@ -18,6 +19,7 @@ interface AnniversarySpotlightProps {
   readonly coupleStartedAt: string;
   readonly featuredMemory?: AnniversarySpotlightMemory | null;
   readonly relationshipDays: number;
+  readonly timeZone: string;
 }
 
 const getQuote = (
@@ -29,17 +31,19 @@ export const AnniversarySpotlight = async ({
   coupleStartedAt,
   featuredMemory,
   relationshipDays,
+  timeZone,
 }: AnniversarySpotlightProps): Promise<ReactElement> => {
   const [t, format] = await Promise.all([
     getTranslations("ui.anniversarySpotlight"),
     getFormatter(),
   ]);
-  const startedAtDate = new Date(coupleStartedAt);
+  const startedAtDate = parseDateInputValueInTimeZone(coupleStartedAt, timeZone);
   const sinceDateLabel = Number.isNaN(startedAtDate.getTime())
     ? coupleStartedAt
     : format.dateTime(startedAtDate, {
         day: "numeric",
         month: "long",
+        timeZone,
         year: "numeric",
       });
 
@@ -106,6 +110,7 @@ export const AnniversarySpotlight = async ({
             locationName={featuredMemory.locationName}
             mediaType={featuredMemory.mediaType}
             note={featuredMemory.note}
+            timeZone={timeZone}
           />
         ) : (
           <div className="rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,255,255,0.72)] p-6 shadow-cloud backdrop-blur-md">

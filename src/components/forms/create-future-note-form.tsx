@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
 import { initialActionState } from "@/lib/actions/action-state";
-import { formatDateInputValue, toUtcDateStartIso } from "@/lib/utils/date-input";
+import { formatDateInputValue } from "@/lib/utils/date-input";
 
 const buildCreateFutureNoteSchema = (
   t: ReturnType<typeof useI18n<"forms.futureNote">>["t"],
@@ -89,7 +89,7 @@ export const CreateFutureNoteForm = (): ReactElement => {
     const payload = new FormData();
     payload.set("body", values.body);
     payload.set("title", values.title);
-    payload.set("unlockAt", toUtcDateStartIso(values.unlockDate));
+    payload.set("unlockDate", values.unlockDate);
 
     startTransition(() => {
       submitAction(payload);

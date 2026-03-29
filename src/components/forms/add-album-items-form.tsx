@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils/cn";
 interface AddAlbumItemsFormProps {
   readonly albumId: string;
   readonly candidates: readonly AlbumMediaOption[];
+  readonly timeZone: string;
   readonly tripId: string;
 }
 
@@ -86,6 +87,7 @@ const renderMediaPreview = (
 export const AddAlbumItemsForm = ({
   albumId,
   candidates,
+  timeZone,
   tripId,
 }: AddAlbumItemsFormProps): ReactElement => {
   const { t: actionsT } = useI18n("actions");
@@ -161,6 +163,7 @@ export const AddAlbumItemsForm = ({
               : format.dateTime(happenedAt, {
                   day: "numeric",
                   month: "short",
+                  timeZone,
                   year: "numeric",
                 });
 

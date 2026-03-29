@@ -1,5 +1,94 @@
 # Implementation Log
 
+## 2026-03-29 - Review Fix: Anniversary Since-Date Timezone Safety
+
+### Delivered
+- Fixed `AnniversarySpotlight` date rendering to parse `coupleStartedAt` as a date token in the saved couple timezone instead of `new Date(...)`.
+- Prevented off-by-one rendering in negative-offset timezones when formatting the "since" label on `/home`.
+
+### Verification
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+
+## 2026-03-29 - Couple Timezone Foundation
+
+### Delivered
+- Added migration `20260329223000_couple_timezone_foundation.sql` with:
+  - `couples.timezone`
+  - SQL validation against `pg_timezone_names`
+  - updated `bootstrap_first_couple(...)` return shape including `timezone`
+  - `update_couple_timezone(...)` RPC for shared timezone updates
+  - album policy/RPC updates so trip-window media eligibility uses the saved couple timezone
+- Regenerated `src/lib/supabase/database.types.ts` and updated schema inventory in `src/lib/db/schema.ts`.
+- Added shared timezone utilities in `src/lib/utils/couple-timezone.ts`.
+- Extended couple context and live read helpers so couple time is authoritative for:
+  - relationship-day math
+  - on-this-day
+  - countdown labels
+  - future-note unlock labels
+  - trip status
+  - album/trip/map date rendering
+  - album media eligibility windows
+- Updated countdown and future-note mutations so forms submit date-only values and the server derives stored instants from the saved couple timezone.
+- Added `updateCoupleTimezoneAction`.
+- Replaced `/settings` shell content with:
+  - live shared-timezone settings form
+  - current timezone display
+  - retained secondary-navigation links
+- Synced product and engineering docs to mark `/settings` implemented and document the couple-time contract.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `pnpm i18n:check`
+- `pnpm i18n:audit-hardcoded`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+
+### Notes
+- This slice intentionally keeps one shared timezone per couple; per-user timezone preferences are still deferred.
+- Timezone changes preserve visible countdown and future-note calendar dates, not the previous absolute instant.
+- Memories remain true instants and are not rewritten when the couple timezone changes.
+
+## 2026-03-29 - Phase 2 Slice 4: Visited-Place Atlas Foundation
+
+### Delivered
+- Added Phase 2 Slice 4 migration `20260329193000_phase2_slice4_visited_places_atlas_foundation.sql` with:
+  - `visited_places`
+  - trip-linked date-window enforcement through RLS
+  - couple-scoped read/write policies for visited places
+- Regenerated `src/lib/supabase/database.types.ts` and updated schema inventory in `src/lib/db/schema.ts`.
+- Added Phase 2 server read helpers:
+  - `getMapPageData(...)`
+  - extended `getTripDetailData(...)` with ordered trip visited places
+- Added Phase 2 Server Action:
+  - `createVisitedPlaceAction`
+- Added Phase 2 visited-place form:
+  - `CreateVisitedPlaceForm`
+- Replaced `/map` shell content with:
+  - live provider-free atlas grouped by trip
+  - selected-place detail
+  - real empty state
+- Replaced the trip-detail places placeholder with:
+  - live visited-place create flow
+  - ordered visited-place list
+  - real empty state
+- Synced product and engineering docs to mark `/map` implemented and document the provider-free atlas contract.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `pnpm i18n:check`
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm build`
+
+### Notes
+- Slice 4 intentionally keeps `/map` provider-free; no Mapbox dependency or environment variable was added.
+- Coordinates, route polylines, and provider-backed geographic tiles remain deferred follow-up work.
+
 ## 2026-03-29 - Phase 2 Slice 3: Trip Albums Foundation
 
 ### Delivered

@@ -85,6 +85,7 @@ export default async function HomePage({
     locationName: memory.locationName,
     mediaType: memory.mediaType,
     note: memory.note,
+    timeZone: context.timezone,
   }));
 
   const featuredMemory = data.memories[0]
@@ -95,6 +96,7 @@ export default async function HomePage({
         locationName: data.memories[0].locationName,
         mediaType: data.memories[0].mediaType,
         note: data.memories[0].note,
+        timeZone: context.timezone,
       }
     : null;
 
@@ -106,6 +108,7 @@ export default async function HomePage({
             coupleStartedAt={context.coupleStartedAt}
             featuredMemory={featuredMemory}
             relationshipDays={data.relationshipDays}
+            timeZone={context.timezone}
           />
         </PageReveal>
 
@@ -131,7 +134,7 @@ export default async function HomePage({
                 title={homeT("header.title")}
               />
               {timelineItems.length ? (
-                <TimelineRibbon items={timelineItems} />
+                <TimelineRibbon items={timelineItems} timeZone={context.timezone} />
               ) : (
                 <EmptyState
                   description={homeT("timelineEmpty.description")}

@@ -24,6 +24,21 @@ This file is the canonical business-rule reference for the current app. If this 
 - If a couple already exists and the authenticated user is already an active member, bootstrap returns the existing couple context.
 - If a couple already exists and the authenticated user is not a member, bootstrap must not attach them implicitly. They must join through an invite.
 
+## Couple Timezone
+- The couple owns one shared timezone stored on `couples.timezone`.
+- The current default and backfill timezone is `Asia/Ho_Chi_Minh`.
+- The timezone must be a valid IANA timezone name and is validated in SQL.
+- Timezone changes are allowed only through the `update_couple_timezone(...)` RPC.
+- Changing the couple timezone preserves the visible calendar date for existing countdowns and future notes by rewriting their stored UTC instants.
+- Changing the couple timezone does not rewrite memory timestamps.
+- Couple-level day-boundary features use the saved timezone, including:
+  - relationship-day math
+  - on-this-day lookup
+  - countdown labels
+  - future-note unlock dates
+  - trip status
+  - album media eligibility
+
 ## Invite Lifecycle
 - Invites are created by an active couple member through `createInviteAction`.
 - Invite tokens are UUIDs and expire 14 days after creation.
@@ -54,14 +69,15 @@ This file is the canonical business-rule reference for the current app. If this 
 - Countdown kinds are `anniversary`, `birthday`, `travel`, `plan`, and `custom`.
 - Countdowns are couple-scoped and readable by active couple members only.
 - Countdown creation records the creating member in `created_by_user_id` and is authorized by RLS.
-- Countdown dates are stored as UTC timestamps, but the UI treats them as date-oriented milestones rather than timed events.
+- Countdown dates are stored as UTC timestamps derived from the selected local date in the saved couple timezone.
 - Past countdowns remain visible as history; the current slice does not auto-archive or auto-delete them.
-- Reminder automation, timezone-aware reminders, and background jobs are explicitly deferred.
+- Reminder automation and background jobs are explicitly deferred.
 
 ## Future Notes
 - Future-note metadata (`title`, `unlock_at`) is visible immediately to active couple members.
 - Future-note bodies are stored in a separate one-to-one table (`future_note_contents`).
 - Future-note bodies are unreadable until the parent note satisfies `unlock_at <= now()` in SQL policy.
+- `unlock_at` is stored as a UTC instant derived from the selected local date in the saved couple timezone.
 - Creation is a two-step mutation: metadata first, content second. If content insert fails, the app attempts rollback of the metadata row.
 - The current slice has no edit/delete UI and no reminder-delivery workflow.
 - This slice uses database policy gating, not encryption-at-rest.
@@ -70,9 +86,9 @@ This file is the canonical business-rule reference for the current app. If this 
 - Trips are couple-scoped and readable by active couple members only.
 - Trip creation records the creating member in `created_by_user_id` and is authorized by RLS.
 - Trip dates are stored as date-only fields (`start_date`, `end_date`), not timestamps.
-- Trip status is derived in app code as `planned`, `active`, or `completed` from the current UTC calendar day and the stored date range until a couple-level timezone model exists.
+- Trip status is derived in app code as `planned`, `active`, or `completed` from the saved couple timezone day token and the stored date range.
 - The database enforces `end_date >= start_date`.
-- This slice has no edit/delete flow and no stop timeline rows yet.
+- This slice has no edit/delete flow.
 
 ## Albums
 - Albums are couple-scoped and readable by active couple members only.
@@ -81,10 +97,17 @@ This file is the canonical business-rule reference for the current app. If this 
 - Albums reuse existing `memory_media`; they do not create a second upload pipeline or a second storage bucket.
 - Album creation records the creating member in `created_by_user_id` and is authorized through RLS plus the `create_album_with_items(...)` RPC.
 - Creating an album requires at least one selected media item.
-- Eligible album media is derived from couple-owned `memory_media` whose parent memory’s UTC date token falls within the trip’s `start_date..end_date` window.
+- Eligible album media is derived from couple-owned `memory_media` whose parent memory’s local date in the saved couple timezone falls within the trip’s `start_date..end_date` window.
 - Adding media later is allowed, but only for remaining eligible media not already attached to the album.
 - This slice has no captions, reordering, removal, delete flow, or multi-album-per-trip behavior.
-- Visited-place pins and map summaries remain downstream of the trip + album contract.
+
+## Visited Places
+- Visited places are couple-scoped and readable by active couple members only.
+- Visited places are rooted in `trips`, not in a separate travel hierarchy.
+- Visited-place creation records the creating member in `created_by_user_id` and is authorized by RLS.
+- `visited_on` is stored as a date-only field and must stay within the parent trip’s `start_date..end_date` window.
+- The current atlas is provider-free: it stores no coordinates, route polylines, or tile-provider metadata.
+- This slice has no edit/delete flow, geocoding flow, or memory-location auto-derivation.
 
 ## Forbidden States
 - More than one `couples` row
@@ -98,6 +121,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - More than one album for the same trip in the current contract
 - Album row committed without at least one `album_items` row
 - Duplicate `album_items` rows for the same `(album_id, memory_media_id)` pair
+- Visited-place row whose `visited_on` falls outside the parent trip window
 
 ## Enforcement Map
 - Singleton couple space: SQL unique index
@@ -109,6 +133,8 @@ This file is the canonical business-rule reference for the current app. If this 
 - Storage object access: storage policies using the couple ID embedded in the object path
 - Countdown and future-note visibility: RLS on the Phase 2 tables
 - Future-note body unlock rule: `future_note_contents_select` policy joined against `future_notes.unlock_at`
+- Couple timezone validity: `couples_timezone_valid_check` using `is_valid_timezone(...)`
+- Couple timezone mutation: `update_couple_timezone(...)`
 - Trip visibility and inserts: RLS on `trips`
 - Trip date validity: `trips_date_range_check` constraint
 - Album visibility and direct insert bounds: RLS on `albums` and `album_items`
@@ -116,6 +142,8 @@ This file is the canonical business-rule reference for the current app. If this 
 - Album-without-items prevention: deferred `albums_require_items_trigger`
 - Album-item uniqueness: `album_items_album_media_unique` constraint
 - Multi-row album writes and eligibility enforcement: `create_album_with_items(...)` and `add_album_items(...)` RPCs
+- Visited-place visibility and inserts: RLS on `visited_places`
+- Visited-place trip-window validity: `visited_places_insert` policy joined against `trips.start_date` and `trips.end_date`
 
 ## User-Visible Failure States
 - Login can fail if Supabase Auth is unreachable.
@@ -133,6 +161,11 @@ This file is the canonical business-rule reference for the current app. If this 
   - required fields are missing or invalid
   - the authenticated user lacks active couple membership
   - database writes fail unexpectedly
+- Visited-place create can fail if:
+  - required fields are missing or invalid
+  - the trip is missing or outside the member’s couple scope
+  - `visited_on` falls outside the trip window
+  - database writes fail unexpectedly
 - Album create/add can fail if:
   - no media items are selected
   - the selected media IDs are duplicated in the submission
@@ -143,5 +176,5 @@ This file is the canonical business-rule reference for the current app. If this 
 
 ## Current Shell Boundaries
 - `/chat` is mock-only because it renders sample conversation content.
-- `/map`, `/games`, `/games/[mode]`, `/stats`, and `/settings` are shell-only.
+- `/games`, `/games/[mode]`, and `/stats` are shell-only.
 - Shell-only and mock-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

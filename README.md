@@ -3,8 +3,8 @@
 Private couple memory web app built with Next.js App Router + Supabase.
 
 ## Current Product State
-- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`
-- `shell-only`: `/map`, `/games`, `/games/[mode]`, `/stats`, `/settings`
+- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
+- `shell-only`: `/games`, `/games/[mode]`, `/stats`
 - `mock-only`: `/chat`
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
@@ -117,6 +117,8 @@ pnpm typecheck
 - `/chat` is mock-only because it renders sample conversation content, not real messages.
 - Shell-only routes are intentionally not evidence of backend/domain support.
 - Current runtime has no live OpenAI integration and no live Mapbox integration.
+- `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.
+- `/settings` now owns the shared couple timezone, which drives countdown, future-note, trip-status, album-eligibility, and other couple-level day boundaries.
 
 ## Deploy On Vercel
 The repo does not currently define project-specific deployment automation. If deployment work is requested, document the exact environment and rollout steps in the same PR.

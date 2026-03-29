@@ -19,6 +19,7 @@ export interface MemoryCardProps {
   readonly locationName?: string | null;
   readonly mediaType?: "image" | "video" | null;
   readonly note?: string | null;
+  readonly timeZone: string;
   readonly variant?: MemoryCardVariant;
 }
 
@@ -59,6 +60,7 @@ export const MemoryCard = ({
   locationName,
   mediaType,
   note,
+  timeZone,
   variant = "compact",
 }: MemoryCardProps): ReactElement => {
   const reduceMotion = useReducedMotion();
@@ -69,14 +71,14 @@ export const MemoryCard = ({
   const mediaLabel = getMemoryLabel(mediaType, t);
   const noteText = note?.trim() ? note : getMemoryPlaceholder(variant, t);
   const monthYearLabel = isValidDate
-    ? format.dateTime(date, { month: "long", year: "numeric" })
+    ? format.dateTime(date, { month: "long", timeZone, year: "numeric" })
     : t("fallbackDate");
-  const dayLabel = isValidDate ? format.dateTime(date, { day: "numeric" }) : "--";
+  const dayLabel = isValidDate ? format.dateTime(date, { day: "numeric", timeZone }) : "--";
   const weekdayLabel = isValidDate
-    ? format.dateTime(date, { weekday: "long" })
+    ? format.dateTime(date, { timeZone, weekday: "long" })
     : t("fallbackDate");
   const fullDateLabel = isValidDate
-    ? format.dateTime(date, { day: "numeric", month: "short", year: "numeric" })
+    ? format.dateTime(date, { day: "numeric", month: "short", timeZone, year: "numeric" })
     : t("fallbackDate");
   const isFeatureVariant = variant !== "compact";
 

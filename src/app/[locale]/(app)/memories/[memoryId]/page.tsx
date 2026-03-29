@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { parseISO } from "date-fns";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
@@ -52,7 +53,7 @@ export default async function MemoryDetailPage({
   const mediaUrls = await signMemoryMediaStorageItems(memory.media);
 
   const firstLine = memory.note?.trim().split("\n")[0] ?? t("header.quoteFallback");
-  const happenedAtDate = new Date(memory.happenedAt);
+  const happenedAtDate = parseISO(memory.happenedAt);
   const happenedAtLabel = Number.isNaN(happenedAtDate.getTime())
     ? memory.happenedAt
     : format.dateTime(happenedAtDate, {
@@ -60,6 +61,7 @@ export default async function MemoryDetailPage({
         hour: "2-digit",
         minute: "2-digit",
         month: "long",
+        timeZone: context.timezone,
         year: "numeric",
       });
 
