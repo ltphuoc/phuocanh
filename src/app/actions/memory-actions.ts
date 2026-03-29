@@ -1,13 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   createErrorState,
   createSuccessState,
   type ActionState,
 } from "@/lib/actions/action-state";
-import { toErrorMessage } from "@/lib/errors";
+import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
 import { requireReadyCoupleContext } from "@/lib/server/couple-context";
 import {
   createSupabaseServerClient,
@@ -45,8 +44,6 @@ const rollbackMemoryMutation = async (
 ): Promise<string | null> => {
   const cleanupErrors: string[] = [];
 
-  // Upload and metadata writes span storage plus Postgres; best-effort rollback keeps partial
-  // failures from leaving orphaned files or memory rows behind.
   if (uploadedStoragePath) {
     const { error: removeObjectError } = await supabase.storage
       .from("memory-media")
@@ -91,15 +88,15 @@ export const createMemoryAction = async (
     const hasFile = mediaFile !== null;
 
     if (!hasFile && !trimmedNote) {
-      return createErrorState("Add a note or at least one media file.");
+      return createErrorState("memory.missingContent");
     }
 
     if (mediaFile && mediaFile.size > MAX_UPLOAD_BYTES) {
-      return createErrorState("File is too large. Max size is 25MB.");
+      return createErrorState("memory.fileTooLarge");
     }
 
     if (mediaFile && !isAllowedMediaMimeType(mediaFile.type)) {
-      return createErrorState("Only image and video files are supported.");
+      return createErrorState("memory.unsupportedType");
     }
 
     const { data: insertedMemories, error: memoryError } = await supabase
@@ -115,18 +112,17 @@ export const createMemoryAction = async (
       .limit(1);
 
     if (memoryError) {
-      return createErrorState(memoryError.message);
+      console.error("Failed to create memory row", memoryError);
+      return createErrorState("unexpectedError");
     }
 
     const memory = insertedMemories[0];
     if (!memory) {
-      return createErrorState("Could not create memory.");
+      return createErrorState("memory.createFailed");
     }
 
     if (mediaFile) {
       const safeName = sanitizeFileName(mediaFile.name || "upload");
-      // Storage policies authorize by couple ID encoded in the object path, so this prefix is
-      // part of the security contract rather than a cosmetic naming choice.
       const storagePath = `couples/${context.coupleId}/memories/${memory.id}/${Date.now()}-${safeName}`;
       const { error: uploadError } = await supabase.storage
         .from("memory-media")
@@ -138,10 +134,11 @@ export const createMemoryAction = async (
       if (uploadError) {
         const cleanupError = await rollbackMemoryMutation(supabase, memory.id, null);
         if (cleanupError) {
-          return createErrorState(`Upload failed and rollback failed: ${cleanupError}`);
+          console.error("Upload rollback failed", cleanupError);
         }
 
-        return createErrorState(uploadError.message);
+        console.error("Failed to upload media", uploadError);
+        return createErrorState("unexpectedError");
       }
 
       const { error: mediaError } = await supabase.from("memory_media").insert({
@@ -157,10 +154,11 @@ export const createMemoryAction = async (
       if (mediaError) {
         const cleanupError = await rollbackMemoryMutation(supabase, memory.id, storagePath);
         if (cleanupError) {
-          return createErrorState(`Media save failed and rollback failed: ${cleanupError}`);
+          console.error("Media save rollback failed", cleanupError);
         }
 
-        return createErrorState(mediaError.message);
+        console.error("Failed to store media metadata", mediaError);
+        return createErrorState("unexpectedError");
       }
     }
 
@@ -172,15 +170,17 @@ export const createMemoryAction = async (
     });
 
     if (eventError) {
-      return createErrorState(eventError.message);
+      console.error("Failed to create activity event", eventError);
+      return createErrorState("unexpectedError");
     }
 
-    revalidatePath("/home");
-    revalidatePath("/on-this-day");
-    revalidatePath("/lists");
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/on-this-day");
+    revalidateLocalizedPath("/lists");
 
-    return createSuccessState("Memory saved.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    return createSuccessState("memory.created");
+  } catch (error: unknown) {
+    console.error("Failed to create memory", error);
+    return createErrorState("unexpectedError");
   }
 };

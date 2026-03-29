@@ -1,4 +1,5 @@
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
+import { getFormatter } from "next-intl/server";
 import type { ReactElement } from "react";
 import { MemoryCard, type MemoryCardProps } from "@/components/ui/memory-card";
 import { cn } from "@/lib/utils/cn";
@@ -11,15 +12,31 @@ interface TimelineRibbonProps {
   readonly items: readonly TimelineRibbonItem[];
 }
 
-export const TimelineRibbon = ({ items }: TimelineRibbonProps): ReactElement => {
+export const TimelineRibbon = async ({
+  items,
+}: TimelineRibbonProps): Promise<ReactElement> => {
+  const format = await getFormatter();
+
   return (
     <div className="relative flex flex-col gap-6 pl-4 md:gap-8 md:pl-8">
       <div className="absolute bottom-0 left-[7px] top-0 w-px bg-[linear-gradient(180deg,rgba(255,148,148,0.18)_0%,rgba(255,209,209,0.6)_28%,rgba(255,209,209,0.05)_100%)] md:left-[15px]" />
       {items.map((item, index) => {
         const date = parseISO(item.happenedAt);
-        const monthKey = format(date, "MMMM yyyy");
+        const monthKey = Number.isNaN(date.getTime())
+          ? item.happenedAt
+          : format.dateTime(date, {
+              month: "long",
+              year: "numeric",
+            });
+        const previousDate =
+          index > 0 ? parseISO(items[index - 1].happenedAt) : null;
         const previousMonthKey =
-          index > 0 ? format(parseISO(items[index - 1].happenedAt), "MMMM yyyy") : null;
+          previousDate && !Number.isNaN(previousDate.getTime())
+            ? format.dateTime(previousDate, {
+                month: "long",
+                year: "numeric",
+              })
+            : null;
         const shouldRenderDivider = monthKey !== previousMonthKey;
 
         return (

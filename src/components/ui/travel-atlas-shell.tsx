@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { SectionCard } from "@/components/ui/section-card";
@@ -15,34 +16,40 @@ interface AtlasStop {
   readonly title: string;
 }
 
-const atlasStops: readonly AtlasStop[] = [
-  {
-    dateLabel: "Jul 12",
-    id: "da-lat",
-    memoryCountLabel: "8 keepsakes",
-    note: "Rain, strawberries, and the walk back when the town felt all blush and fog.",
-    positionClassName: "left-[22%] top-[28%]",
-    title: "Da Lat",
-  },
-  {
-    dateLabel: "Sep 03",
-    id: "hoi-an",
-    memoryCountLabel: "5 keepsakes",
-    note: "Lantern light, too many snacks, and a promise to stay longer next time.",
-    positionClassName: "left-[60%] top-[40%]",
-    title: "Hoi An",
-  },
-  {
-    dateLabel: "Oct 20",
-    id: "da-nang",
-    memoryCountLabel: "4 keepsakes",
-    note: "Ocean air, a slow evening, and one of your favorite photos together.",
-    positionClassName: "left-[48%] top-[62%]",
-    title: "Da Nang",
-  },
-] as const;
+const stopPositionById = {
+  "da-lat": "left-[22%] top-[28%]",
+  "da-nang": "left-[48%] top-[62%]",
+  "hoi-an": "left-[60%] top-[40%]",
+} as const;
 
 export const TravelAtlasShell = (): ReactElement => {
+  const t = useTranslations("ui.travelAtlas");
+  const atlasStops: readonly AtlasStop[] = [
+    {
+      dateLabel: t("stops.daLat.date"),
+      id: "da-lat",
+      memoryCountLabel: t("stops.daLat.count"),
+      note: t("stops.daLat.note"),
+      positionClassName: stopPositionById["da-lat"],
+      title: t("stops.daLat.title"),
+    },
+    {
+      dateLabel: t("stops.hoiAn.date"),
+      id: "hoi-an",
+      memoryCountLabel: t("stops.hoiAn.count"),
+      note: t("stops.hoiAn.note"),
+      positionClassName: stopPositionById["hoi-an"],
+      title: t("stops.hoiAn.title"),
+    },
+    {
+      dateLabel: t("stops.daNang.date"),
+      id: "da-nang",
+      memoryCountLabel: t("stops.daNang.count"),
+      note: t("stops.daNang.note"),
+      positionClassName: stopPositionById["da-nang"],
+      title: t("stops.daNang.title"),
+    },
+  ];
   const [selectedStopId, setSelectedStopId] = useState<string>(atlasStops[0]?.id ?? "");
   const selectedStop = atlasStops.find((stop) => stop.id === selectedStopId) ?? atlasStops[0];
 
@@ -75,18 +82,18 @@ export const TravelAtlasShell = (): ReactElement => {
           />
         </svg>
         <div className="absolute inset-x-4 top-4 rounded-[1.4rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-4 py-3 shadow-whisper backdrop-blur-xl md:inset-x-6">
-          <p className="ui-meta ui-couple-mark">Travel atlas</p>
+          <p className="ui-meta ui-couple-mark">{t("header.eyebrow")}</p>
           <div className="mt-2 flex items-center justify-between gap-3">
             <div>
               <p className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-                Places that changed the story
+                {t("header.title")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                The map becomes part scrapbook, part itinerary, part memory drawer.
+                {t("header.description")}
               </p>
             </div>
             <div className="rounded-pill border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-              Route glow
+              {t("header.badge")}
             </div>
           </div>
         </div>

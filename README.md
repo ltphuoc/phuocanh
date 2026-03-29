@@ -78,6 +78,40 @@ pnpm typecheck
 pnpm build
 ```
 
+## Internationalization (next-intl)
+- Locales: `vi` (default), `en`
+- Locale routes: all user-facing pages are locale-prefixed (`/vi/*`, `/en/*`)
+- Locale selection priority: `NEXT_LOCALE` cookie -> browser `Accept-Language` -> `vi`
+- Message files:
+  - `messages/en.json` (canonical key set)
+  - `messages/vi.json` (localized overrides)
+- Runtime fallback: missing locale keys fall back to English via deep merge in `src/i18n/request.ts`
+
+### Add a new language
+1. Add locale to `src/i18n/routing.ts` in `locales`.
+2. Create `messages/<locale>.json`.
+3. Start from `messages/en.json` keys and translate values.
+4. Add locale display label in `src/i18n/routing.ts` (`localeDisplayNames`).
+5. Run:
+```bash
+pnpm i18n:check
+pnpm i18n:audit-hardcoded
+pnpm typecheck
+```
+
+### Add a new translation key
+1. Add the key to `messages/en.json` first (canonical source).
+2. Add translated value to `messages/vi.json` (or rely on temporary English fallback).
+3. Use nested reusable keys (e.g. `auth.login.title`, `forms.memory.submit`, `actions.memory.created`).
+4. Reference keys via scoped translators (`useI18n(\"forms.memory\")`, `getTranslations({namespace: \"home\"})`).
+5. Re-run `pnpm i18n:check` and `pnpm typecheck`.
+
+### Naming conventions
+- Use feature-first namespaces: `auth.*`, `forms.*`, `actions.*`, `nav.*`, `ui.*`.
+- Prefer stable reusable keys over route-specific one-offs.
+- Use ICU messages for counts/plurals (example: `ui.countdown.daysLeft`).
+- Keep action/toast keys under `actions.*`; UI should render keys, not raw backend messages.
+
 ## Notes
 - Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
 - `/chat` is mock-only because it renders sample conversation content, not real messages.

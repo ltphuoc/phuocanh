@@ -3,14 +3,14 @@ import { cn } from "@/lib/utils/cn";
 
 interface LoadingStateProps {
   readonly className?: string;
-  readonly description?: string;
-  readonly title?: string;
+  readonly description: string;
+  readonly title: string;
 }
 
 export const LoadingState = ({
   className,
-  description = "Please wait a moment.",
-  title = "Loading",
+  description,
+  title,
 }: LoadingStateProps): ReactElement => (
   <div
     className={cn(

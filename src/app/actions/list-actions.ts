@@ -1,13 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   createErrorState,
   createSuccessState,
   type ActionState,
 } from "@/lib/actions/action-state";
-import { toErrorMessage } from "@/lib/errors";
+import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
 import { requireReadyCoupleContext } from "@/lib/server/couple-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -54,14 +53,16 @@ export const addWishItemAction = async (
     });
 
     if (error) {
-      return createErrorState(error.message);
+      console.error("Failed to add wish item", error);
+      return createErrorState("unexpectedError");
     }
 
-    revalidatePath("/home");
-    revalidatePath("/lists");
-    return createSuccessState("Wish item added.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/lists");
+    return createSuccessState("list.wishItem.added");
+  } catch (error: unknown) {
+    console.error("Failed to add wish item", error);
+    return createErrorState("unexpectedError");
   }
 };
 
@@ -82,14 +83,16 @@ export const createChecklistAction = async (
     });
 
     if (error) {
-      return createErrorState(error.message);
+      console.error("Failed to create checklist", error);
+      return createErrorState("unexpectedError");
     }
 
-    revalidatePath("/home");
-    revalidatePath("/lists");
-    return createSuccessState("Checklist created.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/lists");
+    return createSuccessState("list.checklist.created");
+  } catch (error: unknown) {
+    console.error("Failed to create checklist", error);
+    return createErrorState("unexpectedError");
   }
 };
 
@@ -111,14 +114,16 @@ export const addChecklistItemAction = async (
     });
 
     if (error) {
-      return createErrorState(error.message);
+      console.error("Failed to add checklist item", error);
+      return createErrorState("unexpectedError");
     }
 
-    revalidatePath("/home");
-    revalidatePath("/lists");
-    return createSuccessState("Checklist item added.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/lists");
+    return createSuccessState("list.checklistItem.added");
+  } catch (error: unknown) {
+    console.error("Failed to add checklist item", error);
+    return createErrorState("unexpectedError");
   }
 };
 
@@ -143,13 +148,15 @@ export const toggleChecklistItemAction = async (
       .eq("id", parsed.checklistItemId);
 
     if (error) {
-      return createErrorState(error.message);
+      console.error("Failed to toggle checklist item", error);
+      return createErrorState("unexpectedError");
     }
 
-    revalidatePath("/home");
-    revalidatePath("/lists");
-    return createSuccessState("Checklist updated.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/lists");
+    return createSuccessState("list.checklist.updated");
+  } catch (error: unknown) {
+    console.error("Failed to toggle checklist item", error);
+    return createErrorState("unexpectedError");
   }
 };

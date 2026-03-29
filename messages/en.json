@@ -1,0 +1,666 @@
+{
+  "metadata": {
+    "root": {
+      "description": "Private couple memory, timeline, and planning app.",
+      "title": "PhuocAnh"
+    },
+    "routes": {
+      "acceptInvite": "Accept Invite | PhuocAnh",
+      "addMemory": "Add Memory | PhuocAnh",
+      "albumDetail": "Album Detail | PhuocAnh",
+      "chat": "Chat | PhuocAnh",
+      "countdowns": "Countdowns | PhuocAnh",
+      "futureNotes": "Future Notes | PhuocAnh",
+      "gameMode": "Game Mode | PhuocAnh",
+      "games": "Games | PhuocAnh",
+      "home": "Home | PhuocAnh",
+      "lists": "Lists | PhuocAnh",
+      "login": "Login | PhuocAnh",
+      "map": "Map | PhuocAnh",
+      "memoryDetail": "Memory Detail | PhuocAnh",
+      "onThisDay": "On This Day | PhuocAnh",
+      "settings": "Settings | PhuocAnh",
+      "stats": "Stats | PhuocAnh",
+      "tripDetail": "Trip Detail | PhuocAnh",
+      "trips": "Trips | PhuocAnh"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Change language"
+  },
+  "common": {
+    "backHome": "Back home",
+    "backToGameHub": "Back to game hub",
+    "backToGames": "Back to games",
+    "backToLogin": "Back to login",
+    "backToTrips": "Back to trips",
+    "comingSoon": "Coming soon",
+    "openShell": "Open shell",
+    "working": "Working..."
+  },
+  "nav": {
+    "groups": {
+      "planning": "Planning",
+      "play": "Play",
+      "space": "Space",
+      "together": "Together",
+      "travel": "Travel"
+    },
+    "bottom": {
+      "captureMoment": "Capture a moment"
+    },
+    "side": {
+      "keepsakeSpace": "keepsake space",
+      "sharedCornersEyebrow": "Shared corners",
+      "sharedCornersTitle": "Explore softly",
+      "toggleNavigation": "Toggle expanded navigation"
+    },
+    "moreSheet": {
+      "closeAriaLabel": "Close navigation sheet",
+      "done": "Done",
+      "eyebrow": "More places",
+      "title": "Shared corners"
+    },
+    "items": {
+      "albums": {
+        "description": "Albums linked to trips and memories.",
+        "label": "Albums"
+      },
+      "chat": {
+        "description": "The private thread between the two of you.",
+        "label": "Chat"
+      },
+      "countdowns": {
+        "description": "Dates worth waiting for together.",
+        "label": "Countdowns"
+      },
+      "futureNotes": {
+        "description": "Notes for future versions of yourselves.",
+        "label": "Future notes"
+      },
+      "games": {
+        "description": "Playful couple prompts and mini games.",
+        "label": "Games"
+      },
+      "home": {
+        "label": "Home"
+      },
+      "lists": {
+        "description": "Wishlist items and shared checklists.",
+        "label": "Lists"
+      },
+      "map": {
+        "description": "Pins, routes, and place-based memories.",
+        "label": "Map"
+      },
+      "memory": {
+        "description": "Capture a new memory.",
+        "label": "Memory"
+      },
+      "more": {
+        "label": "More"
+      },
+      "newMemory": {
+        "description": "Capture a moment quickly.",
+        "label": "New memory"
+      },
+      "onThisDay": {
+        "label": "On this day",
+        "mobileLabel": "Today"
+      },
+      "settings": {
+        "description": "Manage your space and preferences.",
+        "label": "Settings"
+      },
+      "stats": {
+        "description": "Soft metrics and little streaks.",
+        "label": "Stats"
+      },
+      "trips": {
+        "description": "Journeys, staycations, and shared itineraries.",
+        "label": "Trips"
+      }
+    }
+  },
+  "appLayout": {
+    "mobile": {
+      "addMemory": "Add memory",
+      "eyebrow": "Private chapter"
+    }
+  },
+  "authShell": {
+    "hero": {
+      "description": "A boutique photo book, a travel journal, and a quiet planning space for two.",
+      "eyebrow": "Private couple space",
+      "noteLabel": "Note"
+    }
+  },
+  "auth": {
+    "login": {
+      "helper": "Use your magic link to continue back into your private couple keepsake space.",
+      "helperTitle": "Sign in",
+      "inviteHint": "If this is your second account, ask your partner for an invite link and open <link>accept invite</link>.",
+      "inviteLinkLabel": "accept invite",
+      "title": "Welcome back"
+    },
+    "acceptInvite": {
+      "helper": "Accept your partner invite link to join the shared space.",
+      "helperTitle": "Accept invite",
+      "missingTokenDescription": "Missing token. Open the full invite URL.",
+      "title": "Join your couple space"
+    }
+  },
+  "forms": {
+    "login": {
+      "emailDescription": "Use the email linked to your couple space.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send magic link"
+    },
+    "acceptInvite": {
+      "submit": "Join couple space",
+      "tokenDescription": "Token is prefilled from your partner invite URL.",
+      "tokenLabel": "Invite token"
+    },
+    "invite": {
+      "copySuccess": "Invite link copied.",
+      "submit": "Generate partner invite"
+    },
+    "wishItem": {
+      "category": {
+        "food": "Food",
+        "movie": "Movie",
+        "place": "Place"
+      },
+      "categoryLabel": "Category",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Optional note",
+      "submit": "Add item",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Try bánh xèo in Hội An"
+    },
+    "checklist": {
+      "submit": "Create checklist",
+      "titleLabel": "Checklist title",
+      "titlePlaceholder": "Weekend goals"
+    },
+    "checklistItem": {
+      "placeholder": "Add item",
+      "submit": "Add"
+    },
+    "checklistToggle": {
+      "done": "Done",
+      "undo": "Undo"
+    },
+    "memory": {
+      "happenedAtDescription": "Use local time for this memory.",
+      "happenedAtLabel": "Happened at",
+      "locationDescription": "Optional place where this happened.",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Da Nang",
+      "mediaDescription": "Image or video up to 25MB.",
+      "mediaLabel": "Media",
+      "noteDescription": "A short story helps future search and recap.",
+      "noteLabel": "Note",
+      "notePlaceholder": "What happened?",
+      "submit": "Save memory"
+    }
+  },
+  "actions": {
+    "auth": {
+      "invite": {
+        "accepted": "Invite accepted. Welcome to your couple space.",
+        "created": "Invite link created.",
+        "coupleFull": "This couple space already has two active members.",
+        "expired": "Invite has expired.",
+        "invalidOrUsed": "Invite is invalid or already used."
+      },
+      "magicLink": {
+        "sent": "Check your email for the magic link.",
+        "unreachable": "Cannot reach Supabase Auth. Ensure local Supabase is running and reachable at port 54321."
+      },
+      "signInRequired": "Please sign in before accepting an invite."
+    },
+    "list": {
+      "checklist": {
+        "created": "Checklist created.",
+        "updated": "Checklist updated."
+      },
+      "checklistItem": {
+        "added": "Checklist item added."
+      },
+      "wishItem": {
+        "added": "Wish item added."
+      }
+    },
+    "memory": {
+      "created": "Memory saved.",
+      "createFailed": "Could not create memory.",
+      "fileTooLarge": "File is too large. Max size is 25MB.",
+      "missingContent": "Add a note or at least one media file.",
+      "unsupportedType": "Only image and video files are supported."
+    },
+    "unexpectedError": "Something went wrong. Please try again."
+  },
+  "errors": {
+    "databaseSetupRequired": "Database setup required",
+    "genericDescription": "An unexpected error occurred. Please try again.",
+    "genericTitle": "Something went wrong",
+    "schemaCommandsDescription": "Local migrations are missing. Run these commands, then reload:",
+    "tryAgain": "Try again"
+  },
+  "loading": {
+    "description": "Please wait a moment.",
+    "title": "Loading"
+  },
+  "notFound": {
+    "description": "This page does not exist.",
+    "title": "Page not found"
+  },
+  "home": {
+    "header": {
+      "description": "A story ribbon for your recent chapters, with images, notes, and dates that feel like keepsakes instead of rows.",
+      "eyebrow": "Story ribbon",
+      "quote": "Little details become the chapters you keep reopening.",
+      "title": "Latest chapters"
+    },
+    "addMemory": "Add memory",
+    "timelineEmpty": {
+      "description": "Start your timeline with a note, photo, or short video and it will appear here like a collectible chapter.",
+      "title": "No memories yet"
+    },
+    "wishlist": {
+      "eyebrow": "Wish list",
+      "empty": {
+        "description": "Add places, food, or movies that should become your next chapter together.",
+        "title": "Nothing saved yet"
+      },
+      "title": "Next little plans"
+    },
+    "checklists": {
+      "completed": "Completed",
+      "eyebrow": "Planning quietly",
+      "empty": {
+        "description": "Create a shared list for your next trip, dinner, or tiny weekly ritual.",
+        "title": "No checklist yet"
+      },
+      "pending": "Pending",
+      "sectionLabel": "Checklist",
+      "title": "Shared checklists"
+    }
+  },
+  "lists": {
+    "header": {
+      "description": "Keep your couple plans and todos in one place.",
+      "eyebrow": "Planning",
+      "title": "Shared lists"
+    },
+    "wishItems": {
+      "empty": {
+        "description": "Add places, food, or movies you want to try together.",
+        "title": "No wish items yet"
+      },
+      "title": "Wish items"
+    },
+    "checklists": {
+      "completed": "Completed",
+      "empty": {
+        "description": "Create a checklist for your next trip or weekend.",
+        "title": "No checklists yet"
+      },
+      "pending": "Pending",
+      "title": "Checklists"
+    }
+  },
+  "onThisDay": {
+    "header": {
+      "description": "A ceremonial little recap surface for the same date across earlier years.",
+      "eyebrow": "Memory recap",
+      "quote": "Open the sealed keepsakes from this date and let the day fold back in.",
+      "title": "On this day"
+    },
+    "stackedReveal": {
+      "chapterCount": "{count, plural, =0 {No chapters} one {# chapter} other {# chapters}}",
+      "eyebrow": "Stacked reveal",
+      "title": "Sealed keepsakes"
+    },
+    "empty": {
+      "description": "When this date has memories, they will appear like opened keepsakes here.",
+      "title": "No memories for today yet"
+    }
+  },
+  "newMemory": {
+    "header": {
+      "description": "Save a moment with note, photo, or short video.",
+      "eyebrow": "Timeline",
+      "title": "Add memory"
+    }
+  },
+  "memoryDetail": {
+    "header": {
+      "eyebrow": "Saved chapter",
+      "fallbackLocation": "Memory detail",
+      "quoteFallback": "A saved chapter"
+    },
+    "story": {
+      "empty": "No note was added for this chapter yet.",
+      "label": "Story note"
+    },
+    "media": {
+      "label": "Attached media",
+      "loadErrorDescription": "Signed URL is unavailable for this media.",
+      "loadErrorTitle": "Could not load preview",
+      "noneDescription": "No image or video was attached to this memory.",
+      "noneTitle": "No media yet",
+      "title": "Visual keepsakes"
+    },
+    "mediaAlt": "Memory media"
+  },
+  "chat": {
+    "header": {
+      "description": "A warm conversation canvas for the two of you, designed to feel private and unhurried.",
+      "eyebrow": "Private thread",
+      "quote": "The thread should feel like passing little keepsakes back and forth.",
+      "title": "Chat"
+    },
+    "note": "This is a designed conversation surface for the upcoming chat feature. Real messages, presence, and media attachments are intentionally not wired yet."
+  },
+  "map": {
+    "header": {
+      "description": "A soft atlas surface where places, routes, and memories blend into one travel chapter.",
+      "eyebrow": "Travel map",
+      "quote": "Routes should feel remembered, not engineered.",
+      "title": "Places map"
+    }
+  },
+  "trips": {
+    "header": {
+      "description": "Plan and revisit your shared journeys with trip timelines and albums.",
+      "eyebrow": "Travel",
+      "title": "Trips"
+    },
+    "templates": {
+      "dalat": {
+        "destination": "Da Lat Weekend",
+        "duration": "Jul 12 - Jul 14, 2026",
+        "items": "8 memories and 2 albums"
+      },
+      "hoian": {
+        "destination": "Hoi An Food Hunt",
+        "duration": "Sep 03 - Sep 05, 2026",
+        "items": "5 memories and 1 album"
+      }
+    },
+    "comingSoon": {
+      "cta": "Open albums shell",
+      "description": "Trip editing, stop-by-stop timelines, and linked albums will be connected once Phase 2 travel logic is implemented.",
+      "title": "Trip management"
+    },
+    "empty": {
+      "description": "When real trip data is available, this panel will show your active and archived journeys.",
+      "title": "No connected trips yet"
+    }
+  },
+  "tripDetail": {
+    "header": {
+      "description": "A dedicated trip detail layout with timeline, stops, and album slots.",
+      "eyebrow": "Travel detail"
+    },
+    "durationPlaceholder": "Sample duration until real data is wired",
+    "itemsPlaceholder": "0 stops loaded from backend yet",
+    "plannedSectionsTitle": "Planned sections",
+    "plannedSections": {
+      "albums": "Albums linked to this trip",
+      "highlights": "Trip overview and mood highlights",
+      "timeline": "Visited places timeline"
+    },
+    "comingSoon": {
+      "cta": "Preview map shell",
+      "description": "This detail page will become fully data-driven once trip entities and map pins are delivered in Phase 2.",
+      "title": "Trip timeline and map integration"
+    },
+    "fallbackTripLabel": "Trip"
+  },
+  "albumDetail": {
+    "header": {
+      "description": "Album layout is ready for media grouping, captions, and trip linking.",
+      "eyebrow": "Album"
+    },
+    "mediaPlaceholder": {
+      "description": "Photo and video tiles will render here once storage-backed album items are available.",
+      "title": "Media grid placeholder"
+    },
+    "highlightPlaceholder": {
+      "description": "Pinned highlights and captions from this album will appear in this panel.",
+      "title": "Highlights placeholder"
+    },
+    "comingSoon": {
+      "cta": "Go to trips shell",
+      "description": "Album entities, upload workflows, and trip associations are planned for the next feature phase.",
+      "title": "Album data wiring"
+    },
+    "fallbackAlbumLabel": "Album"
+  },
+  "countdowns": {
+    "header": {
+      "description": "Track upcoming birthdays, anniversaries, and trips in one calm timeline.",
+      "eyebrow": "Events",
+      "title": "Countdowns"
+    },
+    "items": {
+      "anniversaryDinner": {
+        "name": "Anniversary dinner",
+        "type": "Anniversary"
+      },
+      "birthday": {
+        "name": "Partner birthday",
+        "type": "Birthday"
+      },
+      "danangTrip": {
+        "name": "Da Nang trip",
+        "type": "Travel"
+      },
+      "staycation": {
+        "name": "Mini staycation",
+        "type": "Plan"
+      }
+    },
+    "comingSoon": {
+      "cta": "Open future notes shell",
+      "description": "Recurring reminders, timezone-aware scheduling, and reminder jobs will be connected with countdown data in a later phase.",
+      "title": "Reminder automation"
+    }
+  },
+  "futureNotes": {
+    "header": {
+      "description": "Write notes now and unlock them together at a chosen future date.",
+      "eyebrow": "Capsules",
+      "title": "Future notes"
+    },
+    "notes": {
+      "anniversary": {
+        "subtitle": "Unlocks on Nov 12, 2026",
+        "title": "For our anniversary"
+      },
+      "future": {
+        "subtitle": "Unlocks on Jan 01, 2027",
+        "title": "Message for our future selves"
+      }
+    },
+    "comingSoon": {
+      "cta": "Open countdown shell",
+      "description": "Real encrypted note entries and unlock jobs will be connected once the future-note backend model is delivered.",
+      "title": "Unlock workflow"
+    }
+  },
+  "games": {
+    "header": {
+      "description": "Play memory-based mini games and keep your couple streak alive.",
+      "eyebrow": "Play",
+      "title": "Games"
+    },
+    "cards": {
+      "daily": {
+        "cta": "Daily question",
+        "description": "Answer one couple question each day to keep the streak.",
+        "title": "Daily mode"
+      },
+      "guess": {
+        "cta": "Guess the date",
+        "description": "Pick the day of a shared memory from your timeline.",
+        "title": "Guess mode"
+      }
+    },
+    "presentationalNote": "This is a presentational game hub. Real prompts, answers, and scoring remain untouched and are not wired yet.",
+    "comingSoon": {
+      "cta": "Open stats shell",
+      "description": "Game rounds, prompt generation, and score events will be linked when game backend features are implemented.",
+      "title": "Game engine integration"
+    }
+  },
+  "gameMode": {
+    "header": {
+      "description": "Mode-specific game view structure is ready for prompt and answer flows.",
+      "eyebrow": "Game mode"
+    },
+    "placeholder": "This route is a structured shell for the selected game mode. Prompt generation, answer capture, and streak updates will connect here in a later phase.",
+    "comingSoon": {
+      "cta": "Back to game hub",
+      "description": "All gameplay logic remains unchanged and intentionally unimplemented in this UI-only restructure.",
+      "title": "Gameplay wiring"
+    },
+    "fallbackModeLabel": "Mode"
+  },
+  "stats": {
+    "header": {
+      "description": "A soft dashboard for fun couple activity metrics.",
+      "eyebrow": "Insights",
+      "title": "Stats"
+    },
+    "cards": {
+      "memories": {
+        "label": "Memories this month",
+        "trend": "+6 vs last month",
+        "value": "12"
+      },
+      "streak": {
+        "label": "Current streak",
+        "trend": "Both answered daily",
+        "value": "7 days"
+      },
+      "trips": {
+        "label": "Trips completed",
+        "trend": "Shared adventures",
+        "value": "3"
+      }
+    },
+    "comingSoon": {
+      "cta": "Open games shell",
+      "description": "These widgets are placeholders for event-sourced stats and streak aggregations that will be delivered in Phase 3.",
+      "title": "Analytics pipeline"
+    }
+  },
+  "settings": {
+    "header": {
+      "description": "Use this screen as the 'More' hub for secondary sections while core logic remains unchanged.",
+      "eyebrow": "More",
+      "title": "Settings and extras"
+    },
+    "openShell": "Open the {label} shell page.",
+    "description": "This settings page currently acts as the mobile and desktop More entry. Account/privacy controls will be added in a future phase.",
+    "comingSoon": {
+      "cta": "Back to home",
+      "description": "Preference controls and profile-level settings remain out of scope for this UI-only pass.",
+      "title": "Settings controls"
+    }
+  },
+  "ui": {
+    "comingSoonCard": {
+      "badge": "Coming soon"
+    },
+    "memoryCard": {
+      "fallbackDate": "Unknown date",
+      "journalNote": "Journal note",
+      "labels": {
+        "image": "Photo",
+        "video": "Video"
+      },
+      "placeholders": {
+        "anniversary": "An anniversary-worthy page waiting for a little note.",
+        "compact": "A quiet note from this day.",
+        "featured": "One small note can turn this day into a chapter you return to."
+      },
+      "photoAlt": "Memory photo"
+    },
+    "countdown": {
+      "daysLeft": "{count, plural, one {# day} other {# days}}",
+      "remaining": "remaining"
+    },
+    "tripCard": {
+      "badge": "Trip",
+      "eyebrow": "Trip capsule"
+    },
+    "chatThread": {
+      "composerPlaceholder": "Write something warm, playful, or tiny.",
+      "header": {
+        "badge": "Mock surface",
+        "eyebrow": "Future thread",
+        "title": "Intimate, never noisy"
+      },
+      "messages": {
+        "m1": "I still keep thinking about the little cafe in Hoi An.",
+        "m2": "The lamp light made everything feel unreal. We should go back for two nights.",
+        "m3": "Saving that as our next mini trip plan.",
+        "m4": "And I want one more photo in that yellow hallway."
+      },
+      "timeLabels": {
+        "m1": "7:12 PM",
+        "m2": "7:14 PM",
+        "m3": "7:15 PM",
+        "m4": "7:16 PM"
+      }
+    },
+    "travelAtlas": {
+      "header": {
+        "badge": "Route glow",
+        "description": "The map becomes part scrapbook, part itinerary, part memory drawer.",
+        "eyebrow": "Travel atlas",
+        "title": "Places that changed the story"
+      },
+      "stops": {
+        "daLat": {
+          "count": "8 keepsakes",
+          "date": "Jul 12",
+          "note": "Rain, strawberries, and the walk back when the town felt all blush and fog.",
+          "title": "Da Lat"
+        },
+        "daNang": {
+          "count": "4 keepsakes",
+          "date": "Oct 20",
+          "note": "Ocean air, a slow evening, and one of your favorite photos together.",
+          "title": "Da Nang"
+        },
+        "hoiAn": {
+          "count": "5 keepsakes",
+          "date": "Sep 03",
+          "note": "Lantern light, too many snacks, and a promise to stay longer next time.",
+          "title": "Hoi An"
+        }
+      }
+    },
+    "anniversarySpotlight": {
+      "empty": {
+        "description": "Add a memory and this chapter surface will begin to fill with images, dates, and the little details that make your space feel alive.",
+        "eyebrow": "Anniversary highlight",
+        "title": "Start your first keepsake"
+      },
+      "eyebrow": "Editorial romance",
+      "openLatest": "Open latest chapter",
+      "addFirst": "Add your first chapter",
+      "revisit": "Revisit today",
+      "quoteFallback": "A small private world made from ordinary days, soft plans, and moments worth keeping.",
+      "since": "Together since {date}. Built from late-night notes, ordinary breakfasts, and the chapters you keep choosing to revisit.",
+      "dayCount": "Day {count}"
+    }
+  }
+}

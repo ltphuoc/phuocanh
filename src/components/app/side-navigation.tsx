@@ -1,15 +1,16 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, type ReactElement } from "react";
+import { LanguageSwitcher } from "@/components/app/language-switcher";
 import {
   appMemoryActionItem,
   appPrimaryNavigationItems,
   appSecondaryNavigationItems,
   isAppNavigationItemActive,
 } from "@/components/app/navigation-model";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 
 interface ExpansionState {
@@ -19,6 +20,7 @@ interface ExpansionState {
 
 export const SideNavigation = (): ReactElement => {
   const pathname = usePathname();
+  const t = useTranslations();
   const MemoryActionIcon = appMemoryActionItem.icon;
   const hasSecondaryActive = appSecondaryNavigationItems.some((item) =>
     isAppNavigationItemActive(pathname, item),
@@ -49,7 +51,9 @@ export const SideNavigation = (): ReactElement => {
             </Link>
             <div className="text-center">
               <p className="ui-meta">PhuocAnh</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">keepsake space</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                {t("nav.side.keepsakeSpace")}
+              </p>
             </div>
             <nav className="flex w-full flex-col items-center gap-3">
               {appPrimaryNavigationItems.map((item) => {
@@ -73,7 +77,7 @@ export const SideNavigation = (): ReactElement => {
                       />
                     ) : null}
                     <Icon aria-hidden="true" className="relative size-5" strokeWidth={2.1} />
-                    <span className="sr-only">{item.label}</span>
+                    <span className="sr-only">{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
@@ -84,6 +88,7 @@ export const SideNavigation = (): ReactElement => {
             >
               <MemoryActionIcon aria-hidden="true" className="size-6" strokeWidth={2.1} />
             </Link>
+            <LanguageSwitcher />
             <button
               className={cn(
                 "mt-auto inline-flex size-12 items-center justify-center rounded-full border border-white/66 bg-white/72 shadow-whisper",
@@ -97,7 +102,7 @@ export const SideNavigation = (): ReactElement => {
               }
               type="button"
             >
-              <span className="sr-only">Toggle expanded navigation</span>
+              <span className="sr-only">{t("nav.side.toggleNavigation")}</span>
               <svg
                 aria-hidden="true"
                 className="size-4"
@@ -124,9 +129,9 @@ export const SideNavigation = (): ReactElement => {
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div className="mb-4">
-                  <p className="ui-meta ui-couple-mark">Shared corners</p>
+                  <p className="ui-meta ui-couple-mark">{t("nav.side.sharedCornersEyebrow")}</p>
                   <p className="mt-2 font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
-                    Explore softly
+                    {t("nav.side.sharedCornersTitle")}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -151,11 +156,11 @@ export const SideNavigation = (): ReactElement => {
                           </span>
                           <span className="min-w-0">
                             <span className="block text-sm font-semibold text-foreground">
-                              {item.label}
+                              {t(item.labelKey)}
                             </span>
-                            {item.description ? (
+                            {item.descriptionKey ? (
                               <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                                {item.description}
+                                {t(item.descriptionKey)}
                               </span>
                             ) : null}
                           </span>

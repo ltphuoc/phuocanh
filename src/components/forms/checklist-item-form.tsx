@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { addChecklistItemAction } from "@/app/actions/list-actions";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
 import { Input } from "@/components/ui/input";
 import { initialActionState } from "@/lib/actions/action-state";
 
@@ -29,6 +30,9 @@ interface ChecklistItemFormProps {
 export const ChecklistItemForm = ({
   checklistId,
 }: ChecklistItemFormProps): ReactElement => {
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.checklistItem");
   const [state, submitAction, isPending] = useActionState(
     addChecklistItemAction,
     initialActionState,
@@ -46,8 +50,10 @@ export const ChecklistItemForm = ({
       return;
     }
 
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
+      toast.success(actionsT(actionMessageKey));
       form.reset({
         text: "",
       });
@@ -55,9 +61,9 @@ export const ChecklistItemForm = ({
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [form, hasSubmitted, state.message, state.status]);
+  }, [actionsT, form, hasSubmitted, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
@@ -71,9 +77,16 @@ export const ChecklistItemForm = ({
 
   return (
     <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={onSubmit}>
-      <Input placeholder="Add item" type="text" {...form.register("text")} />
-      <Button className="sm:w-auto" isBusy={isPending} size="sm" type="submit" variant="outline">
-        Add
+      <Input placeholder={formT("placeholder")} type="text" {...form.register("text")} />
+      <Button
+        busyLabel={commonT("working")}
+        className="sm:w-auto"
+        isBusy={isPending}
+        size="sm"
+        type="submit"
+        variant="outline"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

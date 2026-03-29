@@ -14,6 +14,8 @@ import { z } from "zod";
 import { acceptInviteAction } from "@/app/actions/auth-actions";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
+import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { initialActionState } from "@/lib/actions/action-state";
 
@@ -30,6 +32,10 @@ interface AcceptInviteFormProps {
 export const AcceptInviteForm = ({
   initialToken,
 }: AcceptInviteFormProps): ReactElement => {
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.acceptInvite");
+  const router = useRouter();
   const [state, submitAction, isPending] = useActionState(
     acceptInviteAction,
     initialActionState,
@@ -47,16 +53,18 @@ export const AcceptInviteForm = ({
       return;
     }
 
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
-      window.location.assign("/home");
+      toast.success(actionsT(actionMessageKey));
+      router.replace("/home");
       return;
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [hasSubmitted, state.message, state.status]);
+  }, [actionsT, hasSubmitted, router, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
@@ -70,14 +78,19 @@ export const AcceptInviteForm = ({
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <FormSection
-        description="Token is prefilled from your partner invite URL."
+        description={formT("tokenDescription")}
         htmlFor="inviteToken"
-        label="Invite token"
+        label={formT("tokenLabel")}
       >
         <Input id="inviteToken" readOnly type="text" {...form.register("token")} />
       </FormSection>
-      <Button className="w-full" isBusy={isPending} type="submit">
-        Join couple space
+      <Button
+        busyLabel={commonT("working")}
+        className="w-full"
+        isBusy={isPending}
+        type="submit"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

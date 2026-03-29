@@ -1,8 +1,7 @@
 "use client";
 
 import { LayoutGroup, motion } from "motion/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, type ReactElement } from "react";
 import {
   appMemoryActionItem,
@@ -11,6 +10,7 @@ import {
   isAppNavigationItemActive,
 } from "@/components/app/navigation-model";
 import { MoreNavigationSheet } from "@/components/app/more-navigation-sheet";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 
 interface MoreSheetState {
@@ -20,6 +20,7 @@ interface MoreSheetState {
 
 export const BottomNavigation = (): ReactElement => {
   const pathname = usePathname();
+  const t = useTranslations();
   const [moreSheetState, setMoreSheetState] = useState<MoreSheetState>({
     open: false,
     pathname,
@@ -56,13 +57,13 @@ export const BottomNavigation = (): ReactElement => {
                         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                       />
                     ) : null}
-                    <span className="relative flex flex-col items-center gap-1">
-                      <Icon aria-hidden="true" className="size-[18px]" strokeWidth={2.2} />
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        {item.mobileLabel ?? item.label}
+                      <span className="relative flex flex-col items-center gap-1">
+                        <Icon aria-hidden="true" className="size-[18px]" strokeWidth={2.2} />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
+                        </span>
                       </span>
-                    </span>
-                  </>
+                    </>
                 );
 
                 return (
@@ -101,7 +102,7 @@ export const BottomNavigation = (): ReactElement => {
               })}
             </div>
             <div className="pointer-events-none mt-3 text-center text-[11px] font-medium text-muted-foreground">
-              Capture a moment
+              {t("nav.bottom.captureMoment")}
             </div>
           </div>
         </LayoutGroup>

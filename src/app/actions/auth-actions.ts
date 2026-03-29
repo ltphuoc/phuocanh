@@ -1,16 +1,19 @@
 "use server";
 
 import { addDays } from "date-fns";
-import { revalidatePath } from "next/cache";
+import { hasLocale } from "next-intl";
 import { z } from "zod";
 import {
   createErrorState,
   createSuccessState,
+  type ActionMessageKey,
   type ActionState,
   type ActionStateWithData,
 } from "@/lib/actions/action-state";
 import { env } from "@/lib/env";
-import { toErrorMessage } from "@/lib/errors";
+import { routing, type Locale } from "@/i18n/routing";
+import { toLocalizedPathname } from "@/lib/i18n/pathname";
+import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
 import { requireReadyCoupleContext } from "@/lib/server/couple-context";
 import { getSiteUrl } from "@/lib/server/site-url";
 import {
@@ -24,30 +27,31 @@ interface InviteData {
 
 const emailSchema = z.object({
   email: z.email(),
+  locale: z.string().optional(),
 });
 
 const inviteTokenSchema = z.object({
   token: z.uuid(),
 });
 
-const mapAcceptInviteError = (message: string): string => {
+const mapAcceptInviteError = (message: string): ActionMessageKey => {
   if (message.includes("INVITE_NOT_FOUND")) {
-    return "Invite is invalid or already used.";
+    return "auth.invite.invalidOrUsed";
   }
 
   if (message.includes("INVITE_EXPIRED")) {
-    return "Invite has expired.";
+    return "auth.invite.expired";
   }
 
   if (message.includes("COUPLE_FULL")) {
-    return "This couple space already has two active members.";
+    return "auth.invite.coupleFull";
   }
 
   if (message.includes("AUTH_REQUIRED")) {
-    return "Please sign in before accepting an invite.";
+    return "auth.signInRequired";
   }
 
-  return message;
+  return "unexpectedError";
 };
 
 const normalizeSupabaseUrl = (urlValue: string): string =>
@@ -75,11 +79,24 @@ const getAlternateLocalSupabaseUrl = (baseUrl: string): string | null => {
 const isNetworkFetchError = (message: string): boolean =>
   message.toLowerCase().includes("fetch failed");
 
+interface MagicLinkRequestResult {
+  readonly errorState: ActionState | null;
+  readonly networkFailed: boolean;
+}
+
+const resolveLocale = (value: unknown): Locale => {
+  if (typeof value === "string" && hasLocale(routing.locales, value)) {
+    return value;
+  }
+
+  return routing.defaultLocale;
+};
+
 const requestMagicLink = async (
   supabaseUrl: string,
   email: string,
   emailRedirectTo: string,
-): Promise<ActionState | null> => {
+): Promise<MagicLinkRequestResult> => {
   try {
     const supabase = await createSupabaseServerClientForUrl(supabaseUrl);
     const { error } = await supabase.auth.signInWithOtp({
@@ -90,12 +107,22 @@ const requestMagicLink = async (
     });
 
     if (!error) {
-      return null;
+      return {
+        errorState: null,
+        networkFailed: false,
+      };
     }
 
-    return createErrorState(error.message);
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    return {
+      errorState: createErrorState("unexpectedError"),
+      networkFailed: isNetworkFetchError(error.message),
+    };
+  } catch (error: unknown) {
+    console.error("Failed to request magic link", error);
+    return {
+      errorState: createErrorState("unexpectedError"),
+      networkFailed: error instanceof Error ? isNetworkFetchError(error.message) : false,
+    };
   }
 };
 
@@ -106,10 +133,13 @@ export const sendMagicLinkAction = async (
   try {
     const parsed = emailSchema.parse({
       email: formData.get("email"),
+      locale: formData.get("locale"),
     });
 
+    const locale = resolveLocale(parsed.locale);
     const siteUrl = await getSiteUrl();
-    const emailRedirectTo = `${siteUrl}/auth/callback?next=/home`;
+    const nextPath = toLocalizedPathname(locale, "/home");
+    const emailRedirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`;
     const primarySupabaseUrl = normalizeSupabaseUrl(env.NEXT_PUBLIC_SUPABASE_URL);
 
     const primaryError = await requestMagicLink(
@@ -118,15 +148,13 @@ export const sendMagicLinkAction = async (
       emailRedirectTo,
     );
 
-    if (!primaryError) {
-      return createSuccessState("Check your email for the magic link.");
+    if (!primaryError.errorState) {
+      return createSuccessState("auth.magicLink.sent");
     }
 
-    // Local Supabase setups often flip between localhost and 127.0.0.1; retrying both avoids
-    // false-negative auth failures caused by host mismatches instead of real credential issues.
     const alternateSupabaseUrl = getAlternateLocalSupabaseUrl(primarySupabaseUrl);
-    if (!alternateSupabaseUrl || !isNetworkFetchError(primaryError.message)) {
-      return primaryError;
+    if (!alternateSupabaseUrl || !primaryError.networkFailed) {
+      return primaryError.errorState;
     }
 
     const fallbackError = await requestMagicLink(
@@ -134,19 +162,18 @@ export const sendMagicLinkAction = async (
       parsed.email,
       emailRedirectTo,
     );
-    if (!fallbackError) {
-      return createSuccessState("Check your email for the magic link.");
+    if (!fallbackError.errorState) {
+      return createSuccessState("auth.magicLink.sent");
     }
 
-    if (isNetworkFetchError(fallbackError.message)) {
-      return createErrorState(
-        "Cannot reach Supabase Auth. Ensure local Supabase is running and reachable at port 54321.",
-      );
+    if (fallbackError.networkFailed) {
+      return createErrorState("auth.magicLink.unreachable");
     }
 
-    return fallbackError;
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    return fallbackError.errorState;
+  } catch (error: unknown) {
+    console.error("Failed to send magic link", error);
+    return createErrorState("unexpectedError");
   }
 };
 
@@ -155,9 +182,9 @@ export const createInviteAction = async (
   formData: FormData,
 ): Promise<ActionStateWithData<InviteData>> => {
   void previousState;
-  void formData;
 
   try {
+    const locale = resolveLocale(formData.get("locale"));
     const context = await requireReadyCoupleContext();
     const supabase = await createSupabaseServerClient();
     const siteUrl = await getSiteUrl();
@@ -172,21 +199,23 @@ export const createInviteAction = async (
     });
 
     if (error) {
+      console.error("Failed to create invite", error);
       return {
-        ...createErrorState(error.message),
+        ...createErrorState("unexpectedError"),
         data: undefined,
       };
     }
 
     return {
-      ...createSuccessState("Invite link created."),
+      ...createSuccessState("auth.invite.created"),
       data: {
-        inviteUrl: `${siteUrl}/accept-invite?token=${token}`,
+        inviteUrl: `${siteUrl}${toLocalizedPathname(locale, `/accept-invite?token=${token}`)}`,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error("Failed to create invite", error);
     return {
-      ...createErrorState(toErrorMessage(error)),
+      ...createErrorState("unexpectedError"),
       data: undefined,
     };
   }
@@ -207,11 +236,9 @@ export const acceptInviteAction = async (
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return createErrorState("Please sign in before accepting an invite.");
+      return createErrorState("auth.signInRequired");
     }
 
-    // Invite completion and membership assignment are DB-owned invariants; the app must not
-    // join users to a couple by writing membership tables directly.
     const { data: acceptedRows, error } = await supabase.rpc("accept_couple_invite", {
       invite_token: parsed.token,
     });
@@ -221,12 +248,13 @@ export const acceptInviteAction = async (
     }
 
     if (!acceptedRows?.[0]) {
-      return createErrorState("Invite is invalid or already used.");
+      return createErrorState("auth.invite.invalidOrUsed");
     }
 
-    revalidatePath("/home");
-    return createSuccessState("Invite accepted. Welcome to your couple space.");
-  } catch (error) {
-    return createErrorState(toErrorMessage(error));
+    revalidateLocalizedPath("/home");
+    return createSuccessState("auth.invite.accepted");
+  } catch (error: unknown) {
+    console.error("Failed to accept invite", error);
+    return createErrorState("unexpectedError");
   }
 };

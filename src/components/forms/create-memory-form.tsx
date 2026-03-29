@@ -15,6 +15,8 @@ import { z } from "zod";
 import { createMemoryAction } from "@/app/actions/memory-actions";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
+import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { initialActionState } from "@/lib/actions/action-state";
@@ -28,6 +30,10 @@ const createMemorySchema = z.object({
 type CreateMemoryValues = z.infer<typeof createMemorySchema>;
 
 export const CreateMemoryForm = (): ReactElement => {
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.memory");
+  const router = useRouter();
   const [state, submitAction, isPending] = useActionState(
     createMemoryAction,
     initialActionState,
@@ -48,16 +54,18 @@ export const CreateMemoryForm = (): ReactElement => {
       return;
     }
 
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
-      window.location.assign("/home");
+      toast.success(actionsT(actionMessageKey));
+      router.replace("/home");
       return;
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [hasSubmitted, state.message, state.status]);
+  }, [actionsT, hasSubmitted, router, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
@@ -79,9 +87,9 @@ export const CreateMemoryForm = (): ReactElement => {
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <FormSection
-          description="Use local time for this memory."
+          description={formT("happenedAtDescription")}
           htmlFor="happenedAtLocal"
-          label="Happened at"
+          label={formT("happenedAtLabel")}
         >
           <Input
             id="happenedAtLocal"
@@ -91,13 +99,13 @@ export const CreateMemoryForm = (): ReactElement => {
         </FormSection>
 
         <FormSection
-          description="Optional place where this happened."
+          description={formT("locationDescription")}
           htmlFor="locationName"
-          label="Location"
+          label={formT("locationLabel")}
         >
           <Input
             id="locationName"
-            placeholder="Da Nang"
+            placeholder={formT("locationPlaceholder")}
             type="text"
             {...form.register("locationName")}
           />
@@ -105,14 +113,23 @@ export const CreateMemoryForm = (): ReactElement => {
       </div>
 
       <FormSection
-        description="A short story helps future search and recap."
+        description={formT("noteDescription")}
         htmlFor="note"
-        label="Note"
+        label={formT("noteLabel")}
       >
-        <Textarea id="note" placeholder="What happened?" rows={5} {...form.register("note")} />
+        <Textarea
+          id="note"
+          placeholder={formT("notePlaceholder")}
+          rows={5}
+          {...form.register("note")}
+        />
       </FormSection>
 
-      <FormSection description="Image or video up to 25MB." htmlFor="media" label="Media">
+      <FormSection
+        description={formT("mediaDescription")}
+        htmlFor="media"
+        label={formT("mediaLabel")}
+      >
         <Input
           id="media"
           onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
@@ -120,8 +137,13 @@ export const CreateMemoryForm = (): ReactElement => {
         />
       </FormSection>
 
-      <Button className="w-full md:w-auto" isBusy={isPending} type="submit">
-        Save memory
+      <Button
+        busyLabel={commonT("working")}
+        className="w-full md:w-auto"
+        isBusy={isPending}
+        type="submit"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

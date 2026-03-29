@@ -18,109 +18,148 @@ import {
 } from "lucide-react";
 
 export interface AppNavigationItem {
-  readonly description?: string;
-  readonly group?: string;
+  readonly descriptionKey?: NavigationDescriptionKey;
+  readonly groupKey?: NavigationGroupKey;
   readonly href: string;
   readonly icon: LucideIcon;
-  readonly label: string;
+  readonly labelKey: NavigationLabelKey;
   readonly matchPrefixes: readonly string[];
-  readonly mobileLabel?: string;
+  readonly mobileLabelKey?: NavigationLabelKey;
 }
+
+type NavigationLabelKey =
+  | "nav.items.albums.label"
+  | "nav.items.chat.label"
+  | "nav.items.countdowns.label"
+  | "nav.items.futureNotes.label"
+  | "nav.items.games.label"
+  | "nav.items.home.label"
+  | "nav.items.lists.label"
+  | "nav.items.map.label"
+  | "nav.items.memory.label"
+  | "nav.items.more.label"
+  | "nav.items.newMemory.label"
+  | "nav.items.onThisDay.label"
+  | "nav.items.onThisDay.mobileLabel"
+  | "nav.items.settings.label"
+  | "nav.items.stats.label"
+  | "nav.items.trips.label";
+
+type NavigationDescriptionKey =
+  | "nav.items.albums.description"
+  | "nav.items.chat.description"
+  | "nav.items.countdowns.description"
+  | "nav.items.futureNotes.description"
+  | "nav.items.games.description"
+  | "nav.items.lists.description"
+  | "nav.items.map.description"
+  | "nav.items.memory.description"
+  | "nav.items.newMemory.description"
+  | "nav.items.settings.description"
+  | "nav.items.stats.description"
+  | "nav.items.trips.description";
+
+type NavigationGroupKey =
+  | "nav.groups.planning"
+  | "nav.groups.play"
+  | "nav.groups.space"
+  | "nav.groups.together"
+  | "nav.groups.travel";
 
 export const appPrimaryNavigationItems: readonly AppNavigationItem[] = [
   {
     href: "/home",
     icon: Home,
-    label: "Home",
+    labelKey: "nav.items.home.label",
     matchPrefixes: ["/home"],
   },
   {
     href: "/on-this-day",
     icon: Heart,
-    label: "On this day",
-    mobileLabel: "Today",
+    labelKey: "nav.items.onThisDay.label",
+    mobileLabelKey: "nav.items.onThisDay.mobileLabel",
     matchPrefixes: ["/on-this-day"],
   },
   {
-    description: "The private thread between the two of you.",
+    descriptionKey: "nav.items.chat.description",
     href: "/chat",
     icon: MessageCircleHeart,
-    label: "Chat",
+    labelKey: "nav.items.chat.label",
     matchPrefixes: ["/chat"],
   },
 ] as const;
 
 export const appSecondaryNavigationItems: readonly AppNavigationItem[] = [
   {
-    description: "Wishlist items and shared checklists.",
-    group: "Together",
+    descriptionKey: "nav.items.lists.description",
+    groupKey: "nav.groups.together",
     href: "/lists",
     icon: ListTodo,
-    label: "Lists",
+    labelKey: "nav.items.lists.label",
     matchPrefixes: ["/lists"],
   },
   {
-    description: "Journeys, staycations, and shared itineraries.",
-    group: "Travel",
+    descriptionKey: "nav.items.trips.description",
+    groupKey: "nav.groups.travel",
     href: "/trips",
     icon: Compass,
-    label: "Trips",
+    labelKey: "nav.items.trips.label",
     matchPrefixes: ["/trips"],
   },
   {
-    description: "Albums linked to trips and memories.",
-    group: "Travel",
+    descriptionKey: "nav.items.albums.description",
+    groupKey: "nav.groups.travel",
     href: "/albums/featured",
     icon: Album,
-    label: "Albums",
+    labelKey: "nav.items.albums.label",
     matchPrefixes: ["/albums"],
   },
   {
-    description: "Pins, routes, and place-based memories.",
-    group: "Travel",
+    descriptionKey: "nav.items.map.description",
+    groupKey: "nav.groups.travel",
     href: "/map",
     icon: MapPinned,
-    label: "Map",
+    labelKey: "nav.items.map.label",
     matchPrefixes: ["/map"],
   },
   {
-    description: "Dates worth waiting for together.",
-    group: "Planning",
+    descriptionKey: "nav.items.countdowns.description",
+    groupKey: "nav.groups.planning",
     href: "/countdowns",
     icon: Timer,
-    label: "Countdowns",
+    labelKey: "nav.items.countdowns.label",
     matchPrefixes: ["/countdowns"],
   },
   {
-    description: "Notes for future versions of yourselves.",
-    group: "Planning",
+    descriptionKey: "nav.items.futureNotes.description",
+    groupKey: "nav.groups.planning",
     href: "/future-notes",
     icon: CalendarClock,
-    label: "Future notes",
+    labelKey: "nav.items.futureNotes.label",
     matchPrefixes: ["/future-notes"],
   },
   {
-    description: "Playful couple prompts and mini games.",
-    group: "Play",
+    descriptionKey: "nav.items.games.description",
+    groupKey: "nav.groups.play",
     href: "/games",
     icon: Gamepad2,
-    label: "Games",
+    labelKey: "nav.items.games.label",
     matchPrefixes: ["/games"],
   },
   {
-    description: "Soft metrics and little streaks.",
-    group: "Play",
+    descriptionKey: "nav.items.stats.description",
+    groupKey: "nav.groups.play",
     href: "/stats",
     icon: Trophy,
-    label: "Stats",
+    labelKey: "nav.items.stats.label",
     matchPrefixes: ["/stats"],
   },
   {
-    description: "Manage your space and preferences.",
-    group: "Space",
+    descriptionKey: "nav.items.settings.description",
+    groupKey: "nav.groups.space",
     href: "/settings",
     icon: Settings2,
-    label: "Settings",
+    labelKey: "nav.items.settings.label",
     matchPrefixes: ["/settings"],
   },
 ] as const;
@@ -132,7 +171,7 @@ const appSecondaryPrefixes: readonly string[] = appSecondaryNavigationItems.flat
 export const appMoreNavigationItem: AppNavigationItem = {
   href: "/settings",
   icon: MoreHorizontal,
-  label: "More",
+  labelKey: "nav.items.more.label",
   matchPrefixes: appSecondaryPrefixes,
 };
 
@@ -143,21 +182,21 @@ export const appMobileNavigationItems: readonly AppNavigationItem[] = [
 
 export const mobileContextQuickActions: readonly AppNavigationItem[] = [
   {
-    description: "Capture a moment quickly.",
+    descriptionKey: "nav.items.newMemory.description",
     href: "/memories/new",
     icon: Sparkles,
-    label: "New memory",
+    labelKey: "nav.items.newMemory.label",
     matchPrefixes: ["/memories/new"],
   },
 ];
 
 export const appMemoryActionItem: AppNavigationItem = {
-  description: "Capture a new memory.",
+  descriptionKey: "nav.items.memory.description",
   href: "/memories/new",
   icon: Camera,
-  label: "Memory",
+  labelKey: "nav.items.memory.label",
   matchPrefixes: ["/memories", "/memories/new"],
-  mobileLabel: "Memory",
+  mobileLabelKey: "nav.items.memory.label",
 };
 
 export const isAppNavigationItemActive = (

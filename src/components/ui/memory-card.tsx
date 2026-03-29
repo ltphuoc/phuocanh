@@ -1,11 +1,12 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
 import type { ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 
 type MemoryCardVariant = "anniversary" | "compact" | "featured";
@@ -21,26 +22,32 @@ export interface MemoryCardProps {
   readonly variant?: MemoryCardVariant;
 }
 
-const getMemoryLabel = (mediaType?: "image" | "video" | null): string | null => {
+const getMemoryLabel = (
+  mediaType: "image" | "video" | null | undefined,
+  t: ReturnType<typeof useTranslations<"ui.memoryCard">>,
+): string | null => {
   switch (mediaType) {
     case "image":
-      return "Photo";
+      return t("labels.image");
     case "video":
-      return "Video";
+      return t("labels.video");
     default:
       return null;
   }
 };
 
-const getMemoryPlaceholder = (variant: MemoryCardVariant): string => {
+const getMemoryPlaceholder = (
+  variant: MemoryCardVariant,
+  t: ReturnType<typeof useTranslations<"ui.memoryCard">>,
+): string => {
   switch (variant) {
     case "anniversary":
-      return "An anniversary-worthy page waiting for a little note.";
+      return t("placeholders.anniversary");
     case "featured":
-      return "One small note can turn this day into a chapter you return to.";
+      return t("placeholders.featured");
     case "compact":
     default:
-      return "A quiet note from this day.";
+      return t("placeholders.compact");
   }
 };
 
@@ -55,9 +62,22 @@ export const MemoryCard = ({
   variant = "compact",
 }: MemoryCardProps): ReactElement => {
   const reduceMotion = useReducedMotion();
+  const format = useFormatter();
+  const t = useTranslations("ui.memoryCard");
   const date = parseISO(happenedAt);
-  const mediaLabel = getMemoryLabel(mediaType);
-  const noteText = note?.trim() ? note : getMemoryPlaceholder(variant);
+  const isValidDate = !Number.isNaN(date.getTime());
+  const mediaLabel = getMemoryLabel(mediaType, t);
+  const noteText = note?.trim() ? note : getMemoryPlaceholder(variant, t);
+  const monthYearLabel = isValidDate
+    ? format.dateTime(date, { month: "long", year: "numeric" })
+    : t("fallbackDate");
+  const dayLabel = isValidDate ? format.dateTime(date, { day: "numeric" }) : "--";
+  const weekdayLabel = isValidDate
+    ? format.dateTime(date, { weekday: "long" })
+    : t("fallbackDate");
+  const fullDateLabel = isValidDate
+    ? format.dateTime(date, { day: "numeric", month: "short", year: "numeric" })
+    : t("fallbackDate");
   const isFeatureVariant = variant !== "compact";
 
   return (
@@ -77,11 +97,11 @@ export const MemoryCard = ({
         <div className="relative flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="ui-meta">{format(date, "MMMM yyyy")}</p>
+              <p className="ui-meta">{monthYearLabel}</p>
               <p className="mt-2 font-display text-[1.5rem] tracking-[-0.03em] text-foreground">
-                {format(date, "d")}
+                {dayLabel}
               </p>
-              <p className="text-sm text-muted-foreground">{format(date, "EEEE")}</p>
+              <p className="text-sm text-muted-foreground">{weekdayLabel}</p>
             </div>
             {mediaLabel ? <Badge variant="primary">{mediaLabel}</Badge> : null}
           </div>
@@ -94,7 +114,7 @@ export const MemoryCard = ({
             {imageUrl ? (
               <div className="relative h-full w-full">
                 <Image
-                  alt="Memory photo"
+                  alt={t("photoAlt")}
                   className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   fill
                   sizes={variant === "compact" ? "(min-width: 1024px) 30vw, 90vw" : "100vw"}
@@ -105,7 +125,7 @@ export const MemoryCard = ({
             ) : (
               <div className="ui-gradient-memory flex h-full items-end p-4">
                 <div className="rounded-pill border border-white/65 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-                  {mediaLabel ?? "Journal note"}
+                  {mediaLabel ?? t("journalNote")}
                 </div>
               </div>
             )}
@@ -122,7 +142,7 @@ export const MemoryCard = ({
               {noteText}
             </p>
             <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.08em] text-muted-foreground">
-              <span>{format(date, "MMM d, yyyy")}</span>
+              <span>{fullDateLabel}</span>
               {locationName ? (
                 <>
                   <span className="text-[rgba(121,99,110,0.6)]">/</span>

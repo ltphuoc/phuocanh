@@ -28,10 +28,12 @@ const buttonVariants = tv({
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  readonly busyLabel?: string;
   readonly isBusy?: boolean;
 }
 
 export const Button = ({
+  busyLabel,
   children,
   className,
   isBusy = false,
@@ -45,6 +47,6 @@ export const Button = ({
     type={props.type ?? "button"}
     {...props}
   >
-    {isBusy ? "Working..." : children}
+    {isBusy ? (busyLabel ?? children) : children}
   </button>
 );

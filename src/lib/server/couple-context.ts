@@ -1,6 +1,8 @@
 import { format } from "date-fns";
 import { redirect } from "next/navigation";
+import type { Locale } from "@/i18n/routing";
 import { isSchemaCacheMissMessage, SchemaReadinessError } from "@/lib/errors";
+import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -180,17 +182,19 @@ export const requireReadyCoupleContext = async (): Promise<CoupleContext> => {
   return state.context;
 };
 
-export const getReadyCoupleContextOrRedirect = async (): Promise<CoupleContext> => {
+export const getReadyCoupleContextOrRedirect = async (
+  locale: Locale,
+): Promise<CoupleContext> => {
   const state = await getAuthGateState();
 
   switch (state.status) {
     case "ready":
       return state.context;
     case "needs_invite":
-      redirect("/accept-invite");
+      redirect(toLocalizedPathname(locale, "/accept-invite"));
     case "unauthenticated":
     default:
-      redirect("/login");
+      redirect(toLocalizedPathname(locale, "/login"));
   }
 };
 

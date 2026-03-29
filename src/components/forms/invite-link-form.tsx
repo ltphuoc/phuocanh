@@ -4,6 +4,7 @@ import { startTransition, useActionState, useEffect, type ReactElement } from "r
 import { toast } from "sonner";
 import { createInviteAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/hooks/useI18n";
 import {
   initialActionState,
   type ActionStateWithData,
@@ -19,20 +20,26 @@ const initialInviteState: ActionStateWithData<InviteData> = {
 };
 
 export const InviteLinkForm = (): ReactElement => {
+  const { locale } = useI18n();
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.invite");
   const [state, submitAction, isPending] = useActionState(
     createInviteAction,
     initialInviteState,
   );
 
   useEffect(() => {
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success" && state.data?.inviteUrl) {
-      toast.success(state.message);
+      toast.success(actionsT(actionMessageKey));
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [state.data?.inviteUrl, state.message, state.status]);
+  }, [actionsT, state.data?.inviteUrl, state.message, state.status]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -40,12 +47,20 @@ export const InviteLinkForm = (): ReactElement => {
         onSubmit={(event) => {
           event.preventDefault();
           startTransition(() => {
-            submitAction(new FormData());
+            const payload = new FormData();
+            payload.set("locale", locale);
+            submitAction(payload);
           });
         }}
       >
-        <Button className="w-full md:w-auto" isBusy={isPending} type="submit" variant="outline">
-          Generate partner invite
+        <Button
+          busyLabel={commonT("working")}
+          className="w-full md:w-auto"
+          isBusy={isPending}
+          type="submit"
+          variant="outline"
+        >
+          {formT("submit")}
         </Button>
       </form>
       {state.data?.inviteUrl ? (
@@ -53,7 +68,7 @@ export const InviteLinkForm = (): ReactElement => {
           className="rounded-2xl border border-border bg-muted-soft px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-muted"
           onClick={async () => {
             await navigator.clipboard.writeText(state.data?.inviteUrl ?? "");
-            toast.success("Invite link copied.");
+            toast.success(formT("copySuccess"));
           }}
           type="button"
         >

@@ -1,10 +1,11 @@
 import { Sparkles } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/ui/section-card";
 
 interface ComingSoonCardProps {
+  readonly badgeLabel: string;
   readonly ctaHref?: string;
   readonly ctaLabel?: string;
   readonly description: string;
@@ -12,6 +13,7 @@ interface ComingSoonCardProps {
 }
 
 export const ComingSoonCard = ({
+  badgeLabel,
   ctaHref,
   ctaLabel,
   description,
@@ -23,7 +25,7 @@ export const ComingSoonCard = ({
         <Sparkles aria-hidden="true" className="size-4 text-primary" strokeWidth={2.2} />
         <p className="font-display text-2xl tracking-[-0.025em] text-foreground">{title}</p>
       </div>
-      <Badge variant="primary">Coming soon</Badge>
+      <Badge variant="primary">{badgeLabel}</Badge>
     </div>
     <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{description}</p>
     {ctaHref && ctaLabel ? (

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { sendMagicLinkAction } from "@/app/actions/auth-actions";
+import { useI18n } from "@/hooks/useI18n";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,10 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = (): ReactElement => {
+  const { locale } = useI18n();
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.login");
   const [state, submitAction, isPending] = useActionState(
     sendMagicLinkAction,
     initialActionState,
@@ -30,18 +35,21 @@ export const LoginForm = (): ReactElement => {
   });
 
   useEffect(() => {
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
+      toast.success(actionsT(actionMessageKey));
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [state.message, state.status]);
+  }, [actionsT, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     const payload = new FormData();
     payload.set("email", values.email);
+    payload.set("locale", locale);
     startTransition(() => {
       submitAction(payload);
     });
@@ -50,20 +58,25 @@ export const LoginForm = (): ReactElement => {
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <FormSection
-        description="Use the email linked to your couple space."
+        description={formT("emailDescription")}
         htmlFor="email"
-        label="Email"
+        label={formT("emailLabel")}
       >
         <Input
           autoComplete="email"
           id="email"
-          placeholder="you@example.com"
+          placeholder={formT("emailPlaceholder")}
           type="email"
           {...form.register("email")}
         />
       </FormSection>
-      <Button className="w-full" isBusy={isPending} type="submit">
-        Send magic link
+      <Button
+        busyLabel={commonT("working")}
+        className="w-full"
+        isBusy={isPending}
+        type="submit"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

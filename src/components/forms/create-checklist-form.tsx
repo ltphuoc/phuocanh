@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { createChecklistAction } from "@/app/actions/list-actions";
+import { useI18n } from "@/hooks/useI18n";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,9 @@ const checklistSchema = z.object({
 type ChecklistValues = z.infer<typeof checklistSchema>;
 
 export const CreateChecklistForm = (): ReactElement => {
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.checklist");
   const [state, submitAction, isPending] = useActionState(
     createChecklistAction,
     initialActionState,
@@ -41,8 +45,10 @@ export const CreateChecklistForm = (): ReactElement => {
       return;
     }
 
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
+      toast.success(actionsT(actionMessageKey));
       form.reset({
         title: "",
       });
@@ -50,9 +56,9 @@ export const CreateChecklistForm = (): ReactElement => {
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [form, hasSubmitted, state.message, state.status]);
+  }, [actionsT, form, hasSubmitted, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
@@ -65,11 +71,22 @@ export const CreateChecklistForm = (): ReactElement => {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-      <FormSection htmlFor="checklistTitle" label="Checklist title">
-        <Input id="checklistTitle" placeholder="Weekend goals" type="text" {...form.register("title")} />
+      <FormSection htmlFor="checklistTitle" label={formT("titleLabel")}>
+        <Input
+          id="checklistTitle"
+          placeholder={formT("titlePlaceholder")}
+          type="text"
+          {...form.register("title")}
+        />
       </FormSection>
-      <Button className="w-full md:w-auto" isBusy={isPending} type="submit" variant="outline">
-        Create checklist
+      <Button
+        busyLabel={commonT("working")}
+        className="w-full md:w-auto"
+        isBusy={isPending}
+        type="submit"
+        variant="outline"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

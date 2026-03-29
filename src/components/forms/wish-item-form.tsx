@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { addWishItemAction } from "@/app/actions/list-actions";
+import { useI18n } from "@/hooks/useI18n";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,9 @@ const wishItemSchema = z.object({
 type WishItemValues = z.infer<typeof wishItemSchema>;
 
 export const WishItemForm = (): ReactElement => {
+  const { t: actionsT } = useI18n("actions");
+  const { t: commonT } = useI18n("common");
+  const { t: formT } = useI18n("forms.wishItem");
   const [state, submitAction, isPending] = useActionState(
     addWishItemAction,
     initialActionState,
@@ -46,8 +50,10 @@ export const WishItemForm = (): ReactElement => {
       return;
     }
 
+    const actionMessageKey = state.message || "unexpectedError";
+
     if (state.status === "success") {
-      toast.success(state.message);
+      toast.success(actionsT(actionMessageKey));
       form.reset({
         category: "place",
         note: "",
@@ -57,9 +63,9 @@ export const WishItemForm = (): ReactElement => {
     }
 
     if (state.status === "error") {
-      toast.error(state.message);
+      toast.error(actionsT(actionMessageKey));
     }
-  }, [form, hasSubmitted, state.message, state.status]);
+  }, [actionsT, form, hasSubmitted, state.message, state.status]);
 
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
@@ -74,26 +80,37 @@ export const WishItemForm = (): ReactElement => {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-      <FormSection htmlFor="wishCategory" label="Category">
+      <FormSection htmlFor="wishCategory" label={formT("categoryLabel")}>
         <Select id="wishCategory" {...form.register("category")}>
-          <option value="place">Place</option>
-          <option value="food">Food</option>
-          <option value="movie">Movie</option>
+          <option value="place">{formT("category.place")}</option>
+          <option value="food">{formT("category.food")}</option>
+          <option value="movie">{formT("category.movie")}</option>
         </Select>
       </FormSection>
-      <FormSection htmlFor="wishTitle" label="Title">
+      <FormSection htmlFor="wishTitle" label={formT("titleLabel")}>
         <Input
           id="wishTitle"
-          placeholder="Try bánh xèo in Hội An"
+          placeholder={formT("titlePlaceholder")}
           type="text"
           {...form.register("title")}
         />
       </FormSection>
-      <FormSection htmlFor="wishNote" label="Note (optional)">
-        <Input id="wishNote" placeholder="Optional note" type="text" {...form.register("note")} />
+      <FormSection htmlFor="wishNote" label={formT("noteLabel")}>
+        <Input
+          id="wishNote"
+          placeholder={formT("notePlaceholder")}
+          type="text"
+          {...form.register("note")}
+        />
       </FormSection>
-      <Button className="w-full md:w-auto" isBusy={isPending} type="submit" variant="outline">
-        Add item
+      <Button
+        busyLabel={commonT("working")}
+        className="w-full md:w-auto"
+        isBusy={isPending}
+        type="submit"
+        variant="outline"
+      >
+        {formT("submit")}
       </Button>
     </form>
   );

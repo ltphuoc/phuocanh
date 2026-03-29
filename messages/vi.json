@@ -1,0 +1,666 @@
+{
+  "metadata": {
+    "root": {
+      "description": "Ứng dụng riêng tư cho cặp đôi để lưu kỷ niệm, dòng thời gian và kế hoạch.",
+      "title": "PhuocAnh"
+    },
+    "routes": {
+      "acceptInvite": "Chấp nhận lời mời | PhuocAnh",
+      "addMemory": "Thêm kỷ niệm | PhuocAnh",
+      "albumDetail": "Chi tiết album | PhuocAnh",
+      "chat": "Trò chuyện | PhuocAnh",
+      "countdowns": "Đếm ngược | PhuocAnh",
+      "futureNotes": "Ghi chú tương lai | PhuocAnh",
+      "gameMode": "Chế độ trò chơi | PhuocAnh",
+      "games": "Trò chơi | PhuocAnh",
+      "home": "Trang chủ | PhuocAnh",
+      "lists": "Danh sách | PhuocAnh",
+      "login": "Đăng nhập | PhuocAnh",
+      "map": "Bản đồ | PhuocAnh",
+      "memoryDetail": "Chi tiết kỷ niệm | PhuocAnh",
+      "onThisDay": "Ngày này năm xưa | PhuocAnh",
+      "settings": "Cài đặt | PhuocAnh",
+      "stats": "Thống kê | PhuocAnh",
+      "tripDetail": "Chi tiết chuyến đi | PhuocAnh",
+      "trips": "Chuyến đi | PhuocAnh"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Đổi ngôn ngữ"
+  },
+  "common": {
+    "backHome": "Về trang chủ",
+    "backToGameHub": "Về trung tâm trò chơi",
+    "backToGames": "Về trò chơi",
+    "backToLogin": "Quay lại đăng nhập",
+    "backToTrips": "Về chuyến đi",
+    "comingSoon": "Sắp ra mắt",
+    "openShell": "Mở giao diện mẫu",
+    "working": "Đang xử lý..."
+  },
+  "nav": {
+    "groups": {
+      "planning": "Lên kế hoạch",
+      "play": "Giải trí",
+      "space": "Không gian",
+      "together": "Cùng nhau",
+      "travel": "Du lịch"
+    },
+    "bottom": {
+      "captureMoment": "Lưu một khoảnh khắc"
+    },
+    "side": {
+      "keepsakeSpace": "không gian kỷ niệm",
+      "sharedCornersEyebrow": "Góc chung",
+      "sharedCornersTitle": "Khám phá nhẹ nhàng",
+      "toggleNavigation": "Bật/tắt thanh điều hướng mở rộng"
+    },
+    "moreSheet": {
+      "closeAriaLabel": "Đóng bảng điều hướng",
+      "done": "Xong",
+      "eyebrow": "Nhiều nơi hơn",
+      "title": "Góc chung"
+    },
+    "items": {
+      "albums": {
+        "description": "Album gắn với chuyến đi và kỷ niệm.",
+        "label": "Album"
+      },
+      "chat": {
+        "description": "Cuộc trò chuyện riêng tư giữa hai bạn.",
+        "label": "Chat"
+      },
+      "countdowns": {
+        "description": "Những ngày đáng chờ đợi cùng nhau.",
+        "label": "Đếm ngược"
+      },
+      "futureNotes": {
+        "description": "Ghi chú cho phiên bản tương lai của hai bạn.",
+        "label": "Ghi chú tương lai"
+      },
+      "games": {
+        "description": "Câu hỏi vui và mini game cho cặp đôi.",
+        "label": "Trò chơi"
+      },
+      "home": {
+        "label": "Trang chủ"
+      },
+      "lists": {
+        "description": "Danh sách mong muốn và checklist chung.",
+        "label": "Danh sách"
+      },
+      "map": {
+        "description": "Địa điểm, lộ trình và kỷ niệm theo vị trí.",
+        "label": "Bản đồ"
+      },
+      "memory": {
+        "description": "Lưu một kỷ niệm mới.",
+        "label": "Kỷ niệm"
+      },
+      "more": {
+        "label": "Thêm"
+      },
+      "newMemory": {
+        "description": "Lưu nhanh một khoảnh khắc.",
+        "label": "Kỷ niệm mới"
+      },
+      "onThisDay": {
+        "label": "Ngày này năm xưa",
+        "mobileLabel": "Hôm nay"
+      },
+      "settings": {
+        "description": "Quản lý không gian và tùy chọn của bạn.",
+        "label": "Cài đặt"
+      },
+      "stats": {
+        "description": "Một vài chỉ số nhẹ nhàng và chuỗi nhỏ.",
+        "label": "Thống kê"
+      },
+      "trips": {
+        "description": "Hành trình, staycation và lịch trình chung.",
+        "label": "Chuyến đi"
+      }
+    }
+  },
+  "appLayout": {
+    "mobile": {
+      "addMemory": "Thêm kỷ niệm",
+      "eyebrow": "Chương riêng tư"
+    }
+  },
+  "authShell": {
+    "hero": {
+      "description": "Một album ảnh boutique, nhật ký du lịch và không gian lên kế hoạch nhẹ nhàng cho hai người.",
+      "eyebrow": "Không gian riêng tư cho cặp đôi",
+      "noteLabel": "Ghi chú"
+    }
+  },
+  "auth": {
+    "login": {
+      "helper": "Dùng magic link để quay lại không gian kỷ niệm riêng của hai bạn.",
+      "helperTitle": "Đăng nhập",
+      "inviteHint": "Nếu đây là tài khoản thứ hai của bạn, hãy xin link mời từ người ấy và mở <link>chấp nhận lời mời</link>.",
+      "inviteLinkLabel": "chấp nhận lời mời",
+      "title": "Chào mừng quay lại"
+    },
+    "acceptInvite": {
+      "helper": "Chấp nhận link mời của người ấy để vào không gian chung.",
+      "helperTitle": "Chấp nhận lời mời",
+      "missingTokenDescription": "Thiếu token. Hãy mở đầy đủ URL lời mời.",
+      "title": "Tham gia không gian cặp đôi"
+    }
+  },
+  "forms": {
+    "login": {
+      "emailDescription": "Dùng email đã liên kết với không gian cặp đôi.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Gửi magic link"
+    },
+    "acceptInvite": {
+      "submit": "Tham gia không gian cặp đôi",
+      "tokenDescription": "Token đã được điền sẵn từ URL lời mời của người ấy.",
+      "tokenLabel": "Token lời mời"
+    },
+    "invite": {
+      "copySuccess": "Đã sao chép link mời.",
+      "submit": "Tạo link mời cho người ấy"
+    },
+    "wishItem": {
+      "category": {
+        "food": "Ẩm thực",
+        "movie": "Phim",
+        "place": "Địa điểm"
+      },
+      "categoryLabel": "Danh mục",
+      "noteLabel": "Ghi chú (tuỳ chọn)",
+      "notePlaceholder": "Ghi chú tuỳ chọn",
+      "submit": "Thêm mục",
+      "titleLabel": "Tiêu đề",
+      "titlePlaceholder": "Đi ăn bánh xèo ở Hội An"
+    },
+    "checklist": {
+      "submit": "Tạo checklist",
+      "titleLabel": "Tiêu đề checklist",
+      "titlePlaceholder": "Mục tiêu cuối tuần"
+    },
+    "checklistItem": {
+      "placeholder": "Thêm mục",
+      "submit": "Thêm"
+    },
+    "checklistToggle": {
+      "done": "Xong",
+      "undo": "Hoàn tác"
+    },
+    "memory": {
+      "happenedAtDescription": "Dùng thời gian địa phương cho kỷ niệm này.",
+      "happenedAtLabel": "Thời điểm xảy ra",
+      "locationDescription": "Địa điểm tùy chọn của khoảnh khắc này.",
+      "locationLabel": "Địa điểm",
+      "locationPlaceholder": "Đà Nẵng",
+      "mediaDescription": "Ảnh hoặc video tối đa 25MB.",
+      "mediaLabel": "Media",
+      "noteDescription": "Một câu chuyện ngắn giúp tìm kiếm và xem lại tốt hơn.",
+      "noteLabel": "Ghi chú",
+      "notePlaceholder": "Đã xảy ra chuyện gì?",
+      "submit": "Lưu kỷ niệm"
+    }
+  },
+  "actions": {
+    "auth": {
+      "invite": {
+        "accepted": "Đã chấp nhận lời mời. Chào mừng đến không gian cặp đôi của bạn.",
+        "created": "Đã tạo link mời.",
+        "coupleFull": "Không gian cặp đôi này đã có đủ hai thành viên hoạt động.",
+        "expired": "Lời mời đã hết hạn.",
+        "invalidOrUsed": "Lời mời không hợp lệ hoặc đã được dùng."
+      },
+      "magicLink": {
+        "sent": "Hãy kiểm tra email để lấy magic link.",
+        "unreachable": "Không thể kết nối Supabase Auth. Hãy đảm bảo Supabase local đang chạy và truy cập được ở cổng 54321."
+      },
+      "signInRequired": "Vui lòng đăng nhập trước khi chấp nhận lời mời."
+    },
+    "list": {
+      "checklist": {
+        "created": "Đã tạo checklist.",
+        "updated": "Đã cập nhật checklist."
+      },
+      "checklistItem": {
+        "added": "Đã thêm mục checklist."
+      },
+      "wishItem": {
+        "added": "Đã thêm mục mong muốn."
+      }
+    },
+    "memory": {
+      "created": "Đã lưu kỷ niệm.",
+      "createFailed": "Không thể tạo kỷ niệm.",
+      "fileTooLarge": "Tệp quá lớn. Kích thước tối đa là 25MB.",
+      "missingContent": "Hãy thêm ghi chú hoặc ít nhất một tệp media.",
+      "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video."
+    },
+    "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại."
+  },
+  "errors": {
+    "databaseSetupRequired": "Cần thiết lập cơ sở dữ liệu",
+    "genericDescription": "Đã xảy ra lỗi ngoài dự kiến. Vui lòng thử lại.",
+    "genericTitle": "Có lỗi xảy ra",
+    "schemaCommandsDescription": "Thiếu migration local. Hãy chạy các lệnh sau rồi tải lại:",
+    "tryAgain": "Thử lại"
+  },
+  "loading": {
+    "description": "Vui lòng chờ một chút.",
+    "title": "Đang tải"
+  },
+  "notFound": {
+    "description": "Trang này không tồn tại.",
+    "title": "Không tìm thấy trang"
+  },
+  "home": {
+    "header": {
+      "description": "Dải câu chuyện cho các chương gần đây, với ảnh, ghi chú và ngày tháng như những món kỷ vật.",
+      "eyebrow": "Dải câu chuyện",
+      "quote": "Những chi tiết nhỏ tạo nên các chương bạn luôn muốn mở lại.",
+      "title": "Các chương mới nhất"
+    },
+    "addMemory": "Thêm kỷ niệm",
+    "timelineEmpty": {
+      "description": "Bắt đầu dòng thời gian bằng ghi chú, ảnh hoặc video ngắn và nó sẽ xuất hiện ở đây như một chương sưu tầm.",
+      "title": "Chưa có kỷ niệm"
+    },
+    "wishlist": {
+      "eyebrow": "Danh sách mong muốn",
+      "empty": {
+        "description": "Thêm địa điểm, món ăn hoặc bộ phim để trở thành chương tiếp theo của hai bạn.",
+        "title": "Chưa lưu gì"
+      },
+      "title": "Những kế hoạch nho nhỏ"
+    },
+    "checklists": {
+      "completed": "Đã hoàn thành",
+      "eyebrow": "Lên kế hoạch nhẹ nhàng",
+      "empty": {
+        "description": "Tạo danh sách chung cho chuyến đi tiếp theo, bữa tối, hay thói quen nhỏ mỗi tuần.",
+        "title": "Chưa có checklist"
+      },
+      "pending": "Đang chờ",
+      "sectionLabel": "Checklist",
+      "title": "Checklist chung"
+    }
+  },
+  "lists": {
+    "header": {
+      "description": "Giữ kế hoạch và việc cần làm của hai bạn trong một nơi.",
+      "eyebrow": "Lên kế hoạch",
+      "title": "Danh sách chung"
+    },
+    "wishItems": {
+      "empty": {
+        "description": "Thêm địa điểm, món ăn hoặc phim mà hai bạn muốn thử cùng nhau.",
+        "title": "Chưa có mục mong muốn"
+      },
+      "title": "Mục mong muốn"
+    },
+    "checklists": {
+      "completed": "Đã hoàn thành",
+      "empty": {
+        "description": "Tạo checklist cho chuyến đi hoặc cuối tuần tiếp theo.",
+        "title": "Chưa có checklist"
+      },
+      "pending": "Đang chờ",
+      "title": "Checklist"
+    }
+  },
+  "onThisDay": {
+    "header": {
+      "description": "Một không gian tổng kết mang tính nghi thức cho cùng ngày ở các năm trước.",
+      "eyebrow": "Tóm tắt kỷ niệm",
+      "quote": "Mở những kỷ vật niêm phong của ngày này và để ký ức ùa về.",
+      "title": "Ngày này năm xưa"
+    },
+    "stackedReveal": {
+      "chapterCount": "{count, plural, =0 {Chưa có chương} one {# chương} other {# chương}}",
+      "eyebrow": "Mở xếp lớp",
+      "title": "Kỷ vật niêm phong"
+    },
+    "empty": {
+      "description": "Khi ngày này có kỷ niệm, chúng sẽ xuất hiện ở đây như các kỷ vật được mở ra.",
+      "title": "Hôm nay chưa có kỷ niệm"
+    }
+  },
+  "newMemory": {
+    "header": {
+      "description": "Lưu một khoảnh khắc bằng ghi chú, ảnh hoặc video ngắn.",
+      "eyebrow": "Dòng thời gian",
+      "title": "Thêm kỷ niệm"
+    }
+  },
+  "memoryDetail": {
+    "header": {
+      "eyebrow": "Chương đã lưu",
+      "fallbackLocation": "Chi tiết kỷ niệm",
+      "quoteFallback": "Một chương đã lưu"
+    },
+    "story": {
+      "empty": "Chưa có ghi chú cho chương này.",
+      "label": "Ghi chú câu chuyện"
+    },
+    "media": {
+      "label": "Media đính kèm",
+      "loadErrorDescription": "Không có signed URL cho media này.",
+      "loadErrorTitle": "Không thể tải xem trước",
+      "noneDescription": "Không có ảnh hoặc video nào được đính kèm cho kỷ niệm này.",
+      "noneTitle": "Chưa có media",
+      "title": "Kỷ vật hình ảnh"
+    },
+    "mediaAlt": "Media kỷ niệm"
+  },
+  "chat": {
+    "header": {
+      "description": "Không gian trò chuyện ấm áp cho hai bạn, được thiết kế riêng tư và thong thả.",
+      "eyebrow": "Luồng riêng tư",
+      "quote": "Luồng trò chuyện nên giống như trao nhau những món kỷ vật nhỏ.",
+      "title": "Chat"
+    },
+    "note": "Đây là bề mặt trò chuyện được thiết kế cho tính năng chat sắp tới. Tin nhắn thật, trạng thái online và media đính kèm hiện chưa được nối dữ liệu."
+  },
+  "map": {
+    "header": {
+      "description": "Một bề mặt atlas nhẹ nhàng nơi địa điểm, lộ trình và kỷ niệm hòa vào một chương du lịch.",
+      "eyebrow": "Bản đồ du lịch",
+      "quote": "Lộ trình nên gợi cảm giác được nhớ lại, không phải được kỹ thuật hóa.",
+      "title": "Bản đồ địa điểm"
+    }
+  },
+  "trips": {
+    "header": {
+      "description": "Lên kế hoạch và nhìn lại hành trình chung với timeline chuyến đi và album.",
+      "eyebrow": "Du lịch",
+      "title": "Chuyến đi"
+    },
+    "templates": {
+      "dalat": {
+        "destination": "Cuối tuần Đà Lạt",
+        "duration": "12 Jul - 14 Jul, 2026",
+        "items": "8 kỷ niệm và 2 album"
+      },
+      "hoian": {
+        "destination": "Săn đồ ăn Hội An",
+        "duration": "03 Sep - 05 Sep, 2026",
+        "items": "5 kỷ niệm và 1 album"
+      }
+    },
+    "comingSoon": {
+      "cta": "Mở giao diện album",
+      "description": "Chỉnh sửa chuyến đi, timeline theo từng điểm dừng và album liên kết sẽ được nối khi logic du lịch Phase 2 hoàn thành.",
+      "title": "Quản lý chuyến đi"
+    },
+    "empty": {
+      "description": "Khi có dữ liệu chuyến đi thật, bảng này sẽ hiển thị hành trình đang diễn ra và đã lưu trữ.",
+      "title": "Chưa có chuyến đi liên kết"
+    }
+  },
+  "tripDetail": {
+    "header": {
+      "description": "Bố cục chi tiết chuyến đi với timeline, điểm dừng và vị trí cho album.",
+      "eyebrow": "Chi tiết hành trình"
+    },
+    "durationPlaceholder": "Thời lượng mẫu cho tới khi nối dữ liệu thật",
+    "itemsPlaceholder": "Chưa tải điểm dừng nào từ backend",
+    "plannedSectionsTitle": "Mục đã lên kế hoạch",
+    "plannedSections": {
+      "albums": "Album liên kết với chuyến đi này",
+      "highlights": "Tổng quan chuyến đi và điểm nhấn cảm xúc",
+      "timeline": "Timeline các địa điểm đã ghé"
+    },
+    "comingSoon": {
+      "cta": "Xem trước giao diện bản đồ",
+      "description": "Trang chi tiết này sẽ hoàn toàn chạy theo dữ liệu khi entity chuyến đi và map pin được triển khai ở Phase 2.",
+      "title": "Tích hợp timeline và bản đồ"
+    },
+    "fallbackTripLabel": "Chuyến đi"
+  },
+  "albumDetail": {
+    "header": {
+      "description": "Bố cục album đã sẵn sàng cho nhóm media, caption và liên kết chuyến đi.",
+      "eyebrow": "Album"
+    },
+    "mediaPlaceholder": {
+      "description": "Các ô ảnh và video sẽ hiển thị ở đây khi dữ liệu mục album từ storage khả dụng.",
+      "title": "Khung lưới media"
+    },
+    "highlightPlaceholder": {
+      "description": "Điểm nhấn ghim và caption của album sẽ xuất hiện trong bảng này.",
+      "title": "Khung điểm nhấn"
+    },
+    "comingSoon": {
+      "cta": "Đi tới giao diện chuyến đi",
+      "description": "Entity album, luồng tải lên và liên kết chuyến đi được lên kế hoạch cho phase tiếp theo.",
+      "title": "Nối dữ liệu album"
+    },
+    "fallbackAlbumLabel": "Album"
+  },
+  "countdowns": {
+    "header": {
+      "description": "Theo dõi sinh nhật, ngày kỷ niệm và chuyến đi sắp tới trong một timeline dịu dàng.",
+      "eyebrow": "Sự kiện",
+      "title": "Đếm ngược"
+    },
+    "items": {
+      "anniversaryDinner": {
+        "name": "Bữa tối kỷ niệm",
+        "type": "Kỷ niệm"
+      },
+      "birthday": {
+        "name": "Sinh nhật người ấy",
+        "type": "Sinh nhật"
+      },
+      "danangTrip": {
+        "name": "Chuyến đi Đà Nẵng",
+        "type": "Du lịch"
+      },
+      "staycation": {
+        "name": "Mini staycation",
+        "type": "Kế hoạch"
+      }
+    },
+    "comingSoon": {
+      "cta": "Mở giao diện ghi chú tương lai",
+      "description": "Nhắc nhở lặp lại, lịch theo múi giờ và job nhắc lịch sẽ được nối với dữ liệu đếm ngược ở phase sau.",
+      "title": "Tự động nhắc lịch"
+    }
+  },
+  "futureNotes": {
+    "header": {
+      "description": "Viết ghi chú từ bây giờ và mở cùng nhau vào ngày tương lai đã chọn.",
+      "eyebrow": "Viên nang",
+      "title": "Ghi chú tương lai"
+    },
+    "notes": {
+      "anniversary": {
+        "subtitle": "Mở vào 12 Nov, 2026",
+        "title": "Cho ngày kỷ niệm của chúng ta"
+      },
+      "future": {
+        "subtitle": "Mở vào 01 Jan, 2027",
+        "title": "Lời nhắn cho phiên bản tương lai"
+      }
+    },
+    "comingSoon": {
+      "cta": "Mở giao diện đếm ngược",
+      "description": "Bản ghi ghi chú mã hoá thật và job mở khoá sẽ được kết nối khi mô hình backend future-note được triển khai.",
+      "title": "Luồng mở khoá"
+    }
+  },
+  "games": {
+    "header": {
+      "description": "Chơi mini game theo kỷ niệm và giữ chuỗi hoạt động của hai bạn.",
+      "eyebrow": "Giải trí",
+      "title": "Trò chơi"
+    },
+    "cards": {
+      "daily": {
+        "cta": "Câu hỏi mỗi ngày",
+        "description": "Mỗi ngày trả lời một câu hỏi cặp đôi để giữ chuỗi.",
+        "title": "Chế độ hằng ngày"
+      },
+      "guess": {
+        "cta": "Đoán ngày",
+        "description": "Chọn đúng ngày của một kỷ niệm chung từ timeline.",
+        "title": "Chế độ đoán"
+      }
+    },
+    "presentationalNote": "Đây là trung tâm trò chơi dạng trình bày. Prompt thật, câu trả lời và tính điểm hiện chưa được nối dữ liệu.",
+    "comingSoon": {
+      "cta": "Mở giao diện thống kê",
+      "description": "Lượt chơi, tạo prompt và sự kiện điểm số sẽ được liên kết khi backend game hoàn thành.",
+      "title": "Tích hợp game engine"
+    }
+  },
+  "gameMode": {
+    "header": {
+      "description": "Bố cục theo từng chế độ đã sẵn sàng cho luồng prompt và trả lời.",
+      "eyebrow": "Chế độ trò chơi"
+    },
+    "placeholder": "Route này là giao diện khung cho chế độ game đã chọn. Tạo prompt, ghi nhận câu trả lời và cập nhật chuỗi sẽ được nối ở phase sau.",
+    "comingSoon": {
+      "cta": "Về trung tâm trò chơi",
+      "description": "Mọi logic gameplay giữ nguyên và cố ý chưa triển khai trong bản tái cấu trúc UI này.",
+      "title": "Nối gameplay"
+    },
+    "fallbackModeLabel": "Chế độ"
+  },
+  "stats": {
+    "header": {
+      "description": "Bảng điều khiển dịu nhẹ cho các chỉ số hoạt động cặp đôi.",
+      "eyebrow": "Góc nhìn",
+      "title": "Thống kê"
+    },
+    "cards": {
+      "memories": {
+        "label": "Kỷ niệm tháng này",
+        "trend": "+6 so với tháng trước",
+        "value": "12"
+      },
+      "streak": {
+        "label": "Chuỗi hiện tại",
+        "trend": "Cả hai đều trả lời hằng ngày",
+        "value": "7 ngày"
+      },
+      "trips": {
+        "label": "Chuyến đi đã hoàn thành",
+        "trend": "Những cuộc phiêu lưu chung",
+        "value": "3"
+      }
+    },
+    "comingSoon": {
+      "cta": "Mở giao diện trò chơi",
+      "description": "Các widget này là placeholder cho thống kê event-sourced và tổng hợp chuỗi sẽ được triển khai ở Phase 3.",
+      "title": "Pipeline phân tích"
+    }
+  },
+  "settings": {
+    "header": {
+      "description": "Dùng màn hình này làm trung tâm More cho các mục phụ trong khi logic lõi vẫn giữ nguyên.",
+      "eyebrow": "Thêm",
+      "title": "Cài đặt và mở rộng"
+    },
+    "openShell": "Mở giao diện mẫu {label}.",
+    "description": "Trang cài đặt này hiện đóng vai trò điểm vào More cho cả mobile và desktop. Các điều khiển tài khoản/quyền riêng tư sẽ được thêm ở phase sau.",
+    "comingSoon": {
+      "cta": "Về trang chủ",
+      "description": "Điều khiển tuỳ chọn và cài đặt cấp hồ sơ nằm ngoài phạm vi của bản UI-only này.",
+      "title": "Điều khiển cài đặt"
+    }
+  },
+  "ui": {
+    "comingSoonCard": {
+      "badge": "Sắp ra mắt"
+    },
+    "memoryCard": {
+      "fallbackDate": "Ngày không xác định",
+      "journalNote": "Ghi chú nhật ký",
+      "labels": {
+        "image": "Ảnh",
+        "video": "Video"
+      },
+      "placeholders": {
+        "anniversary": "Một trang xứng đáng cho ngày kỷ niệm đang chờ thêm chút ghi chú.",
+        "compact": "Một ghi chú yên tĩnh của ngày này.",
+        "featured": "Chỉ một ghi chú nhỏ cũng có thể biến ngày này thành chương bạn muốn quay lại."
+      },
+      "photoAlt": "Ảnh kỷ niệm"
+    },
+    "countdown": {
+      "daysLeft": "{count, plural, one {# ngày} other {# ngày}}",
+      "remaining": "còn lại"
+    },
+    "tripCard": {
+      "badge": "Chuyến đi",
+      "eyebrow": "Viên nang chuyến đi"
+    },
+    "chatThread": {
+      "composerPlaceholder": "Viết điều gì đó ấm áp, vui vẻ hoặc ngắn gọn.",
+      "header": {
+        "badge": "Giao diện mẫu",
+        "eyebrow": "Luồng tương lai",
+        "title": "Thân mật, không ồn ào"
+      },
+      "messages": {
+        "m1": "Em vẫn cứ nghĩ về quán cà phê nhỏ ở Hội An.",
+        "m2": "Ánh đèn lồng làm mọi thứ như mơ. Mình nên quay lại hai đêm nữa.",
+        "m3": "Đánh dấu luôn thành kế hoạch mini trip tiếp theo nhé.",
+        "m4": "Và em muốn thêm một tấm ảnh ở hành lang vàng đó nữa."
+      },
+      "timeLabels": {
+        "m1": "19:12",
+        "m2": "19:14",
+        "m3": "19:15",
+        "m4": "19:16"
+      }
+    },
+    "travelAtlas": {
+      "header": {
+        "badge": "Ánh sáng lộ trình",
+        "description": "Bản đồ trở thành một phần scrapbook, một phần lịch trình, một phần ngăn kéo ký ức.",
+        "eyebrow": "Bản đồ hành trình",
+        "title": "Những nơi đã thay đổi câu chuyện"
+      },
+      "stops": {
+        "daLat": {
+          "count": "8 kỷ vật",
+          "date": "12 Jul",
+          "note": "Mưa, dâu tây, và quãng đường đi bộ về khi cả thị trấn ửng hồng trong sương.",
+          "title": "Đà Lạt"
+        },
+        "daNang": {
+          "count": "4 kỷ vật",
+          "date": "20 Oct",
+          "note": "Gió biển, một buổi tối chậm rãi, và một trong những tấm ảnh đôi bạn thích nhất.",
+          "title": "Đà Nẵng"
+        },
+        "hoiAn": {
+          "count": "5 kỷ vật",
+          "date": "03 Sep",
+          "note": "Đèn lồng, ăn vặt quá trời, và lời hứa lần sau ở lại lâu hơn.",
+          "title": "Hội An"
+        }
+      }
+    },
+    "anniversarySpotlight": {
+      "empty": {
+        "description": "Hãy thêm một kỷ niệm và bề mặt chương này sẽ bắt đầu đầy lên với ảnh, ngày tháng và các chi tiết nhỏ khiến không gian của hai bạn sống động.",
+        "eyebrow": "Điểm nhấn kỷ niệm",
+        "title": "Bắt đầu kỷ vật đầu tiên"
+      },
+      "eyebrow": "Lãng mạn biên tập",
+      "openLatest": "Mở chương mới nhất",
+      "addFirst": "Thêm chương đầu tiên",
+      "revisit": "Nhìn lại hôm nay",
+      "quoteFallback": "Một thế giới riêng nho nhỏ tạo nên từ những ngày bình thường, kế hoạch dịu dàng và khoảnh khắc đáng lưu giữ.",
+      "since": "Ở bên nhau từ {date}. Được dệt từ những ghi chú đêm khuya, bữa sáng bình dị và những chương hai bạn luôn chọn mở lại.",
+      "dayCount": "Ngày {count}"
+    }
+  }
+}
