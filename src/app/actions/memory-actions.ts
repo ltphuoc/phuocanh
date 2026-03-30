@@ -240,7 +240,6 @@ export const createMemoryAction = async (
 
     if (eventError) {
       console.error("Failed to create activity event", eventError);
-      return createErrorState("unexpectedError");
     }
 
     revalidateLocalizedPath("/home");
