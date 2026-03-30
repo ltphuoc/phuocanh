@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { Locale } from "@/i18n/routing";
 import { isSchemaCacheMissMessage, SchemaReadinessError } from "@/lib/errors";
@@ -116,7 +117,7 @@ const getAnyCouple = async (): Promise<ExistingCoupleRow | null> => {
   return data[0] ?? null;
 };
 
-export const getAuthGateState = async (): Promise<AuthGateState> => {
+export const getAuthGateState = cache(async (): Promise<AuthGateState> => {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -163,7 +164,7 @@ export const getAuthGateState = async (): Promise<AuthGateState> => {
     status: "needs_onboarding",
     userId: user.id,
   };
-};
+});
 
 export const requireReadyCoupleContext = async (): Promise<CoupleContext> => {
   const state = await getAuthGateState();
