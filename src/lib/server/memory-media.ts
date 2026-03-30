@@ -26,28 +26,36 @@ export const signMemoryMediaStorageItems = async <TItem extends StoragePathItem>
   items: readonly TItem[],
 ): Promise<readonly SignedStoragePathItem<TItem>[]> => {
   const supabase = await createSupabaseServerClient();
+  const storagePaths = items.flatMap((item) => {
+    const storagePath = getStoragePath(item);
+    return storagePath ? [storagePath] : [];
+  });
 
-  const signedItems = await Promise.all(
-    items.map(async (item) => {
-      const storagePath = getStoragePath(item);
+  const signedUrlByPath = new Map<string, string | null>();
+  if (storagePaths.length) {
+    const { data, error } = await supabase.storage
+      .from("memory-media")
+      .createSignedUrls(storagePaths, MEMORY_MEDIA_SIGNED_URL_TTL_SECONDS);
 
-      if (!storagePath) {
-        return {
-          ...item,
-          signedUrl: null,
-        };
-      }
+    if (error) {
+      storagePaths.forEach((storagePath) => {
+        signedUrlByPath.set(storagePath, null);
+      });
+    } else {
+      data.forEach((item) => {
+        if (item.path) {
+          signedUrlByPath.set(item.path, item.signedUrl);
+        }
+      });
+    }
+  }
 
-      const { data, error } = await supabase.storage
-        .from("memory-media")
-        .createSignedUrl(storagePath, MEMORY_MEDIA_SIGNED_URL_TTL_SECONDS);
+  return items.map((item) => {
+    const storagePath = getStoragePath(item);
 
-      return {
-        ...item,
-        signedUrl: error || !data?.signedUrl ? null : data.signedUrl,
-      };
-    }),
-  );
-
-  return signedItems;
+    return {
+      ...item,
+      signedUrl: storagePath ? signedUrlByPath.get(storagePath) ?? null : null,
+    };
+  });
 };

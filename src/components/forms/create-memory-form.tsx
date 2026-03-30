@@ -79,7 +79,6 @@ export const CreateMemoryForm = ({
     const actionMessageKey = state.message || "unexpectedError";
 
     if (state.status === "success") {
-      setUploadedStoragePath(null);
       toast.success(actionsT(actionMessageKey));
       router.replace("/home");
       return;
@@ -97,8 +96,10 @@ export const CreateMemoryForm = ({
         .remove([uploadedStoragePath])
         .catch((error: unknown) => {
           console.error("Failed to clean up uploaded memory media", error);
+        })
+        .finally(() => {
+          setUploadedStoragePath(null);
         });
-      setUploadedStoragePath(null);
     }
   }, [
     actionsT,
