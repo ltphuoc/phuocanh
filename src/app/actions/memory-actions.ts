@@ -14,20 +14,88 @@ import {
 } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+const ALLOWED_MEDIA_MIME_PREFIXES = ["image/", "video/"] as const;
+const MEMORY_UPLOAD_PATH_PATTERN =
+  /^couples\/([0-9a-f-]{36})\/memories\/([0-9a-f-]{36})\/([0-9]+)-([A-Za-z0-9._-]+)$/i;
+
 const createMemorySchema = z.object({
   happenedAt: z.iso.datetime(),
   locationName: z.string().max(180).optional(),
+  mimeType: z.string().trim().min(1).optional(),
   note: z.string().max(800).optional(),
+  originalFileName: z.string().trim().min(1).max(255).optional(),
+  sizeBytes: z.coerce.number().int().positive().max(MAX_UPLOAD_BYTES).optional(),
+  storagePath: z.string().trim().min(1).optional(),
+}).superRefine((value, context) => {
+  const hasUploadMetadata =
+    value.storagePath !== undefined
+    || value.mimeType !== undefined
+    || value.originalFileName !== undefined
+    || value.sizeBytes !== undefined;
+
+  if (!hasUploadMetadata) {
+    return;
+  }
+
+  if (!value.storagePath) {
+    context.addIssue({
+      code: "custom",
+      message: "Storage path is required when media metadata is provided.",
+      path: ["storagePath"],
+    });
+  }
+
+  if (!value.mimeType) {
+    context.addIssue({
+      code: "custom",
+      message: "Mime type is required when media metadata is provided.",
+      path: ["mimeType"],
+    });
+  }
+
+  if (value.sizeBytes === undefined) {
+    context.addIssue({
+      code: "custom",
+      message: "Size is required when media metadata is provided.",
+      path: ["sizeBytes"],
+    });
+  }
 });
-
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const ALLOWED_MEDIA_MIME_PREFIXES = ["image/", "video/"] as const;
-
-const sanitizeFileName = (fileName: string): string =>
-  fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, "_");
 
 const isAllowedMediaMimeType = (mimeType: string): boolean =>
   ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
+
+const getOptionalFormDataValue = (
+  formData: FormData,
+  key: string,
+): string | undefined => {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+};
+
+const removeUploadedStorageObject = async (
+  supabase: AppSupabaseClient,
+  uploadedStoragePath: string | null,
+): Promise<string | null> => {
+  if (!uploadedStoragePath) {
+    return null;
+  }
+
+  const { error } = await supabase.storage
+    .from("memory-media")
+    .remove([uploadedStoragePath]);
+
+  return error ? error.message : null;
+};
+
+const isValidMemoryUploadPath = (
+  storagePath: string,
+  coupleId: string,
+): boolean => {
+  const match = MEMORY_UPLOAD_PATH_PATTERN.exec(storagePath);
+  return match?.[1] === coupleId;
+};
 
 const detectMediaType = (mimeType: string): Database["public"]["Enums"]["media_type"] => {
   if (mimeType.startsWith("video/")) {
@@ -77,26 +145,34 @@ export const createMemoryAction = async (
     const context = await requireReadyCoupleContext();
     const parsed = createMemorySchema.parse({
       happenedAt: formData.get("happenedAt"),
-      locationName: formData.get("locationName"),
-      note: formData.get("note"),
+      locationName: getOptionalFormDataValue(formData, "locationName"),
+      mimeType: getOptionalFormDataValue(formData, "mimeType"),
+      note: getOptionalFormDataValue(formData, "note"),
+      originalFileName: getOptionalFormDataValue(formData, "originalFileName"),
+      sizeBytes: getOptionalFormDataValue(formData, "sizeBytes"),
+      storagePath: getOptionalFormDataValue(formData, "storagePath"),
     });
 
     const supabase = await createSupabaseServerClient();
     const trimmedNote = parsed.note?.trim() ?? "";
-    const fileInput = formData.get("media");
-    const mediaFile = fileInput instanceof File && fileInput.size > 0 ? fileInput : null;
-    const hasFile = mediaFile !== null;
+    const hasFile = parsed.storagePath !== undefined;
+    const uploadedStoragePath = parsed.storagePath ?? null;
 
     if (!hasFile && !trimmedNote) {
       return createErrorState("memory.missingContent");
     }
 
-    if (mediaFile && mediaFile.size > MAX_UPLOAD_BYTES) {
-      return createErrorState("memory.fileTooLarge");
+    if (parsed.mimeType && !isAllowedMediaMimeType(parsed.mimeType)) {
+      return createErrorState("memory.unsupportedType");
     }
 
-    if (mediaFile && !isAllowedMediaMimeType(mediaFile.type)) {
-      return createErrorState("memory.unsupportedType");
+    if (uploadedStoragePath && !isValidMemoryUploadPath(uploadedStoragePath, context.coupleId)) {
+      console.error("Memory upload storage path did not match the active couple context", {
+        coupleId: context.coupleId,
+        storagePath: uploadedStoragePath,
+      });
+      await removeUploadedStorageObject(supabase, uploadedStoragePath);
+      return createErrorState("unexpectedError");
     }
 
     const { data: insertedMemories, error: memoryError } = await supabase
@@ -112,47 +188,40 @@ export const createMemoryAction = async (
       .limit(1);
 
     if (memoryError) {
+      const cleanupError = await removeUploadedStorageObject(supabase, uploadedStoragePath);
+      if (cleanupError) {
+        console.error("Memory upload cleanup failed after memory row error", cleanupError);
+      }
       console.error("Failed to create memory row", memoryError);
       return createErrorState("unexpectedError");
     }
 
     const memory = insertedMemories[0];
     if (!memory) {
+      const cleanupError = await removeUploadedStorageObject(supabase, uploadedStoragePath);
+      if (cleanupError) {
+        console.error("Memory upload cleanup failed after empty memory insert result", cleanupError);
+      }
       return createErrorState("memory.createFailed");
     }
 
-    if (mediaFile) {
-      const safeName = sanitizeFileName(mediaFile.name || "upload");
-      const storagePath = `couples/${context.coupleId}/memories/${memory.id}/${Date.now()}-${safeName}`;
-      const { error: uploadError } = await supabase.storage
-        .from("memory-media")
-        .upload(storagePath, mediaFile, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        const cleanupError = await rollbackMemoryMutation(supabase, memory.id, null);
-        if (cleanupError) {
-          console.error("Upload rollback failed", cleanupError);
-        }
-
-        console.error("Failed to upload media", uploadError);
-        return createErrorState("unexpectedError");
-      }
-
+    if (uploadedStoragePath && parsed.mimeType && parsed.sizeBytes !== undefined) {
       const { error: mediaError } = await supabase.from("memory_media").insert({
         couple_id: context.coupleId,
-        media_type: detectMediaType(mediaFile.type),
+        media_type: detectMediaType(parsed.mimeType),
         memory_id: memory.id,
-        mime_type: mediaFile.type,
-        original_file_name: mediaFile.name || null,
-        size_bytes: mediaFile.size,
-        storage_path: storagePath,
+        mime_type: parsed.mimeType,
+        original_file_name: parsed.originalFileName?.trim() || null,
+        size_bytes: parsed.sizeBytes,
+        storage_path: uploadedStoragePath,
       });
 
       if (mediaError) {
-        const cleanupError = await rollbackMemoryMutation(supabase, memory.id, storagePath);
+        const cleanupError = await rollbackMemoryMutation(
+          supabase,
+          memory.id,
+          uploadedStoragePath,
+        );
         if (cleanupError) {
           console.error("Media save rollback failed", cleanupError);
         }

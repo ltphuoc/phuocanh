@@ -20,6 +20,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { initialActionState } from "@/lib/actions/action-state";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const createMemorySchema = z.object({
   happenedAtLocal: z.string().min(1),
@@ -29,17 +30,38 @@ const createMemorySchema = z.object({
 
 type CreateMemoryValues = z.infer<typeof createMemorySchema>;
 
-export const CreateMemoryForm = (): ReactElement => {
+interface CreateMemoryFormProps {
+  readonly coupleId: string;
+}
+
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+const sanitizeFileName = (fileName: string): string =>
+  fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, "_");
+
+const buildStoragePath = (coupleId: string, fileName: string): string => {
+  const clientUploadId = crypto.randomUUID();
+  const safeName = sanitizeFileName(fileName || "upload");
+
+  return `couples/${coupleId}/memories/${clientUploadId}/${Date.now()}-${safeName}`;
+};
+
+export const CreateMemoryForm = ({
+  coupleId,
+}: CreateMemoryFormProps): ReactElement => {
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.memory");
   const router = useRouter();
+  const [supabase] = useState(createSupabaseBrowserClient);
   const [state, submitAction, isPending] = useActionState(
     createMemoryAction,
     initialActionState,
   );
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [uploadedStoragePath, setUploadedStoragePath] = useState<string | null>(null);
   const form = useForm<CreateMemoryValues>({
     defaultValues: {
       happenedAtLocal: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
@@ -57,6 +79,7 @@ export const CreateMemoryForm = (): ReactElement => {
     const actionMessageKey = state.message || "unexpectedError";
 
     if (state.status === "success") {
+      setUploadedStoragePath(null);
       toast.success(actionsT(actionMessageKey));
       router.replace("/home");
       return;
@@ -64,10 +87,30 @@ export const CreateMemoryForm = (): ReactElement => {
 
     if (state.status === "error") {
       toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, hasSubmitted, router, state.message, state.status]);
 
-  const onSubmit = form.handleSubmit((values) => {
+      if (!uploadedStoragePath) {
+        return;
+      }
+
+      void supabase.storage
+        .from("memory-media")
+        .remove([uploadedStoragePath])
+        .catch((error: unknown) => {
+          console.error("Failed to clean up uploaded memory media", error);
+        });
+      setUploadedStoragePath(null);
+    }
+  }, [
+    actionsT,
+    hasSubmitted,
+    router,
+    state.message,
+    state.status,
+    supabase,
+    uploadedStoragePath,
+  ]);
+
+  const onSubmit = form.handleSubmit(async (values) => {
     setHasSubmitted(true);
     const payload = new FormData();
     payload.set("happenedAt", new Date(values.happenedAtLocal).toISOString());
@@ -75,7 +118,34 @@ export const CreateMemoryForm = (): ReactElement => {
     payload.set("note", values.note ?? "");
 
     if (mediaFile) {
-      payload.set("media", mediaFile);
+      if (mediaFile.size > MAX_UPLOAD_BYTES) {
+        toast.error(actionsT("memory.fileTooLarge"));
+        return;
+      }
+
+      const storagePath = buildStoragePath(coupleId, mediaFile.name);
+      setIsUploading(true);
+
+      const { error } = await supabase.storage
+        .from("memory-media")
+        .upload(storagePath, mediaFile, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      setIsUploading(false);
+
+      if (error) {
+        console.error("Failed to upload memory media", error);
+        toast.error(actionsT("unexpectedError"));
+        return;
+      }
+
+      setUploadedStoragePath(storagePath);
+      payload.set("mimeType", mediaFile.type);
+      payload.set("originalFileName", mediaFile.name);
+      payload.set("sizeBytes", String(mediaFile.size));
+      payload.set("storagePath", storagePath);
     }
 
     startTransition(() => {
@@ -140,7 +210,7 @@ export const CreateMemoryForm = (): ReactElement => {
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={isPending || isUploading}
         type="submit"
       >
         {formT("submit")}
