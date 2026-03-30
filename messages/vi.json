@@ -18,6 +18,7 @@
       "login": "Đăng nhập | PhuocAnh",
       "map": "Bản đồ | PhuocAnh",
       "memoryDetail": "Chi tiết kỷ niệm | PhuocAnh",
+      "onboarding": "Thiết lập ban đầu | PhuocAnh",
       "onThisDay": "Ngày này năm xưa | PhuocAnh",
       "settings": "Cài đặt | PhuocAnh",
       "stats": "Thống kê | PhuocAnh",
@@ -149,6 +150,11 @@
       "helperTitle": "Chấp nhận lời mời",
       "missingTokenDescription": "Thiếu token. Hãy mở đầy đủ URL lời mời.",
       "title": "Tham gia không gian cặp đôi"
+    },
+    "onboarding": {
+      "helper": "Thiết lập dữ liệu thật của hai bạn theo từng bước. Không có gì được lưu cho tới khi bạn xác nhận ở bước tổng kết cuối.",
+      "helperTitle": "Thiết lập lần đầu",
+      "title": "Tạo không gian cặp đôi"
     }
   },
   "forms": {
@@ -162,6 +168,38 @@
       "submit": "Tham gia không gian cặp đôi",
       "tokenDescription": "Token đã được điền sẵn từ URL lời mời của người ấy.",
       "tokenLabel": "Token lời mời"
+    },
+    "onboarding": {
+      "back": "Quay lại",
+      "confirmationDescription": "Tôi xác nhận phần tổng kết này là đúng và đồng ý ghi vào không gian cặp đôi của chúng tôi.",
+      "confirmationLabel": "Xác nhận rõ ràng",
+      "coupleNameDescription": "Dùng tên thật cho không gian chung của hai bạn.",
+      "coupleNameLabel": "Tên cặp đôi",
+      "coupleNamePlaceholder": "Phuoc & Anh",
+      "next": "Tiếp tục",
+      "startedDateDescription": "Ngày này dùng cho bộ đếm yêu nhau và các mốc trên timeline.",
+      "startedDateLabel": "Ngày bắt đầu",
+      "stepIndicator": "Bước {step} / {total}",
+      "submit": "Xác nhận và tạo không gian",
+      "summary": {
+        "coupleName": "Tên cặp đôi",
+        "startedDate": "Ngày bắt đầu",
+        "timeZone": "Múi giờ"
+      },
+      "summaryLabel": "Tổng kết trước khi xác nhận",
+      "timeZoneDescription": "Dùng múi giờ chung thật để tính các mốc ngày.",
+      "timeZoneLabel": "Múi giờ cặp đôi",
+      "timeZonePlaceholder": "Asia/Ho_Chi_Minh",
+      "validation": {
+        "confirmationRequired": "Bạn phải xác nhận trước khi tạo không gian cặp đôi.",
+        "coupleNameMax": "Tên cặp đôi tối đa 120 ký tự.",
+        "coupleNameRequired": "Hãy nhập tên cặp đôi.",
+        "startedDateFuture": "Ngày bắt đầu không thể ở tương lai.",
+        "startedDateInvalid": "Hãy chọn ngày bắt đầu hợp lệ.",
+        "startedDateRequired": "Hãy chọn ngày bắt đầu.",
+        "timeZoneInvalid": "Hãy nhập múi giờ IANA hợp lệ.",
+        "timeZoneRequired": "Hãy nhập múi giờ."
+      }
     },
     "invite": {
       "copySuccess": "Đã sao chép link mời.",
@@ -326,7 +364,12 @@
         "sent": "Hãy kiểm tra email để lấy magic link.",
         "unreachable": "Không thể kết nối Supabase Auth. Hãy đảm bảo Supabase local đang chạy và truy cập được ở cổng 54321."
       },
-      "signInRequired": "Vui lòng đăng nhập trước khi chấp nhận lời mời."
+      "onboarding": {
+        "completed": "Đã tạo thành công không gian cặp đôi.",
+        "coupleExists": "Đã có không gian cặp đôi tồn tại. Hãy dùng link mời để tham gia.",
+        "invalidSubmission": "Dữ liệu onboarding không hợp lệ."
+      },
+      "signInRequired": "Vui lòng đăng nhập để tiếp tục."
     },
     "list": {
       "checklist": {

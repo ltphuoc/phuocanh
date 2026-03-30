@@ -10,7 +10,7 @@
 - slim floating rail for primary destinations
 - expandable secondary drawer for grouped destinations
 - right content canvas for all route pages
-- `src/app/(public)` uses `AuthShell` for consistent login/invite composition.
+- `src/app/(public)` uses `AuthShell` for consistent login/onboarding/invite composition.
 - Global visual mode is light-only with editorial semantic tokens from `globals.css`.
 
 ## Shared Layout Primitives

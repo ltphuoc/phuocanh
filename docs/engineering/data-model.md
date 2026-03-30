@@ -65,7 +65,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `visited_places` is couple-scoped through RLS and additionally bounded by the parent trip window through policy checks.
 
 ## RPCs In Use
-- `bootstrap_first_couple(started_date date, couple_name text)`
+- `bootstrap_first_couple(started_date date, couple_name text, target_timezone text)`
 - `accept_couple_invite(invite_token text)`
 - `update_couple_timezone(target_couple_id uuid, target_timezone text)`
 - `memories_on_this_day(target_couple_id uuid, target_timezone text)`
@@ -78,7 +78,7 @@ This file summarizes the current schema. The authoritative source is always `sup
   - defaults to `Asia/Ho_Chi_Minh`
   - is validated against `pg_timezone_names` through SQL
 - `bootstrap_first_couple(...)`
-  - now returns the stored `timezone` along with couple identity fields
+  - now accepts explicit `target_timezone` and returns the stored `timezone` with couple identity fields
 - `update_couple_timezone(...)`
   - updates the shared couple timezone transactionally
   - preserves visible calendar dates for existing `countdowns.target_at` and `future_notes.unlock_at`

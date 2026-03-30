@@ -1,5 +1,31 @@
 # Implementation Log
 
+## 2026-03-30 - Safe First-User Onboarding With Explicit Confirmation
+
+### Delivered
+- Replaced implicit first-user bootstrap in auth-gate reads with a new `needs_onboarding` auth state.
+- Added `/onboarding` route with a four-step form:
+  - couple name
+  - timezone
+  - started date
+  - final confirmation summary + explicit confirmation checkbox
+- Added `completeOnboardingAction` with server-side validation and explicit confirmation requirement.
+- Added migration `20260330001000_onboarding_bootstrap_timezone.sql` to extend `bootstrap_first_couple(...)` with `target_timezone`, keeping couple + membership + timezone persistence atomic in one RPC transaction.
+- Updated route redirects so:
+  - first authenticated user without a couple is routed to `/onboarding`
+  - existing non-member users are still routed to `/accept-invite`
+  - ready users continue to `/home`
+- Synced API/data/frontend/system/product docs to reflect the onboarding contract.
+
+### Verification
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm i18n:check`
+- `pnpm build`
+
+### Verification Notes
+- `pnpm build` passes in a network-enabled environment. The earlier failure mode was sandbox-specific because `next/font/google` could not fetch `Fraunces` and `Manrope` when outbound access was blocked.
+
 ## 2026-03-29 - Review Fix: Anniversary Since-Date Timezone Safety
 
 ### Delivered

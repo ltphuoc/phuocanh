@@ -11,7 +11,7 @@ This file is now the engineering index. Use the focused docs below instead of tr
 
 ## Current Runtime Summary
 - Next.js App Router with Server Components by default
-- Public routes for login and invite acceptance
+- Public routes for login, first-user onboarding, and invite acceptance
 - Authenticated routes behind one shared app shell
 - Server Actions for app-layer mutations
 - Supabase Auth for identity

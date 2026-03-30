@@ -6,6 +6,7 @@ This file is the canonical “what exists today” route map.
 |---|---|---|---|
 | `/` | implemented | `getAuthGateState()` redirect decision | Redirect-only route; do not add product UI here |
 | `/login` | implemented | Supabase Auth via `sendMagicLinkAction` | Public auth entry; no couple context required |
+| `/onboarding` | implemented | `completeOnboardingAction` + `bootstrap_first_couple(...)` RPC | First-account setup only; no writes happen before explicit confirmation |
 | `/accept-invite` | implemented | `acceptInviteAction` + `accept_couple_invite(...)` RPC | Requires auth before acceptance; not a general onboarding route |
 | `/auth/callback` | implemented | Supabase Auth callback exchange | Internal auth handler only; do not add app UI here |
 | `/home` | implemented | `getHomePageData(...)` + signed storage URLs | Story-first implemented page; not a shell |

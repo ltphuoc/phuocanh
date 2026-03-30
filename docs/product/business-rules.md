@@ -18,7 +18,9 @@ This file is the canonical business-rule reference for the current app. If this 
 - If the invite target user is already an active member of that couple, invite acceptance returns the existing role and marks the invite accepted.
 
 ## Couple Bootstrap Rules
-- Bootstrap is only allowed through the `bootstrap_first_couple(started_date, couple_name)` RPC.
+- Bootstrap is only allowed through the `bootstrap_first_couple(started_date, couple_name, target_timezone)` RPC.
+- Auth-gate reads must not create bootstrap data implicitly.
+- First-user onboarding must collect draft values step by step and show a final confirmation summary before calling bootstrap.
 - The RPC uses a transaction-level advisory lock to prevent concurrent creation of duplicate couple spaces.
 - If no couple exists, the authenticated user becomes `partner_a` in the new singleton couple.
 - If a couple already exists and the authenticated user is already an active member, bootstrap returns the existing couple context.
@@ -115,6 +117,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Two active `partner_a` memberships in one couple
 - Two active `partner_b` memberships in one couple
 - Direct app-layer join flow that writes `couples` or `couple_memberships` without RPCs
+- Implicit auth-gate bootstrap writes before explicit onboarding confirmation
 - Storage objects in `memory-media` whose path does not begin with `couples/{uuid}/...`
 - Future-note body visibility before the parent note unlock date
 - Trip row whose `end_date` is before `start_date`

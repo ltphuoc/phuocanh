@@ -14,12 +14,19 @@ import { env } from "@/lib/env";
 import { routing, type Locale } from "@/i18n/routing";
 import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
-import { requireReadyCoupleContext } from "@/lib/server/couple-context";
+import {
+  getAuthGateState,
+  requireReadyCoupleContext,
+} from "@/lib/server/couple-context";
 import { getSiteUrl } from "@/lib/server/site-url";
 import {
   createSupabaseServerClient,
   createSupabaseServerClientForUrl,
 } from "@/lib/supabase/server";
+import {
+  getCurrentDateTokenInTimeZone,
+  isSupportedCoupleTimeZone,
+} from "@/lib/utils/couple-timezone";
 
 interface InviteData {
   readonly inviteUrl: string;
@@ -34,6 +41,32 @@ const inviteTokenSchema = z.object({
   token: z.uuid(),
 });
 
+const completeOnboardingSchema = z
+  .object({
+    confirmation: z.literal("true"),
+    coupleName: z.string().trim().min(1).max(120),
+    startedDate: z.iso.date(),
+    timeZone: z
+      .string()
+      .trim()
+      .min(1)
+      .refine((value) => isSupportedCoupleTimeZone(value)),
+  })
+  .superRefine(({ startedDate, timeZone }, context) => {
+    if (!isSupportedCoupleTimeZone(timeZone)) {
+      return;
+    }
+
+    const todayInSelectedTimezone = getCurrentDateTokenInTimeZone(timeZone);
+    if (startedDate > todayInSelectedTimezone) {
+      context.addIssue({
+        code: "custom",
+        path: ["startedDate"],
+        message: "Started date cannot be in the future.",
+      });
+    }
+  });
+
 const mapAcceptInviteError = (message: string): ActionMessageKey => {
   if (message.includes("INVITE_NOT_FOUND")) {
     return "auth.invite.invalidOrUsed";
@@ -45,6 +78,22 @@ const mapAcceptInviteError = (message: string): ActionMessageKey => {
 
   if (message.includes("COUPLE_FULL")) {
     return "auth.invite.coupleFull";
+  }
+
+  if (message.includes("AUTH_REQUIRED")) {
+    return "auth.signInRequired";
+  }
+
+  return "unexpectedError";
+};
+
+const mapCompleteOnboardingError = (message: string): ActionMessageKey => {
+  if (message.includes("COUPLE_EXISTS")) {
+    return "auth.onboarding.coupleExists";
+  }
+
+  if (message.includes("INVALID_TIMEZONE")) {
+    return "auth.onboarding.invalidSubmission";
   }
 
   if (message.includes("AUTH_REQUIRED")) {
@@ -255,6 +304,55 @@ export const acceptInviteAction = async (
     return createSuccessState("auth.invite.accepted");
   } catch (error: unknown) {
     console.error("Failed to accept invite", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const completeOnboardingAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const authGateState = await getAuthGateState();
+    if (authGateState.status === "unauthenticated") {
+      return createErrorState("auth.signInRequired");
+    }
+
+    if (authGateState.status === "ready") {
+      return createSuccessState("auth.onboarding.completed");
+    }
+
+    if (authGateState.status === "needs_invite") {
+      return createErrorState("auth.onboarding.coupleExists");
+    }
+
+    const parsed = completeOnboardingSchema.parse({
+      confirmation: formData.get("confirmation"),
+      coupleName: formData.get("coupleName"),
+      startedDate: formData.get("startedDate"),
+      timeZone: formData.get("timeZone"),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("bootstrap_first_couple", {
+      couple_name: parsed.coupleName,
+      started_date: parsed.startedDate,
+      target_timezone: parsed.timeZone,
+    });
+
+    if (error) {
+      return createErrorState(mapCompleteOnboardingError(error.message));
+    }
+
+    revalidateLocalizedPath("/home");
+    revalidateLocalizedPath("/");
+    return createSuccessState("auth.onboarding.completed");
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState("auth.onboarding.invalidSubmission");
+    }
+
+    console.error("Failed to complete onboarding", error);
     return createErrorState("unexpectedError");
   }
 };

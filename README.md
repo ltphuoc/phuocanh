@@ -3,7 +3,7 @@
 Private couple memory web app built with Next.js App Router + Supabase.
 
 ## Current Product State
-- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
+- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
 - `shell-only`: `/games`, `/games/[mode]`, `/stats`
 - `mock-only`: `/chat`
 

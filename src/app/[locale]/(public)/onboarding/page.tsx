@@ -1,44 +1,38 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { redirect } from "@/i18n/navigation";
 import type { ReactElement } from "react";
-import { AcceptInviteForm } from "@/components/forms/accept-invite-form";
+import { CompleteOnboardingForm } from "@/components/forms/complete-onboarding-form";
 import { AuthShell } from "@/components/layout/auth-shell";
-import { SectionCard } from "@/components/ui/section-card";
+import { Link, redirect } from "@/i18n/navigation";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
 import { getAuthGateState } from "@/lib/server/couple-context";
 
-interface AcceptInvitePageProps {
+interface OnboardingPageProps {
   readonly params: Promise<{
     readonly locale: string;
-  }>;
-  readonly searchParams: Promise<{
-    readonly token?: string;
   }>;
 }
 
 export const generateMetadata = async ({
   params,
-}: AcceptInvitePageProps): Promise<Metadata> => getRouteMetadata(params, "acceptInvite");
+}: OnboardingPageProps): Promise<Metadata> => getRouteMetadata(params, "onboarding");
 
-export default async function AcceptInvitePage({
+export default async function OnboardingPage({
   params,
-  searchParams,
-}: AcceptInvitePageProps): Promise<ReactElement> {
+}: OnboardingPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
   const [t, commonT] = await Promise.all([
     getTranslations({
       locale,
-      namespace: "auth.acceptInvite",
+      namespace: "auth.onboarding",
     }),
     getTranslations({
       locale,
       namespace: "common",
     }),
   ]);
-
   const state = await getAuthGateState();
+
   if (state.status === "unauthenticated") {
     redirect({
       href: "/login",
@@ -53,15 +47,12 @@ export default async function AcceptInvitePage({
     });
   }
 
-  if (state.status === "needs_onboarding") {
+  if (state.status === "needs_invite") {
     redirect({
-      href: "/onboarding",
+      href: "/accept-invite",
       locale,
     });
   }
-
-  const queryParams = await searchParams;
-  const token = queryParams.token ?? "";
 
   return (
     <main>
@@ -70,13 +61,7 @@ export default async function AcceptInvitePage({
         helperTitle={t("helperTitle")}
         title={t("title")}
       >
-        {token ? (
-          <AcceptInviteForm initialToken={token} />
-        ) : (
-          <SectionCard className="text-sm text-muted-foreground" surface="petal">
-            {t("missingTokenDescription")}
-          </SectionCard>
-        )}
+        <CompleteOnboardingForm />
         <Link
           className="text-xs font-semibold text-muted-foreground underline decoration-primary/70 underline-offset-2"
           href="/login"

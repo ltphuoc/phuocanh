@@ -37,6 +37,13 @@ export default async function AppLayout({
     });
   }
 
+  if (state.status === "needs_onboarding") {
+    redirect({
+      href: "/onboarding",
+      locale,
+    });
+  }
+
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-5 pb-32 pt-5 md:px-7 md:pb-12 md:pt-6 lg:px-10">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] overflow-hidden">

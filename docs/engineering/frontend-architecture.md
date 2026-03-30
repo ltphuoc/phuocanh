@@ -3,13 +3,13 @@
 This file describes the current frontend operating model. It is the canonical reference for route behavior and UI/runtime boundaries.
 
 ## Route Groups
-- `src/app/(public)`: `/login` and `/accept-invite`
+- `src/app/(public)`: `/login`, `/onboarding`, and `/accept-invite`
 - `src/app/(app)`: authenticated routes rendered inside one shared app shell
 - `src/app/auth/callback/route.ts`: Supabase auth callback exchange and safe redirect
 - `src/app/page.tsx`: redirect-only route that resolves auth gate state
 
 ## Route Categories
-- `implemented`: `/`, `/login`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
+- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
 - `shell-only`: `/games`, `/games/[mode]`, `/stats`
 - `mock-only`: `/chat`
 
@@ -38,7 +38,7 @@ Do not move server reads into client components unless the task explicitly chang
 - Forms use `react-hook-form`, `zodResolver`, `useActionState`, `startTransition(...)`, and Sonner toasts.
 - Phase 2 planning forms also use inline field errors via `FormSection` in addition to toast feedback.
 - Server Actions are the mutation boundary for app code.
-- Couple bootstrap and invite acceptance use SQL RPCs because the invariants are DB-owned.
+- First-user onboarding confirmation and invite acceptance use SQL RPCs because membership/bootstrap invariants are DB-owned.
 - Countdown and future-note forms submit date-only values; server actions derive stored UTC instants from the saved couple timezone.
 - Album creation/add flows call SQL RPCs from Server Actions so multi-row album writes stay transactional and couple-scoped.
 - `/settings` owns the `updateCoupleTimezoneAction` flow for the shared couple timezone.
@@ -52,6 +52,7 @@ Do not move server reads into client components unless the task explicitly chang
 | Mutation | Revalidated routes |
 |---|---|
 | `sendMagicLinkAction` | none |
+| `completeOnboardingAction` | `/`, `/home` |
 | `createInviteAction` | none |
 | `acceptInviteAction` | `/home` |
 | `createMemoryAction` | `/home`, `/on-this-day`, `/lists` |

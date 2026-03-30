@@ -14,6 +14,7 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | Action | Input | Output | Notes |
 |---|---|---|---|
 | `sendMagicLinkAction` | `email` | `ActionState` | Requests Supabase magic link; no revalidation |
+| `completeOnboardingAction` | `coupleName`, `timeZone`, `startedDate`, `confirmation` | `ActionState` | First-user setup only; validates summary confirmation; calls `bootstrap_first_couple(...)`; revalidates `/` and `/home` |
 | `createInviteAction` | none | `ActionStateWithData<{ inviteUrl: string }>` | Creates a 14-day invite URL for the current couple |
 | `acceptInviteAction` | `token` | `ActionState` | Must call `accept_couple_invite(...)`; no direct membership writes |
 | `createMemoryAction` | `happenedAt`, `locationName?`, `note?`, `media?` | `ActionState` | Requires note or media; max `25MB`; revalidates `/home`, `/on-this-day`, `/lists` |
@@ -37,6 +38,7 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - couple full
   - sign-in required
 - Memory creation returns validation or storage/database failure messages directly.
+- Onboarding returns validation/state errors through `auth.onboarding.invalidSubmission` and `auth.onboarding.coupleExists`.
 - Countdown, future-note, trip, visited-place, album, and couple-timezone mutations return validation errors through `countdown.invalidSubmission`, `futureNote.invalidSubmission`, `trip.invalidSubmission`, `visitedPlace.invalidSubmission`, `album.invalidSubmission`, and `settings.timezone.invalidSubmission`.
 - `/auth/callback` does not return a JSON error payload; it redirects to `/login` on callback failure.
 
@@ -48,8 +50,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 - Exchanges/verifies Supabase auth callback and redirects to a normalized internal path.
 
 ## Database RPCs Used By App Layer
-- `bootstrap_first_couple(started_date, couple_name)`
-  - Auth gate bootstrap path only
+- `bootstrap_first_couple(started_date, couple_name, target_timezone)`
+  - Explicit onboarding-confirmation path only
   - Returns `couple_id`, `role`, `started_at`, `name`, `timezone`
 - `accept_couple_invite(invite_token)`
   - Invite acceptance path only

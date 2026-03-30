@@ -51,3 +51,8 @@
 - Chosen visited-place contract: add manual trip-linked `visited_places` rows rather than auto-deriving stops from `memories.location_name`.
 - Chosen map delivery strategy: ship a provider-free atlas UI first, grouped by trip, without introducing Mapbox, coordinates, or new environment requirements.
 - Chosen travel hierarchy rule: keep visited places rooted in `trips` alongside albums rather than inventing a parallel place hierarchy.
+
+## 2026-03-30 (Onboarding Safety Hardening)
+- Chosen first-user entry path: replace implicit auth-gate bootstrap with explicit `/onboarding` flow before any bootstrap write.
+- Chosen write-safety model: persist first-user bootstrap data only after explicit summary confirmation in the onboarding form.
+- Chosen bootstrap transaction shape: extend `bootstrap_first_couple(...)` to accept `target_timezone` so name, started date, timezone, and first membership commit atomically in one RPC.

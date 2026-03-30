@@ -30,7 +30,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 
 ## Phase 1 Notes
 - Implemented authentication with magic-link + invite acceptance flow.
-- Implemented couple membership bootstrap for first user and invite flow for second user.
+- Implemented explicit first-user onboarding with confirmation-backed couple bootstrap, plus invite flow for second user.
 - Implemented core memories flow with optional image/video upload to private storage.
 
 ## Phase 1 Hardening (Stage A)

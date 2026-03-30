@@ -25,7 +25,7 @@ User-visible errors:
 - Supabase Auth not reachable
 - Generic auth callback failure returns to login
 
-## Flow 2: First User Bootstrap
+## Flow 2: First User Onboarding And Explicit Confirmation
 Preconditions:
 - User is authenticated.
 - No active membership exists for that user.
@@ -34,16 +34,23 @@ Preconditions:
 Steps:
 1. Authenticated route or `/` calls `getAuthGateState()`.
 2. App checks for an active `couple_memberships` row for the user.
-3. If none exists, app calls `bootstrap_first_couple(...)`.
-4. RPC creates the singleton couple and one active membership as `partner_a`.
-5. App returns `ready` state and renders `/home`.
+3. Since no couple exists yet, auth gate resolves to `needs_onboarding`.
+4. User is redirected to `/onboarding`.
+5. The onboarding form collects `coupleName`, `timeZone`, and `startedDate` step-by-step in client draft state only.
+6. Final step shows a summary and requires explicit confirmation.
+7. `completeOnboardingAction` validates the payload and calls `bootstrap_first_couple(started_date, couple_name, target_timezone)`.
+8. RPC creates the singleton couple and one active membership as `partner_a` in one transaction.
+9. User is redirected to `/home`.
 
 Redirects:
-- `/` redirects to `/home` once the couple context is ready.
+- `/` redirects to `/onboarding` when first-user onboarding is required.
+- `/onboarding` redirects to `/home` after successful confirmation.
 
 User-visible errors:
 - Missing schema surfaces the setup-recovery UI.
-- RPC failure bubbles as runtime error.
+- Invalid onboarding submission.
+- `COUPLE_EXISTS` race path redirects user to invite flow.
+- Unexpected RPC failure surfaces as generic error.
 
 ## Flow 3: Authenticated User Needs Invite
 Preconditions:
@@ -53,10 +60,9 @@ Preconditions:
 
 Steps:
 1. `getAuthGateState()` checks membership.
-2. App attempts bootstrap.
-3. Bootstrap RPC returns `COUPLE_EXISTS`.
-4. App resolves auth gate state as `needs_invite`.
-5. Authenticated app routes redirect the user to `/accept-invite`.
+2. App checks whether any couple already exists.
+3. Because a couple exists and this user is not a member, auth gate resolves to `needs_invite`.
+4. Authenticated app routes redirect the user to `/accept-invite`.
 
 Redirects:
 - `/` redirects to `/accept-invite`.

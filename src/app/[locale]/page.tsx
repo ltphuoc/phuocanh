@@ -29,6 +29,13 @@ export default async function IndexPage({
     });
   }
 
+  if (state.status === "needs_onboarding") {
+    redirect({
+      href: "/onboarding",
+      locale,
+    });
+  }
+
   redirect({
     href: "/home",
     locale,

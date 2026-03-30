@@ -18,6 +18,7 @@
       "login": "Login | PhuocAnh",
       "map": "Map | PhuocAnh",
       "memoryDetail": "Memory Detail | PhuocAnh",
+      "onboarding": "Onboarding | PhuocAnh",
       "onThisDay": "On This Day | PhuocAnh",
       "settings": "Settings | PhuocAnh",
       "stats": "Stats | PhuocAnh",
@@ -149,6 +150,11 @@
       "helperTitle": "Accept invite",
       "missingTokenDescription": "Missing token. Open the full invite URL.",
       "title": "Join your couple space"
+    },
+    "onboarding": {
+      "helper": "Set your real couple details step by step. Nothing is saved until you explicitly confirm the final summary.",
+      "helperTitle": "First-time setup",
+      "title": "Create your couple space"
     }
   },
   "forms": {
@@ -162,6 +168,38 @@
       "submit": "Join couple space",
       "tokenDescription": "Token is prefilled from your partner invite URL.",
       "tokenLabel": "Invite token"
+    },
+    "onboarding": {
+      "back": "Back",
+      "confirmationDescription": "I confirm this summary is correct and should be written to our couple space.",
+      "confirmationLabel": "Explicit confirmation",
+      "coupleNameDescription": "Use the real name for your shared space.",
+      "coupleNameLabel": "Couple name",
+      "coupleNamePlaceholder": "Phuoc & Anh",
+      "next": "Next",
+      "startedDateDescription": "This date powers relationship day counts and timeline milestones.",
+      "startedDateLabel": "Started date",
+      "stepIndicator": "Step {step} of {total}",
+      "submit": "Confirm and create space",
+      "summary": {
+        "coupleName": "Couple name",
+        "startedDate": "Started date",
+        "timeZone": "Timezone"
+      },
+      "summaryLabel": "Final confirmation summary",
+      "timeZoneDescription": "Use your real shared timezone for date boundaries.",
+      "timeZoneLabel": "Couple timezone",
+      "timeZonePlaceholder": "Asia/Ho_Chi_Minh",
+      "validation": {
+        "confirmationRequired": "You must confirm before creating the couple space.",
+        "coupleNameMax": "Couple name must be 120 characters or fewer.",
+        "coupleNameRequired": "Enter your couple name.",
+        "startedDateFuture": "Started date cannot be in the future.",
+        "startedDateInvalid": "Choose a valid started date.",
+        "startedDateRequired": "Choose a started date.",
+        "timeZoneInvalid": "Enter a valid IANA timezone.",
+        "timeZoneRequired": "Enter a timezone."
+      }
     },
     "invite": {
       "copySuccess": "Invite link copied.",
@@ -326,7 +364,12 @@
         "sent": "Check your email for the magic link.",
         "unreachable": "Cannot reach Supabase Auth. Ensure local Supabase is running and reachable at port 54321."
       },
-      "signInRequired": "Please sign in before accepting an invite."
+      "onboarding": {
+        "completed": "Couple space created successfully.",
+        "coupleExists": "A couple space already exists. Use an invite link to join it.",
+        "invalidSubmission": "Onboarding submission is invalid."
+      },
+      "signInRequired": "Please sign in to continue."
     },
     "list": {
       "checklist": {

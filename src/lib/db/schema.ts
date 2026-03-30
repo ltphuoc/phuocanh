@@ -79,8 +79,8 @@ export const phaseOneTableBaseline = appTableBaseline;
 
 export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
-    name: "public.bootstrap_first_couple(date, text)",
-    sourceMigration: "20260327233000_phase1_hardening.sql",
+    name: "public.bootstrap_first_couple(date, text, text)",
+    sourceMigration: "20260330001000_onboarding_bootstrap_timezone.sql",
     status: "sql_authoritative",
   },
   {

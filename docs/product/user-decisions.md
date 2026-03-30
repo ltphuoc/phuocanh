@@ -11,9 +11,13 @@
 - Local development auth redirects should support both `localhost` and `127.0.0.1` to avoid callback mismatches.
 
 ## Implementation Defaults Applied in Phase 1
-- First authenticated user bootstraps couple space automatically.
+- First authenticated user bootstraps couple space automatically. `SUPERSEDED BY 2026-03-30 (First-user onboarding now requires explicit confirmation before persistence.)`
 - Second user joins via explicit invite token.
 - Auth method: Supabase email magic link.
+
+## 2026-03-30
+- Confirmed first-user onboarding policy: collect `coupleName`, `timeZone`, and `startedDate` step by step, then persist only after explicit summary confirmation.
+- Confirmed onboarding scope: applies only when no couple exists yet (no forced backfill gate for existing ready couples).
 
 ## 2026-03-28
 - Runtime stabilization is prioritized before Phase 2 coding.

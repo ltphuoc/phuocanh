@@ -32,11 +32,12 @@ flowchart LR
 
 ## Auth And Session Flow
 - Middleware refreshes Supabase auth state on requests.
-- Public routes handle login and invite acceptance.
+- Public routes handle login, first-user onboarding, and invite acceptance.
 - `GET /auth/callback` finishes Supabase callback exchange and normalizes the `next` redirect.
 - Authenticated routes use `getAuthGateState()` / `getReadyCoupleContextOrRedirect()` before rendering protected content.
 - The auth gate decides between:
 - unauthenticated
+- authenticated but needs onboarding
 - authenticated but needs invite
 - authenticated and ready
 
@@ -55,6 +56,7 @@ flowchart LR
 
 ## Trust Boundaries And Enforcement
 - Couple bootstrap and invite acceptance are DB-owned invariants through RPCs.
+- The auth gate is read-only and does not bootstrap data implicitly.
 - Membership visibility is controlled through `is_couple_member(...)`.
 - Storage visibility and writes are controlled through storage policies keyed off the couple ID in the object path.
 - The app layer must not substitute UI checks for SQL ownership rules.

@@ -4,10 +4,6 @@ import { isSchemaCacheMissMessage, SchemaReadinessError } from "@/lib/errors";
 import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
-import {
-  DEFAULT_COUPLE_TIMEZONE,
-  getCurrentDateTokenInTimeZone,
-} from "@/lib/utils/couple-timezone";
 
 type MembershipRole = Database["public"]["Enums"]["membership_role"];
 
@@ -31,12 +27,22 @@ interface NeedsInviteState {
   readonly userId: string;
 }
 
+interface NeedsOnboardingState {
+  readonly email: string | null;
+  readonly status: "needs_onboarding";
+  readonly userId: string;
+}
+
 interface ReadyState {
   readonly context: CoupleContext;
   readonly status: "ready";
 }
 
-export type AuthGateState = UnauthenticatedState | NeedsInviteState | ReadyState;
+export type AuthGateState =
+  | UnauthenticatedState
+  | NeedsInviteState
+  | NeedsOnboardingState
+  | ReadyState;
 
 interface MembershipRow {
   readonly couple_id: string;
@@ -50,7 +56,9 @@ interface CoupleRow {
   readonly timezone: string;
 }
 
-const DEFAULT_COUPLE_NAME = "Our Space";
+interface ExistingCoupleRow {
+  readonly id: string;
+}
 
 const getMembershipForUser = async (
   userId: string,
@@ -93,43 +101,19 @@ const getCoupleById = async (coupleId: string): Promise<CoupleRow | null> => {
   return data[0] ?? null;
 };
 
-const bootstrapCoupleForUser = async (
-  userId: string,
-  email: string | null,
-): Promise<CoupleContext | null> => {
+const getAnyCouple = async (): Promise<ExistingCoupleRow | null> => {
   const supabase = await createSupabaseServerClient();
-  const today = getCurrentDateTokenInTimeZone(DEFAULT_COUPLE_TIMEZONE);
-  // The first authenticated user claims the singleton couple space in SQL so UI redirects
-  // cannot race or create duplicate spaces from app-layer writes.
-  const { data: bootstrappedRows, error } = await supabase.rpc("bootstrap_first_couple", {
-    couple_name: DEFAULT_COUPLE_NAME,
-    started_date: today,
-  });
+  const { data, error } = await supabase.from("couples").select("id").limit(1);
 
   if (error) {
-    if (error.message.includes("COUPLE_EXISTS")) {
-      // If the singleton space already exists and this user is not a member, the only legal
-      // path forward is invite acceptance rather than implicit attachment.
-      return null;
+    if (isSchemaCacheMissMessage(error.message)) {
+      throw new SchemaReadinessError("public.couples");
     }
 
     throw new Error(error.message);
   }
 
-  const bootstrappedCouple = bootstrappedRows?.[0] ?? null;
-  if (!bootstrappedCouple) {
-    throw new Error("Could not bootstrap couple space.");
-  }
-
-  return {
-    coupleId: bootstrappedCouple.couple_id,
-    coupleName: bootstrappedCouple.name,
-    coupleStartedAt: bootstrappedCouple.started_at,
-    email,
-    role: bootstrappedCouple.role,
-    timezone: bootstrappedCouple.timezone,
-    userId,
-  };
+  return data[0] ?? null;
 };
 
 export const getAuthGateState = async (): Promise<AuthGateState> => {
@@ -165,17 +149,18 @@ export const getAuthGateState = async (): Promise<AuthGateState> => {
     };
   }
 
-  const bootstrappedContext = await bootstrapCoupleForUser(user.id, user.email ?? null);
-  if (bootstrappedContext) {
+  const existingCouple = await getAnyCouple();
+  if (existingCouple) {
     return {
-      context: bootstrappedContext,
-      status: "ready",
+      email: user.email ?? null,
+      status: "needs_invite",
+      userId: user.id,
     };
   }
 
   return {
     email: user.email ?? null,
-    status: "needs_invite",
+    status: "needs_onboarding",
     userId: user.id,
   };
 };
@@ -199,6 +184,8 @@ export const getReadyCoupleContextOrRedirect = async (
       return state.context;
     case "needs_invite":
       redirect(toLocalizedPathname(locale, "/accept-invite"));
+    case "needs_onboarding":
+      redirect(toLocalizedPathname(locale, "/onboarding"));
     case "unauthenticated":
     default:
       redirect(toLocalizedPathname(locale, "/login"));

@@ -14,7 +14,7 @@ If roadmap or feature copy conflicts with the route-capability matrix on what ex
 If an older decision log conflicts with current architecture docs, trust the newer architecture docs unless the log explicitly says it is still current.
 
 ## Repo Map
-- `src/app/(public)`: login and invite acceptance routes
+- `src/app/(public)`: login, first-user onboarding, and invite acceptance routes
 - `src/app/(app)`: authenticated app shell and user-facing routes
 - `src/app/actions`: Server Actions that own runtime mutations
 - `src/lib/server`: auth gate, couple context, page data reads, site URL resolution

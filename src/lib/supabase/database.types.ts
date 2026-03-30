@@ -694,7 +694,7 @@ export type Database = {
         Returns: number
       }
       bootstrap_first_couple: {
-        Args: { couple_name: string; started_date: string }
+        Args: { couple_name: string; started_date: string; target_timezone?: string }
         Returns: {
           couple_id: string
           name: string
@@ -887,4 +887,3 @@ export const Constants = {
     },
   },
 } as const
-
