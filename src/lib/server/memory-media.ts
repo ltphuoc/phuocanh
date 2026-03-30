@@ -26,10 +26,10 @@ export const signMemoryMediaStorageItems = async <TItem extends StoragePathItem>
   items: readonly TItem[],
 ): Promise<readonly SignedStoragePathItem<TItem>[]> => {
   const supabase = await createSupabaseServerClient();
-  const storagePaths = items.flatMap((item) => {
+  const storagePaths = Array.from(new Set(items.flatMap((item) => {
     const storagePath = getStoragePath(item);
     return storagePath ? [storagePath] : [];
-  });
+  })));
 
   const signedUrlByPath = new Map<string, string | null>();
   if (storagePaths.length) {

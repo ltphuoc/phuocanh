@@ -34,7 +34,11 @@ interface CreateMemoryFormProps {
   readonly coupleId: string;
 }
 
+const ALLOWED_MEDIA_MIME_PREFIXES = ["image/", "video/"] as const;
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+const isAllowedMediaMimeType = (mimeType: string): boolean =>
+  ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
 
 const sanitizeFileName = (fileName: string): string =>
   fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, "_");
@@ -112,7 +116,6 @@ export const CreateMemoryForm = ({
   ]);
 
   const onSubmit = form.handleSubmit(async (values) => {
-    setHasSubmitted(true);
     const payload = new FormData();
     payload.set("happenedAt", new Date(values.happenedAtLocal).toISOString());
     payload.set("locationName", values.locationName ?? "");
@@ -121,6 +124,11 @@ export const CreateMemoryForm = ({
     if (mediaFile) {
       if (mediaFile.size > MAX_UPLOAD_BYTES) {
         toast.error(actionsT("memory.fileTooLarge"));
+        return;
+      }
+
+      if (!isAllowedMediaMimeType(mediaFile.type)) {
+        toast.error(actionsT("memory.unsupportedType"));
         return;
       }
 
@@ -149,6 +157,7 @@ export const CreateMemoryForm = ({
       payload.set("storagePath", storagePath);
     }
 
+    setHasSubmitted(true);
     startTransition(() => {
       submitAction(payload);
     });
