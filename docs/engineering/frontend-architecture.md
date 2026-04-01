@@ -11,7 +11,7 @@ This file describes the current frontend operating model. It is the canonical re
 ## Route Categories
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
 - `shell-only`: `/games`, `/games/[mode]`, `/stats`
-- `mock-only`: `/chat`
+- `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 
 Use `docs/engineering/route-capability-matrix.md` for the full table.
 
@@ -26,7 +26,7 @@ Do not move server reads into client components unless the task explicitly chang
 - Authenticated pages first resolve couple context through `getAuthGateState()` or `getReadyCoupleContextOrRedirect()`.
 - Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, `getMemoryDetailData(...)`, `getCountdownsPageData(...)`, `getFutureNotesPageData(...)`, `getTripsPageData(...)`, `getTripDetailData(...)`, `getMapPageData(...)`, `getAlbumsPageData(...)`, and `getAlbumDetailData(...)`.
 - Signed `memory-media` URLs are created server-side through `signMemoryMediaStorageItems(...)` before render.
-- Future-note bodies stay in the server read layer; client components never fetch locked content directly.
+- Future-note bodies stay in the server read layer; client components never fetch locked content directly, and unlocked bodies now flow through the decrypted RPC path rather than direct table reads.
 - Trip detail reads return `notFound()` for invalid or non-member trip IDs instead of rendering placeholder content.
 - Trip detail reads now include ordered `visited_places` rows for the trip.
 - Album detail reads return `notFound()` for invalid or non-member album IDs instead of rendering placeholder content.
@@ -40,6 +40,7 @@ Do not move server reads into client components unless the task explicitly chang
 - Server Actions are the mutation boundary for app code.
 - First-user onboarding confirmation and invite acceptance use SQL RPCs because membership/bootstrap invariants are DB-owned.
 - Countdown and future-note forms submit date-only values; server actions derive stored UTC instants from the saved couple timezone.
+- Future-note creation now uses a SQL RPC so metadata insert plus encrypted body write stay transactional.
 - Album creation/add flows call SQL RPCs from Server Actions so multi-row album writes stay transactional and couple-scoped.
 - `/settings` owns the `updateCoupleTimezoneAction` flow for the shared couple timezone.
 
@@ -79,7 +80,7 @@ New routes should compose these primitives rather than invent new layout systems
 
 ## Shell-Only And Mock-Only Rules
 - `shell-only` means the route exists to define layout and navigation, not to prove backend support.
-- `mock-only` means the route renders sample content for UX direction and must not be treated as real data.
+- `mock-only` means the route renders sample content for UX direction or survives temporarily as a deprecated artifact and must not be treated as real data.
 - Do not add server reads, new tables, or background jobs to shell-only or mock-only routes without updating `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md`.
 
 ## Architecture Guardrails

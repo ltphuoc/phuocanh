@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "typecheck:functions": "deno check --config ./supabase/functions/reminder-processor/deno.json ./supabase/functions/reminder-processor/index.ts",
     "i18n:check": "node ./scripts/i18n/check-key-parity.mjs && node ./scripts/i18n/check-fallback.mjs",
     "i18n:audit-hardcoded": "node ./scripts/i18n/audit-hardcoded-ui.mjs",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next && rm -rf dist"

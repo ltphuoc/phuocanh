@@ -185,8 +185,9 @@ Steps:
 5. Action validates the payload with `createCountdownSchema`.
 6. Action converts `targetDate` into the stored UTC instant at local midnight in the saved couple timezone.
 7. Action inserts a couple-scoped `countdowns` row with `created_by_user_id`.
-8. Action revalidates `/countdowns`.
-9. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
+8. The reminder enqueue job later derives a single day-of reminder email for each active partner from that stored date and the current couple timezone.
+9. Action revalidates `/countdowns`.
+10. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
 - None.
@@ -207,9 +208,9 @@ Steps:
 4. `createFutureNoteAction` requires ready couple context.
 5. Action validates the payload with `createFutureNoteSchema`.
 6. Action converts `unlockDate` into the stored UTC instant at local midnight in the saved couple timezone.
-7. Action inserts the `future_notes` metadata row first.
-8. Action inserts the `future_note_contents` body row second.
-9. If the body insert fails, the action attempts rollback of the metadata row.
+7. Action calls `create_future_note_with_body(...)`.
+8. RPC resolves the active couple membership, inserts `future_notes`, encrypts the body, and inserts `future_note_contents` transactionally.
+9. The reminder enqueue job later derives one unlock reminder email for each active partner from that stored unlock date and the current couple timezone.
 10. Action revalidates `/future-notes`.
 11. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
@@ -231,7 +232,7 @@ Steps:
 3. The helper reads couple-scoped `future_notes` metadata ordered by `unlock_at`.
 4. Notes with `unlock_at > now()` are returned as locked metadata only.
 5. Notes with `unlock_at <= now()` are treated as unlocked.
-6. Only unlocked note IDs are then used to read `future_note_contents`.
+6. Only unlocked note IDs are then used to read `get_unlocked_future_note_contents(...)`.
 7. UI renders locked notes without bodies and unlocked notes with bodies.
 
 Redirects:
@@ -398,6 +399,28 @@ User-visible errors:
 - Missing or invalid timezone
 - Missing active couple membership
 - Unexpected RPC/database failure
+
+## Flow 18: Automated Reminder Delivery
+Preconditions:
+- Countdown or future-note rows exist for a couple with active members and email addresses.
+- Hosted: Vault contains `project_url` and `anon_key` for cron-driven function invocation. Local/CI without Vault: the private fallback store contains those same secret names.
+- The `reminder-processor` Edge Function has its runtime secrets configured, including Resend and Supabase service-role access.
+
+Steps:
+1. `pg_cron` runs `enqueue_due_reminder_deliveries()` on a fixed interval.
+2. The function finds countdowns whose local saved date is today in the couple timezone.
+3. The function finds future notes whose local unlock date is today in the couple timezone.
+4. For each due source row, the function inserts one `reminder_deliveries` row per active partner email.
+5. The unique key `(kind, source_id, recipient_user_id)` prevents duplicate enqueueing across repeated cron runs.
+6. A second cron job invokes the `reminder-processor` Edge Function through `pg_net`.
+7. The function claims pending deliveries in batches via `claim_reminder_deliveries(...)`.
+8. The function sends summary-only emails through Resend and deep-links back into the app.
+9. Successful sends are marked `sent` with provider metadata.
+10. Failed sends are re-queued with backoff until `max_attempts` is reached, then marked `failed`.
+
+User-visible errors:
+- Reminder emails may arrive late or not at all if Edge Function secrets, Resend, or cron delivery infrastructure are misconfigured.
+- Failures do not block app reads or writes; they remain isolated to `reminder_deliveries` retry state.
 
 ## Route Entry Flow
 - `/` is a pure redirect route.

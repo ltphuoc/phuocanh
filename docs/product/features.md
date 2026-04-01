@@ -15,18 +15,17 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 | 7 | Map các nơi đã đi cùng nhau | 2 | implemented |
 | 8 | Album theo từng chuyến đi | 2 | implemented |
 | 9 | Countdown sinh nhật / anniversary / chuyến đi | 2 | implemented |
-| 10 | Private couple chat | 3 | mock-only |
-| 11 | Quiz ai nhớ rõ hơn | 3 | shell-only |
-| 12 | Guess the date/place | 3-4 | shell-only |
-| 13 | This or that | 4 | planned |
-| 14 | Memory cards từ ảnh thật | 4 | planned |
-| 15 | Daily question | 3 | shell-only |
-| 16 | Điểm số / streak | 3 | shell-only |
-| 17 | Future notes mở vào ngày định sẵn | 2 | implemented |
-| 18 | Couple AI Memory Search | 4 | planned |
-| 19 | Các stats vui | 3 | shell-only |
-| 20 | Trips foundation | 2 | implemented |
-| 21 | Shared couple timezone + date boundaries | 2 | implemented |
+| 10 | Quiz ai nhớ rõ hơn | 3 | shell-only |
+| 11 | Guess the date/place | 3-4 | shell-only |
+| 12 | This or that | 4 | planned |
+| 13 | Memory cards từ ảnh thật | 4 | planned |
+| 14 | Daily question | 3 | shell-only |
+| 15 | Điểm số / streak | 3 | shell-only |
+| 16 | Future notes mở vào ngày định sẵn | 2 | implemented |
+| 17 | Couple AI Memory Search | 4 | planned |
+| 18 | Các stats vui | 3 | shell-only |
+| 19 | Trips foundation | 2 | implemented |
+| 20 | Shared couple timezone + date boundaries | 2 | implemented |
 
 ## Phase 1 Notes
 - Implemented authentication with magic-link + invite acceptance flow.
@@ -52,14 +51,13 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: mobile navigation is now a floating dock with a centered memory action orb and a separate `More` sheet.
 - `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
 - `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
-- `mock-only`: `/chat` now exists as a styled route with sample conversation content, but no live messaging backend exists.
+- `mock-only`: `/chat` now exists as a styled route with sample conversation content, but it is a deprecated mock artifact rather than a planned product slice.
 - `shell-only`: `/games`, `/games/[mode]`, and `/stats` are still presentational route shells only.
 
 ## Phase 2 Slice 1 (2026-03-29)
 - `implemented`: `/countdowns` now reads and writes live Phase 2 countdown rows.
 - `implemented`: `/future-notes` now reads and writes live metadata plus secure note bodies gated by unlock date.
 - `implemented`: shared accessibility and consistency fixes landed alongside the slice (`/lists` label parity, icon-button labels, mobile `More` semantics).
-- `deferred`: reminder jobs and encryption-at-rest remain follow-up work.
 
 ## Phase 2 Slice 2 (2026-03-29)
 - `implemented`: `/trips` now reads and writes live trip rows through the `trips` schema and `createTripAction`.
@@ -85,8 +83,22 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: countdown and future-note forms now submit date-only values and the server derives stored instants from the saved couple timezone.
 - `implemented`: relationship-day math, on-this-day, trip status, album media eligibility, album detail dates, trip dates, and map dates now use the saved couple timezone.
 - `implemented`: changing the couple timezone preserves visible countdown and future-note calendar dates instead of shifting them unexpectedly.
-- `deferred`: per-user timezone overrides and reminder delivery remain out of scope.
+- `deferred`: per-user timezone overrides remain out of scope.
+
+## Phase 2 Closeout (2026-04-01)
+- `implemented`: countdowns now enqueue one day-of reminder email per active partner based on the saved couple timezone.
+- `implemented`: future notes now store encrypted bodies at rest and only decrypt through unlock-gated RPC reads.
+- `implemented`: future-note creation now runs through a transactional SQL RPC instead of a two-step app write plus rollback.
+- `implemented`: unlock reminder emails are summary-only and do not include the future-note body.
+- `implemented`: reminder delivery now uses durable queue rows plus claim/retry processing in the reminder Edge Function.
+- `implemented`: the product scope for Phase 2 is complete, with Vault-backed reminder secrets in hosted environments and a private fallback secret store for local/CI replay when Vault is unavailable.
 
 ## Phase 3 Carry-Forward
-- `mock-only`: `/chat` remains a designed conversation surface only and sits in the Phase 3 track.
-- `shell-only`: `/games`, `/games/[mode]`, and `/stats` remain presentational scaffolding until the Phase 3 backend track is scoped.
+- `deprecated`: `/chat` remains in the app only as a mock artifact pending cleanup and is no longer part of the product roadmap.
+- `deprecated`: `/chat` route removal is maintenance work and not part of the next gameplay slice.
+- `shell-only`: `/games`, `/games/[mode]`, and `/stats` remain presentational scaffolding today.
+- `planned`: the next product slice is `Phase 3 Slice 1: Games + Stats foundation`.
+- `planned`: `/games` becomes a live hub with backend-backed mode availability and entry links.
+- `planned`: `/games/daily-question` is the single first live gameplay mode because it is the narrowest fit for prompt, answer, streak, and stats wiring.
+- `planned`: `/stats` becomes a real couple-scoped read model for gameplay history plus score/streak aggregates.
+- `planned`: additional game modes, leaderboards, sharing, and travel-map depth remain outside the first Phase 3 slice.

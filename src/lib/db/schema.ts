@@ -54,6 +54,11 @@ export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
     status: "planned_mirror",
   },
   {
+    name: "public.reminder_deliveries",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "planned_mirror",
+  },
+  {
     name: "public.trips",
     sourceMigration: "20260329153000_phase2_slice2_trips_foundation.sql",
     status: "planned_mirror",
@@ -121,6 +126,36 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.update_couple_timezone(uuid, text)",
     sourceMigration: "20260329223000_couple_timezone_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.create_future_note_with_body(text, timestamptz, text)",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.get_unlocked_future_note_contents(uuid)",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.enqueue_due_reminder_deliveries()",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.claim_reminder_deliveries(integer)",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.invoke_reminder_processor()",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.configure_phase2_reminder_jobs()",
+    sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
     status: "sql_authoritative",
   },
   {

@@ -68,10 +68,6 @@
         "description": "Albums grouped from real trip memories.",
         "label": "Albums"
       },
-      "chat": {
-        "description": "The private thread between the two of you.",
-        "label": "Chat"
-      },
       "countdowns": {
         "description": "Dates worth waiting for together.",
         "label": "Countdowns"
@@ -540,7 +536,7 @@
       "quote": "The thread should feel like passing little keepsakes back and forth.",
       "title": "Chat"
     },
-    "note": "This is a designed conversation surface for the upcoming chat feature. Real messages, presence, and media attachments are intentionally not wired yet."
+    "note": "This is a deprecated mock conversation surface that remains reachable until route cleanup lands. Real messages, presence, and media attachments are intentionally not wired."
   },
   "map": {
     "header": {
@@ -647,8 +643,8 @@
   },
   "countdowns": {
     "automationNote": {
-      "description": "These countdowns now follow the saved couple timezone. Recurring reminders and background jobs remain a follow-up slice.",
-      "title": "Reminder automation is still deferred"
+      "description": "These countdowns now follow the saved couple timezone and trigger one email reminder on the day itself for both partners.",
+      "title": "Reminder automation is live"
     },
     "composer": {
       "description": "Create real date-based milestones for birthdays, anniversaries, trips, and quiet little plans. The timeline below is backed by the new Phase 2 schema.",
@@ -716,8 +712,8 @@
       "unlockedTitle": "Unlocked notes"
     },
     "securityNote": {
-      "description": "This slice protects note bodies with a separate table plus row-level policies, and unlock timing now follows the saved couple timezone. Encryption-at-rest and reminder delivery are still follow-up work.",
-      "title": "Security boundary for this slice"
+      "description": "Note bodies stay in a protected content table, are encrypted at rest, and only unlock inside the app once the saved couple-time date is reached. Unlock emails stay summary-only.",
+      "title": "Protected note bodies and live unlock delivery"
     },
     "status": {
       "locked": "Locked",

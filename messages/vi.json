@@ -68,10 +68,6 @@
         "description": "Album được nhóm từ kỷ niệm thật theo từng chuyến đi.",
         "label": "Album"
       },
-      "chat": {
-        "description": "Cuộc trò chuyện riêng tư giữa hai bạn.",
-        "label": "Chat"
-      },
       "countdowns": {
         "description": "Những ngày đáng chờ đợi cùng nhau.",
         "label": "Đếm ngược"
@@ -540,7 +536,7 @@
       "quote": "Luồng trò chuyện nên giống như trao nhau những món kỷ vật nhỏ.",
       "title": "Chat"
     },
-    "note": "Đây là bề mặt trò chuyện được thiết kế cho tính năng chat sắp tới. Tin nhắn thật, trạng thái online và media đính kèm hiện chưa được nối dữ liệu."
+    "note": "Đây là bề mặt trò chuyện mock đã bị đưa vào diện dọn dẹp, hiện vẫn còn truy cập được cho tới khi route này được xoá. Tin nhắn thật, trạng thái online và media đính kèm cố ý chưa được nối dữ liệu."
   },
   "map": {
     "header": {
@@ -647,8 +643,8 @@
   },
   "countdowns": {
     "automationNote": {
-      "description": "Các đếm ngược này giờ tuân theo múi giờ chung đã lưu. Nhắc lịch lặp lại và background job vẫn là phần theo sau.",
-      "title": "Tự động nhắc lịch vẫn đang được hoãn lại"
+      "description": "Các đếm ngược này giờ tuân theo múi giờ chung đã lưu và sẽ gửi một email nhắc đúng ngày cho cả hai người.",
+      "title": "Tự động nhắc lịch đã hoạt động"
     },
     "composer": {
       "description": "Tạo các cột mốc thật cho sinh nhật, ngày kỷ niệm, chuyến đi hay kế hoạch nhỏ. Timeline bên dưới đã chạy trên schema Phase 2 mới.",
@@ -716,8 +712,8 @@
       "unlockedTitle": "Ghi chú đã mở"
     },
     "securityNote": {
-      "description": "Slice này bảo vệ phần nội dung ghi chú bằng bảng riêng và row-level policy, còn thời điểm mở khoá giờ tuân theo múi giờ chung đã lưu. Mã hoá at-rest và gửi nhắc lịch vẫn là phần theo sau.",
-      "title": "Ranh giới bảo mật của slice này"
+      "description": "Phần nội dung ghi chú nằm trong bảng bảo vệ riêng, được mã hoá at-rest và chỉ mở trong app khi tới đúng ngày theo múi giờ chung đã lưu. Email mở khoá chỉ gửi phần tóm tắt.",
+      "title": "Nội dung ghi chú được bảo vệ và gửi mở khoá đã hoạt động"
     },
     "status": {
       "locked": "Đang khoá",

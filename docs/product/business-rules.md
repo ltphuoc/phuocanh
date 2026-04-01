@@ -73,16 +73,17 @@ This file is the canonical business-rule reference for the current app. If this 
 - Countdown creation records the creating member in `created_by_user_id` and is authorized by RLS.
 - Countdown dates are stored as UTC timestamps derived from the selected local date in the saved couple timezone.
 - Past countdowns remain visible as history; the current slice does not auto-archive or auto-delete them.
-- Reminder automation and background jobs are explicitly deferred.
+- Countdowns enqueue one day-of reminder email per active partner based on the saved couple timezone.
 
 ## Future Notes
 - Future-note metadata (`title`, `unlock_at`) is visible immediately to active couple members.
 - Future-note bodies are stored in a separate one-to-one table (`future_note_contents`).
-- Future-note bodies are unreadable until the parent note satisfies `unlock_at <= now()` in SQL policy.
+- Future-note bodies are encrypted at rest and are unreadable until the parent note satisfies `unlock_at <= now()` through the unlocked-body RPC.
 - `unlock_at` is stored as a UTC instant derived from the selected local date in the saved couple timezone.
-- Creation is a two-step mutation: metadata first, content second. If content insert fails, the app attempts rollback of the metadata row.
-- The current slice has no edit/delete UI and no reminder-delivery workflow.
-- This slice uses database policy gating, not encryption-at-rest.
+- Future-note title and body validation is enforced in SQL as well as in the app: trimmed non-empty title/body, title max `120`, body max `2000`.
+- Creation is a transactional mutation owned by SQL so metadata insert plus encrypted content write succeed or fail together.
+- Unlock reminder emails are summary-only and do not include the decrypted note body.
+- The current slice has no edit/delete UI.
 
 ## Trips
 - Trips are couple-scoped and readable by active couple members only.
@@ -135,7 +136,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Couple membership read/write visibility: RLS helper `is_couple_member(...)`
 - Storage object access: storage policies using the couple ID embedded in the object path
 - Countdown and future-note visibility: RLS on the Phase 2 tables
-- Future-note body unlock rule: `future_note_contents_select` policy joined against `future_notes.unlock_at`
+- Future-note body unlock rule: `get_unlocked_future_note_contents(...)` joined against `future_notes.unlock_at`
 - Couple timezone validity: `couples_timezone_valid_check` using `is_valid_timezone(...)`
 - Couple timezone mutation: `update_couple_timezone(...)`
 - Trip visibility and inserts: RLS on `trips`
@@ -178,6 +179,6 @@ This file is the canonical business-rule reference for the current app. If this 
   - database writes fail unexpectedly
 
 ## Current Shell Boundaries
-- `/chat` is mock-only because it renders sample conversation content.
+- `/chat` is a deprecated mock artifact because it renders sample conversation content and is no longer on the product roadmap.
 - `/games`, `/games/[mode]`, and `/stats` are shell-only.
 - Shell-only and mock-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

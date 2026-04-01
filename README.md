@@ -5,7 +5,7 @@ Private couple memory web app built with Next.js App Router + Supabase.
 ## Current Product State
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
 - `shell-only`: `/games`, `/games/[mode]`, `/stats`
-- `mock-only`: `/chat`
+- `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
 
@@ -37,7 +37,26 @@ If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Browser/server anon key for current runtime |
 | `DATABASE_URL` | yes | Local SQL tooling and schema parity work |
 | `NEXT_PUBLIC_SITE_URL` | yes | Fallback site URL when forwarded headers are absent |
-| `SUPABASE_SERVICE_ROLE_KEY` | optional | Reserved for future trusted server/admin tasks; current runtime does not require it |
+| `SUPABASE_SERVICE_ROLE_KEY` | conditional | Required by the `reminder-processor` Edge Function; not required for the main Next.js runtime |
+
+Phase 2 reminder delivery also needs Edge Function secrets when you deploy or serve `supabase/functions/reminder-processor`:
+
+| Secret | Required now | Purpose |
+|---|---|---|
+| `SUPABASE_URL` | yes | Supabase project URL inside the Edge Function runtime |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | Claims and updates `reminder_deliveries` inside the Edge Function |
+| `RESEND_API_KEY` | yes | Outbound reminder email provider |
+| `REMINDER_FROM_EMAIL` | yes | Sender address for reminder emails |
+| `REMINDER_FROM_NAME` | optional | Sender display name, defaults to `PhuocAnh` |
+| `REMINDER_APP_BASE_URL` | optional | Public app base URL used for reminder deep links |
+| `REMINDER_LOCALE` | optional | Locale prefix used in reminder deep links, defaults to `vi` |
+
+In hosted environments, Phase 2 reminder delivery also needs these Supabase Vault secrets for cron-triggered Edge Function invocation:
+
+| Vault secret | Required now | Purpose |
+|---|---|---|
+| `project_url` | yes | Base project URL used by `pg_net` to call the reminder Edge Function |
+| `anon_key` | yes | Supabase anon key used as the scheduled invoke bearer token |
 
 For local Supabase Docker setup, use:
 ```bash
@@ -75,8 +94,19 @@ Run all of these before opening a PR:
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm typecheck:functions
 pnpm build
 ```
+
+## Reminder Setup Verification
+After deploying the migration and the `reminder-processor` Edge Function, verify:
+1. Hosted: Vault contains `project_url` and `anon_key`. Local/CI without Vault: seed the fallback store instead:
+   `select private.upsert_secret_fallback('project_url', '<API_URL>', 'Local functions base URL');`
+   `select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');`
+   Use `supabase status -o env` to get `API_URL` and `ANON_KEY`.
+2. Cron contains `phase2-reminder-enqueue` and `phase2-reminder-processor`.
+3. `select public.invoke_reminder_processor();` returns a request ID.
+4. Due reminders appear in `public.reminder_deliveries` and advance to `sent` or retry state.
 
 ## Internationalization (next-intl)
 - Locales: `vi` (default), `en`
@@ -114,11 +144,12 @@ pnpm typecheck
 
 ## Notes
 - Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
-- `/chat` is mock-only because it renders sample conversation content, not real messages.
+- `/chat` is a deprecated mock artifact because it renders sample conversation content, not real messages, and is no longer on the roadmap.
 - Shell-only routes are intentionally not evidence of backend/domain support.
 - Current runtime has no live OpenAI integration and no live Mapbox integration.
 - `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.
 - `/settings` now owns the shared couple timezone, which drives countdown, future-note, trip-status, album-eligibility, and other couple-level day boundaries.
+- Phase 2 reminder automation is now part of the runtime contract. Database cron jobs enqueue reminder rows, and the `reminder-processor` Edge Function delivers summary-only emails through Resend.
 
 ## Deploy On Vercel
 The repo does not currently define project-specific deployment automation. If deployment work is requested, document the exact environment and rollout steps in the same PR.

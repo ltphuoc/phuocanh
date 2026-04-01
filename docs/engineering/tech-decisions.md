@@ -44,7 +44,7 @@
 - Chosen typography strategy: move from Geist to `Fraunces` for display moments and `Manrope` for UI/body copy via `next/font/google`.
 - Chosen motion layer: adopt `motion` for shared-layout transitions, dock state animation, and gentle reveal choreography.
 - Chosen responsive shell pattern: floating mobile dock with centered memory action orb, plus slim desktop rail with expandable grouped drawer.
-- Chosen `/chat` delivery strategy: ship a presentational conversation shell first without inventing backend contracts or data models.
+- Chosen `/chat` cleanup posture: leave the presentational conversation shell only as a temporary deprecated artifact until navigation/route cleanup lands.
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
 
 ## 2026-03-29 (Visited-Place Atlas Foundation)
@@ -56,3 +56,11 @@
 - Chosen first-user entry path: replace implicit auth-gate bootstrap with explicit `/onboarding` flow before any bootstrap write.
 - Chosen write-safety model: persist first-user bootstrap data only after explicit summary confirmation in the onboarding form.
 - Chosen bootstrap transaction shape: extend `bootstrap_first_couple(...)` to accept `target_timezone` so name, started date, timezone, and first membership commit atomically in one RPC.
+
+## 2026-03-31 (Phase 2 Closeout)
+- Chosen future-note storage model: move plaintext note bodies out of direct app table reads/writes and store encrypted `body_encrypted` payloads behind SQL helper functions.
+- Chosen future-note mutation path: replace app-side two-step insert + rollback with `create_future_note_with_body(...)` so metadata and encrypted body commit atomically.
+- Chosen unlocked-read path: use `get_unlocked_future_note_contents(...)` RPC instead of member-facing `future_note_contents` select policies.
+- Chosen reminder durability model: persist reminder work in `reminder_deliveries` with idempotent uniqueness on `(kind, source_id, recipient_user_id)`.
+- Chosen reminder execution model: enqueue due reminder rows in Postgres, then deliver them from a Supabase Edge Function using service-role access and Resend.
+- Chosen cron invocation auth: use `project_url` + `anon_key` for `pg_net` calls into the reminder Edge Function, with Vault as the hosted secret backend and a private fallback store for local/CI replay.

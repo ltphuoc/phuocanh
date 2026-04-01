@@ -23,7 +23,7 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `addChecklistItemAction` | `checklistId`, `text` | `ActionState` | Revalidates `/home`, `/lists` |
 | `toggleChecklistItemAction` | `checklistItemId`, `nextDone` | `ActionState` | Revalidates `/home`, `/lists` |
 | `createCountdownAction` | `title`, `kind`, `targetDate`, `note?` | `ActionState` | Derives the stored UTC instant from the couple timezone; revalidates `/countdowns` only |
-| `createFutureNoteAction` | `title`, `unlockDate`, `body` | `ActionState` | Derives the stored UTC instant from the couple timezone; inserts metadata + body rows; revalidates `/future-notes` only |
+| `createFutureNoteAction` | `title`, `unlockDate`, `body` | `ActionState` | Derives the stored UTC instant from the couple timezone; calls `create_future_note_with_body(...)`; maps explicit RPC validation failures to `futureNote.invalidSubmission`; revalidates `/future-notes` only |
 | `createTripAction` | `title`, `startDate`, `endDate`, `note?` | `ActionState` | Inserts into `trips`; revalidates `/trips` only |
 | `createVisitedPlaceAction` | `tripId`, `title`, `visitedOn`, `note?` | `ActionState` | Inserts into `visited_places`; revalidates `/map` and `/trips/[tripId]` |
 | `createAlbumAction` | `tripId`, `title`, `description?`, `memoryMediaIds[]` | `ActionState` | Calls `create_album_with_items(...)`; revalidates `/albums` and `/trips/[tripId]` |
@@ -71,12 +71,20 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - Album append path only
   - Adds only remaining eligible media for the album/trip window
   - Returns inserted item count
+- `create_future_note_with_body(note_title, note_unlock_at, note_body)`
+  - Future-note mutation path only
+  - Validates title/body presence and max lengths inside SQL
+  - Creates metadata plus encrypted note content transactionally
+  - Returns the created future-note UUID
+- `get_unlocked_future_note_contents(target_couple_id)`
+  - Future-note unlocked-body read path only
+  - Returns decrypted bodies only for unlocked notes visible to the active couple member
 
 ## Phase 2 Read Model
 - `getCountdownsPageData(context)`
   - Reads couple-scoped countdown rows and splits them into `upcoming` and `past` using the saved couple timezone
 - `getFutureNotesPageData(context)`
-  - Reads future-note metadata, then reads unlocked bodies from `future_note_contents`
+  - Reads future-note metadata, then reads decrypted unlocked bodies through `get_unlocked_future_note_contents(...)`
 - `getTripsPageData(context)`
   - Reads couple-scoped trip rows and groups them into `active`, `planned`, and `completed` using the saved couple timezone
 - `getTripDetailData(context, tripId)`
@@ -98,8 +106,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 
 ## Non-Contracts
 - Shell-only and mock-only routes do not imply backend/API support.
-- `/chat`, `/games`, `/games/[mode]`, and `/stats` add no new runtime API surface today.
-- Reminder jobs, encryption-at-rest, realtime chat, coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract.
+- `/chat`, `/games`, `/games/[mode]`, and `/stats` add no new runtime API surface today; `/chat` is a deprecated mock artifact pending cleanup.
+- Coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract yet.
 
 ## Compatibility Rule
 - There is no external versioned API today.

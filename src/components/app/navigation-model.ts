@@ -8,7 +8,6 @@ import {
   Home,
   ListTodo,
   MapPinned,
-  MessageCircleHeart,
   MoreHorizontal,
   Settings2,
   Sparkles,
@@ -29,7 +28,6 @@ export interface AppNavigationItem {
 
 type NavigationLabelKey =
   | "nav.items.albums.label"
-  | "nav.items.chat.label"
   | "nav.items.countdowns.label"
   | "nav.items.futureNotes.label"
   | "nav.items.games.label"
@@ -47,7 +45,6 @@ type NavigationLabelKey =
 
 type NavigationDescriptionKey =
   | "nav.items.albums.description"
-  | "nav.items.chat.description"
   | "nav.items.countdowns.description"
   | "nav.items.futureNotes.description"
   | "nav.items.games.description"
@@ -79,13 +76,6 @@ export const appPrimaryNavigationItems: readonly AppNavigationItem[] = [
     labelKey: "nav.items.onThisDay.label",
     mobileLabelKey: "nav.items.onThisDay.mobileLabel",
     matchPrefixes: ["/on-this-day"],
-  },
-  {
-    descriptionKey: "nav.items.chat.description",
-    href: "/chat",
-    icon: MessageCircleHeart,
-    labelKey: "nav.items.chat.label",
-    matchPrefixes: ["/chat"],
   },
 ] as const;
 

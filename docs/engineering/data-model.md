@@ -21,6 +21,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `countdowns`
 - `future_notes`
 - `future_note_contents`
+- `reminder_deliveries`
 - `trips`
 - `albums`
 - `album_items`
@@ -29,6 +30,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 ## Core Relationships
 - One `couples` row -> many `couple_memberships`
 - One `couples` row -> many `memories`, `wish_items`, `checklists`, `activity_events`, `countdowns`, `future_notes`, `trips`, and `albums`
+- One `couples` row -> many `reminder_deliveries`
 - One `memories` row -> many `memory_media`
 - One `checklists` row -> many `checklist_items`
 - One `future_notes` row -> one `future_note_contents`
@@ -45,6 +47,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - Unique invite token
 - Storage authorization bound to the couple ID embedded in object paths
 - `future_note_contents.future_note_id` is one-to-one with `future_notes.id`
+- `reminder_deliveries` is unique on `(kind, source_id, recipient_user_id)`
 - `trips.end_date >= trips.start_date`
 - `albums.trip_id` is unique in Slice 3 (`one album per trip`)
 - `albums` must not commit without at least one linked `album_items` row
@@ -58,17 +61,20 @@ This file summarizes the current schema. The authoritative source is always `sup
 - Direct app-layer insert into `couples` and `couple_memberships` is intentionally blocked; membership creation happens through RPCs.
 - Storage bucket `memory-media` is private.
 - Storage object access is couple-scoped by path policy.
-- `future_note_contents` is protected by a separate read policy that only allows access after the parent `unlock_at` passes.
+- `future_note_contents` stores encrypted note bodies and is only decrypted through `get_unlocked_future_note_contents(...)`.
 - `albums` and `album_items` are couple-scoped through RLS.
 - Direct `album_items` inserts are additionally bounded by the parent trip window through policy checks.
 - `albums_require_items_trigger` blocks empty albums from committing, even if a caller bypasses the RPC path.
 - `visited_places` is couple-scoped through RLS and additionally bounded by the parent trip window through policy checks.
+- `reminder_deliveries` is RLS-protected with no member-facing policies; reminder processing is handled by cron plus service-role reads/writes.
 
 ## RPCs In Use
 - `bootstrap_first_couple(started_date date, couple_name text, target_timezone text)`
 - `accept_couple_invite(invite_token text)`
 - `update_couple_timezone(target_couple_id uuid, target_timezone text)`
 - `memories_on_this_day(target_couple_id uuid, target_timezone text)`
+- `create_future_note_with_body(note_title text, note_unlock_at timestamptz, note_body text)`
+- `get_unlocked_future_note_contents(target_couple_id uuid)`
 - `create_album_with_items(target_trip_id uuid, album_title text, album_description text, selected_memory_media_ids uuid[])`
 - `add_album_items(target_album_id uuid, selected_memory_media_ids uuid[])`
 
@@ -99,7 +105,11 @@ This file summarizes the current schema. The authoritative source is always `sup
   - metadata is visible immediately to active couple members
 - `future_note_contents`
   - separate protected body table keyed by `future_note_id`
-  - readable only when the parent note satisfies `unlock_at <= now()`
+  - stores encrypted `body_encrypted` bytes instead of plaintext note bodies
+  - is decrypted only through the unlocked-body RPC after the parent note satisfies `unlock_at <= now()`
+- `reminder_deliveries`
+  - durable queue/audit table for countdown day-of and future-note unlock emails
+  - deduplicates delivery per `(kind, source_id, recipient_user_id)` and tracks retry/failure state
 
 ## Phase 2 Slice 2 Tables
 - `trips`
@@ -124,3 +134,4 @@ This file summarizes the current schema. The authoritative source is always `sup
 
 ## Remaining Shell-Only / Mock-Only Route Impact
 - `/chat`, `/games`, `/games/[mode]`, and `/stats` still do not add schema by themselves.
+- `/chat` is a deprecated mock artifact and should not be used to justify future schema work.

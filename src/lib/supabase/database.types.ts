@@ -381,17 +381,17 @@ export type Database = {
       }
       future_note_contents: {
         Row: {
-          body: string
+          body_encrypted: string
           created_at: string
           future_note_id: string
         }
         Insert: {
-          body: string
+          body_encrypted: string
           created_at?: string
           future_note_id: string
         }
         Update: {
-          body?: string
+          body_encrypted?: string
           created_at?: string
           future_note_id?: string
         }
@@ -531,6 +531,80 @@ export type Database = {
             columns: ["memory_id"]
             isOneToOne: false
             referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminder_deliveries: {
+        Row: {
+          attempts: number
+          couple_id: string
+          created_at: string
+          due_at: string
+          failed_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          last_error: string | null
+          max_attempts: number
+          not_before: string
+          payload: Json
+          processing_started_at: string | null
+          provider_message_id: string | null
+          recipient_email: string
+          recipient_user_id: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["reminder_delivery_status"]
+          source_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          couple_id: string
+          created_at?: string
+          due_at: string
+          failed_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          last_error?: string | null
+          max_attempts?: number
+          not_before?: string
+          payload?: Json
+          processing_started_at?: string | null
+          provider_message_id?: string | null
+          recipient_email: string
+          recipient_user_id: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["reminder_delivery_status"]
+          source_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          couple_id?: string
+          created_at?: string
+          due_at?: string
+          failed_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["reminder_kind"]
+          last_error?: string | null
+          max_attempts?: number
+          not_before?: string
+          payload?: Json
+          processing_started_at?: string | null
+          provider_message_id?: string | null
+          recipient_email?: string
+          recipient_user_id?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["reminder_delivery_status"]
+          source_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_deliveries_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
             referencedColumns: ["id"]
           },
         ]
@@ -703,6 +777,22 @@ export type Database = {
           timezone: string
         }[]
       }
+      claim_reminder_deliveries: {
+        Args: { max_batch_size?: number }
+        Returns: {
+          attempts: number
+          due_at: string
+          id: string
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          max_attempts: number
+          payload: Json
+          recipient_email: string
+        }[]
+      }
+      configure_phase2_reminder_jobs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_album_with_items: {
         Args: {
           album_description: string
@@ -712,8 +802,31 @@ export type Database = {
         }
         Returns: string
       }
+      create_future_note_with_body: {
+        Args: {
+          note_body: string
+          note_title: string
+          note_unlock_at: string
+        }
+        Returns: string
+      }
+      enqueue_due_reminder_deliveries: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_unlocked_future_note_contents: {
+        Args: { target_couple_id: string }
+        Returns: {
+          body: string
+          future_note_id: string
+        }[]
+      }
       is_couple_member: { Args: { target_couple_id: string }; Returns: boolean }
       is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean }
+      invoke_reminder_processor: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       memories_on_this_day: {
         Args: { target_couple_id: string; target_timezone?: string }
         Returns: {
@@ -746,6 +859,8 @@ export type Database = {
       media_type: "image" | "video"
       membership_role: "partner_a" | "partner_b"
       membership_status: "active" | "inactive"
+      reminder_delivery_status: "pending" | "processing" | "sent" | "failed"
+      reminder_kind: "countdown_day_of" | "future_note_unlock"
       wish_category: "place" | "food" | "movie"
       wish_status: "pending" | "done"
     }
@@ -882,6 +997,8 @@ export const Constants = {
       media_type: ["image", "video"],
       membership_role: ["partner_a", "partner_b"],
       membership_status: ["active", "inactive"],
+      reminder_delivery_status: ["pending", "processing", "sent", "failed"],
+      reminder_kind: ["countdown_day_of", "future_note_unlock"],
       wish_category: ["place", "food", "movie"],
       wish_status: ["pending", "done"],
     },

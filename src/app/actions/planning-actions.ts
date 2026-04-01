@@ -74,6 +74,11 @@ const ALBUM_MUTATION_ERROR_MESSAGES = new Set([
   "TRIP_NOT_FOUND",
 ]);
 
+const INVALID_FUTURE_NOTE_RPC_MESSAGES = new Set([
+  "INVALID_FUTURE_NOTE_BODY",
+  "INVALID_FUTURE_NOTE_TITLE",
+  "INVALID_FUTURE_NOTE_UNLOCK_AT",
+]);
 const INVALID_VISITED_PLACE_ERROR_CODES = new Set(["23503", "23514", "42501"]);
 const INVALID_TIMEZONE_RPC_MESSAGES = new Set(["INVALID_TIMEZONE"]);
 
@@ -130,42 +135,25 @@ export const createFutureNoteAction = async (
     });
 
     const supabase = await createSupabaseServerClient();
-    const { data: insertedFutureNotes, error: futureNoteError } = await supabase
-      .from("future_notes")
-      .insert({
-        couple_id: context.coupleId,
-        created_by_user_id: context.userId,
-        title: parsed.title,
-        unlock_at: toTimeZoneDateStartIso(parsed.unlockDate, context.timezone),
-      })
-      .select("id")
-      .limit(1);
+    const { data: createdFutureNoteId, error: futureNoteError } = await supabase.rpc(
+      "create_future_note_with_body",
+      {
+        note_body: parsed.body,
+        note_title: parsed.title,
+        note_unlock_at: toTimeZoneDateStartIso(parsed.unlockDate, context.timezone),
+      },
+    );
 
     if (futureNoteError) {
-      console.error("Failed to create future note metadata", futureNoteError);
-      return createErrorState("unexpectedError");
-    }
-
-    const futureNote = insertedFutureNotes[0];
-    if (!futureNote) {
-      return createErrorState("unexpectedError");
-    }
-
-    const { error: contentError } = await supabase.from("future_note_contents").insert({
-      body: parsed.body,
-      future_note_id: futureNote.id,
-    });
-
-    if (contentError) {
-      const { error: rollbackError } = await supabase
-        .from("future_notes")
-        .delete()
-        .eq("id", futureNote.id);
-      if (rollbackError) {
-        console.error("Future note rollback failed", rollbackError);
+      if (INVALID_FUTURE_NOTE_RPC_MESSAGES.has(futureNoteError.message)) {
+        return createErrorState("futureNote.invalidSubmission");
       }
 
-      console.error("Failed to create future note content", contentError);
+      console.error("Failed to create future note", futureNoteError);
+      return createErrorState("unexpectedError");
+    }
+
+    if (!createdFutureNoteId) {
       return createErrorState("unexpectedError");
     }
 

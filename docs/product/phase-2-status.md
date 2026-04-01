@@ -8,7 +8,7 @@ Status values:
 - `missing`
 - `needs rework`
 
-## Current Status (2026-03-29)
+## Current Status (2026-04-01)
 - Phase 1 runtime remains stable.
 - Phase 2 Slice 1 is implemented for:
   - `/countdowns`
@@ -25,13 +25,21 @@ Status values:
 - Couple timezone foundation is implemented for:
   - `/settings`
   - shared day-boundary logic across countdowns, future notes, trips, albums, map, on-this-day, and relationship-day math
-- All planned user-facing Phase 2 routes are now implemented.
+- Phase 2 closeout is implemented for:
+  - countdown day-of reminder automation
+  - future-note unlock reminder automation
+  - reminder delivery queue + retry pipeline
+  - encrypted-at-rest future-note bodies
+- All planned Phase 2 routes and closeout infrastructure are now implemented.
+- Post-closeout engineering follow-up:
+  - hosted reminder invocation uses Vault-backed secrets
+  - local and CI replay now uses a private fallback secret store when Vault is unavailable
 
 ## Checklist
 | Item | Status | Notes |
 |---|---|---|
-| Countdowns | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, and live route UI are implemented. |
-| Future notes | `done` | Real schema, secure split body table, unlock-gated reads, Server Action rollback path, and live route UI are implemented. |
+| Countdowns | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, live route UI, and day-of reminder email enqueueing are implemented. |
+| Future notes | `done` | Real schema, encrypted body storage, RPC-backed create/read path, unlock-gated reads, unlock reminder enqueueing, and live route UI are implemented. |
 | Trips | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, and live route UI are implemented. |
 | Albums | `done` | Real trip-rooted schema, RPC-backed mutations, signed media reads, `/albums` index, `/albums/[albumId]` detail, and trip-detail album flows are implemented. |
 | Map visited places | `done` | `visited_places`, `getMapPageData(...)`, provider-free atlas UI, and trip-level visited-place create/read flow are implemented. |
@@ -82,19 +90,31 @@ Status values:
 6. Replaced the trip-detail places placeholder with a real create form, ordered place log, and empty state.
 7. Synced docs/specs to the delivered runtime and closed the user-facing Phase 2 travel slice.
 
-## Implementation Order After Slice 4
-1. Start the Phase 3 track with chat backend/realtime scope.
-2. Continue with games/stats backend work.
-3. Revisit reminder jobs only if asynchronous delivery becomes a near-term product priority.
+## Phase 2 Closeout Delivered
+1. Added encrypted-at-rest future-note body storage behind SQL-owned encrypt/decrypt helpers and RPCs.
+2. Added `reminder_deliveries`, due-reminder enqueueing, claim/retry infrastructure, and cron-driven processing hooks.
+3. Added the `reminder-processor` Edge Function with Resend delivery, summary-only templates, and retry/backoff handling.
+4. Switched future-note creation and unlocked reads onto RPCs so plaintext no longer lives in application table access paths.
+5. Synced runtime copy and docs so reminder automation and encryption are no longer described as deferred.
+
+## Recommended Next Order
+1. `Phase 3 Slice 1: Games + Stats foundation`
+2. Extend gameplay beyond the first live mode only after the stats read model is live.
+3. Revisit travel-map depth only after the gameplay and analytics contract is stable.
+
+## Phase 3 Slice 1 Target
+1. `/games` becomes a backend-backed hub with real mode availability and entry links.
+2. `/games/[mode]` ships one live mode only: `/games/daily-question`.
+3. `/stats` becomes a real couple-scoped read model backed by gameplay history and derived score/streak aggregates.
+4. The first slice adds one gameplay session write path, one gameplay answer/event write path, and one stats read model.
+5. The first slice does not include `/chat`, additional game modes, leaderboards, sharing, or travel-map depth.
 
 ## Risks And Deferred Items
-- Reminder automation is still deferred; countdowns do not schedule jobs yet.
-- Future note bodies are policy-gated, but encryption-at-rest is not implemented.
 - There is still only one shared timezone per couple; no per-user timezone override exists.
 - Albums currently allow one album per trip only; captions, reordering, removal, and multi-album-per-trip remain deferred.
 - The atlas is provider-free; coordinates, route polylines, and provider-backed geographic tiles remain deferred.
 
 ## Phase 3 Carry-Forward
-- `/chat` remains mock-only and is no longer tracked as remaining Phase 2 scope.
-- Chat backend, message persistence, presence, and attachment contracts belong to the Phase 3 track.
-- `/games`, `/games/[mode]`, and `/stats` remain shell-only and also belong to the Phase 3 backend track.
+- `/chat` remains a deprecated mock artifact in the app and is scheduled for cleanup rather than backend expansion.
+- `/chat` cleanup is maintenance work, not part of `Phase 3 Slice 1`.
+- `/games`, `/games/[mode]`, and `/stats` remain shell-only today and belong to `Phase 3 Slice 1: Games + Stats foundation`.

@@ -19,6 +19,12 @@
 - Confirmed first-user onboarding policy: collect `coupleName`, `timeZone`, and `startedDate` step by step, then persist only after explicit summary confirmation.
 - Confirmed onboarding scope: applies only when no couple exists yet (no forced backfill gate for existing ready couples).
 
+## 2026-03-31
+- Confirmed Phase 2 closeout scope: one day-of countdown email and one future-note unlock email, sent to both active partners.
+- Confirmed email content policy: reminder emails are summary-only and must not include decrypted future-note bodies.
+- Confirmed delivery stack: keep reminders on the existing Supabase-first path with cron, Vault, an Edge Function, and Resend as the first provider.
+- Confirmed reminder settings scope: no per-item reminder configuration or per-user timezone override is added in this phase.
+
 ## 2026-03-28
 - Runtime stabilization is prioritized before Phase 2 coding.
 - Upload reliability decision: configure Next.js Server Action body-size limit to `26mb` now, keep direct signed browser upload as a later hardening step.
@@ -42,6 +48,6 @@
 - Finalized typography stack: `Fraunces` for headings/quotes and `Manrope` for body, navigation, and forms.
 - Finalized mobile navigation shell: floating dock above the safe area with a centered memory action orb.
 - Finalized desktop navigation shell: slim rail plus expandable grouped drawer instead of a full sidebar.
-- Confirmed `/chat` ships as a presentational shell route before live messaging/backend contracts are implemented.
+- Confirmed `/chat` remains only as a temporary mock artifact and is no longer a planned product feature.
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
 - Confirmed visited-place atlas v1: ship trip-linked `visited_places` and a provider-free atlas first; coordinates and Mapbox-backed tiles remain deferred.

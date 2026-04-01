@@ -276,11 +276,11 @@ export const getFutureNotesPageData = async (
     }));
 
   const unlockedIds = unlockedMetadata.map((note) => note.id);
+  const unlockedIdSet = new Set(unlockedIds);
   const unlockedContentsQuery = unlockedIds.length
-    ? await supabase
-        .from("future_note_contents")
-        .select("future_note_id, body")
-        .in("future_note_id", unlockedIds)
+    ? await supabase.rpc("get_unlocked_future_note_contents", {
+        target_couple_id: context.coupleId,
+      })
     : { data: [], error: null };
 
   if (unlockedContentsQuery.error) {
@@ -288,9 +288,11 @@ export const getFutureNotesPageData = async (
   }
 
   const bodyByNoteId = new Map<string, string>();
-  unlockedContentsQuery.data.forEach((content) => {
-    bodyByNoteId.set(content.future_note_id, content.body);
-  });
+  unlockedContentsQuery.data
+    .filter((content) => unlockedIdSet.has(content.future_note_id))
+    .forEach((content) => {
+      bodyByNoteId.set(content.future_note_id, content.body);
+    });
 
   return {
     locked,
