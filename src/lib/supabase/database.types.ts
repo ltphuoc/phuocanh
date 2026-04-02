@@ -443,6 +443,82 @@ export type Database = {
           },
         ]
       }
+      game_round_answers: {
+        Row: {
+          answer_body: string
+          id: string
+          round_id: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          answer_body: string
+          id?: string
+          round_id: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          answer_body?: string
+          id?: string
+          round_id?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_round_answers_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "game_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rounds: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          mode: Database["public"]["Enums"]["game_mode"]
+          prompt_locale: string
+          prompt_source: string
+          prompt_text: string
+          round_date: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          mode: Database["public"]["Enums"]["game_mode"]
+          prompt_locale: string
+          prompt_source: string
+          prompt_text: string
+          round_date: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["game_mode"]
+          prompt_locale?: string
+          prompt_source?: string
+          prompt_text?: string
+          round_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_rounds_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memories: {
         Row: {
           author_user_id: string
@@ -553,8 +629,8 @@ export type Database = {
           recipient_email: string
           recipient_user_id: string
           sent_at: string | null
-          status: Database["public"]["Enums"]["reminder_delivery_status"]
           source_id: string
+          status: Database["public"]["Enums"]["reminder_delivery_status"]
           updated_at: string
         }
         Insert: {
@@ -574,8 +650,8 @@ export type Database = {
           recipient_email: string
           recipient_user_id: string
           sent_at?: string | null
-          status?: Database["public"]["Enums"]["reminder_delivery_status"]
           source_id: string
+          status?: Database["public"]["Enums"]["reminder_delivery_status"]
           updated_at?: string
         }
         Update: {
@@ -595,8 +671,8 @@ export type Database = {
           recipient_email?: string
           recipient_user_id?: string
           sent_at?: string | null
-          status?: Database["public"]["Enums"]["reminder_delivery_status"]
           source_id?: string
+          status?: Database["public"]["Enums"]["reminder_delivery_status"]
           updated_at?: string
         }
         Relationships: [
@@ -768,7 +844,11 @@ export type Database = {
         Returns: number
       }
       bootstrap_first_couple: {
-        Args: { couple_name: string; started_date: string; target_timezone?: string }
+        Args: {
+          couple_name: string
+          started_date: string
+          target_timezone?: string
+        }
         Returns: {
           couple_id: string
           name: string
@@ -789,10 +869,7 @@ export type Database = {
           recipient_email: string
         }[]
       }
-      configure_phase2_reminder_jobs: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      configure_phase2_reminder_jobs: { Args: never; Returns: undefined }
       create_album_with_items: {
         Args: {
           album_description: string
@@ -803,16 +880,44 @@ export type Database = {
         Returns: string
       }
       create_future_note_with_body: {
+        Args: { note_body: string; note_title: string; note_unlock_at: string }
+        Returns: string
+      }
+      enqueue_due_reminder_deliveries: { Args: never; Returns: number }
+      ensure_daily_question_round: {
         Args: {
-          note_body: string
-          note_title: string
-          note_unlock_at: string
+          prompt_locale: string
+          prompt_source: string
+          prompt_text: string
+          target_mode: Database["public"]["Enums"]["game_mode"]
+          target_round_date: string
         }
         Returns: string
       }
-      enqueue_due_reminder_deliveries: {
-        Args: Record<PropertyKey, never>
-        Returns: number
+      get_daily_question_round_state: {
+        Args: { target_round_date: string }
+        Returns: {
+          answer_count: number
+          id: string
+          prompt_locale: string
+          prompt_source: string
+          prompt_text: string
+          reveal_answers: boolean
+          revealed_answers: Json
+          round_date: string
+          viewer_has_answered: boolean
+        }[]
+      }
+      get_daily_question_stats: {
+        Args: { target_history_days?: number }
+        Returns: {
+          current_streak: number
+          recent_history: Json
+          total_completed_rounds: number
+          total_rounds: number
+          viewer_participation_count: number
+          viewer_participation_rate: number
+        }[]
       }
       get_unlocked_future_note_contents: {
         Args: { target_couple_id: string }
@@ -821,12 +926,9 @@ export type Database = {
           future_note_id: string
         }[]
       }
+      invoke_reminder_processor: { Args: never; Returns: number }
       is_couple_member: { Args: { target_couple_id: string }; Returns: boolean }
       is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean }
-      invoke_reminder_processor: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
       memories_on_this_day: {
         Args: { target_couple_id: string; target_timezone?: string }
         Returns: {
@@ -846,6 +948,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      submit_daily_question_answer: {
+        Args: { answer_body: string; target_round_id: string }
+        Returns: string
+      }
       update_couple_timezone: {
         Args: { target_couple_id: string; target_timezone: string }
         Returns: {
@@ -856,6 +962,7 @@ export type Database = {
     }
     Enums: {
       countdown_kind: "anniversary" | "birthday" | "travel" | "plan" | "custom"
+      game_mode: "daily_question"
       media_type: "image" | "video"
       membership_role: "partner_a" | "partner_b"
       membership_status: "active" | "inactive"
@@ -994,6 +1101,7 @@ export const Constants = {
   public: {
     Enums: {
       countdown_kind: ["anniversary", "birthday", "travel", "plan", "custom"],
+      game_mode: ["daily_question"],
       media_type: ["image", "video"],
       membership_role: ["partner_a", "partner_b"],
       membership_status: ["active", "inactive"],

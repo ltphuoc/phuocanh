@@ -274,6 +274,16 @@
         "unlockDateRequired": "Hãy chọn ngày mở khoá."
       }
     },
+    "dailyQuestion": {
+      "answerDescription": "Khi đã gửi thì câu trả lời sẽ khoá lại cho tới khi cả hai cùng trả lời.",
+      "answerLabel": "Câu trả lời của bạn",
+      "answerPlaceholder": "Viết câu trả lời bạn muốn người ấy đọc khi cả hai cùng hoàn tất.",
+      "submit": "Khoá câu trả lời",
+      "validation": {
+        "answerMax": "Câu trả lời tối đa 800 ký tự.",
+        "answerRequired": "Hãy viết câu trả lời trước khi gửi."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Múi giờ hiện tại: {timeZone}",
       "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
@@ -385,6 +395,15 @@
       "fileTooLarge": "Tệp quá lớn. Kích thước tối đa là 25MB.",
       "missingContent": "Hãy thêm ghi chú hoặc ít nhất một tệp media.",
       "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video."
+    },
+    "gameplay": {
+      "dailyQuestion": {
+        "alreadyAnswered": "Bạn đã trả lời câu hỏi hôm nay rồi.",
+        "answered": "Đã khoá câu trả lời cho hôm nay.",
+        "generationFailed": "Không thể tạo câu hỏi hôm nay lúc này.",
+        "invalidSubmission": "Thông tin câu hỏi hằng ngày không hợp lệ.",
+        "ready": "Câu hỏi hôm nay đã sẵn sàng."
+      }
     },
     "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại.",
     "countdown": {
@@ -723,27 +742,36 @@
   },
   "games": {
     "header": {
-      "description": "Chơi mini game theo kỷ niệm và giữ chuỗi hoạt động của hai bạn.",
+      "description": "Bắt đầu câu hỏi hôm nay, xem trạng thái còn chờ và giữ nhịp chơi của hai bạn.",
       "eyebrow": "Giải trí",
       "title": "Trò chơi"
     },
-    "cards": {
-      "daily": {
-        "cta": "Câu hỏi mỗi ngày",
-        "description": "Mỗi ngày trả lời một câu hỏi cặp đôi để giữ chuỗi.",
-        "title": "Chế độ hằng ngày"
-      },
-      "guess": {
-        "cta": "Đoán ngày",
-        "description": "Chọn đúng ngày của một kỷ niệm chung từ timeline.",
-        "title": "Chế độ đoán"
-      }
+    "shellBadge": "Chỉ là shell",
+    "dailyQuestion": {
+      "description": "Mỗi ngày có một câu hỏi chung cho cả hai. Mỗi người trả lời một lần, rồi cùng mở cả hai câu trả lời.",
+      "emptySummary": "Hôm nay chưa có prompt nào. Hãy tạo vòng chơi khi một trong hai người sẵn sàng bắt đầu.",
+      "eyebrow": "Đang hoạt động",
+      "generateCta": "Bắt đầu câu hỏi hôm nay",
+      "generateHint": "Người mở vòng chơi đầu tiên hôm nay sẽ quyết định ngôn ngữ prompt được lưu cho ngày đó.",
+      "onlyLiveMode": "Trong slice này chỉ có daily question là mode thật.",
+      "openCta": "Mở vòng chơi hôm nay",
+      "promptLocale": "Được lưu bằng {locale}.",
+      "readySummary": "{count, plural, =0 {Prompt hôm nay đã sẵn sàng và đang chờ cả hai câu trả lời.} one {Đã có 1 câu trả lời cho vòng hôm nay.} other {Cả hai ô trả lời của hôm nay đều đã hoạt động.}}",
+      "title": "Câu hỏi hằng ngày"
     },
-    "presentationalNote": "Đây là trung tâm trò chơi dạng trình bày. Prompt thật, câu trả lời và tính điểm hiện chưa được nối dữ liệu.",
-    "comingSoon": {
-      "cta": "Mở giao diện thống kê",
-      "description": "Lượt chơi, tạo prompt và sự kiện điểm số sẽ được liên kết khi backend game hoàn thành.",
-      "title": "Tích hợp game engine"
+    "guessDate": {
+      "cta": "Mở shell mode",
+      "deferredNote": "Guess the date vẫn chỉ là shell cho tới khi hợp đồng daily-question ổn định.",
+      "description": "Mode đoán ngày vẫn chỉ giữ shell giao diện, chưa có runtime prompt hoặc câu trả lời thật trong slice này.",
+      "eyebrow": "Mode sau",
+      "shellSummary": "Route này vẫn chỉ để xem bố cục. Chưa có logic tính điểm, chọn kỷ niệm hay ghi nhận câu trả lời thật.",
+      "title": "Đoán ngày"
+    },
+    "statsBridge": {
+      "cta": "Mở thống kê thật",
+      "description": "Màn hình stats giờ đọc từ lịch sử daily-question thật thay vì các widget placeholder.",
+      "eyebrow": "Read model",
+      "title": "Gameplay stats đã hoạt động"
     }
   },
   "gameMode": {
@@ -754,38 +782,102 @@
     "placeholder": "Route này là giao diện khung cho chế độ game đã chọn. Tạo prompt, ghi nhận câu trả lời và cập nhật chuỗi sẽ được nối ở phase sau.",
     "comingSoon": {
       "cta": "Về trung tâm trò chơi",
-      "description": "Mọi logic gameplay giữ nguyên và cố ý chưa triển khai trong bản tái cấu trúc UI này.",
+      "description": "Mode này vẫn chỉ là shell trong khi daily question giữ hợp đồng gameplay thật đầu tiên.",
       "title": "Nối gameplay"
     },
     "fallbackModeLabel": "Chế độ"
   },
+  "dailyQuestion": {
+    "header": {
+      "description": "Tạo một câu hỏi cho hôm nay, mỗi người gửi một câu trả lời đã khoá, rồi cùng mở khi cả hai hoàn tất.",
+      "eyebrow": "Chế độ hằng ngày",
+      "title": "Câu hỏi hằng ngày"
+    },
+    "intro": {
+      "description": "Vòng chơi hôm nay chưa tồn tại. Hãy tạo một câu hỏi chung khi một trong hai người sẵn sàng bắt đầu.",
+      "generateCta": "Tạo câu hỏi hôm nay",
+      "title": "Mở vòng chơi"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {Chưa có câu trả lời nào} one {Đã khoá 1 câu trả lời} other {Đã khoá # câu trả lời}}",
+      "date": "Ngày cục bộ {date}",
+      "description": "Câu hỏi này chỉ được lưu một lần cho hôm nay và dùng lại cho cả hai người.",
+      "eyebrow": "Prompt hôm nay",
+      "locale": "Ngôn ngữ prompt: {locale}",
+      "title": "Câu hỏi hôm nay"
+    },
+    "composer": {
+      "description": "Bạn chỉ trả lời một lần. Slice đầu tiên này chưa hỗ trợ sửa sau khi gửi.",
+      "eyebrow": "Đến lượt bạn",
+      "title": "Gửi câu trả lời"
+    },
+    "pending": {
+      "eyebrow": "Đã khoá",
+      "title": "Đang chờ câu trả lời thứ hai",
+      "viewerLocked": "Câu trả lời của bạn đã được khoá. Cả hai câu trả lời sẽ tiếp tục ẩn cho tới khi người ấy gửi phần của họ."
+    },
+    "reveal": {
+      "description": "Cả hai câu trả lời giờ đã được mở cho vòng chơi này.",
+      "eyebrow": "Mở khoá",
+      "title": "Câu trả lời hôm nay"
+    },
+    "answers": {
+      "partner": "Người ấy",
+      "viewer": "Bạn"
+    },
+    "locale": {
+      "en": "Tiếng Anh",
+      "vi": "Tiếng Việt"
+    },
+    "status": {
+      "completed": "Đã hoàn tất",
+      "not_started": "Chưa bắt đầu",
+      "waiting_for_partner": "Đang chờ người ấy",
+      "waiting_for_you": "Đang chờ bạn"
+    },
+    "statusNote": {
+      "eyebrow": "Trạng thái",
+      "title": "Hôm nay đang tiến triển thế nào",
+      "copy": {
+        "completed": "Vòng chơi hôm nay đã hoàn tất và cả hai câu trả lời đều đang hiển thị.",
+        "not_started": "Chưa có câu trả lời nào. Hãy tạo câu hỏi khi hai bạn muốn bắt đầu.",
+        "waiting_for_partner": "Bạn đã gửi câu trả lời. Vòng chơi sẽ mở ngay khi người ấy trả lời.",
+        "waiting_for_you": "Người ấy đã trả lời trước. Hãy gửi phần của bạn để mở cả hai."
+      }
+    }
+  },
   "stats": {
     "header": {
-      "description": "Bảng điều khiển dịu nhẹ cho các chỉ số hoạt động cặp đôi.",
+      "description": "Các chỉ số chỉ dành cho daily-question: streak, lịch sử vòng chơi và trạng thái gần đây.",
       "eyebrow": "Góc nhìn",
       "title": "Thống kê"
     },
     "cards": {
-      "memories": {
-        "label": "Kỷ niệm tháng này",
-        "trend": "+6 so với tháng trước",
-        "value": "12"
-      },
       "streak": {
         "label": "Chuỗi hiện tại",
-        "trend": "Cả hai đều trả lời hằng ngày",
-        "value": "7 ngày"
+        "trend": "Số ngày hoàn tất liên tiếp",
+        "value": "{count, plural, =0 {0 ngày} one {# ngày} other {# ngày}}"
       },
-      "trips": {
-        "label": "Chuyến đi đã hoàn thành",
-        "trend": "Những cuộc phiêu lưu chung",
-        "value": "3"
+      "rounds": {
+        "label": "Tổng vòng chơi đã tạo",
+        "trend": "Tất cả daily-question từ trước tới nay"
+      },
+      "completed": {
+        "label": "Vòng chơi đã hoàn tất",
+        "trend": "Cả hai đều đã gửi câu trả lời"
+      },
+      "participation": {
+        "label": "Tỉ lệ tham gia của bạn",
+        "trend": "{count, plural, =0 {Chưa gửi câu trả lời nào} one {Đã gửi # câu trả lời} other {Đã gửi # câu trả lời}}",
+        "value": "{count}%"
       }
     },
-    "comingSoon": {
-      "cta": "Mở giao diện trò chơi",
-      "description": "Các widget này là placeholder cho thống kê event-sourced và tổng hợp chuỗi sẽ được triển khai ở Phase 3.",
-      "title": "Pipeline phân tích"
+    "history": {
+      "description": "14 ngày cục bộ gần nhất được liệt kê ở đây, kể cả những ngày chưa bắt đầu vòng chơi.",
+      "eyebrow": "Lịch sử gần đây",
+      "rowTitle": "Câu hỏi hằng ngày",
+      "subtitle": "{date}",
+      "title": "Nhật ký hai tuần"
     }
   },
   "settings": {

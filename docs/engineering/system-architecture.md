@@ -14,9 +14,11 @@ flowchart LR
 
   Reads --> Auth["Supabase Auth"]
   Reads --> PG["Supabase Postgres"]
+  Reads --> ReadRpcs["Security-definer read RPCs"]
   App --> StorageRead["Supabase Storage signed URLs"]
   Actions --> Auth
   Actions --> PG
+  Actions --> OpenAI["OpenAI Responses API"]
   Actions --> Storage["Supabase Storage bucket: memory-media"]
   Callback --> Auth
 
@@ -45,6 +47,7 @@ flowchart LR
 - Implemented authenticated pages are Server Components.
 - Pages call server read helpers in `src/lib/server/*`.
 - Read helpers query couple-scoped data through typed Supabase clients.
+- Gameplay reads that depend on hidden answer state use security-definer SQL RPCs instead of direct `game_round_answers` table reads.
 - Image-backed memories fetch signed storage URLs server-side before rendering.
 
 ## Mutation Flow
@@ -52,6 +55,7 @@ flowchart LR
 - Server Actions validate inputs, require auth/couple context where needed, and then:
 - write directly to couple-scoped tables when that is allowed by RLS, or
 - call SQL RPCs when the mutation owns membership/invite invariants
+- `/games/daily-question` prompt generation calls the OpenAI Responses API from the server and persists through SQL RPCs only.
 - Mutations revalidate affected routes after successful writes.
 
 ## Trust Boundaries And Enforcement
@@ -65,8 +69,9 @@ flowchart LR
 - Supabase Auth
 - Supabase Postgres
 - Supabase Storage
+- OpenAI Responses API
 
-There is no live OpenAI integration and no live Mapbox integration in the current runtime.
+There is no live Mapbox integration in the current runtime.
 
 ## Scalability Assumptions
 - The current product enforces one global couple space, not general multi-tenant scale-out behavior.

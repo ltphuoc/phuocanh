@@ -19,11 +19,11 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 | 11 | Guess the date/place | 3-4 | shell-only |
 | 12 | This or that | 4 | planned |
 | 13 | Memory cards từ ảnh thật | 4 | planned |
-| 14 | Daily question | 3 | shell-only |
-| 15 | Điểm số / streak | 3 | shell-only |
+| 14 | Daily question | 3 | implemented |
+| 15 | Điểm số / streak | 3 | implemented |
 | 16 | Future notes mở vào ngày định sẵn | 2 | implemented |
 | 17 | Couple AI Memory Search | 4 | planned |
-| 18 | Các stats vui | 3 | shell-only |
+| 18 | Các stats vui | 3 | implemented |
 | 19 | Trips foundation | 2 | implemented |
 | 20 | Shared couple timezone + date boundaries | 2 | implemented |
 
@@ -52,7 +52,10 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
 - `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
 - `mock-only`: `/chat` now exists as a styled route with sample conversation content, but it is a deprecated mock artifact rather than a planned product slice.
-- `shell-only`: `/games`, `/games/[mode]`, and `/stats` are still presentational route shells only.
+- `implemented`: `/games` is now a real gameplay hub backed by today’s live daily-question state.
+- `implemented`: `/games/daily-question` is the first live gameplay route with on-demand prompt generation, one-answer-per-user locking, and both-answer reveal.
+- `implemented`: `/stats` now renders gameplay-only aggregates from real daily-question history.
+- `shell-only`: `/games/[mode]` remains shell-only for non-`daily-question` slugs.
 
 ## Phase 2 Slice 1 (2026-03-29)
 - `implemented`: `/countdowns` now reads and writes live Phase 2 countdown rows.
@@ -93,12 +96,15 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: reminder delivery now uses durable queue rows plus claim/retry processing in the reminder Edge Function.
 - `implemented`: the product scope for Phase 2 is complete, with Vault-backed reminder secrets in hosted environments and a private fallback secret store for local/CI replay when Vault is unavailable.
 
+## Phase 3 Slice 1 (2026-04-02)
+- `implemented`: added couple-scoped gameplay schema with `game_rounds`, `game_round_answers`, and `game_mode`.
+- `implemented`: `/games` now reads real live status for the current couple-local day.
+- `implemented`: `/games/daily-question` now generates one canonical OpenAI-backed prompt per local day, stores the first successful opener locale, locks one answer per user, and reveals both answers only after both submit.
+- `implemented`: `/stats` now renders gameplay-only streak, participation, completed-round counts, and 14-day status history.
+- `shell-only`: non-`daily-question` game modes remain presentational shells.
+
 ## Phase 3 Carry-Forward
 - `deprecated`: `/chat` remains in the app only as a mock artifact pending cleanup and is no longer part of the product roadmap.
 - `deprecated`: `/chat` route removal is maintenance work and not part of the next gameplay slice.
-- `shell-only`: `/games`, `/games/[mode]`, and `/stats` remain presentational scaffolding today.
-- `planned`: the next product slice is `Phase 3 Slice 1: Games + Stats foundation`.
-- `planned`: `/games` becomes a live hub with backend-backed mode availability and entry links.
-- `planned`: `/games/daily-question` is the single first live gameplay mode because it is the narrowest fit for prompt, answer, streak, and stats wiring.
-- `planned`: `/stats` becomes a real couple-scoped read model for gameplay history plus score/streak aggregates.
-- `planned`: additional game modes, leaderboards, sharing, and travel-map depth remain outside the first Phase 3 slice.
+- `implemented`: `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is now landed.
+- `planned`: additional game modes, leaderboards, sharing, similarity scoring, and travel-map depth remain outside the first Phase 3 slice.

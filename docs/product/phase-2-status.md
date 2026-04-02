@@ -8,7 +8,7 @@ Status values:
 - `missing`
 - `needs rework`
 
-## Current Status (2026-04-01)
+## Current Status (2026-04-02)
 - Phase 1 runtime remains stable.
 - Phase 2 Slice 1 is implemented for:
   - `/countdowns`
@@ -31,6 +31,11 @@ Status values:
   - reminder delivery queue + retry pipeline
   - encrypted-at-rest future-note bodies
 - All planned Phase 2 routes and closeout infrastructure are now implemented.
+- Phase 3 Slice 1 is implemented for:
+  - `/games`
+  - `/games/daily-question`
+  - `/stats`
+  - gameplay schema, gameplay RPCs, and gameplay read model helpers
 - Post-closeout engineering follow-up:
   - hosted reminder invocation uses Vault-backed secrets
   - local and CI replay now uses a private fallback secret store when Vault is unavailable
@@ -97,17 +102,21 @@ Status values:
 4. Switched future-note creation and unlocked reads onto RPCs so plaintext no longer lives in application table access paths.
 5. Synced runtime copy and docs so reminder automation and encryption are no longer described as deferred.
 
-## Recommended Next Order
-1. `Phase 3 Slice 1: Games + Stats foundation`
-2. Extend gameplay beyond the first live mode only after the stats read model is live.
-3. Revisit travel-map depth only after the gameplay and analytics contract is stable.
+## Phase 3 Slice 1 Delivered
+1. Added `game_mode`, `game_rounds`, and `game_round_answers` with couple-scoped RLS.
+2. Added gameplay RPCs `ensure_daily_question_round(...)` and `submit_daily_question_answer(...)`.
+3. Updated schema inventory and typed Supabase surfaces for the gameplay tables and RPCs.
+4. Added `getGamesHubData(...)`, `getDailyQuestionPageData(...)`, and `getGameplayStatsPageData(...)`.
+5. Added `ensureDailyQuestionRoundAction` and `submitDailyQuestionAnswerAction`.
+6. Added OpenAI-backed server prompt generation through the Responses API with structured validation.
+7. Replaced `/games` and `/stats` shells with live backend-backed routes.
+8. Replaced `/games/daily-question` with a live mode flow while keeping other `/games/[mode]` slugs shell-only.
+9. Synced docs/specs to the delivered runtime and moved Phase 3 forward to additional gameplay modes rather than the first foundation slice.
 
-## Phase 3 Slice 1 Target
-1. `/games` becomes a backend-backed hub with real mode availability and entry links.
-2. `/games/[mode]` ships one live mode only: `/games/daily-question`.
-3. `/stats` becomes a real couple-scoped read model backed by gameplay history and derived score/streak aggregates.
-4. The first slice adds one gameplay session write path, one gameplay answer/event write path, and one stats read model.
-5. The first slice does not include `/chat`, additional game modes, leaderboards, sharing, or travel-map depth.
+## Recommended Next Order
+1. Extend gameplay beyond `daily-question` only after the first stats read model is stable.
+2. Revisit travel-map depth only after the gameplay and analytics contract is stable.
+3. Remove deprecated `/chat` scaffolding as maintenance work.
 
 ## Risks And Deferred Items
 - There is still only one shared timezone per couple; no per-user timezone override exists.
@@ -117,4 +126,5 @@ Status values:
 ## Phase 3 Carry-Forward
 - `/chat` remains a deprecated mock artifact in the app and is scheduled for cleanup rather than backend expansion.
 - `/chat` cleanup is maintenance work, not part of `Phase 3 Slice 1`.
-- `/games`, `/games/[mode]`, and `/stats` remain shell-only today and belong to `Phase 3 Slice 1: Games + Stats foundation`.
+- `/games/[mode]` remains shell-only for non-`daily-question` slugs.
+- Additional gameplay modes, leaderboards, sharing, and similarity scoring remain deferred follow-up work.

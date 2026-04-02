@@ -112,6 +112,26 @@ This file is the canonical business-rule reference for the current app. If this 
 - The current atlas is provider-free: it stores no coordinates, route polylines, or tile-provider metadata.
 - This slice has no edit/delete flow, geocoding flow, or memory-location auto-derivation.
 
+## Gameplay
+- Gameplay is couple-scoped and readable by active couple members only.
+- The current live gameplay mode set contains one enum value: `daily_question`.
+- A gameplay round is unique per `(couple_id, mode, round_date)`.
+- `game_rounds.round_date` is the couple-local date token derived from the saved `couples.timezone`, not the server timezone.
+- The first successful round creation for a given couple-local day becomes canonical for that day.
+- Daily-question prompt generation is on demand, not cron-driven.
+- The stored prompt locale is set by the first successful opener for that couple-local day and is reused for both partners.
+- `game_rounds.prompt_source` currently records `openai` for generated prompts.
+- A gameplay answer is unique per `(round_id, user_id)`.
+- Answers are trimmed non-empty free text and are locked after the first successful submission.
+- Daily-question answers remain hidden until both active partners have submitted for the same round.
+- Current gameplay stats are participation-only:
+  - completed-round streak
+  - total rounds
+  - total completed rounds
+  - per-viewer participation count and rate
+  - recent 14-day status history
+- The current slice has no winner, scoring, similarity matching, answer edits, answer deletes, or backfill UI.
+
 ## Forbidden States
 - More than one `couples` row
 - More than two active memberships in a couple
@@ -126,6 +146,11 @@ This file is the canonical business-rule reference for the current app. If this 
 - Album row committed without at least one `album_items` row
 - Duplicate `album_items` rows for the same `(album_id, memory_media_id)` pair
 - Visited-place row whose `visited_on` falls outside the parent trip window
+- More than one `game_rounds` row for the same `(couple_id, mode, round_date)` tuple
+- More than one `game_round_answers` row for the same `(round_id, user_id)` pair
+- Gameplay answer body that trims to empty text
+- Daily-question answers revealed before both partners have submitted
+- Non-member or cross-couple gameplay read/write access
 
 ## Enforcement Map
 - Singleton couple space: SQL unique index
@@ -148,6 +173,11 @@ This file is the canonical business-rule reference for the current app. If this 
 - Multi-row album writes and eligibility enforcement: `create_album_with_items(...)` and `add_album_items(...)` RPCs
 - Visited-place visibility and inserts: RLS on `visited_places`
 - Visited-place trip-window validity: `visited_places_insert` policy joined against `trips.start_date` and `trips.end_date`
+- Gameplay round visibility and inserts: RLS on `game_rounds`
+- Canonical daily round creation: `ensure_daily_question_round(...)`
+- Locked single-answer submission: `submit_daily_question_answer(...)`
+- Hidden-until-reveal round reads: `get_daily_question_round_state(...)`
+- Gameplay aggregate reads: `get_daily_question_stats(...)`
 
 ## User-Visible Failure States
 - Login can fail if Supabase Auth is unreachable.
@@ -177,8 +207,19 @@ This file is the canonical business-rule reference for the current app. If this 
   - the trip already has an album
   - selected media does not belong to the couple or falls outside the trip window
   - database writes fail unexpectedly
+- Daily-question generation can fail if:
+  - the authenticated user lacks active couple membership
+  - `OPENAI_API_KEY` is missing
+  - the prompt response is invalid or OpenAI fails
+  - the gameplay round RPC rejects the submission unexpectedly
+- Daily-question answer submit can fail if:
+  - the round is missing or outside the member’s couple scope
+  - the answer body is empty or invalid
+  - the viewer already submitted an answer for that round
+  - database writes fail unexpectedly
 
 ## Current Shell Boundaries
 - `/chat` is a deprecated mock artifact because it renders sample conversation content and is no longer on the product roadmap.
-- `/games`, `/games/[mode]`, and `/stats` are shell-only.
+- `/games` and `/stats` are implemented.
+- `/games/[mode]` is implemented only for `/games/daily-question`; other mode slugs remain shell-only.
 - Shell-only and mock-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

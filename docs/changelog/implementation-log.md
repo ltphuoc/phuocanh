@@ -1,5 +1,64 @@
 # Implementation Log
 
+## 2026-04-02 - Phase 3 Slice 1: Live Daily Question + Gameplay Stats
+
+### Delivered
+- Added migration `20260402100000_phase3_slice1_games_stats_foundation.sql` with:
+  - `game_mode`
+  - `game_rounds`
+  - `game_round_answers`
+  - couple-scoped RLS policies for gameplay reads and writes
+  - SQL RPCs `ensure_daily_question_round(...)` and `submit_daily_question_answer(...)`
+- Added follow-up migration `20260402143000_phase3_slice1_gameplay_contract_hardening.sql` with:
+  - `SECURITY DEFINER` hardening for gameplay write RPCs
+  - secure gameplay read RPCs `get_daily_question_round_state(...)` and `get_daily_question_stats(...)`
+  - removal of direct browser reads/writes for `game_round_answers`
+  - removal of direct browser inserts for `game_rounds`
+- Updated `src/lib/supabase/database.types.ts` and `src/lib/db/schema.ts` for the gameplay tables, enum, and RPCs.
+- Added Phase 3 server read helpers:
+  - `getGamesHubData(...)`
+  - `getDailyQuestionPageData(...)`
+  - `getGameplayStatsPageData(...)`
+  - gameplay read helpers now resolve through secure SQL RPCs instead of direct answer-table reads
+- Added OpenAI-backed daily-question prompt generation on the server:
+  - `generateDailyQuestionPrompt(...)`
+  - uses the Responses API with structured JSON validation
+  - no static fallback is used when OpenAI fails
+- Added Phase 3 Server Actions:
+  - `ensureDailyQuestionRoundAction`
+  - `submitDailyQuestionAnswerAction`
+- Added gameplay forms:
+  - `GenerateDailyQuestionForm`
+  - `SubmitDailyQuestionAnswerForm`
+- Replaced `/games` shell content with:
+  - live daily-question hub status
+  - live entry CTA
+  - explicit shell-only messaging for deferred modes
+- Replaced `/games/daily-question` shell content with:
+  - on-demand round generation
+  - one-answer-per-user submission flow
+  - locked answer state until both partners submit
+  - revealed answers once the round is complete
+- Replaced `/stats` placeholder widgets with:
+  - current completed streak
+  - total rounds
+  - total completed rounds
+  - viewer participation count/rate
+  - recent 14-day gameplay history
+- Synced product and engineering docs to mark `/games` and `/stats` implemented and document `/games/[mode]` as live only for `daily-question`.
+- Synced `README.md` and `docs/engineering/system-architecture.md` with the live OpenAI-backed gameplay runtime and the hardened gameplay contract.
+
+### Verification
+- `pnpm typecheck`
+- `pnpm i18n:check`
+- `pnpm lint`
+- `pnpm build`
+
+### Notes
+- This slice intentionally ships only one live gameplay mode: `daily_question`.
+- Non-`daily-question` slugs under `/games/[mode]` remain presentational shells.
+- The current stats model is participation-only and does not add winners, similarity scoring, or edit/delete flows.
+
 ## 2026-03-30 - Safe First-User Onboarding With Explicit Confirmation
 
 ### Delivered

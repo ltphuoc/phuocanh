@@ -29,6 +29,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `createAlbumAction` | `tripId`, `title`, `description?`, `memoryMediaIds[]` | `ActionState` | Calls `create_album_with_items(...)`; revalidates `/albums` and `/trips/[tripId]` |
 | `addAlbumItemsAction` | `albumId`, `tripId`, `memoryMediaIds[]` | `ActionState` | Calls `add_album_items(...)`; revalidates `/albums`, `/albums/[albumId]`, and `/trips/[tripId]` |
 | `updateCoupleTimezoneAction` | `timeZone` | `ActionState` | Calls `update_couple_timezone(...)`; revalidates `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, and `/map` |
+| `ensureDailyQuestionRoundAction` | `locale` | `ActionState` | Generates one prompt through the OpenAI Responses API, calls `ensure_daily_question_round(...)`, and revalidates `/games`, `/games/daily-question`, and `/stats` |
+| `submitDailyQuestionAnswerAction` | `roundId`, `answerBody` | `ActionState` | Calls `submit_daily_question_answer(...)`; answers are single-submit and locked after success; revalidates `/games`, `/games/daily-question`, and `/stats` |
 
 ## Error Conventions
 - Server Actions return user-facing error messages through `ActionState`.
@@ -40,6 +42,12 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 - Memory creation returns validation or storage/database failure messages directly.
 - Onboarding returns validation/state errors through `auth.onboarding.invalidSubmission` and `auth.onboarding.coupleExists`.
 - Countdown, future-note, trip, visited-place, album, and couple-timezone mutations return validation errors through `countdown.invalidSubmission`, `futureNote.invalidSubmission`, `trip.invalidSubmission`, `visitedPlace.invalidSubmission`, `album.invalidSubmission`, and `settings.timezone.invalidSubmission`.
+- Daily-question mutations return validation/action errors through:
+  - `gameplay.dailyQuestion.invalidSubmission`
+  - `gameplay.dailyQuestion.generationFailed`
+  - `gameplay.dailyQuestion.ready`
+  - `gameplay.dailyQuestion.answered`
+  - `gameplay.dailyQuestion.alreadyAnswered`
 - `/auth/callback` does not return a JSON error payload; it redirects to `/login` on callback failure.
 
 ## Route Handler
@@ -79,6 +87,20 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 - `get_unlocked_future_note_contents(target_couple_id)`
   - Future-note unlocked-body read path only
   - Returns decrypted bodies only for unlocked notes visible to the active couple member
+- `ensure_daily_question_round(target_mode, target_round_date, prompt_locale, prompt_text, prompt_source)`
+  - Gameplay round creation path only
+  - Accepts the generated prompt payload, inserts the canonical round if missing, and returns the existing round ID if another request already created it
+  - Direct browser inserts into `game_rounds` are not part of the contract
+- `submit_daily_question_answer(target_round_id, answer_body)`
+  - Gameplay answer mutation path only
+  - Verifies active membership, same-couple access, one-answer-per-user, and locked-after-submit behavior
+  - Returns the created answer UUID
+- `get_daily_question_round_state(target_round_date)`
+  - Secure gameplay round read path only
+  - Returns today’s round metadata plus revealed answers only when the round is complete
+- `get_daily_question_stats(target_history_days)`
+  - Secure gameplay stats read path only
+  - Returns aggregate counts plus recent status history without exposing raw answer rows
 
 ## Phase 2 Read Model
 - `getCountdownsPageData(context)`
@@ -104,9 +126,23 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 - `signMemoryMediaStorageItems(items)`
   - Shared server helper used by home, memory detail, and album reads for `memory-media` signed URLs
 
+## Phase 3 Slice 1 Read Model
+- `getGamesHubData(context)`
+  - Reads today’s daily-question round for the couple-local day
+  - Returns the current viewer status for the hub card through `get_daily_question_round_state(...)`
+- `getDailyQuestionPageData(context, roundId?)`
+  - Reads today’s daily-question round, the viewer submission state, and the reveal state
+  - Uses `get_daily_question_round_state(...)` so answer bodies stay hidden until reveal
+  - Returns `null` round state for missing/foreign/invalid round IDs
+- `getGameplayStatsPageData(context)`
+  - Reads gameplay-only daily-question aggregates for `/stats`
+  - Uses `get_daily_question_stats(...)`
+  - Returns current completed streak, total rounds, total completed rounds, viewer participation metrics, and recent 14-day history
+
 ## Non-Contracts
 - Shell-only and mock-only routes do not imply backend/API support.
-- `/chat`, `/games`, `/games/[mode]`, and `/stats` add no new runtime API surface today; `/chat` is a deprecated mock artifact pending cleanup.
+- `/chat` adds no runtime API surface and remains a deprecated mock artifact pending cleanup.
+- `/games/[mode]` is only backend-backed for `/games/daily-question`; other mode slugs still do not imply additional gameplay APIs.
 - Coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract yet.
 
 ## Compatibility Rule

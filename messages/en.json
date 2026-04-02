@@ -274,6 +274,16 @@
         "unlockDateRequired": "Choose an unlock date."
       }
     },
+    "dailyQuestion": {
+      "answerDescription": "Once you submit, your answer locks until both partners have answered.",
+      "answerLabel": "Your answer",
+      "answerPlaceholder": "Write the answer you want your partner to read once both of you are in.",
+      "submit": "Lock answer",
+      "validation": {
+        "answerMax": "Answer must be 800 characters or fewer.",
+        "answerRequired": "Write your answer before submitting."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Current timezone: {timeZone}",
       "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
@@ -385,6 +395,15 @@
       "fileTooLarge": "File is too large. Max size is 25MB.",
       "missingContent": "Add a note or at least one media file.",
       "unsupportedType": "Only image and video files are supported."
+    },
+    "gameplay": {
+      "dailyQuestion": {
+        "alreadyAnswered": "You already answered today’s question.",
+        "answered": "Answer locked for today.",
+        "generationFailed": "Could not generate today’s question right now.",
+        "invalidSubmission": "Daily question submission is invalid.",
+        "ready": "Today’s question is ready."
+      }
     },
     "unexpectedError": "Something went wrong. Please try again.",
     "countdown": {
@@ -723,27 +742,36 @@
   },
   "games": {
     "header": {
-      "description": "Play memory-based mini games and keep your couple streak alive.",
+      "description": "Start today’s question, see what is still waiting, and keep the couple streak moving.",
       "eyebrow": "Play",
       "title": "Games"
     },
-    "cards": {
-      "daily": {
-        "cta": "Daily question",
-        "description": "Answer one couple question each day to keep the streak.",
-        "title": "Daily mode"
-      },
-      "guess": {
-        "cta": "Guess the date",
-        "description": "Pick the day of a shared memory from your timeline.",
-        "title": "Guess mode"
-      }
+    "shellBadge": "Shell only",
+    "dailyQuestion": {
+      "description": "One shared prompt per couple and local day. Each partner answers once, then both answers open together.",
+      "emptySummary": "No prompt exists for today yet. Generate the round when you’re ready to start.",
+      "eyebrow": "Live now",
+      "generateCta": "Start today’s question",
+      "generateHint": "The first partner who opens today’s round sets the stored prompt language for that day.",
+      "onlyLiveMode": "Daily question is the only live mode in this slice.",
+      "openCta": "Open today’s round",
+      "promptLocale": "Stored in {locale}.",
+      "readySummary": "{count, plural, =0 {Today’s prompt is ready and waiting for both answers.} one {One answer is in for today’s round.} other {Both answer slots are active for today’s round.}}",
+      "title": "Daily question"
     },
-    "presentationalNote": "This is a presentational game hub. Real prompts, answers, and scoring remain untouched and are not wired yet.",
-    "comingSoon": {
-      "cta": "Open stats shell",
-      "description": "Game rounds, prompt generation, and score events will be linked when game backend features are implemented.",
-      "title": "Game engine integration"
+    "guessDate": {
+      "cta": "Open shell mode",
+      "deferredNote": "Guess the date stays shell-only until after the daily-question contract is stable.",
+      "description": "Memory-date guessing still keeps its presentation shell, but no real prompt or answer runtime ships here yet.",
+      "eyebrow": "Later mode",
+      "shellSummary": "This route still previews layout only. There is no live scoring, memory-pick logic, or answer capture behind it yet.",
+      "title": "Guess the date"
+    },
+    "statsBridge": {
+      "cta": "Open live stats",
+      "description": "The stats view now reflects real gameplay history from daily-question rounds instead of placeholder widgets.",
+      "eyebrow": "Read model",
+      "title": "Gameplay stats are live"
     }
   },
   "gameMode": {
@@ -754,38 +782,102 @@
     "placeholder": "This route is a structured shell for the selected game mode. Prompt generation, answer capture, and streak updates will connect here in a later phase.",
     "comingSoon": {
       "cta": "Back to game hub",
-      "description": "All gameplay logic remains unchanged and intentionally unimplemented in this UI-only restructure.",
+      "description": "This mode still stays shell-only while daily question owns the first live gameplay contract.",
       "title": "Gameplay wiring"
     },
     "fallbackModeLabel": "Mode"
   },
+  "dailyQuestion": {
+    "header": {
+      "description": "Generate one question for today, submit one locked answer each, and reveal both once the pair is complete.",
+      "eyebrow": "Daily mode",
+      "title": "Daily question"
+    },
+    "intro": {
+      "description": "Today’s round does not exist yet. Generate one shared question when either partner is ready to start.",
+      "generateCta": "Generate today’s question",
+      "title": "Open the round"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {No answers yet} one {1 answer locked} other {# answers locked}}",
+      "date": "Local day {date}",
+      "description": "This question is saved once for today and reused for both partners.",
+      "eyebrow": "Today’s prompt",
+      "locale": "Prompt language: {locale}",
+      "title": "Today’s question"
+    },
+    "composer": {
+      "description": "Reply once. Editing is not available after submission in this first slice.",
+      "eyebrow": "Your turn",
+      "title": "Submit your answer"
+    },
+    "pending": {
+      "eyebrow": "Locked",
+      "title": "Waiting for the second answer",
+      "viewerLocked": "Your answer is locked. Both answers stay hidden until your partner submits their side of today’s round."
+    },
+    "reveal": {
+      "description": "Both answers are now open for this round.",
+      "eyebrow": "Reveal",
+      "title": "Today’s answers"
+    },
+    "answers": {
+      "partner": "Partner",
+      "viewer": "You"
+    },
+    "locale": {
+      "en": "English",
+      "vi": "Vietnamese"
+    },
+    "status": {
+      "completed": "Completed",
+      "not_started": "Not started",
+      "waiting_for_partner": "Waiting for partner",
+      "waiting_for_you": "Waiting for you"
+    },
+    "statusNote": {
+      "eyebrow": "Status",
+      "title": "How today is moving",
+      "copy": {
+        "completed": "Today’s round is complete and both answers are visible.",
+        "not_started": "No answers are in yet. Generate the question when you want to begin.",
+        "waiting_for_partner": "Your answer is in. The round will reveal as soon as your partner answers.",
+        "waiting_for_you": "Your partner already answered. Submit your side to reveal both."
+      }
+    }
+  },
   "stats": {
     "header": {
-      "description": "A soft dashboard for fun couple activity metrics.",
+      "description": "Gameplay-only daily-question metrics, streaks, and recent round statuses.",
       "eyebrow": "Insights",
       "title": "Stats"
     },
     "cards": {
-      "memories": {
-        "label": "Memories this month",
-        "trend": "+6 vs last month",
-        "value": "12"
-      },
       "streak": {
         "label": "Current streak",
-        "trend": "Both answered daily",
-        "value": "7 days"
+        "trend": "Completed days in a row",
+        "value": "{count, plural, =0 {0 days} one {# day} other {# days}}"
       },
-      "trips": {
-        "label": "Trips completed",
-        "trend": "Shared adventures",
-        "value": "3"
+      "rounds": {
+        "label": "Rounds created",
+        "trend": "All daily-question rounds so far"
+      },
+      "completed": {
+        "label": "Completed rounds",
+        "trend": "Both answers were submitted"
+      },
+      "participation": {
+        "label": "Your participation rate",
+        "trend": "{count, plural, =0 {No answers submitted yet} one {# answer submitted} other {# answers submitted}}",
+        "value": "{count}%"
       }
     },
-    "comingSoon": {
-      "cta": "Open games shell",
-      "description": "These widgets are placeholders for event-sourced stats and streak aggregations that will be delivered in Phase 3.",
-      "title": "Analytics pipeline"
+    "history": {
+      "description": "The latest 14 local days are shown here, including days when no round was started.",
+      "eyebrow": "Recent history",
+      "rowTitle": "Daily question",
+      "subtitle": "{date}",
+      "title": "Two-week round log"
     }
   },
   "settings": {

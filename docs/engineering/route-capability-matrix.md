@@ -22,18 +22,17 @@ This file is the canonical “what exists today” route map.
 | `/albums/[albumId]` | implemented | `getAlbumDetailData(...)` | Route param is a real album UUID; invalid or foreign IDs must not resolve |
 | `/map` | implemented | `getMapPageData(...)` + `visited_places` | Atlas is provider-free and trip-linked; no coordinates, tiles, or route polylines exist yet |
 | `/chat` | mock-only | local mock message array in `ChatThreadPreview` | Deprecated mock artifact only; no live chat backend, presence, or attachment model exists, and no roadmap work should assume it will be expanded |
-| `/games` | shell-only | none | Hub exists, gameplay logic does not |
-| `/games/[mode]` | shell-only | route param only | Mode pages are structured shells, not live game engines |
-| `/stats` | shell-only | none | Placeholder metrics only; no analytics pipeline exists |
+| `/games` | implemented | `getGamesHubData(...)` | Live hub for today’s `daily_question` status; non-live modes still render as shell-only entry points |
+| `/games/[mode]` | implemented for `/games/daily-question`; shell-only otherwise | `getDailyQuestionPageData(...)` + gameplay Server Actions for `daily-question`; route param only for other slugs | Only `/games/daily-question` has live prompt generation, answer capture, and reveal behavior in this slice |
+| `/stats` | implemented | `getGameplayStatsPageData(...)` | Gameplay-only metrics sourced from `daily_question` history; this is not a general analytics pipeline |
 | `/settings` | implemented | `getReadyCoupleContextOrRedirect()` + `updateCoupleTimezoneAction` | Owns the shared couple timezone only; account/privacy/per-user settings are still deferred |
 
-## Next Documented Backend Slice
-- `Phase 3 Slice 1: Games + Stats foundation` is the next implementation target after the Phase 2 closeout.
-- Current route statuses stay unchanged until that slice lands.
-- Planned acceptance criteria for that slice:
-  - `/games` becomes a real backend-backed hub with mode availability and entry links
-  - `/games/[mode]` gets one live mode only: `/games/daily-question`
-  - `/stats` reads real couple-scoped gameplay aggregates instead of placeholder values
+## Latest Documented Backend Slice
+- `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is now the latest implemented slice after the Phase 2 closeout.
+- Delivered route capability in this slice:
+  - `/games` is now a real backend-backed hub with live status and entry links for `daily-question`
+  - `/games/[mode]` is live only for `/games/daily-question`
+  - `/stats` now reads real couple-scoped gameplay aggregates instead of placeholder values
 - `/chat` cleanup remains maintenance work and is not part of the gameplay roadmap.
 
 ## Engineering Follow-Up Note

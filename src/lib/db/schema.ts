@@ -78,6 +78,16 @@ export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
     sourceMigration: "20260329193000_phase2_slice4_visited_places_atlas_foundation.sql",
     status: "planned_mirror",
   },
+  {
+    name: "public.game_rounds",
+    sourceMigration: "20260402100000_phase3_slice1_games_stats_foundation.sql",
+    status: "planned_mirror",
+  },
+  {
+    name: "public.game_round_answers",
+    sourceMigration: "20260402100000_phase3_slice1_games_stats_foundation.sql",
+    status: "planned_mirror",
+  },
 ] as const;
 
 export const phaseOneTableBaseline = appTableBaseline;
@@ -156,6 +166,26 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.configure_phase2_reminder_jobs()",
     sourceMigration: "20260331120000_phase2_closeout_reminders_encrypted_future_notes.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.ensure_daily_question_round(game_mode, date, text, text, text)",
+    sourceMigration: "20260402100000_phase3_slice1_games_stats_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.submit_daily_question_answer(uuid, text)",
+    sourceMigration: "20260402100000_phase3_slice1_games_stats_foundation.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.get_daily_question_round_state(date)",
+    sourceMigration: "20260402143000_phase3_slice1_gameplay_contract_hardening.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.get_daily_question_stats(integer)",
+    sourceMigration: "20260402143000_phase3_slice1_gameplay_contract_hardening.sql",
     status: "sql_authoritative",
   },
   {

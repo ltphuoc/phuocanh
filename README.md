@@ -3,8 +3,8 @@
 Private couple memory web app built with Next.js App Router + Supabase.
 
 ## Current Product State
-- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
-- `shell-only`: `/games`, `/games/[mode]`, `/stats`
+- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
+- `shell-only`: non-`daily-question` slugs under `/games/[mode]`
 - `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
@@ -37,6 +37,8 @@ If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Browser/server anon key for current runtime |
 | `DATABASE_URL` | yes | Local SQL tooling and schema parity work |
 | `NEXT_PUBLIC_SITE_URL` | yes | Fallback site URL when forwarded headers are absent |
+| `OPENAI_API_KEY` | conditional | Required to generate daily-question prompts in `/games/daily-question` |
+| `OPENAI_DAILY_QUESTION_MODEL` | optional | Prompt-generation model override; defaults to `gpt-4o-mini` |
 | `SUPABASE_SERVICE_ROLE_KEY` | conditional | Required by the `reminder-processor` Edge Function; not required for the main Next.js runtime |
 
 Phase 2 reminder delivery also needs Edge Function secrets when you deploy or serve `supabase/functions/reminder-processor`:
@@ -146,9 +148,10 @@ pnpm typecheck
 - Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
 - `/chat` is a deprecated mock artifact because it renders sample conversation content, not real messages, and is no longer on the roadmap.
 - Shell-only routes are intentionally not evidence of backend/domain support.
-- Current runtime has no live OpenAI integration and no live Mapbox integration.
+- Current runtime uses the OpenAI Responses API for `/games/daily-question` prompt generation and has no live Mapbox integration.
 - `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.
 - `/settings` now owns the shared couple timezone, which drives countdown, future-note, trip-status, album-eligibility, and other couple-level day boundaries.
+- Gameplay writes are RPC-only and raw `game_round_answers` rows are not directly browser-readable; reveal state flows through secure server read helpers.
 - Phase 2 reminder automation is now part of the runtime contract. Database cron jobs enqueue reminder rows, and the `reminder-processor` Edge Function delivers summary-only emails through Resend.
 
 ## Deploy On Vercel

@@ -9,8 +9,8 @@ This file describes the current frontend operating model. It is the canonical re
 - `src/app/page.tsx`: redirect-only route that resolves auth gate state
 
 ## Route Categories
-- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/settings`
-- `shell-only`: `/games`, `/games/[mode]`, `/stats`
+- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
+- `shell-only`: non-`daily-question` slugs under `/games/[mode]`
 - `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 
 Use `docs/engineering/route-capability-matrix.md` for the full table.
@@ -24,13 +24,16 @@ Do not move server reads into client components unless the task explicitly chang
 
 ## Data Read Pattern
 - Authenticated pages first resolve couple context through `getAuthGateState()` or `getReadyCoupleContextOrRedirect()`.
-- Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, `getMemoryDetailData(...)`, `getCountdownsPageData(...)`, `getFutureNotesPageData(...)`, `getTripsPageData(...)`, `getTripDetailData(...)`, `getMapPageData(...)`, `getAlbumsPageData(...)`, and `getAlbumDetailData(...)`.
+- Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, `getMemoryDetailData(...)`, `getCountdownsPageData(...)`, `getFutureNotesPageData(...)`, `getTripsPageData(...)`, `getTripDetailData(...)`, `getMapPageData(...)`, `getAlbumsPageData(...)`, `getAlbumDetailData(...)`, `getGamesHubData(...)`, `getDailyQuestionPageData(...)`, and `getGameplayStatsPageData(...)`.
 - Signed `memory-media` URLs are created server-side through `signMemoryMediaStorageItems(...)` before render.
 - Future-note bodies stay in the server read layer; client components never fetch locked content directly, and unlocked bodies now flow through the decrypted RPC path rather than direct table reads.
 - Trip detail reads return `notFound()` for invalid or non-member trip IDs instead of rendering placeholder content.
 - Trip detail reads now include ordered `visited_places` rows for the trip.
 - Album detail reads return `notFound()` for invalid or non-member album IDs instead of rendering placeholder content.
 - `/map` renders a provider-free atlas from real trip-linked `visited_places`; it does not depend on a tile provider.
+- `/games` renders the live daily-question hub state on the server through secure gameplay read RPCs.
+- `/games/daily-question` renders the current couple-local round, submission state, and reveal state on the server through secure gameplay read RPCs.
+- `/stats` renders gameplay-only aggregates from the server read model through secure gameplay stats RPCs.
 - `/settings` resolves real couple context and renders the live shared-timezone control.
 - Shared date helpers and date-rendering components receive the couple timezone explicitly instead of relying on environment defaults.
 
@@ -42,6 +45,9 @@ Do not move server reads into client components unless the task explicitly chang
 - Countdown and future-note forms submit date-only values; server actions derive stored UTC instants from the saved couple timezone.
 - Future-note creation now uses a SQL RPC so metadata insert plus encrypted body write stay transactional.
 - Album creation/add flows call SQL RPCs from Server Actions so multi-row album writes stay transactional and couple-scoped.
+- Daily-question generation calls the OpenAI Responses API on the server, then writes through `ensure_daily_question_round(...)`.
+- Daily-question answer submit calls `submit_daily_question_answer(...)` so one-answer-per-user and locked-after-submit behavior stays DB-owned.
+- Direct browser reads of `game_round_answers` are intentionally not part of the runtime; gameplay reveal state comes from secure server read helpers.
 - `/settings` owns the `updateCoupleTimezoneAction` flow for the shared couple timezone.
 
 ## ActionState Contract
@@ -67,13 +73,15 @@ Do not move server reads into client components unless the task explicitly chang
 | `createVisitedPlaceAction` | `/map`, `/trips/[tripId]` |
 | `createAlbumAction` | `/albums`, `/trips/[tripId]` |
 | `addAlbumItemsAction` | `/albums`, `/albums/[albumId]`, `/trips/[tripId]` |
+| `ensureDailyQuestionRoundAction` | `/games`, `/games/daily-question`, `/stats` |
+| `submitDailyQuestionAnswerAction` | `/games`, `/games/daily-question`, `/stats` |
 | `updateCoupleTimezoneAction` | `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, `/map` |
 
 ## Shared UI Structure
 - App shell: `src/app/(app)/layout.tsx`, `BottomNavigation`, `SideNavigation`, `navigation-model.ts`
 - Shared layout primitives: `AuthShell`, `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `ShellPage`
 - Shared UI/state primitives: `SectionCard`, `EmptyState`, `LoadingState`, `ListRow`, `ComingSoonCard`, `PageReveal`, `CountdownWidgetTemplate`, `FutureNoteCard`, `TripCardTemplate`, `AlbumCard`
-- Phase 2 forms: `CreateCountdownForm`, `CreateFutureNoteForm`, `CreateTripForm`, `CreateVisitedPlaceForm`, `CreateAlbumForm`, `AddAlbumItemsForm`, `UpdateCoupleTimezoneForm`
+- Phase 2/3 forms: `CreateCountdownForm`, `CreateFutureNoteForm`, `CreateTripForm`, `CreateVisitedPlaceForm`, `CreateAlbumForm`, `AddAlbumItemsForm`, `GenerateDailyQuestionForm`, `SubmitDailyQuestionAnswerForm`, `UpdateCoupleTimezoneForm`
 - Phase 2 travel atlas shell: `TravelAtlasShell`
 
 New routes should compose these primitives rather than invent new layout systems per page.
@@ -90,5 +98,6 @@ New routes should compose these primitives rather than invent new layout systems
 - Keep couple-level day-boundary logic rooted in the saved `couples.timezone` field and shared timezone helpers.
 - Keep album grouping rooted in `trips` and existing `memory_media`; do not add a second upload pipeline casually.
 - Keep visited places rooted in `trips`; do not derive them implicitly from memory locations without revisiting the product contract.
+- Keep gameplay reads server-first and keep prompt generation on the server; do not move OpenAI prompt generation into client code.
 - Do not introduce TanStack Query, Zustand, or `nuqs` opportunistically into routine changes. The current runtime is not structured around them yet.
 - If a task intentionally migrates data/state architecture, document it first.
