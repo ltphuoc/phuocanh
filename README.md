@@ -62,8 +62,8 @@ In hosted environments, Phase 2 reminder delivery also needs these Supabase Vaul
 
 For local Supabase Docker setup, use:
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54330/postgres
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
@@ -75,6 +75,23 @@ Keep your browser URL consistent with auth redirect config. This repo supports b
 ```bash
 supabase start
 ```
+
+Local Supabase service endpoints for this repo:
+
+| Service | URL |
+|---|---|
+| Project URL | `http://127.0.0.1:54331` |
+| Studio | `http://127.0.0.1:54332` |
+| Mailpit | `http://127.0.0.1:54333` |
+| MCP | `http://127.0.0.1:54331/mcp` |
+| REST | `http://127.0.0.1:54331/rest/v1` |
+| GraphQL | `http://127.0.0.1:54331/graphql/v1` |
+| Edge Functions | `http://127.0.0.1:54331/functions/v1` |
+| Database URL | `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
+
+`NEXT_PUBLIC_SUPABASE_URL` must point to `http://127.0.0.1:54331`.
+
+These local ports are intentionally different from the default Supabase ports to avoid conflicts with another local stack already using `54321`, `54322`, `54323`, `54324`, and `54327`.
 
 4. Apply local database migrations:
 ```bash

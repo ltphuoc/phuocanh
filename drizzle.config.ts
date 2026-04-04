@@ -1,5 +1,5 @@
 const databaseUrl =
-  process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:54330/postgres";
 
 interface DrizzleConfig {
   readonly dbCredentials: {
