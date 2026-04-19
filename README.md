@@ -6,6 +6,7 @@ Private couple memory web app built with Next.js App Router + Supabase.
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
 - `shell-only`: non-`daily-question` slugs under `/games/[mode]`
 - `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
+- internal-only route handlers also exist at `/auth/callback/verify-email-otp` for local Playwright auth bootstrap when explicitly enabled from a loopback host
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
 
@@ -39,7 +40,7 @@ If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL.
 | `NEXT_PUBLIC_SITE_URL` | yes | Fallback site URL when forwarded headers are absent |
 | `OPENAI_API_KEY` | conditional | Required to generate daily-question prompts in `/games/daily-question` |
 | `OPENAI_DAILY_QUESTION_MODEL` | optional | Prompt-generation model override; defaults to `gpt-4o-mini` |
-| `SUPABASE_SERVICE_ROLE_KEY` | conditional | Required by the `reminder-processor` Edge Function; not required for the main Next.js runtime |
+| `SUPABASE_SERVICE_ROLE_KEY` | optional | Enables the admin-backed auth-gate fast path for existing-couple detection; when unset, the main app falls back to the authenticated `has_any_couple()` RPC |
 
 Phase 2 reminder delivery also needs Edge Function secrets when you deploy or serve `supabase/functions/reminder-processor`:
 
@@ -76,6 +77,12 @@ Keep your browser URL consistent with auth redirect config. This repo supports b
 supabase start
 ```
 
+This repo currently disables local Supabase Edge Runtime by default because the
+current Supabase CLI local relay imports `jsr:@panva/jose@6`, and `jsr.io`
+returns a `403` challenge in this environment during boot. The hosted
+`reminder-processor` Edge Function remains part of the runtime contract; only
+local auto-boot is disabled for now.
+
 Local Supabase service endpoints for this repo:
 
 | Service | URL |
@@ -86,7 +93,6 @@ Local Supabase service endpoints for this repo:
 | MCP | `http://127.0.0.1:54331/mcp` |
 | REST | `http://127.0.0.1:54331/rest/v1` |
 | GraphQL | `http://127.0.0.1:54331/graphql/v1` |
-| Edge Functions | `http://127.0.0.1:54331/functions/v1` |
 | Database URL | `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
 
 `NEXT_PUBLIC_SUPABASE_URL` must point to `http://127.0.0.1:54331`.
@@ -116,6 +122,41 @@ pnpm typecheck
 pnpm typecheck:functions
 pnpm build
 ```
+
+## E2E Validation
+Production-flow browser coverage now lives in Playwright and runs against `next build` + `next start` on the local Supabase stack.
+
+Prerequisites:
+- Docker Desktop is installed and the Docker daemon is running
+- local Supabase is installed and available on your `PATH`
+- `.env.local` contains the local Supabase URL/keys and site URL values above
+- local auth email capture is available through Mailpit on `http://127.0.0.1:54333`
+- no other process is required to own the E2E app port; the harness starts its own dedicated server at `http://127.0.0.1:3100` by default
+
+Commands:
+```bash
+pnpm test:e2e
+pnpm test:e2e:headed
+```
+
+What `pnpm test:e2e` does:
+- starts local Supabase if needed
+- resets the local database with migrations and the baseline seed file
+- builds the Next.js app
+- runs Playwright serially against `E2E_BASE_URL`, which defaults to `http://127.0.0.1:3100`
+
+Local E2E note:
+- `supabase start` intentionally skips local Edge Runtime right now, so the
+  local stack used by Playwright covers DB, Auth, Storage, Studio, Mailpit, and
+  the app runtime, but not `/functions/v1`.
+
+E2E-specific runtime notes:
+- `E2E_ENABLE_EMAIL_OTP_HELPER` explicitly enables the internal `POST /auth/callback/verify-email-otp` helper used by local Playwright auth bootstrap. The route still returns `404` unless the request also comes through `127.0.0.1`, `localhost`, or another loopback host.
+- `OPENAI_DAILY_QUESTION_STUB_RESPONSE` is a test-only override for `/games/daily-question` prompt generation. When unset, the app uses the normal OpenAI Responses API path.
+- `scripts/e2e/run.sh` defaults `E2E_BASE_URL=http://127.0.0.1:3100`, aligns `NEXT_PUBLIC_SITE_URL` to that URL, and also sets `E2E_ENABLE_EMAIL_OTP_HELPER`, `OPENAI_DAILY_QUESTION_STUB_RESPONSE`, and `TZ=Asia/Ho_Chi_Minh`.
+- Playwright auth state files are written under `playwright/.auth/` and are gitignored.
+- The suite intentionally excludes shell-only game modes under `/games/[mode]` and the deprecated mock `/chat` route.
+- Latest verified local result: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
 
 ## Reminder Setup Verification
 After deploying the migration and the `reminder-processor` Edge Function, verify:

@@ -1,14 +1,14 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   startTransition,
   useActionState,
   useEffect,
+  useId,
   useState,
+  type FormEvent,
   type ReactElement,
 } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { updateCoupleTimezoneAction } from "@/app/actions/planning-actions";
@@ -42,8 +42,6 @@ const buildUpdateCoupleTimezoneSchema = (
       }),
   });
 
-type UpdateCoupleTimezoneValues = z.infer<ReturnType<typeof buildUpdateCoupleTimezoneSchema>>;
-
 export const UpdateCoupleTimezoneForm = ({
   currentTimeZone,
 }: UpdateCoupleTimezoneFormProps): ReactElement => {
@@ -54,19 +52,9 @@ export const UpdateCoupleTimezoneForm = ({
     updateCoupleTimezoneAction,
     initialActionState,
   );
+  const formKey = useId();
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const form = useForm<UpdateCoupleTimezoneValues>({
-    defaultValues: {
-      timeZone: currentTimeZone,
-    },
-    resolver: zodResolver(buildUpdateCoupleTimezoneSchema(formT)),
-  });
-
-  useEffect(() => {
-    form.reset({
-      timeZone: currentTimeZone,
-    });
-  }, [currentTimeZone, form]);
+  const [timeZoneErrorMessage, setTimeZoneErrorMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!hasSubmitted) {
@@ -77,31 +65,36 @@ export const UpdateCoupleTimezoneForm = ({
 
     if (state.status === "success") {
       toast.success(actionsT(actionMessageKey));
-      form.reset({
-        timeZone: form.getValues("timeZone"),
-      });
       return;
     }
 
     if (state.status === "error") {
       toast.error(actionsT(actionMessageKey));
     }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
+  }, [actionsT, hasSubmitted, state.message, state.status]);
 
-  const timeZoneErrorMessage = form.formState.errors.timeZone?.message;
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  const onSubmit = form.handleSubmit((values) => {
+    const payload = new FormData(event.currentTarget);
+    const parsed = buildUpdateCoupleTimezoneSchema(formT).safeParse({
+      timeZone: payload.get("timeZone"),
+    });
+
+    if (!parsed.success) {
+      setTimeZoneErrorMessage(parsed.error.flatten().fieldErrors.timeZone?.[0]);
+      return;
+    }
+
+    setTimeZoneErrorMessage(undefined);
     setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("timeZone", values.timeZone);
-
     startTransition(() => {
       submitAction(payload);
     });
-  });
+  };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-4" key={`${formKey}-${currentTimeZone}`} onSubmit={onSubmit}>
       <FormSection
         description={formT("description")}
         errorId="couple-timezone-error"
@@ -116,10 +109,16 @@ export const UpdateCoupleTimezoneForm = ({
             autoComplete="off"
             id="coupleTimeZone"
             list={TIME_ZONE_DATALIST_ID}
+            name="timeZone"
+            defaultValue={currentTimeZone}
+            onChange={() => {
+              if (timeZoneErrorMessage) {
+                setTimeZoneErrorMessage(undefined);
+              }
+            }}
             placeholder={formT("placeholder")}
             spellCheck={false}
             type="text"
-            {...form.register("timeZone")}
           />
           <datalist id={TIME_ZONE_DATALIST_ID}>
             {COUPLE_TIME_ZONE_OPTIONS.map((timeZone) => (

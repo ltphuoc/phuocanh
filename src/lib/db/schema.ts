@@ -185,7 +185,12 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   },
   {
     name: "public.get_daily_question_stats(integer)",
-    sourceMigration: "20260402143000_phase3_slice1_gameplay_contract_hardening.sql",
+    sourceMigration: "20260411110000_fix_daily_question_stats_today_timezone.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.has_any_couple()",
+    sourceMigration: "20260417103000_add_has_any_couple_rpc.sql",
     status: "sql_authoritative",
   },
   {

@@ -3,10 +3,11 @@
 This file describes the current frontend operating model. It is the canonical reference for route behavior and UI/runtime boundaries.
 
 ## Route Groups
-- `src/app/(public)`: `/login`, `/onboarding`, and `/accept-invite`
-- `src/app/(app)`: authenticated routes rendered inside one shared app shell
+- `src/app/[locale]/(public)`: `/login`, `/onboarding`, and `/accept-invite`
+- `src/app/[locale]/(app)`: authenticated routes rendered inside one shared app shell
 - `src/app/auth/callback/route.ts`: Supabase auth callback exchange and safe redirect
-- `src/app/page.tsx`: redirect-only route that resolves auth gate state
+- `src/app/auth/callback/verify-email-otp/route.ts`: internal local-E2E OTP verification helper
+- `src/app/[locale]/page.tsx`: redirect-only route that resolves auth gate state
 
 ## Route Categories
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
@@ -38,7 +39,8 @@ Do not move server reads into client components unless the task explicitly chang
 - Shared date helpers and date-rendering components receive the couple timezone explicitly instead of relying on environment defaults.
 
 ## Mutation Pattern
-- Forms use `react-hook-form`, `zodResolver`, `useActionState`, `startTransition(...)`, and Sonner toasts.
+- Forms use `react-hook-form`, `zodResolver`, Server Actions, and Sonner toasts.
+- Some forms still bind through `useActionState` / `startTransition(...)`, while upload-heavy flows can call the action function directly after client-side preprocessing.
 - Phase 2 planning forms also use inline field errors via `FormSection` in addition to toast feedback.
 - Server Actions are the mutation boundary for app code.
 - First-user onboarding confirmation and invite acceptance use SQL RPCs because membership/bootstrap invariants are DB-owned.
@@ -49,6 +51,29 @@ Do not move server reads into client components unless the task explicitly chang
 - Daily-question answer submit calls `submit_daily_question_answer(...)` so one-answer-per-user and locked-after-submit behavior stays DB-owned.
 - Direct browser reads of `game_round_answers` are intentionally not part of the runtime; gameplay reveal state comes from secure server read helpers.
 - `/settings` owns the `updateCoupleTimezoneAction` flow for the shared couple timezone.
+
+## Production-Flow E2E Coverage
+- Browser coverage is now anchored in Playwright under `tests/e2e/*`.
+- The suite runs against `next build` + `next start`, not the dev server.
+- `playwright.config.ts` keeps the suite serial (`workers: 1`) because the app is a singleton couple space on one local Supabase stack.
+- The harness uses `E2E_BASE_URL`, defaulting to `http://127.0.0.1:3100`, so Playwright does not depend on a pre-existing app server on port `3000`.
+- Auth bootstrap is hybrid:
+  - real `/login` UI
+  - real local auth emails read from Mailpit on `http://127.0.0.1:54333`
+  - test-only OTP verification route at `/auth/callback/verify-email-otp`
+  - saved partner storage states under `playwright/.auth/`
+- `E2E_ENABLE_EMAIL_OTP_HELPER` explicitly gates the OTP helper route and must stay disabled outside local browser E2E runs.
+- The OTP helper also rejects non-loopback hosts even when the env flag is enabled.
+- Feature data creation stays inside browser flows; the suite does not use SQL seed fixtures for route-level test content.
+- The current production-flow suite covers only implemented, backend-backed routes:
+  - auth gatekeeping and invite join flow
+  - memories, wishlists, and checklists
+  - countdowns, future notes, shared timezone updates
+  - trips, visited places, trip albums, and map
+  - `/games/daily-question` and `/stats`
+- The suite explicitly excludes shell-only non-`daily-question` game modes and the deprecated mock `/chat` route.
+- Daily-question generation has a narrow E2E seam through `OPENAI_DAILY_QUESTION_STUB_RESPONSE`; production behavior is unchanged when that env var is unset.
+- Latest verified local result: the production-flow suite passes end to end with `7 passed (2.8m)`.
 
 ## ActionState Contract
 - `ActionState = { status: "idle" | "success" | "error"; message: string }`

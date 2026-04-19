@@ -919,6 +919,7 @@ export type Database = {
           viewer_participation_rate: number
         }[]
       }
+      has_any_couple: { Args: never; Returns: boolean }
       get_unlocked_future_note_contents: {
         Args: { target_couple_id: string }
         Returns: {

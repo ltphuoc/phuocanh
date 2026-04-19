@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/routing";
 import { isSchemaCacheMissMessage, SchemaReadinessError } from "@/lib/errors";
 import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 
 type MembershipRole = Database["public"]["Enums"]["membership_role"];
@@ -57,10 +58,6 @@ interface CoupleRow {
   readonly timezone: string;
 }
 
-interface ExistingCoupleRow {
-  readonly id: string;
-}
-
 const getMembershipForUser = async (
   userId: string,
 ): Promise<MembershipRow | null> => {
@@ -102,19 +99,34 @@ const getCoupleById = async (coupleId: string): Promise<CoupleRow | null> => {
   return data[0] ?? null;
 };
 
-const getAnyCouple = async (): Promise<ExistingCoupleRow | null> => {
+const hasAnyCouple = async (): Promise<boolean> => {
+  const adminSupabase = createSupabaseAdminClient();
+  if (adminSupabase) {
+    const { data, error } = await adminSupabase.from("couples").select("id").limit(1);
+
+    if (error) {
+      if (isSchemaCacheMissMessage(error.message)) {
+        throw new SchemaReadinessError("public.couples");
+      }
+
+      throw new Error(error.message);
+    }
+
+    return Boolean(data[0]);
+  }
+
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("couples").select("id").limit(1);
+  const { data, error } = await supabase.rpc("has_any_couple");
 
   if (error) {
     if (isSchemaCacheMissMessage(error.message)) {
-      throw new SchemaReadinessError("public.couples");
+      throw new SchemaReadinessError("public.has_any_couple");
     }
 
     throw new Error(error.message);
   }
 
-  return data[0] ?? null;
+  return data;
 };
 
 export const getAuthGateState = cache(async (): Promise<AuthGateState> => {
@@ -150,8 +162,7 @@ export const getAuthGateState = cache(async (): Promise<AuthGateState> => {
     };
   }
 
-  const existingCouple = await getAnyCouple();
-  if (existingCouple) {
+  if (await hasAnyCouple()) {
     return {
       email: user.email ?? null,
       status: "needs_invite",

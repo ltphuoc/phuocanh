@@ -11,6 +11,7 @@ flowchart LR
   App --> Reads["Server reads in src/lib/server/*"]
   Browser --> Actions["Server Actions in src/app/actions/*"]
   Browser --> Callback["GET /auth/callback"]
+  Browser --> OtpHelper["POST /auth/callback/verify-email-otp (E2E only)"]
 
   Reads --> Auth["Supabase Auth"]
   Reads --> PG["Supabase Postgres"]
@@ -21,6 +22,7 @@ flowchart LR
   Actions --> OpenAI["OpenAI Responses API"]
   Actions --> Storage["Supabase Storage bucket: memory-media"]
   Callback --> Auth
+  OtpHelper --> Auth
 
   PG --> SQL["SQL migrations, RLS, triggers, RPCs"]
   Storage --> Policies["Storage path policies"]
@@ -36,18 +38,21 @@ flowchart LR
 - Middleware refreshes Supabase auth state on requests.
 - Public routes handle login, first-user onboarding, and invite acceptance.
 - `GET /auth/callback` finishes Supabase callback exchange and normalizes the `next` redirect.
+- `POST /auth/callback/verify-email-otp` is an internal local-E2E helper and is enabled only through `E2E_ENABLE_EMAIL_OTP_HELPER` on loopback-host requests.
 - Authenticated routes use `getAuthGateState()` / `getReadyCoupleContextOrRedirect()` before rendering protected content.
 - The auth gate decides between:
 - unauthenticated
 - authenticated but needs onboarding
 - authenticated but needs invite
 - authenticated and ready
+- Existing-couple detection uses the service-role fast path when `SUPABASE_SERVICE_ROLE_KEY` is present and otherwise falls back to the security-definer `has_any_couple()` RPC.
 
 ## Data Read Flow
 - Implemented authenticated pages are Server Components.
 - Pages call server read helpers in `src/lib/server/*`.
 - Read helpers query couple-scoped data through typed Supabase clients.
 - Gameplay reads that depend on hidden answer state use security-definer SQL RPCs instead of direct `game_round_answers` table reads.
+- Gameplay stats compute the couple-local meaning of `today` inside SQL before deriving streak and recent-history output.
 - Image-backed memories fetch signed storage URLs server-side before rendering.
 
 ## Mutation Flow

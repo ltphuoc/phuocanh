@@ -48,6 +48,13 @@
 - Downstream implementation order after `Phase 3 Slice 1`:
   - extend gameplay beyond `daily-question` only after the first stats read model is live
   - revisit travel-map depth after the gameplay and stats contract is stable
+- Latest hardening wave after `Phase 3 Slice 1`:
+  - production-flow Playwright coverage for implemented backend-backed routes
+  - real auth bootstrap through Mailpit-backed magic-link OTP flows
+  - serial production-mode browser validation harness for local Supabase on a dedicated configurable `E2E_BASE_URL` that defaults to `http://127.0.0.1:3100`
+  - docs alignment for E2E prerequisites, exclusions, loopback-only OTP-helper gating, and test-only OpenAI prompt stubbing
+  - auth-gate fallback hardening so existing-couple detection stays correct without requiring `SUPABASE_SERVICE_ROLE_KEY`
+  - latest local validation: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`
 - Still deferred after the Phase 2 closeout:
   - coordinates and route polylines
   - provider-backed geographic tiles
@@ -59,8 +66,12 @@
   - live daily-question route with prompt generation, locked answers, and reveal
   - real gameplay streak and stats read model
 - Next Phase 3 target:
-  - extend beyond `/games/daily-question` only after the first gameplay contract is stable
+  - extend beyond `/games/daily-question` only after the first gameplay contract and production-flow browser coverage are stable
 - `/chat` is not part of the Phase 3 feature roadmap; it remains a deprecated mock artifact pending route cleanup.
+
+## Next Move
+- Primary: keep expanding Phase 3 gameplay beyond `daily-question` only from this now-green production-flow browser baseline.
+- Secondary maintenance: remove the deprecated `/chat` mock route once downstream references are cleared.
 
 ## Phase 4 (Advanced+) - Status: planned
 - AI retrieval search with embeddings

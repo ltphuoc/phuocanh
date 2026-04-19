@@ -2,7 +2,7 @@
 
 This app does not expose a public REST or GraphQL API. The live runtime contract is:
 - Server Actions in `src/app/actions/*`
-- one route handler at `/auth/callback`
+- route handlers at `/auth/callback` and `/auth/callback/verify-email-otp`
 - SQL RPCs defined in `supabase/migrations/*.sql`
 
 ## Shared ActionState Contract
@@ -56,6 +56,11 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - `code` + optional `next`
   - `token_hash` + `type` + optional `next`
 - Exchanges/verifies Supabase auth callback and redirects to a normalized internal path.
+- `POST /auth/callback/verify-email-otp`
+- Internal-only local E2E helper; not part of the user-facing auth flow.
+- Accepts JSON body with `email` and six-digit `otpCode`.
+- Enabled only when `E2E_ENABLE_EMAIL_OTP_HELPER=true` and the request arrives through a loopback host.
+- Verifies email OTP through Supabase Auth and returns JSON `{"ok": true}` on success.
 
 ## Database RPCs Used By App Layer
 - `bootstrap_first_couple(started_date, couple_name, target_timezone)`
@@ -100,7 +105,12 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - Returns today’s round metadata plus revealed answers only when the round is complete
 - `get_daily_question_stats(target_history_days)`
   - Secure gameplay stats read path only
+  - Computes `today` from the saved couple timezone before building streak/history output
   - Returns aggregate counts plus recent status history without exposing raw answer rows
+- `has_any_couple()`
+  - Auth-gate helper only
+  - Security-definer boolean RPC used when `SUPABASE_SERVICE_ROLE_KEY` is unset
+  - Distinguishes `needs_invite` vs `needs_onboarding` without relying on direct `couples` table reads
 
 ## Phase 2 Read Model
 - `getCountdownsPageData(context)`

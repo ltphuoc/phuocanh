@@ -135,6 +135,12 @@ const extractParsedPrompt = (
 export const generateDailyQuestionPrompt = async (
   options: GenerateDailyQuestionPromptOptions,
 ): Promise<string> => {
+  if (env.OPENAI_DAILY_QUESTION_STUB_RESPONSE) {
+    return generatedDailyQuestionSchema.parse({
+      question: env.OPENAI_DAILY_QUESTION_STUB_RESPONSE,
+    }).question;
+  }
+
   if (!env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY_MISSING");
   }

@@ -9,6 +9,7 @@ This file is the canonical “what exists today” route map.
 | `/onboarding` | implemented | `completeOnboardingAction` + `bootstrap_first_couple(...)` RPC | First-account setup only; no writes happen before explicit confirmation |
 | `/accept-invite` | implemented | `acceptInviteAction` + `accept_couple_invite(...)` RPC | Requires auth before acceptance; not a general onboarding route |
 | `/auth/callback` | implemented | Supabase Auth callback exchange | Internal auth handler only; do not add app UI here |
+| `/auth/callback/verify-email-otp` | implemented | Supabase Auth OTP verify via Route Handler | Internal local-E2E helper only; requires `E2E_ENABLE_EMAIL_OTP_HELPER=true`, serves loopback hosts only, and must never be exposed in hosted environments |
 | `/home` | implemented | `getHomePageData(...)` + signed storage URLs | Story-first implemented page; not a shell |
 | `/lists` | implemented | `getHomePageData(...)` | Reads real wish/checklist data |
 | `/memories/new` | implemented | `createMemoryAction` | Real mutation flow with upload/storage behavior |
@@ -38,6 +39,7 @@ This file is the canonical “what exists today” route map.
 ## Engineering Follow-Up Note
 - Reminder cron/invoke uses Vault-backed secrets in hosted environments.
 - Local and CI replay uses a private fallback secret store when Vault is unavailable, so this is no longer a route-capability blocker.
+- Existing-couple auth-gate branching no longer depends on service-role access alone; the runtime now falls back to the authenticated `has_any_couple()` RPC when `SUPABASE_SERVICE_ROLE_KEY` is unset.
 
 ## Status Definitions
 - `implemented`: backed by current runtime data or auth logic

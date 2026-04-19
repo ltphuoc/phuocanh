@@ -3,9 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
-  startTransition,
-  useActionState,
-  useEffect,
   useState,
   type ReactElement,
 } from "react";
@@ -50,6 +47,19 @@ const buildStoragePath = (coupleId: string, fileName: string): string => {
   return `couples/${coupleId}/memories/${clientUploadId}/${Date.now()}-${safeName}`;
 };
 
+const cleanupUploadedMemoryMedia = async (
+  supabase: ReturnType<typeof createSupabaseBrowserClient>,
+  storagePath: string,
+): Promise<void> => {
+  const { error } = await supabase.storage
+    .from("memory-media")
+    .remove([storagePath]);
+
+  if (error) {
+    console.error("Failed to clean up uploaded memory media", error);
+  }
+};
+
 export const CreateMemoryForm = ({
   coupleId,
 }: CreateMemoryFormProps): ReactElement => {
@@ -58,14 +68,9 @@ export const CreateMemoryForm = ({
   const { t: formT } = useI18n("forms.memory");
   const router = useRouter();
   const [supabase] = useState(createSupabaseBrowserClient);
-  const [state, submitAction, isPending] = useActionState(
-    createMemoryAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [uploadedStoragePath, setUploadedStoragePath] = useState<string | null>(null);
   const form = useForm<CreateMemoryValues>({
     defaultValues: {
       happenedAtLocal: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
@@ -75,92 +80,73 @@ export const CreateMemoryForm = ({
     resolver: zodResolver(createMemorySchema),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
-
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
-      toast.success(actionsT(actionMessageKey));
-      router.replace("/home");
-      return;
-    }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-
-      if (!uploadedStoragePath) {
-        return;
-      }
-
-      void supabase.storage
-        .from("memory-media")
-        .remove([uploadedStoragePath])
-        .catch((error: unknown) => {
-          console.error("Failed to clean up uploaded memory media", error);
-        })
-        .finally(() => {
-          setUploadedStoragePath(null);
-        });
-    }
-  }, [
-    actionsT,
-    hasSubmitted,
-    router,
-    state.message,
-    state.status,
-    supabase,
-    uploadedStoragePath,
-  ]);
-
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
     payload.set("happenedAt", new Date(values.happenedAtLocal).toISOString());
     payload.set("locationName", values.locationName ?? "");
     payload.set("note", values.note ?? "");
+    let uploadedStoragePath: string | null = null;
 
-    if (mediaFile) {
-      if (mediaFile.size > MAX_UPLOAD_BYTES) {
-        toast.error(actionsT("memory.fileTooLarge"));
+    try {
+      if (mediaFile) {
+        if (mediaFile.size > MAX_UPLOAD_BYTES) {
+          toast.error(actionsT("memory.fileTooLarge"));
+          return;
+        }
+
+        if (!isAllowedMediaMimeType(mediaFile.type)) {
+          toast.error(actionsT("memory.unsupportedType"));
+          return;
+        }
+
+        const storagePath = buildStoragePath(coupleId, mediaFile.name);
+        setIsUploading(true);
+
+        const { error } = await supabase.storage
+          .from("memory-media")
+          .upload(storagePath, mediaFile, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (error) {
+          console.error("Failed to upload memory media", error);
+          toast.error(actionsT("unexpectedError"));
+          return;
+        }
+
+        uploadedStoragePath = storagePath;
+        payload.set("mimeType", mediaFile.type);
+        payload.set("originalFileName", mediaFile.name);
+        payload.set("sizeBytes", String(mediaFile.size));
+        payload.set("storagePath", storagePath);
+      }
+
+      setIsSubmitting(true);
+      const nextState = await createMemoryAction(initialActionState, payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
+
+      if (nextState.status === "success") {
+        toast.success(actionsT(actionMessageKey));
+        router.replace("/home");
         return;
       }
 
-      if (!isAllowedMediaMimeType(mediaFile.type)) {
-        toast.error(actionsT("memory.unsupportedType"));
-        return;
+      toast.error(actionsT(actionMessageKey));
+      if (uploadedStoragePath) {
+        await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
       }
+    } catch (error: unknown) {
+      console.error("Failed to submit memory form", error);
+      toast.error(actionsT("unexpectedError"));
 
-      const storagePath = buildStoragePath(coupleId, mediaFile.name);
-      setIsUploading(true);
-
-      const { error } = await supabase.storage
-        .from("memory-media")
-        .upload(storagePath, mediaFile, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
+      if (uploadedStoragePath) {
+        await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
+      }
+    } finally {
+      setIsSubmitting(false);
       setIsUploading(false);
-
-      if (error) {
-        console.error("Failed to upload memory media", error);
-        toast.error(actionsT("unexpectedError"));
-        return;
-      }
-
-      setUploadedStoragePath(storagePath);
-      payload.set("mimeType", mediaFile.type);
-      payload.set("originalFileName", mediaFile.name);
-      payload.set("sizeBytes", String(mediaFile.size));
-      payload.set("storagePath", storagePath);
     }
-
-    setHasSubmitted(true);
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -220,7 +206,7 @@ export const CreateMemoryForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending || isUploading}
+        isBusy={isSubmitting || isUploading}
         type="submit"
       >
         {formT("submit")}

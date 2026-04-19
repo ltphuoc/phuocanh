@@ -8,10 +8,89 @@ import type { Database } from "@/lib/supabase/database.types";
 
 const handleI18nRouting = createIntlMiddleware(routing);
 
+interface AuthenticatedLookup {
+  readonly status: "authenticated";
+}
+
+interface UnauthenticatedLookup {
+  readonly status: "unauthenticated";
+}
+
+interface UnavailableLookup {
+  readonly error: unknown;
+  readonly status: "unavailable";
+}
+
+type AuthLookupResult = AuthenticatedLookup | UnauthenticatedLookup | UnavailableLookup;
+
 const isPublicPath = (pathname: string): boolean =>
   pathname.startsWith("/login") || pathname.startsWith("/accept-invite");
 
 const isAuthCallbackPath = (pathname: string): boolean => pathname.startsWith("/auth/callback");
+
+const getAuthLookupResult = async (
+  request: NextRequest,
+  response: NextResponse,
+): Promise<{
+  readonly result: AuthLookupResult;
+  readonly response: NextResponse;
+}> => {
+  let mutableResponse = response;
+
+  try {
+    const supabase = createServerClient<Database>(
+      env.NEXT_PUBLIC_SUPABASE_URL,
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+
+            mutableResponse = NextResponse.next({
+              request,
+            });
+
+            cookiesToSet.forEach(({ name, options, value }) => {
+              mutableResponse.cookies.set(name, value, options);
+            });
+          },
+        },
+      },
+    );
+
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return {
+        response: mutableResponse,
+        result: {
+          status: "unauthenticated",
+        },
+      };
+    }
+
+    return {
+      response: mutableResponse,
+      result: {
+        status: "authenticated",
+      },
+    };
+  } catch (error: unknown) {
+    console.error("Failed to resolve middleware auth state", error);
+
+    return {
+      response: mutableResponse,
+      result: {
+        error,
+        status: "unavailable",
+      },
+    };
+  }
+};
 
 export const middleware = async (
   request: NextRequest,
@@ -33,42 +112,20 @@ export const middleware = async (
   }
 
   const normalizedPathname = stripLocalePrefix(request.nextUrl.pathname);
-  let response = i18nResponse;
+  const authLookup = await getAuthLookupResult(request, i18nResponse);
 
-  const supabase = createServerClient<Database>(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-
-          response = NextResponse.next({
-            request,
-          });
-
-          cookiesToSet.forEach(({ name, options, value }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    },
-  );
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user && !isPublicPath(normalizedPathname)) {
+  if (
+    authLookup.result.status !== "authenticated" &&
+    !isPublicPath(normalizedPathname)
+  ) {
     return NextResponse.redirect(new URL(toLocalizedPathname(locale, "/login"), request.url));
   }
 
-  if (user && normalizedPathname === "/login") {
+  if (authLookup.result.status === "authenticated" && normalizedPathname === "/login") {
     return NextResponse.redirect(new URL(toLocalizedPathname(locale, "/home"), request.url));
   }
 
-  return response;
+  return authLookup.response;
 };
 
 export const config = {

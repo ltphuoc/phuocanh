@@ -90,6 +90,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `ensure_daily_question_round(target_mode game_mode, target_round_date date, prompt_locale text, prompt_text text, prompt_source text)`
 - `get_daily_question_round_state(target_round_date date)`
 - `get_daily_question_stats(target_history_days integer)`
+- `has_any_couple()`
 - `submit_daily_question_answer(target_round_id uuid, answer_body text)`
 
 ## Couple Timezone Foundation
@@ -155,6 +156,10 @@ This file summarizes the current schema. The authoritative source is always `sup
   - direct member reads/writes are not part of the runtime contract
   - secure read/reveal behavior flows through gameplay RPCs
   - stores one locked free-text answer per user per round
+
+## Gameplay Stats Timezone Rule
+- `get_daily_question_stats(...)` now derives `today` from the saved `couples.timezone` value, not the database/server timezone.
+- Streak and recent-history output therefore follow the same couple-local day boundary as the live gameplay routes.
 
 ## Remaining Shell-Only / Mock-Only Route Impact
 - `/chat` remains a deprecated mock artifact and should not be used to justify future schema work.
