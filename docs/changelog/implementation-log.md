@@ -1,5 +1,25 @@
 # Implementation Log
 
+## 2026-04-25 - Docs Refresh: Agent And Developer Guidance
+
+### Delivered
+- Expanded root `AGENTS.md` outside the Next-managed block with project source-of-truth order, verification expectations, and repo safety boundaries.
+- Updated `docs/agent/agent-handbook.md` with Next.js 16.2 agent guidance, MCP/runtime inspection expectations, locale-aware repo paths, and validation rules.
+- Added `docs/engineering/development-verification.md` as the compact local setup, app startup, E2E, env, and docs-update guide.
+- Synced roadmap/status wording so `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is the latest documented slice.
+- Marked prior E2E suite results as historical instead of fresh current-run verification.
+- Replaced machine-specific manual-test index links with repo-relative links.
+
+### Verification
+- Route inventory was re-checked against `docs/engineering/route-capability-matrix.md` before editing.
+- Official Next.js docs checked: v16.2.4 docs for AI agents, local development, version 16 upgrading, and Playwright testing, last updated 2026-04-23.
+- Current npm metadata was checked for package latest versions; dependency upgrades were intentionally left out of this docs-only task.
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm typecheck:functions`
+- `pnpm build`
+- `git diff --check`
+
 ## 2026-04-02 - Phase 3 Slice 1: Live Daily Question + Gameplay Stats
 
 ### Delivered

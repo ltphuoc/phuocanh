@@ -80,7 +80,7 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
   - `/games/daily-question` and `/stats`
 - The suite explicitly excludes shell-only non-`daily-question` game modes and the deprecated mock `/chat` route.
 - Daily-question generation has a narrow E2E seam through `OPENAI_DAILY_QUESTION_STUB_RESPONSE`; production behavior is unchanged when that env var is unset.
-- Latest verified local result: the production-flow suite passes end to end with `7 passed (2.8m)`.
+- Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: the production-flow suite passed end to end with `7 passed (2.8m)`.
 
 ## ActionState Contract
 - `ActionState = { status: "idle" | "success" | "error"; message: string }`

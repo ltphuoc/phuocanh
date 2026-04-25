@@ -25,6 +25,7 @@ If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL.
 - User flows: `docs/product/flows.md`
 - System architecture: `docs/engineering/system-architecture.md`
 - Frontend architecture: `docs/engineering/frontend-architecture.md`
+- Development and verification: `docs/engineering/development-verification.md`
 - Migration rules: `docs/engineering/migration-playbook.md`
 - Route capability matrix: `docs/engineering/route-capability-matrix.md`
 
@@ -156,7 +157,7 @@ E2E-specific runtime notes:
 - `scripts/e2e/run.sh` defaults `E2E_BASE_URL=http://127.0.0.1:3100`, aligns `NEXT_PUBLIC_SITE_URL` to that URL, and also sets `E2E_ENABLE_EMAIL_OTP_HELPER`, `OPENAI_DAILY_QUESTION_STUB_RESPONSE`, and `TZ=Asia/Ho_Chi_Minh`.
 - Playwright auth state files are written under `playwright/.auth/` and are gitignored.
 - The suite intentionally excludes shell-only game modes under `/games/[mode]` and the deprecated mock `/chat` route.
-- Latest verified local result: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
+- Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
 
 ## Reminder Setup Verification
 After deploying the migration and the `reminder-processor` Edge Function, verify:

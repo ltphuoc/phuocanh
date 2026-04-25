@@ -31,15 +31,11 @@
 - Current route posture:
   - `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, and `/settings` are backend-backed implemented routes.
 - Current schema posture: SQL migrations remain authoritative, and the Drizzle baseline artifacts are inventory only until a dedicated adoption task is scoped.
-- Latest documented slice: `Phase 2 closeout`
-  - adds encrypted future-note body storage and RPC-backed future-note create/read paths
-  - adds `reminder_deliveries`, reminder enqueueing, claim/retry RPCs, and the reminder Edge Function
-  - schedules cron-driven reminder enqueue and reminder processing jobs
-- Post-closeout validation note:
+- Phase 2 closeout added encrypted future-note body storage, RPC-backed future-note create/read paths, `reminder_deliveries`, reminder enqueueing, claim/retry RPCs, the reminder Edge Function, and cron-driven processing jobs.
+- Post-closeout reminder validation note:
   - hosted environments use Vault-backed secrets for reminder invocation
   - local and CI replay now falls back to a private secret store when Vault is unavailable
-- Latest implemented step after the Phase 2 closeout:
-  - `Phase 3 Slice 1: Live Daily Question + Gameplay Stats`
+- Latest documented slice: `Phase 3 Slice 1: Live Daily Question + Gameplay Stats`
   - `/games` is now a backend-backed hub with live mode status and entry links
   - `/games/[mode]` now has one live gameplay runtime: `/games/daily-question`
   - `/stats` is now a real couple-scoped gameplay read model with participation/streak aggregates
@@ -54,7 +50,7 @@
   - serial production-mode browser validation harness for local Supabase on a dedicated configurable `E2E_BASE_URL` that defaults to `http://127.0.0.1:3100`
   - docs alignment for E2E prerequisites, exclusions, loopback-only OTP-helper gating, and test-only OpenAI prompt stubbing
   - auth-gate fallback hardening so existing-couple detection stays correct without requiring `SUPABASE_SERVICE_ROLE_KEY`
-  - latest local validation: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`
+  - historical local validation from that hardening wave: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`
 - Still deferred after the Phase 2 closeout:
   - coordinates and route polylines
   - provider-backed geographic tiles

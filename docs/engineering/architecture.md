@@ -8,6 +8,7 @@ This file is now the engineering index. Use the focused docs below instead of tr
 3. `docs/engineering/api-contracts.md`
 4. `docs/engineering/data-model.md`
 5. `docs/engineering/migration-playbook.md`
+6. `docs/engineering/development-verification.md`
 
 ## Current Runtime Summary
 - Next.js App Router with Server Components by default

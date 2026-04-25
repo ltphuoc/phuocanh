@@ -2,6 +2,12 @@
 
 This repository is safe for stateless AI agents only if they follow the source-of-truth order and respect the database-owned invariants. Do not treat visual completeness as proof that backend logic exists.
 
+## Next.js 16.2 Agent Baseline
+- Before any Next.js change, read the matching bundled docs under `node_modules/next/dist/docs/`; installed Next.js docs are version-matched to this project.
+- Preserve the Next-managed section in root `AGENTS.md`; project-specific rules belong outside its comment markers.
+- If Next.js DevTools MCP is available, use it for runtime route, compilation, and error diagnostics before guessing from static files alone.
+- For local development behavior, remember that Next.js 16 uses Turbopack by default and writes dev output under `.next/dev`.
+
 ## Source Of Truth
 1. Business rules: `docs/product/business-rules.md`
 2. Schema and security enforcement: `supabase/migrations/*.sql`
@@ -14,14 +20,15 @@ If roadmap or feature copy conflicts with the route-capability matrix on what ex
 If an older decision log conflicts with current architecture docs, trust the newer architecture docs unless the log explicitly says it is still current.
 
 ## Repo Map
-- `src/app/(public)`: login, first-user onboarding, and invite acceptance routes
-- `src/app/(app)`: authenticated app shell and user-facing routes
+- `src/app/[locale]/(public)`: login, first-user onboarding, and invite acceptance routes
+- `src/app/[locale]/(app)`: authenticated app shell and user-facing routes
 - `src/app/actions`: Server Actions that own runtime mutations
 - `src/lib/server`: auth gate, couple context, page data reads, site URL resolution
 - `src/lib/supabase`: typed server/browser clients and middleware
 - `supabase/migrations`: authoritative schema, RLS, RPCs, triggers, storage policies
 - `docs/product`: product rules, user flows, roadmap, feature state
 - `docs/engineering`: architecture, contracts, migration rules, route capability matrix
+- `docs/engineering/development-verification.md`: local setup, verification, and E2E harness guide
 
 ## Capability Model
 - `implemented`: route is data-backed and part of the current runtime
@@ -61,15 +68,24 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical “what exist
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm build`
+- `git diff --check`
 
 If a change touches auth, invite flow, schema, RLS, RPCs, or storage:
 - re-read `docs/product/business-rules.md`
 - re-read `docs/engineering/migration-playbook.md`
 - confirm the affected docs still match the code and SQL
 
+If a change touches Supabase Edge Functions or reminder delivery:
+- run `pnpm typecheck:functions`
+
+If a change touches browser production flows:
+- consider `pnpm test:e2e`
+- do not claim a fresh E2E result unless it was run in the current change
+
 ## Agent Start Checklist
 - Read this file first.
 - Read `docs/product/business-rules.md` before changing auth, invite, memory, or list flows.
 - Read `docs/engineering/migration-playbook.md` before proposing schema work.
 - Read `docs/engineering/route-capability-matrix.md` before touching a route that is not obviously implemented.
+- Read `docs/engineering/development-verification.md` before changing local setup, validation, or E2E instructions.
 - If the task changes current behavior, update the affected docs in the same PR.
