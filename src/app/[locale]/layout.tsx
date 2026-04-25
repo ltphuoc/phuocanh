@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactElement, ReactNode } from "react";
+import { QueryProvider } from "@/components/providers/query-provider";
 import { SonnerToaster } from "@/components/ui/sonner-toaster";
 import { getLocaleDirection, routing } from "@/i18n/routing";
 import { resolveLocaleFromParams } from "@/i18n/server";
@@ -56,7 +57,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <QueryProvider>
+            {children}
+          </QueryProvider>
           <SonnerToaster />
         </NextIntlClientProvider>
       </body>

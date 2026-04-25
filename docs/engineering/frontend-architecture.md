@@ -17,15 +17,17 @@ This file describes the current frontend operating model. It is the canonical re
 Use `docs/engineering/route-capability-matrix.md` for the full table.
 
 ## Server vs Client Boundary
-- Default: pages and data reads stay on the server.
-- Implemented pages fetch data in Server Components through helpers in `src/lib/server/*`.
-- Client components are used for forms, navigation interaction, motion wrappers, toast feedback, and file input handling.
-
-Do not move server reads into client components unless the task explicitly changes architecture.
+- Public auth/onboarding routes stay server-first with form-local action state.
+- Authenticated interactive routes server-prefetch TanStack Query data, then render the hydrated data inside client page components.
+- Server Components prefetch by calling helpers in `src/lib/server/*` and `src/lib/server/app-data.ts` directly. They do not fetch internal API routes.
+- Client query functions use internal `/api/app-data/...` route handlers only for refetches after invalidation.
+- Client components own forms, query cache updates, navigation interaction, motion wrappers, toast feedback, and file input handling.
 
 ## Data Read Pattern
 - Authenticated pages first resolve couple context through `getAuthGateState()` or `getReadyCoupleContextOrRedirect()`.
-- Page reads then call server helpers such as `getHomePageData(...)`, `getOnThisDayData(...)`, `getMemoryDetailData(...)`, `getCountdownsPageData(...)`, `getFutureNotesPageData(...)`, `getTripsPageData(...)`, `getTripDetailData(...)`, `getMapPageData(...)`, `getAlbumsPageData(...)`, `getAlbumDetailData(...)`, `getGamesHubData(...)`, `getDailyQuestionPageData(...)`, and `getGameplayStatsPageData(...)`.
+- Authenticated page reads flow through app-data wrappers such as `getHomeAppData(...)`, `getListsAppData(...)`, `getMemoryDetailAppData(...)`, `getCountdownsAppData(...)`, `getTripDetailAppData(...)`, `getAlbumDetailAppData(...)`, `getGamesAppData(...)`, `getDailyQuestionAppData(...)`, and `getStatsAppData(...)`.
+- Query keys live in `src/lib/query/app-query-keys.ts` under one `["app-data", ...]` root. Use exact keys (`home`, `lists`, `trip(id)`, `album(id)`, `dailyQuestion`, `stats`) instead of broad invalidation.
+- Hydration uses `dehydrateAppQuery(...)` with a nonzero stale time so server-prefetched data is not immediately duplicated by a client refetch.
 - Signed `memory-media` URLs are created server-side through `signMemoryMediaStorageItems(...)` before render.
 - Future-note bodies stay in the server read layer; client components never fetch locked content directly, and unlocked bodies now flow through the decrypted RPC path rather than direct table reads.
 - Trip detail reads return `notFound()` for invalid or non-member trip IDs instead of rendering placeholder content.
@@ -39,10 +41,13 @@ Do not move server reads into client components unless the task explicitly chang
 - Shared date helpers and date-rendering components receive the couple timezone explicitly instead of relying on environment defaults.
 
 ## Mutation Pattern
-- Forms use `react-hook-form`, `zodResolver`, Server Actions, and Sonner toasts.
-- Some forms still bind through `useActionState` / `startTransition(...)`, while upload-heavy flows can call the action function directly after client-side preprocessing.
+- Forms use `react-hook-form`, `zodResolver`, TanStack `useMutation`, Server Actions, and Sonner toasts.
+- Authenticated app-data mutations keep Server Actions as the write boundary and keep the existing `ActionState` response shape.
 - Phase 2 planning forms also use inline field errors via `FormSection` in addition to toast feedback.
-- Server Actions are the mutation boundary for app code.
+- Migrated Server Actions still call `revalidateLocalizedPath(...)` for later server-rendered navigations, but they no longer call `refresh()` for same-session UI sync.
+- Same-session freshness comes from targeted `invalidateQueries(...)`, precise `setQueryData(...)`, or optimistic updates.
+- Checklist toggles optimistically update `home` and `lists`, with rollback on action failure.
+- Create/add mutations invalidate only affected keys because actions do not return created row IDs.
 - First-user onboarding confirmation and invite acceptance use SQL RPCs because membership/bootstrap invariants are DB-owned.
 - Countdown and future-note forms submit date-only values; server actions derive stored UTC instants from the saved couple timezone.
 - Future-note creation now uses a SQL RPC so metadata insert plus encrypted body write stay transactional.
@@ -65,6 +70,8 @@ Do not move server reads into client components unless the task explicitly chang
 - `E2E_ENABLE_EMAIL_OTP_HELPER` explicitly gates the OTP helper route and must stay disabled outside local browser E2E runs.
 - The OTP helper also rejects non-loopback hosts even when the env flag is enabled.
 - Feature data creation stays inside browser flows; the suite does not use SQL seed fixtures for route-level test content.
+- Targeted freshness assertions now verify post-action UI updates without helper-driven hard reloads for memories, lists, planning, travel, and same-session gameplay actions.
+- The only remaining explicit revisit is the cross-session daily-question reveal check, where a second browser session performs the mutation.
 - The current production-flow suite covers only implemented, backend-backed routes:
   - auth gatekeeping and invite join flow
   - memories, wishlists, and checklists
@@ -81,26 +88,26 @@ Do not move server reads into client components unless the task explicitly chang
 - Client forms should not invent alternate success/error payload shapes for the current runtime without updating `docs/engineering/api-contracts.md`
 
 ## Revalidation Rules
-| Mutation | Revalidated routes |
+| Mutation | Revalidated routes | Client query sync |
 |---|---|
-| `sendMagicLinkAction` | none |
-| `completeOnboardingAction` | `/`, `/home` |
-| `createInviteAction` | none |
-| `acceptInviteAction` | `/home` |
-| `createMemoryAction` | `/home`, `/on-this-day`, `/lists` |
-| `addWishItemAction` | `/home`, `/lists` |
-| `createChecklistAction` | `/home`, `/lists` |
-| `addChecklistItemAction` | `/home`, `/lists` |
-| `toggleChecklistItemAction` | `/home`, `/lists` |
-| `createCountdownAction` | `/countdowns` |
-| `createFutureNoteAction` | `/future-notes` |
-| `createTripAction` | `/trips` |
-| `createVisitedPlaceAction` | `/map`, `/trips/[tripId]` |
-| `createAlbumAction` | `/albums`, `/trips/[tripId]` |
-| `addAlbumItemsAction` | `/albums`, `/albums/[albumId]`, `/trips/[tripId]` |
-| `ensureDailyQuestionRoundAction` | `/games`, `/games/daily-question`, `/stats` |
-| `submitDailyQuestionAnswerAction` | `/games`, `/games/daily-question`, `/stats` |
-| `updateCoupleTimezoneAction` | `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, `/map` |
+| `sendMagicLinkAction` | none | not applicable |
+| `completeOnboardingAction` | `/`, `/home` | not migrated |
+| `createInviteAction` | none | not app data |
+| `acceptInviteAction` | `/home` | not migrated |
+| `createMemoryAction` | `/home`, `/on-this-day`, `/lists` | invalidate `home`, `onThisDay`, `lists`, `tripDetails` |
+| `addWishItemAction` | `/home`, `/lists` | invalidate `home`, `lists` |
+| `createChecklistAction` | `/home`, `/lists` | invalidate `home`, `lists` |
+| `addChecklistItemAction` | `/home`, `/lists` | invalidate `home`, `lists` |
+| `toggleChecklistItemAction` | `/home`, `/lists` | optimistic update `home`, `lists`; invalidate after settle |
+| `createCountdownAction` | `/countdowns` | invalidate `countdowns` |
+| `createFutureNoteAction` | `/future-notes` | invalidate `futureNotes` |
+| `createTripAction` | `/trips` | invalidate `trips` |
+| `createVisitedPlaceAction` | `/map`, `/trips/[tripId]` | invalidate `map`, `trip(tripId)` |
+| `createAlbumAction` | `/albums`, `/trips/[tripId]` | invalidate `albums`, `trip(tripId)` |
+| `addAlbumItemsAction` | `/albums`, `/albums/[albumId]`, `/trips/[tripId]` | invalidate `albums`, `album(albumId)`, `trip(tripId)` |
+| `ensureDailyQuestionRoundAction` | `/games`, `/games/daily-question`, `/stats` | invalidate `games`, `dailyQuestion`, `stats` |
+| `submitDailyQuestionAnswerAction` | `/games`, `/games/daily-question`, `/stats` | update safe answered state, then invalidate `games`, `dailyQuestion`, `stats` |
+| `updateCoupleTimezoneAction` | `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, `/map` | update `settings`, invalidate timezone-derived app-data keys |
 
 ## Shared UI Structure
 - App shell: `src/app/(app)/layout.tsx`, `BottomNavigation`, `SideNavigation`, `navigation-model.ts`
@@ -117,12 +124,12 @@ New routes should compose these primitives rather than invent new layout systems
 - Do not add server reads, new tables, or background jobs to shell-only or mock-only routes without updating `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md`.
 
 ## Architecture Guardrails
-- Keep implemented reads server-first.
+- Keep authenticated app-data reads server-prefetched and hydrated through TanStack Query.
 - Keep auth gate decisions in `src/lib/server/couple-context.ts`.
 - Keep couple/invite invariants in SQL RPCs.
 - Keep couple-level day-boundary logic rooted in the saved `couples.timezone` field and shared timezone helpers.
 - Keep album grouping rooted in `trips` and existing `memory_media`; do not add a second upload pipeline casually.
 - Keep visited places rooted in `trips`; do not derive them implicitly from memory locations without revisiting the product contract.
 - Keep gameplay reads server-first and keep prompt generation on the server; do not move OpenAI prompt generation into client code.
-- Do not introduce TanStack Query, Zustand, or `nuqs` opportunistically into routine changes. The current runtime is not structured around them yet.
+- Do not introduce additional client state/query systems such as Zustand or `nuqs` opportunistically into routine changes.
 - If a task intentionally migrates data/state architecture, document it first.

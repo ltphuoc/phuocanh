@@ -1,13 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,7 +10,11 @@ import { addChecklistItemAction } from "@/app/actions/list-actions";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/useI18n";
 import { Input } from "@/components/ui/input";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { invalidateHomeAndLists } from "@/lib/query/app-query-updates";
 
 const checklistItemSchema = z.object({
   text: z.string().min(1).max(180),
@@ -33,11 +32,8 @@ export const ChecklistItemForm = ({
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.checklistItem");
-  const [state, submitAction, isPending] = useActionState(
-    addChecklistItemAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(addChecklistItemAction);
   const form = useForm<ChecklistItemValues>({
     defaultValues: {
       text: "",
@@ -45,34 +41,23 @@ export const ChecklistItemForm = ({
     resolver: zodResolver(checklistItemSchema),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("checklistId", checklistId);
+    payload.set("text", values.text);
 
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         text: "",
       });
-      return;
+      await invalidateHomeAndLists(queryClient);
+    } catch (error: unknown) {
+      console.error("Failed to submit checklist item form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("checklistId", checklistId);
-    payload.set("text", values.text);
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -81,7 +66,7 @@ export const ChecklistItemForm = ({
       <Button
         busyLabel={commonT("working")}
         className="sm:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         size="sm"
         type="submit"
         variant="outline"

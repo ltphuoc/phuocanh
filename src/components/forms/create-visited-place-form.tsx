@@ -1,13 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,7 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { formatDateInputValue } from "@/lib/utils/date-input";
 
 interface CreateVisitedPlaceFormProps {
@@ -69,11 +68,8 @@ export const CreateVisitedPlaceForm = ({
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.visitedPlace");
-  const [state, submitAction, isPending] = useActionState(
-    createVisitedPlaceAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(createVisitedPlaceAction);
   const defaultVisitedOn = getDefaultVisitedOn(startDate, endDate);
   const form = useForm<CreateVisitedPlaceValues>({
     defaultValues: {
@@ -84,43 +80,34 @@ export const CreateVisitedPlaceForm = ({
     resolver: zodResolver(buildCreateVisitedPlaceSchema(formT, startDate, endDate)),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
-
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
-      toast.success(actionsT(actionMessageKey));
-      form.reset({
-        note: "",
-        title: "",
-        visitedOn: defaultVisitedOn,
-      });
-      return;
-    }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, defaultVisitedOn, form, hasSubmitted, state.message, state.status]);
-
   const noteErrorMessage = form.formState.errors.note?.message;
   const titleErrorMessage = form.formState.errors.title?.message;
   const visitedOnErrorMessage = form.formState.errors.visitedOn?.message;
 
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
+  const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
     payload.set("note", values.note ?? "");
     payload.set("title", values.title);
     payload.set("tripId", tripId);
     payload.set("visitedOn", values.visitedOn);
 
-    startTransition(() => {
-      submitAction(payload);
-    });
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
+      toast.success(actionsT(actionMessageKey));
+      form.reset({
+        note: "",
+        title: "",
+        visitedOn: defaultVisitedOn,
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: appQueryKeys.map() }),
+        queryClient.invalidateQueries({ queryKey: appQueryKeys.trip(tripId) }),
+      ]);
+    } catch (error: unknown) {
+      console.error("Failed to submit visited place form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
+    }
   });
 
   return (
@@ -181,7 +168,7 @@ export const CreateVisitedPlaceForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

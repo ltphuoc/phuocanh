@@ -12,6 +12,7 @@ import {
 } from "@/lib/actions/action-state";
 import { env } from "@/lib/env";
 import { routing, type Locale } from "@/i18n/routing";
+import { normalizeAuthRedirectPath } from "@/lib/auth/redirect-path";
 import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
 import {
@@ -35,6 +36,14 @@ interface InviteData {
 const emailSchema = z.object({
   email: z.email(),
   locale: z.string().optional(),
+  next: z.preprocess(
+    (value) => (typeof value === "string" ? value : undefined),
+    z.string().optional(),
+  ),
+  origin: z.preprocess(
+    (value) => (typeof value === "string" ? value : undefined),
+    z.url().optional(),
+  ),
 });
 
 const inviteTokenSchema = z.object({
@@ -183,11 +192,14 @@ export const sendMagicLinkAction = async (
     const parsed = emailSchema.parse({
       email: formData.get("email"),
       locale: formData.get("locale"),
+      next: formData.get("next"),
+      origin: formData.get("origin"),
     });
 
     const locale = resolveLocale(parsed.locale);
-    const siteUrl = await getSiteUrl();
-    const nextPath = toLocalizedPathname(locale, "/home");
+    const siteUrl = parsed.origin ? new URL(parsed.origin).origin : await getSiteUrl();
+    const fallbackPath = toLocalizedPathname(locale, "/home");
+    const nextPath = normalizeAuthRedirectPath(parsed.next, fallbackPath);
     const emailRedirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`;
     const primarySupabaseUrl = normalizeSupabaseUrl(env.NEXT_PUBLIC_SUPABASE_URL);
 

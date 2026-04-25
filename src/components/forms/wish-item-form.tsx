@@ -1,13 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,7 +12,11 @@ import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { invalidateHomeAndLists } from "@/lib/query/app-query-updates";
 
 const wishItemSchema = z.object({
   category: z.enum(["place", "food", "movie"]),
@@ -31,11 +30,8 @@ export const WishItemForm = (): ReactElement => {
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.wishItem");
-  const [state, submitAction, isPending] = useActionState(
-    addWishItemAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(addWishItemAction);
   const form = useForm<WishItemValues>({
     defaultValues: {
       category: "place",
@@ -45,37 +41,26 @@ export const WishItemForm = (): ReactElement => {
     resolver: zodResolver(wishItemSchema),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("category", values.category);
+    payload.set("title", values.title);
+    payload.set("note", values.note ?? "");
 
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         category: "place",
         note: "",
         title: "",
       });
-      return;
+      await invalidateHomeAndLists(queryClient);
+    } catch (error: unknown) {
+      console.error("Failed to submit wish item form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("category", values.category);
-    payload.set("title", values.title);
-    payload.set("note", values.note ?? "");
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -106,7 +91,7 @@ export const WishItemForm = (): ReactElement => {
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
         variant="outline"
       >

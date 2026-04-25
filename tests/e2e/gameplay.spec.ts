@@ -4,7 +4,6 @@ import {
   onboardingTimeZone,
   partnerBStorageStatePath,
 } from "./support/runtime";
-import { reloadUntilTextVisible } from "./support/page-sync";
 import { buildUniqueText } from "./support/test-data";
 
 test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end for both partners and updates the hub and stats", async ({
@@ -21,11 +20,14 @@ test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(page.getByRole("heading", { name: "Games" })).toBeVisible();
   await page.goto("/en/games/daily-question");
   await page.getByRole("button", { name: "Generate today’s question" }).click();
-  await reloadUntilTextVisible(page, promptText);
+  await expect(page.getByText(promptText)).toBeVisible({
+    timeout: 15_000,
+  });
   await page.getByLabel("Your answer").fill(partnerAAnswer);
   await page.getByRole("button", { name: "Lock answer" }).click();
-  await reloadUntilTextVisible(page, "Waiting for the second answer");
-  await expect(page.getByRole("heading", { name: "Waiting for the second answer" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Waiting for the second answer" })).toBeVisible({
+    timeout: 15_000,
+  });
 
   const partnerBContext = await browser.newContext({
     locale: "en-US",
@@ -42,15 +44,16 @@ test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(partnerBPage.getByText(promptText)).toBeVisible();
   await partnerBPage.getByLabel("Your answer").fill(partnerBAnswer);
   await partnerBPage.getByRole("button", { name: "Lock answer" }).click();
-  await reloadUntilTextVisible(partnerBPage, "Today’s answers");
   await expect(
     partnerBPage.getByRole("heading", { name: "Today’s answers" }),
-  ).toBeVisible();
+  ).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(partnerBPage.getByText(partnerAAnswer)).toBeVisible();
   await expect(partnerBPage.getByText(partnerBAnswer)).toBeVisible();
   await partnerBContext.close();
 
-  await reloadUntilTextVisible(page, "Today’s answers");
+  await page.goto("/en/games/daily-question");
   await expect(page.getByRole("heading", { name: "Today’s answers" })).toBeVisible();
   await expect(page.getByText(partnerAAnswer)).toBeVisible();
   await expect(page.getByText(partnerBAnswer)).toBeVisible();

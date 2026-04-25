@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { memoryFixturePath } from "./support/runtime";
-import { reloadUntilTextVisible } from "./support/page-sync";
 import {
   buildUniqueText,
   createTodayDateTimeLocalInput,
@@ -47,12 +46,15 @@ test("E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   await page.getByRole("textbox", { name: /^Title$/ }).fill(wishTitle);
   await page.getByLabel("Note (optional)").fill(wishNote);
   await page.getByRole("button", { name: "Add item" }).click();
-  await reloadUntilTextVisible(page, wishTitle);
-  await expect(page.getByText(wishTitle)).toBeVisible();
+  await expect(page.getByText(wishTitle)).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.getByLabel("Checklist title").fill(checklistTitle);
   await page.getByRole("button", { name: "Create checklist" }).click();
-  await reloadUntilTextVisible(page, checklistTitle);
+  await expect(page.getByRole("heading", { name: checklistTitle })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.goto("/en/lists");
   await expect(page.getByRole("heading", { name: "Shared lists" })).toBeVisible();
@@ -65,14 +67,18 @@ test("E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   }).first();
   await checklistCard.getByPlaceholder("Add item").fill(checklistItemText);
   await checklistCard.getByRole("button", { exact: true, name: "Add" }).click();
-  await reloadUntilTextVisible(page, checklistItemText);
+  await expect(checklistCard.getByText(checklistItemText)).toBeVisible({
+    timeout: 15_000,
+  });
 
   const refreshedChecklistCard = page.locator("div").filter({
     has: page.getByRole("heading", { name: checklistTitle }),
   }).first();
   await expect(refreshedChecklistCard.getByText(checklistItemText)).toBeVisible();
   await refreshedChecklistCard.getByRole("button", { name: "Done" }).click();
-  await reloadUntilTextVisible(page, "Completed");
+  await expect(refreshedChecklistCard.getByText("Completed")).toBeVisible({
+    timeout: 15_000,
+  });
 
   const completedChecklistCard = page.locator("div").filter({
     has: page.getByRole("heading", { name: checklistTitle }),

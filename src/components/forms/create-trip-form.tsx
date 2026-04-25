@@ -1,14 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { addDays } from "date-fns";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import type { ReactElement } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,7 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { formatDateInputValue } from "@/lib/utils/date-input";
 
 const buildCreateTripSchema = (t: ReturnType<typeof useI18n<"forms.trip">>["t"]) =>
@@ -44,8 +43,8 @@ export const CreateTripForm = (): ReactElement => {
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.trip");
-  const [state, submitAction, isPending] = useActionState(createTripAction, initialActionState);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(createTripAction);
   const form = useForm<CreateTripValues>({
     defaultValues: {
       endDate: formatDateInputValue(addDays(new Date(), 17)),
@@ -60,14 +59,21 @@ export const CreateTripForm = (): ReactElement => {
     name: "startDate",
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const endDateErrorMessage = form.formState.errors.endDate?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
+  const startDateErrorMessage = form.formState.errors.startDate?.message;
+  const titleErrorMessage = form.formState.errors.title?.message;
 
-    const actionMessageKey = state.message || "unexpectedError";
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("endDate", values.endDate);
+    payload.set("note", values.note ?? "");
+    payload.set("startDate", values.startDate);
+    payload.set("title", values.title);
 
-    if (state.status === "success") {
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         endDate: formatDateInputValue(addDays(new Date(), 17)),
@@ -75,30 +81,11 @@ export const CreateTripForm = (): ReactElement => {
         startDate: formatDateInputValue(addDays(new Date(), 14)),
         title: "",
       });
-      return;
+      await queryClient.invalidateQueries({ queryKey: appQueryKeys.trips() });
+    } catch (error: unknown) {
+      console.error("Failed to submit trip form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
-  const endDateErrorMessage = form.formState.errors.endDate?.message;
-  const noteErrorMessage = form.formState.errors.note?.message;
-  const startDateErrorMessage = form.formState.errors.startDate?.message;
-  const titleErrorMessage = form.formState.errors.title?.message;
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("endDate", values.endDate);
-    payload.set("note", values.note ?? "");
-    payload.set("startDate", values.startDate);
-    payload.set("title", values.title);
-
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -174,7 +161,7 @@ export const CreateTripForm = (): ReactElement => {
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

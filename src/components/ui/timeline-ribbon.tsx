@@ -1,5 +1,7 @@
+"use client";
+
 import { parseISO } from "date-fns";
-import { getFormatter } from "next-intl/server";
+import { useFormatter } from "next-intl";
 import type { ReactElement } from "react";
 import { MemoryCard, type MemoryCardProps } from "@/components/ui/memory-card";
 import { cn } from "@/lib/utils/cn";
@@ -13,11 +15,11 @@ interface TimelineRibbonProps {
   readonly timeZone: string;
 }
 
-export const TimelineRibbon = async ({
+export const TimelineRibbon = ({
   items,
   timeZone,
-}: TimelineRibbonProps): Promise<ReactElement> => {
-  const format = await getFormatter();
+}: TimelineRibbonProps): ReactElement => {
+  const format = useFormatter();
 
   return (
     <div className="relative flex flex-col gap-6 pl-4 md:gap-8 md:pl-8">

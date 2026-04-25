@@ -18,7 +18,13 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export const LoginForm = (): ReactElement => {
+interface LoginFormProps {
+  readonly initialNextPath?: string;
+}
+
+export const LoginForm = ({
+  initialNextPath,
+}: LoginFormProps): ReactElement => {
   const { locale } = useI18n();
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
@@ -50,6 +56,10 @@ export const LoginForm = (): ReactElement => {
     const payload = new FormData();
     payload.set("email", values.email);
     payload.set("locale", locale);
+    payload.set("origin", window.location.origin);
+    if (initialNextPath) {
+      payload.set("next", initialNextPath);
+    }
     startTransition(() => {
       submitAction(payload);
     });
@@ -57,6 +67,7 @@ export const LoginForm = (): ReactElement => {
 
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+      {initialNextPath ? <input name="next" type="hidden" value={initialNextPath} /> : null}
       <FormSection
         description={formT("emailDescription")}
         htmlFor="email"

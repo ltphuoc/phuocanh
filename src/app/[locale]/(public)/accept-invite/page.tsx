@@ -7,6 +7,7 @@ import { AcceptInviteForm } from "@/components/forms/accept-invite-form";
 import { AuthShell } from "@/components/layout/auth-shell";
 import { SectionCard } from "@/components/ui/section-card";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
+import { toLocalizedPathname } from "@/lib/i18n/pathname";
 import { getAuthGateState } from "@/lib/server/couple-context";
 
 interface AcceptInvitePageProps {
@@ -27,6 +28,8 @@ export default async function AcceptInvitePage({
   searchParams,
 }: AcceptInvitePageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
+  const queryParams = await searchParams;
+  const token = queryParams.token ?? "";
   const [t, commonT] = await Promise.all([
     getTranslations({
       locale,
@@ -40,13 +43,27 @@ export default async function AcceptInvitePage({
 
   const state = await getAuthGateState();
   if (state.status === "unauthenticated") {
+    const loginHref = token
+      ? {
+          href: {
+            pathname: "/login",
+            query: {
+              next: toLocalizedPathname(locale, `/accept-invite?token=${token}`),
+            },
+          },
+          locale,
+        }
+      : {
+          href: "/login",
+          locale,
+        };
+
     redirect({
-      href: "/login",
-      locale,
+      ...loginHref,
     });
   }
 
-  if (state.status === "ready") {
+  if (state.status === "ready" && !token) {
     redirect({
       href: "/home",
       locale,
@@ -59,9 +76,6 @@ export default async function AcceptInvitePage({
       locale,
     });
   }
-
-  const queryParams = await searchParams;
-  const token = queryParams.token ?? "";
 
   return (
     <main>

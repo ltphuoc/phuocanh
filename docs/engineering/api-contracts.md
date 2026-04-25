@@ -2,7 +2,7 @@
 
 This app does not expose a public REST or GraphQL API. The live runtime contract is:
 - Server Actions in `src/app/actions/*`
-- route handlers at `/auth/callback` and `/auth/callback/verify-email-otp`
+- route handlers at `/auth/callback`, `/auth/callback/verify-email-otp`, and internal `/api/app-data/...`
 - SQL RPCs defined in `supabase/migrations/*.sql`
 
 ## Shared ActionState Contract
@@ -13,7 +13,7 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 ## Server Actions
 | Action | Input | Output | Notes |
 |---|---|---|---|
-| `sendMagicLinkAction` | `email` | `ActionState` | Requests Supabase magic link; no revalidation |
+| `sendMagicLinkAction` | `email`, `locale?`, `next?` | `ActionState` | Requests Supabase magic link; preserves a valid internal `next` path through the auth callback; no revalidation |
 | `completeOnboardingAction` | `coupleName`, `timeZone`, `startedDate`, `confirmation` | `ActionState` | First-user setup only; validates summary confirmation; calls `bootstrap_first_couple(...)`; revalidates `/` and `/home` |
 | `createInviteAction` | none | `ActionStateWithData<{ inviteUrl: string }>` | Creates a 14-day invite URL for the current couple |
 | `acceptInviteAction` | `token` | `ActionState` | Must call `accept_couple_invite(...)`; no direct membership writes |
@@ -31,6 +31,10 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `updateCoupleTimezoneAction` | `timeZone` | `ActionState` | Calls `update_couple_timezone(...)`; revalidates `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, and `/map` |
 | `ensureDailyQuestionRoundAction` | `locale` | `ActionState` | Generates one prompt through the OpenAI Responses API, calls `ensure_daily_question_round(...)`, and revalidates `/games`, `/games/daily-question`, and `/stats` |
 | `submitDailyQuestionAnswerAction` | `roundId`, `answerBody` | `ActionState` | Calls `submit_daily_question_answer(...)`; answers are single-submit and locked after success; revalidates `/games`, `/games/daily-question`, and `/stats` |
+
+Migrated authenticated app-data Server Actions no longer refresh the active router tree after success. They keep path revalidation for later server-rendered navigations; same-session UI freshness is owned by TanStack Query invalidation, cache updates, and optimistic updates in the calling form.
+
+`sendMagicLinkAction` only requests the Supabase email. It does not establish an app session; the session boundary is `/auth/callback`, which must receive the Supabase token data and set auth cookies before redirecting to `next`.
 
 ## Error Conventions
 - Server Actions return user-facing error messages through `ActionState`.
@@ -56,11 +60,37 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
   - `code` + optional `next`
   - `token_hash` + `type` + optional `next`
 - Exchanges/verifies Supabase auth callback and redirects to a normalized internal path.
+- SSR-compatible magic-link templates should link directly to `/auth/callback?next=...&token_hash={{ .TokenHash }}&type=email` instead of relying on a fragment/session response from Supabase Auth.
 - `POST /auth/callback/verify-email-otp`
 - Internal-only local E2E helper; not part of the user-facing auth flow.
 - Accepts JSON body with `email` and six-digit `otpCode`.
 - Enabled only when `E2E_ENABLE_EMAIL_OTP_HELPER=true` and the request arrives through a loopback host.
 - Verifies email OTP through Supabase Auth and returns JSON `{"ok": true}` on success.
+
+## Internal App-Data Route Handlers
+- These endpoints are an internal client refetch surface for TanStack Query, not a public external API.
+- Every endpoint requires an authenticated ready couple context through `getAuthGateState()`.
+- Unauthenticated requests return `401`; authenticated users without a ready couple context return `403`.
+- Responses are JSON only and send `Cache-Control: no-store`.
+- Route handlers call the same server app-data helpers as server prefetch wrappers; business rules remain in server read helpers, Server Actions, SQL RLS, and SQL RPCs.
+
+| Route | Data key | Notes |
+|---|---|---|
+| `GET /api/app-data/home` | `home` | Home timeline, wish items, checklists, signed memory preview URLs |
+| `GET /api/app-data/lists` | `lists` | Wish items and checklists |
+| `GET /api/app-data/on-this-day` | `onThisDay` | Couple-scoped on-this-day memories |
+| `GET /api/app-data/memories/[memoryId]` | `memory(memoryId)` | Memory detail and signed media; `404` when not visible |
+| `GET /api/app-data/countdowns` | `countdowns` | Upcoming and past countdowns |
+| `GET /api/app-data/future-notes` | `futureNotes` | Locked metadata and decrypted unlocked bodies through RPC |
+| `GET /api/app-data/trips` | `trips` | Active, planned, completed trips |
+| `GET /api/app-data/trips/[tripId]` | `trip(tripId)` | Trip detail, visited places, album summary, eligible media; `404` when not visible |
+| `GET /api/app-data/map` | `map` | Trip-grouped visited places |
+| `GET /api/app-data/albums` | `albums` | Album summaries with signed covers |
+| `GET /api/app-data/albums/[albumId]` | `album(albumId)` | Album detail and signed media; `404` when not visible |
+| `GET /api/app-data/settings` | `settings` | Current shared timezone |
+| `GET /api/app-data/games` | `games` | Games hub daily-question state |
+| `GET /api/app-data/games/daily-question` | `dailyQuestion` | Current daily-question round, viewer state, reveal state |
+| `GET /api/app-data/stats` | `stats` | Daily-question stats and recent history |
 
 ## Database RPCs Used By App Layer
 - `bootstrap_first_couple(started_date, couple_name, target_timezone)`

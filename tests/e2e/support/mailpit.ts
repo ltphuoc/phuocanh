@@ -25,7 +25,8 @@ const mailpitMessageDetailSchema = z.object({
 type MailpitMessageDetail = z.infer<typeof mailpitMessageDetailSchema>;
 
 const MAILPIT_API_BASE_URL = `${inbucketBaseUrl}/api/v1`;
-const MAGIC_LINK_PATTERN = /https?:\/\/[^\s)"'<>]+\/auth\/v1\/verify\?[^\s)"'<>]+/;
+const APP_CALLBACK_MAGIC_LINK_PATTERN = /https?:\/\/[^\s)"'<>]+\/auth\/callback\?[^\s)"'<>]+/;
+const SUPABASE_MAGIC_LINK_PATTERN = /https?:\/\/[^\s)"'<>]+\/auth\/v1\/verify\?[^\s)"'<>]+/;
 const MAGIC_LINK_CODE_PATTERN = /Alternatively, enter the code: (\d+)/;
 
 const fetchJson = async (url: string): Promise<unknown> => {
@@ -40,6 +41,14 @@ const fetchJson = async (url: string): Promise<unknown> => {
   return response.json();
 };
 
+const normalizeAppCallbackUrl = (callbackUrl: URL): URL => {
+  const canonicalBaseUrl = new URL(E2E_BASE_URL);
+  callbackUrl.host = canonicalBaseUrl.host;
+  callbackUrl.protocol = canonicalBaseUrl.protocol;
+
+  return callbackUrl;
+};
+
 const normalizeMagicLinkUrl = (rawUrl: string): string => {
   const decodedUrl = rawUrl
     .replaceAll("&amp;", "&")
@@ -49,27 +58,43 @@ const normalizeMagicLinkUrl = (rawUrl: string): string => {
   const magicLinkUrl = new URL(decodedUrl);
   const redirectTo = magicLinkUrl.searchParams.get("redirect_to");
   if (!redirectTo) {
+    if (magicLinkUrl.pathname === "/auth/callback") {
+      normalizeAppCallbackUrl(magicLinkUrl);
+    }
+
     return magicLinkUrl.toString();
   }
 
   const redirectUrl = new URL(redirectTo);
-  const canonicalBaseUrl = new URL(E2E_BASE_URL);
-  redirectUrl.host = canonicalBaseUrl.host;
-  redirectUrl.protocol = canonicalBaseUrl.protocol;
+  normalizeAppCallbackUrl(redirectUrl);
   magicLinkUrl.searchParams.set("redirect_to", redirectUrl.toString());
 
   return magicLinkUrl.toString();
 };
 
-const extractMagicLinkUrl = (detail: MailpitMessageDetail): string | null => {
-  const textMatch = detail.Text.match(MAGIC_LINK_PATTERN);
-  if (textMatch?.[0]) {
-    return normalizeMagicLinkUrl(textMatch[0]);
+const findMagicLinkUrl = (content: string): string | null => {
+  const appCallbackMatch = content.match(APP_CALLBACK_MAGIC_LINK_PATTERN);
+  if (appCallbackMatch?.[0]) {
+    return normalizeMagicLinkUrl(appCallbackMatch[0]);
   }
 
-  const htmlMatch = detail.HTML.match(MAGIC_LINK_PATTERN);
-  if (htmlMatch?.[0]) {
-    return normalizeMagicLinkUrl(htmlMatch[0]);
+  const supabaseMatch = content.match(SUPABASE_MAGIC_LINK_PATTERN);
+  if (supabaseMatch?.[0]) {
+    return normalizeMagicLinkUrl(supabaseMatch[0]);
+  }
+
+  return null;
+};
+
+const extractMagicLinkUrl = (detail: MailpitMessageDetail): string | null => {
+  const textMatch = findMagicLinkUrl(detail.Text);
+  if (textMatch) {
+    return textMatch;
+  }
+
+  const htmlMatch = findMagicLinkUrl(detail.HTML);
+  if (htmlMatch) {
+    return htmlMatch;
   }
 
   return null;

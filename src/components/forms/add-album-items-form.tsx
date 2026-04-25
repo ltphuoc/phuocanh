@@ -1,15 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { parseISO } from "date-fns";
 import Image from "next/image";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import type { ReactElement } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -17,7 +12,11 @@ import { addAlbumItemsAction } from "@/app/actions/planning-actions";
 import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { cn } from "@/lib/utils/cn";
 
 interface AddAlbumItemsFormProps {
@@ -93,8 +92,8 @@ export const AddAlbumItemsForm = ({
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { format, t: formT } = useI18n("forms.album");
-  const [state, submitAction, isPending] = useActionState(addAlbumItemsAction, initialActionState);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(addAlbumItemsAction);
   const form = useForm<AddAlbumItemsValues>({
     defaultValues: {
       memoryMediaIds: [],
@@ -107,30 +106,9 @@ export const AddAlbumItemsForm = ({
       name: "memoryMediaIds",
     }) ?? [];
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
-
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
-      toast.success(actionsT(actionMessageKey));
-      form.reset({
-        memoryMediaIds: [],
-      });
-      return;
-    }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
   const mediaErrorMessage = form.formState.errors.memoryMediaIds?.message;
 
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
+  const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
     payload.set("albumId", albumId);
     values.memoryMediaIds.forEach((mediaId) => {
@@ -138,9 +116,22 @@ export const AddAlbumItemsForm = ({
     });
     payload.set("tripId", tripId);
 
-    startTransition(() => {
-      submitAction(payload);
-    });
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
+      toast.success(actionsT(actionMessageKey));
+      form.reset({
+        memoryMediaIds: [],
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: appQueryKeys.albums() }),
+        queryClient.invalidateQueries({ queryKey: appQueryKeys.album(albumId) }),
+        queryClient.invalidateQueries({ queryKey: appQueryKeys.trip(tripId) }),
+      ]);
+    } catch (error: unknown) {
+      console.error("Failed to submit album items form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
+    }
   });
 
   return (
@@ -216,7 +207,7 @@ export const AddAlbumItemsForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("addMediaSubmit")}

@@ -1,13 +1,11 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
-  startTransition,
-  useActionState,
-  useEffect,
   useId,
-  useState,
   type FormEvent,
   type ReactElement,
+  useState,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,7 +14,14 @@ import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import {
+  invalidateTimezoneDerivedData,
+  setSettingsTimeZone,
+} from "@/lib/query/app-query-updates";
 import {
   getSupportedCoupleTimeZones,
   isSupportedCoupleTimeZone,
@@ -48,32 +53,12 @@ export const UpdateCoupleTimezoneForm = ({
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.settingsTimezone");
-  const [state, submitAction, isPending] = useActionState(
-    updateCoupleTimezoneAction,
-    initialActionState,
-  );
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(updateCoupleTimezoneAction);
   const formKey = useId();
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [timeZoneErrorMessage, setTimeZoneErrorMessage] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
-
-    const actionMessageKey = state.message || "unexpectedError";
-
-    if (state.status === "success") {
-      toast.success(actionsT(actionMessageKey));
-      return;
-    }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, hasSubmitted, state.message, state.status]);
-
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const payload = new FormData(event.currentTarget);
@@ -87,10 +72,17 @@ export const UpdateCoupleTimezoneForm = ({
     }
 
     setTimeZoneErrorMessage(undefined);
-    setHasSubmitted(true);
-    startTransition(() => {
-      submitAction(payload);
-    });
+
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
+      toast.success(actionsT(actionMessageKey));
+      setSettingsTimeZone(queryClient, parsed.data.timeZone);
+      await invalidateTimezoneDerivedData(queryClient);
+    } catch (error: unknown) {
+      console.error("Failed to submit couple timezone form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
+    }
   };
 
   return (
@@ -137,7 +129,7 @@ export const UpdateCoupleTimezoneForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

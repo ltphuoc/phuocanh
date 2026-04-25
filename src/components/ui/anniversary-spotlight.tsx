@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ReactElement } from "react";
 import { FeaturedMemoryObject } from "@/components/ui/memory-card";
@@ -27,16 +29,14 @@ const getQuote = (
   fallback: string,
 ): string => (note?.trim() ? note.trim().slice(0, 120) : fallback);
 
-export const AnniversarySpotlight = async ({
+export const AnniversarySpotlight = ({
   coupleStartedAt,
   featuredMemory,
   relationshipDays,
   timeZone,
-}: AnniversarySpotlightProps): Promise<ReactElement> => {
-  const [t, format] = await Promise.all([
-    getTranslations("ui.anniversarySpotlight"),
-    getFormatter(),
-  ]);
+}: AnniversarySpotlightProps): ReactElement => {
+  const t = useTranslations("ui.anniversarySpotlight");
+  const format = useFormatter();
   const startedAtDate = parseDateInputValueInTimeZone(coupleStartedAt, timeZone);
   const sinceDateLabel = Number.isNaN(startedAtDate.getTime())
     ? coupleStartedAt

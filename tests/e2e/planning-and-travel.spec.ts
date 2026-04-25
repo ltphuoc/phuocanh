@@ -1,6 +1,5 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { memoryFixturePath, onboardingTimeZone } from "./support/runtime";
-import { waitForActionSuccessAndReload } from "./support/page-sync";
 import {
   buildUniqueText,
   createOffsetDateInput,
@@ -34,8 +33,9 @@ test("E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.getByLabel("Target date").fill(createOffsetDateInput(30));
   await page.getByLabel("Note (optional)").fill(countdownNote);
   await page.getByRole("button", { name: "Save countdown" }).click();
-  await waitForActionSuccessAndReload(page, "Countdown saved.");
-  await expect(page.getByText(countdownTitle)).toBeVisible();
+  await expect(page.getByText(countdownTitle)).toBeVisible({
+    timeout: 15_000,
+  });
 
   const countdownCard = page.locator("div").filter({
     hasText: countdownTitle,
@@ -51,15 +51,17 @@ test("E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.getByLabel("Unlock date").fill(createOffsetDateInput(45));
   await page.getByLabel("Note body").fill(lockedFutureNoteBody);
   await page.getByRole("button", { name: "Seal future note" }).click();
-  await waitForActionSuccessAndReload(page, "Future note sealed.");
-  await expect(page.getByText(lockedFutureNoteTitle)).toBeVisible();
+  await expect(page.getByText(lockedFutureNoteTitle)).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.getByLabel("Title").fill(unlockedFutureNoteTitle);
   await page.getByLabel("Unlock date").fill(createTodayDateInput());
   await page.getByLabel("Note body").fill(unlockedFutureNoteBody);
   await page.getByRole("button", { name: "Seal future note" }).click();
-  await waitForActionSuccessAndReload(page, "Future note sealed.");
-  await expect(page.getByText(unlockedFutureNoteTitle)).toBeVisible();
+  await expect(page.getByText(unlockedFutureNoteTitle)).toBeVisible({
+    timeout: 15_000,
+  });
 
   const lockedFutureNoteCard = page.locator("div").filter({
     hasText: lockedFutureNoteTitle,
@@ -86,8 +88,9 @@ test("E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.goto("/en/settings");
   await replaceInputValue(page.getByLabel("Couple timezone"), "America/New_York");
   await page.getByRole("button", { name: "Save timezone" }).click();
-  await waitForActionSuccessAndReload(page, "Couple timezone updated.");
-  await expect(page.getByText("Current timezone: America/New_York")).toBeVisible();
+  await expect(page.getByText("Current timezone: America/New_York")).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.goto("/en/countdowns");
   await expect(page.getByText(countdownDateLabel)).toBeVisible();
@@ -100,8 +103,9 @@ test("E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.goto("/en/settings");
   await replaceInputValue(page.getByLabel("Couple timezone"), onboardingTimeZone);
   await page.getByRole("button", { name: "Save timezone" }).click();
-  await waitForActionSuccessAndReload(page, "Couple timezone updated.");
-  await expect(page.getByText(`Current timezone: ${onboardingTimeZone}`)).toBeVisible();
+  await expect(page.getByText(`Current timezone: ${onboardingTimeZone}`)).toBeVisible({
+    timeout: 15_000,
+  });
 });
 
 test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums, and invalid detail routes behave correctly", async ({
@@ -124,8 +128,9 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await page.getByLabel("End date").fill(createOffsetDateInput(2));
   await page.getByLabel("Trip note (optional)").fill(tripNote);
   await page.getByRole("button", { name: "Save trip" }).click();
-  await waitForActionSuccessAndReload(page, "Trip saved.");
-  await expect(page.getByText(tripTitle)).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(tripTitle) })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.getByRole("link", { name: new RegExp(tripTitle) }).click();
   await expect(page).toHaveURL(/\/en\/trips\/[0-9a-f-]+$/);
@@ -135,8 +140,9 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await page.getByLabel("Visited on").fill(createTodayDateInput());
   await page.getByLabel("Place note (optional)").fill(visitedPlaceNote);
   await page.getByRole("button", { name: "Save visited place" }).click();
-  await waitForActionSuccessAndReload(page, "Visited place saved.");
-  await expect(page.getByText(visitedPlaceTitle)).toBeVisible();
+  await expect(page.getByText(visitedPlaceTitle)).toBeVisible({
+    timeout: 15_000,
+  });
 
   await page.goto("/en/map");
   await expect(page.getByRole("heading", { name: "Places map" })).toBeVisible();
@@ -173,19 +179,23 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await albumComposer.getByLabel("Album note (optional)").fill(albumNote);
   await albumComposer.locator("label").filter({ hasText: firstTripMemoryNote }).click();
   await albumComposer.getByRole("button", { name: "Create album" }).click();
-  await waitForActionSuccessAndReload(page, "Album created.");
-  await expect(page.getByRole("link", { name: new RegExp(albumTitle) })).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(albumTitle) })).toBeVisible({
+    timeout: 15_000,
+  });
 
   const addAlbumItemsForm = page.locator("form").filter({
     has: page.getByRole("button", { name: "Add selected media" }),
   }).first();
   await addAlbumItemsForm.locator("label").filter({ hasText: secondTripMemoryNote }).click();
   await addAlbumItemsForm.getByRole("button", { name: "Add selected media" }).click();
-  await waitForActionSuccessAndReload(page, "Album updated.");
-  await expect(addAlbumItemsForm.getByText(secondTripMemoryNote)).toHaveCount(0);
+  await expect(addAlbumItemsForm.getByText(secondTripMemoryNote)).toHaveCount(0, {
+    timeout: 15_000,
+  });
   const linkedAlbum = page.getByRole("link", { name: new RegExp(albumTitle) }).first();
   await expect(linkedAlbum).toBeVisible();
-  await expect(linkedAlbum.getByText("2 items")).toBeVisible();
+  await expect(linkedAlbum.getByText("2 items")).toBeVisible({
+    timeout: 15_000,
+  });
 
   await linkedAlbum.click();
   await expect(page).toHaveURL(/\/en\/albums\/[0-9a-f-]+$/);

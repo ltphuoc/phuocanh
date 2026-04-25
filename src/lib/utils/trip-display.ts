@@ -1,5 +1,5 @@
 import { differenceInCalendarDays } from "date-fns";
-import { getFormatter, getTranslations } from "next-intl/server";
+import type { getFormatter, getTranslations } from "next-intl/server";
 import type { TripCard, TripStatus } from "@/lib/server/phase-two-data";
 import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
 

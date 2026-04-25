@@ -1,13 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -16,7 +11,13 @@ import { FormSection } from "@/components/layout/form-section";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import type { DailyQuestionAppData } from "@/lib/app-data/types";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
+import { invalidateGameplay } from "@/lib/query/app-query-updates";
 
 const buildSubmitDailyQuestionAnswerSchema = (
   t: ReturnType<typeof useI18n<"forms.dailyQuestion">>["t"],
@@ -44,11 +45,8 @@ export const SubmitDailyQuestionAnswerForm = ({
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.dailyQuestion");
-  const [state, submitAction, isPending] = useActionState(
-    submitDailyQuestionAnswerAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(submitDailyQuestionAnswerAction);
   const form = useForm<SubmitDailyQuestionAnswerValues>({
     defaultValues: {
       answerBody: "",
@@ -57,37 +55,43 @@ export const SubmitDailyQuestionAnswerForm = ({
     resolver: zodResolver(buildSubmitDailyQuestionAnswerSchema(formT)),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const answerErrorMessage = form.formState.errors.answerBody?.message;
 
-    const actionMessageKey = state.message || "unexpectedError";
-    if (state.status === "success") {
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("answerBody", values.answerBody);
+    payload.set("roundId", values.roundId);
+
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         answerBody: "",
         roundId,
       });
-      return;
+      queryClient.setQueryData<DailyQuestionAppData>(appQueryKeys.dailyQuestion(), (current) => {
+        if (!current?.round || current.round.id !== roundId) {
+          return current;
+        }
+
+        const isFirstAnswer = current.round.answerCount === 0;
+
+        return {
+          ...current,
+          round: {
+            ...current.round,
+            answerCount: isFirstAnswer ? 1 : current.round.answerCount,
+            status: isFirstAnswer ? "waiting_for_partner" : current.round.status,
+            viewerHasAnswered: true,
+          },
+        };
+      });
+      void invalidateGameplay(queryClient);
+    } catch (error: unknown) {
+      console.error("Failed to submit daily question answer", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, roundId, state.message, state.status]);
-
-  const answerErrorMessage = form.formState.errors.answerBody?.message;
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("answerBody", values.answerBody);
-    payload.set("roundId", values.roundId);
-
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -113,7 +117,7 @@ export const SubmitDailyQuestionAnswerForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

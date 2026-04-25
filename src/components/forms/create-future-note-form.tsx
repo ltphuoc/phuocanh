@@ -1,14 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { addDays } from "date-fns";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -18,7 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { formatDateInputValue } from "@/lib/utils/date-input";
 
 const buildCreateFutureNoteSchema = (
@@ -44,11 +43,8 @@ export const CreateFutureNoteForm = (): ReactElement => {
   const { t: actionsT } = useI18n("actions");
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.futureNote");
-  const [state, submitAction, isPending] = useActionState(
-    createFutureNoteAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(createFutureNoteAction);
   const form = useForm<CreateFutureNoteValues>({
     defaultValues: {
       body: "",
@@ -58,42 +54,30 @@ export const CreateFutureNoteForm = (): ReactElement => {
     resolver: zodResolver(buildCreateFutureNoteSchema(formT)),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const bodyErrorMessage = form.formState.errors.body?.message;
+  const titleErrorMessage = form.formState.errors.title?.message;
+  const unlockDateErrorMessage = form.formState.errors.unlockDate?.message;
 
-    const actionMessageKey = state.message || "unexpectedError";
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("body", values.body);
+    payload.set("title", values.title);
+    payload.set("unlockDate", values.unlockDate);
 
-    if (state.status === "success") {
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         body: "",
         title: "",
         unlockDate: formatDateInputValue(addDays(new Date(), 30)),
       });
-      return;
+      await queryClient.invalidateQueries({ queryKey: appQueryKeys.futureNotes() });
+    } catch (error: unknown) {
+      console.error("Failed to submit future note form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
-  const bodyErrorMessage = form.formState.errors.body?.message;
-  const titleErrorMessage = form.formState.errors.title?.message;
-  const unlockDateErrorMessage = form.formState.errors.unlockDate?.message;
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("body", values.body);
-    payload.set("title", values.title);
-    payload.set("unlockDate", values.unlockDate);
-
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -152,7 +136,7 @@ export const CreateFutureNoteForm = (): ReactElement => {
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

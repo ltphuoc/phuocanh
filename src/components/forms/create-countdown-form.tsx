@@ -1,14 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { addDays } from "date-fns";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
+import type { ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,7 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { formatDateInputValue } from "@/lib/utils/date-input";
 
 const buildCreateCountdownSchema = (
@@ -51,11 +50,8 @@ export const CreateCountdownForm = (): ReactElement => {
   const { t: commonT } = useI18n("common");
   const { t: countdownsT } = useI18n("countdowns");
   const { t: formT } = useI18n("forms.countdown");
-  const [state, submitAction, isPending] = useActionState(
-    createCountdownAction,
-    initialActionState,
-  );
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(createCountdownAction);
   const form = useForm<CreateCountdownValues>({
     defaultValues: {
       kind: "anniversary",
@@ -66,14 +62,21 @@ export const CreateCountdownForm = (): ReactElement => {
     resolver: zodResolver(buildCreateCountdownSchema(formT)),
   });
 
-  useEffect(() => {
-    if (!hasSubmitted) {
-      return;
-    }
+  const kindErrorMessage = form.formState.errors.kind?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
+  const targetDateErrorMessage = form.formState.errors.targetDate?.message;
+  const titleErrorMessage = form.formState.errors.title?.message;
 
-    const actionMessageKey = state.message || "unexpectedError";
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set("kind", values.kind);
+    payload.set("note", values.note ?? "");
+    payload.set("targetDate", values.targetDate);
+    payload.set("title", values.title);
 
-    if (state.status === "success") {
+    try {
+      const nextState = await mutation.mutateAsync(payload);
+      const actionMessageKey = nextState.message || "unexpectedError";
       toast.success(actionsT(actionMessageKey));
       form.reset({
         kind: "anniversary",
@@ -81,30 +84,11 @@ export const CreateCountdownForm = (): ReactElement => {
         targetDate: formatDateInputValue(addDays(new Date(), 7)),
         title: "",
       });
-      return;
+      await queryClient.invalidateQueries({ queryKey: appQueryKeys.countdowns() });
+    } catch (error: unknown) {
+      console.error("Failed to submit countdown form", error);
+      toast.error(actionsT(getActionErrorMessage(error)));
     }
-
-    if (state.status === "error") {
-      toast.error(actionsT(actionMessageKey));
-    }
-  }, [actionsT, form, hasSubmitted, state.message, state.status]);
-
-  const kindErrorMessage = form.formState.errors.kind?.message;
-  const noteErrorMessage = form.formState.errors.note?.message;
-  const targetDateErrorMessage = form.formState.errors.targetDate?.message;
-  const titleErrorMessage = form.formState.errors.title?.message;
-
-  const onSubmit = form.handleSubmit((values) => {
-    setHasSubmitted(true);
-    const payload = new FormData();
-    payload.set("kind", values.kind);
-    payload.set("note", values.note ?? "");
-    payload.set("targetDate", values.targetDate);
-    payload.set("title", values.title);
-
-    startTransition(() => {
-      submitAction(payload);
-    });
   });
 
   return (
@@ -185,7 +169,7 @@ export const CreateCountdownForm = (): ReactElement => {
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isPending}
+        isBusy={mutation.isPending}
         type="submit"
       >
         {formT("submit")}

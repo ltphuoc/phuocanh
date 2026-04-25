@@ -7,7 +7,7 @@ export interface PartnerIdentity {
   readonly email: string;
 }
 
-const E2E_RUN_TOKEN = randomUUID().slice(0, 8);
+const E2E_RUN_TOKEN = process.env.E2E_RUN_TOKEN ?? randomUUID().slice(0, 8);
 
 const getTimeZoneNow = (): TZDate => TZDate.tz(onboardingTimeZone);
 

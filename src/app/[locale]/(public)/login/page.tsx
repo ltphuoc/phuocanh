@@ -10,6 +10,9 @@ interface LoginPageProps {
   readonly params: Promise<{
     readonly locale: string;
   }>;
+  readonly searchParams: Promise<{
+    readonly next?: string;
+  }>;
 }
 
 export const generateMetadata = async ({
@@ -18,8 +21,10 @@ export const generateMetadata = async ({
 
 export default async function LoginPage({
   params,
+  searchParams,
 }: LoginPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
+  const { next } = await searchParams;
   const t = await getTranslations({
     locale,
     namespace: "auth.login",
@@ -32,7 +37,7 @@ export default async function LoginPage({
         helperTitle={t("helperTitle")}
         title={t("title")}
       >
-        <LoginForm />
+        <LoginForm initialNextPath={next} />
         <p className="text-xs text-muted-foreground">
           {t.rich("inviteHint", {
             link: (chunks) => (

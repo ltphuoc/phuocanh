@@ -38,9 +38,11 @@ Failure triage:
 ### MAN-AUTH-002 Second user can join with invite
 1. From `/home`, generate a partner invite.
 2. Open the invite URL in a fresh session.
-3. Sign in with the second email.
-4. Join the couple space from `/accept-invite`.
-5. Confirm the second user lands on `/home`.
+3. Confirm the app redirects to `/login` while preserving `next=/accept-invite?token=...`.
+4. Sign in with the second email.
+5. Open the email link from Mailpit and confirm it returns to `/accept-invite?token=...`.
+6. Join the couple space from `/accept-invite`.
+7. Confirm the second user lands on `/home`.
 
 Expected result:
 - Invite URL resolves, acceptance succeeds once, and the second user becomes an active member.

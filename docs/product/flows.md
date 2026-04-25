@@ -10,7 +10,7 @@ Preconditions:
 Steps:
 1. User opens `/login`.
 2. `sendMagicLinkAction` validates the email and requests a Supabase magic link.
-3. The action builds `emailRedirectTo=/auth/callback?next=/home`.
+3. The action builds `emailRedirectTo=/auth/callback?next=...`, defaulting to localized `/home` and preserving a valid internal `next` path when login started from another route.
 4. In local development the action retries both `localhost` and `127.0.0.1` Supabase hosts before surfacing a network error.
 5. User follows the email link back into `/auth/callback`.
 6. `/auth/callback` exchanges either `code` via `exchangeCodeForSession(...)` or `token_hash` + `type` via `verifyOtp(...)`.
@@ -96,7 +96,7 @@ Preconditions:
 
 Steps:
 1. User opens `/accept-invite?token=...`.
-2. Page requires authentication; unauthenticated users are redirected to `/login`.
+2. Page requires authentication; unauthenticated users are redirected to `/login?next=/accept-invite?token=...`.
 3. `AcceptInviteForm` submits the token to `acceptInviteAction`.
 4. Action calls the `accept_couple_invite(...)` RPC.
 5. RPC validates token, expiration, membership state, and available role.
@@ -104,7 +104,7 @@ Steps:
 7. UI redirects the user to `/home`.
 
 Redirects:
-- Unauthenticated user on `/accept-invite` -> `/login`
+- Unauthenticated user on `/accept-invite?token=...` -> `/login?next=/accept-invite?token=...`
 - Already-ready couple member on `/accept-invite` -> `/home`
 - Successful acceptance -> `/home`
 

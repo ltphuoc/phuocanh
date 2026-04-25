@@ -64,3 +64,9 @@
 - Chosen reminder durability model: persist reminder work in `reminder_deliveries` with idempotent uniqueness on `(kind, source_id, recipient_user_id)`.
 - Chosen reminder execution model: enqueue due reminder rows in Postgres, then deliver them from a Supabase Edge Function using service-role access and Resend.
 - Chosen cron invocation auth: use `project_url` + `anon_key` for `pg_net` calls into the reminder Edge Function, with Vault as the hosted secret backend and a private fallback store for local/CI replay.
+
+## 2026-04-24 (Authenticated Interactive Sync)
+- Chosen interactive sync layer: TanStack Query for authenticated app-data flows.
+- Chosen read shape: server-prefetch exact app-data query keys, hydrate client page components, and use internal `/api/app-data/...` JSON routes only for client refetch after invalidation.
+- Chosen mutation shape: keep existing Server Actions and SQL RPC business rules, remove active-tree `refresh()` calls from migrated app-data actions, and update the client cache with exact invalidation, `setQueryData`, or optimistic updates.
+- Chosen freshness policy: avoid broad invalidation and hard reloads; successful same-session actions must update through the query cache.

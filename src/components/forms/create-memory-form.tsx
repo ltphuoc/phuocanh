@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   useState,
@@ -16,7 +17,11 @@ import { useI18n } from "@/hooks/useI18n";
 import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { initialActionState } from "@/lib/actions/action-state";
+import {
+  getActionErrorMessage,
+  useActionMutation,
+} from "@/lib/query/action-mutation";
+import { invalidateMemoryCreated } from "@/lib/query/app-query-updates";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const createMemorySchema = z.object({
@@ -67,8 +72,9 @@ export const CreateMemoryForm = ({
   const { t: commonT } = useI18n("common");
   const { t: formT } = useI18n("forms.memory");
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const mutation = useActionMutation(createMemoryAction);
   const [supabase] = useState(createSupabaseBrowserClient);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const form = useForm<CreateMemoryValues>({
@@ -122,29 +128,19 @@ export const CreateMemoryForm = ({
         payload.set("storagePath", storagePath);
       }
 
-      setIsSubmitting(true);
-      const nextState = await createMemoryAction(initialActionState, payload);
+      const nextState = await mutation.mutateAsync(payload);
       const actionMessageKey = nextState.message || "unexpectedError";
-
-      if (nextState.status === "success") {
-        toast.success(actionsT(actionMessageKey));
-        router.replace("/home");
-        return;
-      }
-
-      toast.error(actionsT(actionMessageKey));
-      if (uploadedStoragePath) {
-        await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
-      }
+      toast.success(actionsT(actionMessageKey));
+      await invalidateMemoryCreated(queryClient);
+      router.replace("/home");
     } catch (error: unknown) {
       console.error("Failed to submit memory form", error);
-      toast.error(actionsT("unexpectedError"));
+      toast.error(actionsT(getActionErrorMessage(error)));
 
       if (uploadedStoragePath) {
         await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
       }
     } finally {
-      setIsSubmitting(false);
       setIsUploading(false);
     }
   });
@@ -206,7 +202,7 @@ export const CreateMemoryForm = ({
       <Button
         busyLabel={commonT("working")}
         className="w-full md:w-auto"
-        isBusy={isSubmitting || isUploading}
+        isBusy={mutation.isPending || isUploading}
         type="submit"
       >
         {formT("submit")}

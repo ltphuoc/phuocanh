@@ -7,7 +7,7 @@ import {
   parseDateInputValueInTimeZone,
 } from "@/lib/utils/couple-timezone";
 
-interface MemoryCard {
+export interface MemoryCard {
   readonly happenedAt: string;
   readonly id: string;
   readonly locationName: string | null;
@@ -16,14 +16,14 @@ interface MemoryCard {
   readonly storagePath: string | null;
 }
 
-interface WishItemCard {
+export interface WishItemCard {
   readonly category: Database["public"]["Enums"]["wish_category"];
   readonly id: string;
   readonly note: string | null;
   readonly title: string;
 }
 
-interface ChecklistItemCard {
+export interface ChecklistItemCard {
   readonly checklistId: string;
   readonly doneAt: string | null;
   readonly id: string;
@@ -31,20 +31,20 @@ interface ChecklistItemCard {
   readonly text: string;
 }
 
-interface ChecklistCard {
+export interface ChecklistCard {
   readonly id: string;
   readonly items: ChecklistItemCard[];
   readonly title: string;
 }
 
-interface HomePageData {
+export interface HomePageData {
   readonly checklists: ChecklistCard[];
   readonly memories: MemoryCard[];
   readonly relationshipDays: number;
   readonly wishItems: WishItemCard[];
 }
 
-interface MemoryDetailData {
+export interface MemoryDetailData {
   readonly happenedAt: string;
   readonly id: string;
   readonly locationName: string | null;
@@ -155,6 +155,74 @@ export const getHomePageData = async (
     checklists,
     memories: memoryQuery.data.map((memory) => toMemoryCard(memory, mediaQuery.data)),
     relationshipDays,
+    wishItems: wishQuery.data.map((item) => ({
+      category: item.category,
+      id: item.id,
+      note: item.note,
+      title: item.title,
+    })),
+  };
+};
+
+export interface ListsPageData {
+  readonly checklists: ChecklistCard[];
+  readonly wishItems: WishItemCard[];
+}
+
+export const getListsPageData = async (
+  context: CoupleContext,
+): Promise<ListsPageData> => {
+  const supabase = await createSupabaseServerClient();
+
+  const [wishQuery, checklistQuery] = await Promise.all([
+    supabase
+      .from("wish_items")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(30),
+    supabase
+      .from("checklists")
+      .select("*")
+      .eq("couple_id", context.coupleId)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (wishQuery.error) {
+    throw new Error(wishQuery.error.message);
+  }
+  if (checklistQuery.error) {
+    throw new Error(checklistQuery.error.message);
+  }
+
+  const checklistIds = checklistQuery.data.map((checklist) => checklist.id);
+  const checklistItemsQuery = checklistIds.length
+    ? await supabase
+        .from("checklist_items")
+        .select("*")
+        .in("checklist_id", checklistIds)
+        .order("created_at", { ascending: true })
+    : { data: [], error: null };
+
+  if (checklistItemsQuery.error) {
+    throw new Error(checklistItemsQuery.error.message);
+  }
+
+  const checklistItems = checklistItemsQuery.data.map((item) => ({
+    checklistId: item.checklist_id,
+    doneAt: item.done_at,
+    id: item.id,
+    isDone: item.is_done,
+    text: item.text,
+  }));
+
+  return {
+    checklists: checklistQuery.data.map((checklist) => ({
+      id: checklist.id,
+      items: checklistItems.filter((item) => item.checklistId === checklist.id),
+      title: checklist.title,
+    })),
     wishItems: wishQuery.data.map((item) => ({
       category: item.category,
       id: item.id,
