@@ -39,4 +39,4 @@ If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL a
 - Do not insert directly into `public.couples` or `public.couple_memberships` from app code.
 - Do not replace `bootstrap_first_couple(...)` or `accept_couple_invite(...)` with direct table writes.
 - Do not edit `src/lib/supabase/database.types.ts` or `src/lib/db/schema.ts` as a substitute for a real SQL migration.
-- Do not treat `/chat` or non-`daily-question` `/games/[mode]` routes as live backend features.
+- Do not reintroduce `/chat` or treat non-`daily-question` `/games/[mode]` routes as live backend features.

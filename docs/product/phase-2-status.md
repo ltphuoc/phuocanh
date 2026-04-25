@@ -116,7 +116,7 @@ Status values:
 ## Recommended Next Order
 1. Extend gameplay beyond `daily-question` only after the first stats read model is stable.
 2. Revisit travel-map depth only after the gameplay and analytics contract is stable.
-3. Remove deprecated `/chat` scaffolding as maintenance work.
+3. Deprecated `/chat` scaffolding removal is complete.
 
 ## Risks And Deferred Items
 - There is still only one shared timezone per couple; no per-user timezone override exists.
@@ -124,7 +124,6 @@ Status values:
 - The atlas is provider-free; coordinates, route polylines, and provider-backed geographic tiles remain deferred.
 
 ## Phase 3 Carry-Forward
-- `/chat` remains a deprecated mock artifact in the app and is scheduled for cleanup rather than backend expansion.
-- `/chat` cleanup is maintenance work, not part of `Phase 3 Slice 1`.
+- Deprecated `/chat` cleanup is complete and was maintenance work, not part of `Phase 3 Slice 1`.
 - `/games/[mode]` remains shell-only for non-`daily-question` slugs.
 - Additional gameplay modes, leaderboards, sharing, and similarity scoring remain deferred follow-up work.

@@ -75,7 +75,7 @@
 - Layout: `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `AuthShell`, `ShellPage`.
 - UI controls: `Button`, `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`.
 - Shared state UI: `EmptyState`, `LoadingState`, `ListRow`, `MemoryCard`, `ComingSoonCard`, `PageReveal`.
-- Story surfaces: `AnniversarySpotlight`, `TimelineRibbon`, `FeaturedMemoryObject`, `TravelAtlasShell`, `ChatThreadPreview`.
+- Story surfaces: `AnniversarySpotlight`, `TimelineRibbon`, `FeaturedMemoryObject`, `TravelAtlasShell`.
 - Template widgets remain available for shell-only Phase 2+/3 routes.
 
 ## Interaction Patterns

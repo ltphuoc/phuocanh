@@ -48,7 +48,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical “what exist
 - Auth flow, invite acceptance, couple bootstrap, and callback redirect handling
 - Any change touching `couples`, `couple_memberships`, invite lifecycle, RLS, RPCs, or storage policies
 - Any schema change that edits TypeScript mirrors without matching SQL migrations
-- Any work that assumes `/chat` is live data
+- Any work that reintroduces `/chat` without a new product plan
 - Any work that assumes non-`daily-question` slugs under `/games/[mode]` are live gameplay routes
 - Any work that treats `/stats` as a general analytics system beyond the current gameplay read model
 - Any work that changes the trip/album contract without also reviewing the trip-rooted album rules in `docs/product/business-rules.md`

@@ -40,7 +40,7 @@
   - `/games/[mode]` now has one live gameplay runtime: `/games/daily-question`
   - `/stats` is now a real couple-scoped gameplay read model with participation/streak aggregates
   - write paths stay on Server Actions or SQL RPCs; no client-owned gameplay write layer was introduced
-  - this slice still does not include `/chat`, additional game modes, or deeper travel-map work
+  - this slice still does not include additional game modes or deeper travel-map work
 - Downstream implementation order after `Phase 3 Slice 1`:
   - extend gameplay beyond `daily-question` only after the first stats read model is live
   - revisit travel-map depth after the gameplay and stats contract is stable
@@ -63,11 +63,11 @@
   - real gameplay streak and stats read model
 - Next Phase 3 target:
   - extend beyond `/games/daily-question` only after the first gameplay contract and production-flow browser coverage are stable
-- `/chat` is not part of the Phase 3 feature roadmap; it remains a deprecated mock artifact pending route cleanup.
+- `/chat` is not part of the Phase 3 feature roadmap; the deprecated mock route has been removed as maintenance.
 
 ## Next Move
 - Primary: keep expanding Phase 3 gameplay beyond `daily-question` only from this now-green production-flow browser baseline.
-- Secondary maintenance: remove the deprecated `/chat` mock route once downstream references are cleared.
+- Secondary maintenance: deprecated `/chat` mock route removal is complete.
 - Current planning source: use `docs/product/active-plan.md` for the latest operating plan; this roadmap remains the phase-level history and direction.
 
 ## Phase 4 (Advanced+) - Status: planned

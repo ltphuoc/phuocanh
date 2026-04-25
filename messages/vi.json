@@ -8,7 +8,6 @@
       "acceptInvite": "Chấp nhận lời mời | PhuocAnh",
       "addMemory": "Thêm kỷ niệm | PhuocAnh",
       "albumDetail": "Chi tiết album | PhuocAnh",
-      "chat": "Trò chuyện | PhuocAnh",
       "countdowns": "Đếm ngược | PhuocAnh",
       "futureNotes": "Ghi chú tương lai | PhuocAnh",
       "gameMode": "Chế độ trò chơi | PhuocAnh",
@@ -548,15 +547,6 @@
     },
     "mediaAlt": "Media kỷ niệm"
   },
-  "chat": {
-    "header": {
-      "description": "Không gian trò chuyện ấm áp cho hai bạn, được thiết kế riêng tư và thong thả.",
-      "eyebrow": "Luồng riêng tư",
-      "quote": "Luồng trò chuyện nên giống như trao nhau những món kỷ vật nhỏ.",
-      "title": "Chat"
-    },
-    "note": "Đây là bề mặt trò chuyện mock đã bị đưa vào diện dọn dẹp, hiện vẫn còn truy cập được cho tới khi route này được xoá. Tin nhắn thật, trạng thái online và media đính kèm cố ý chưa được nối dữ liệu."
-  },
   "map": {
     "header": {
       "description": "Một atlas thật cho các địa điểm hai bạn đã ghim bên trong những chương chuyến đi.",
@@ -930,28 +920,6 @@
         "completed": "Đã xong",
         "planned": "Đã lên kế hoạch"
       }
-    },
-    "chatThread": {
-      "composerPlaceholder": "Viết điều gì đó ấm áp, vui vẻ hoặc ngắn gọn.",
-      "header": {
-        "badge": "Giao diện mẫu",
-        "eyebrow": "Luồng tương lai",
-        "title": "Thân mật, không ồn ào"
-      },
-      "messages": {
-        "m1": "Em vẫn cứ nghĩ về quán cà phê nhỏ ở Hội An.",
-        "m2": "Ánh đèn lồng làm mọi thứ như mơ. Mình nên quay lại hai đêm nữa.",
-        "m3": "Đánh dấu luôn thành kế hoạch mini trip tiếp theo nhé.",
-        "m4": "Và em muốn thêm một tấm ảnh ở hành lang vàng đó nữa."
-      },
-      "timeLabels": {
-        "m1": "19:12",
-        "m2": "19:14",
-        "m3": "19:15",
-        "m4": "19:16"
-      },
-      "attachAriaLabel": "Đính kèm media (chưa khả dụng)",
-      "sendAriaLabel": "Gửi tin nhắn (chỉ là bản mẫu)"
     },
     "travelAtlas": {
       "header": {

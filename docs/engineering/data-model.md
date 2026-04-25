@@ -161,6 +161,6 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `get_daily_question_stats(...)` now derives `today` from the saved `couples.timezone` value, not the database/server timezone.
 - Streak and recent-history output therefore follow the same couple-local day boundary as the live gameplay routes.
 
-## Remaining Shell-Only / Mock-Only Route Impact
-- `/chat` remains a deprecated mock artifact and should not be used to justify future schema work.
+## Remaining Shell-Only Route Impact
+- The deprecated `/chat` mock route has been removed and should not be used to justify future schema work.
 - `/games/[mode]` still does not justify additional schema outside the delivered `daily_question` mode.

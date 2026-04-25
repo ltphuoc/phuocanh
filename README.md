@@ -5,7 +5,6 @@ Private couple memory web app built with Next.js App Router + Supabase.
 ## Current Product State
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
 - `shell-only`: non-`daily-question` slugs under `/games/[mode]`
-- `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 - internal-only route handlers also exist at `/auth/callback/verify-email-otp` for local Playwright auth bootstrap when explicitly enabled from a loopback host
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
@@ -156,7 +155,7 @@ E2E-specific runtime notes:
 - `OPENAI_DAILY_QUESTION_STUB_RESPONSE` is a test-only override for `/games/daily-question` prompt generation. When unset, the app uses the normal OpenAI Responses API path.
 - `scripts/e2e/run.sh` defaults `E2E_BASE_URL=http://127.0.0.1:3100`, aligns `NEXT_PUBLIC_SITE_URL` to that URL, and also sets `E2E_ENABLE_EMAIL_OTP_HELPER`, `OPENAI_DAILY_QUESTION_STUB_RESPONSE`, and `TZ=Asia/Ho_Chi_Minh`.
 - Playwright auth state files are written under `playwright/.auth/` and are gitignored.
-- The suite intentionally excludes shell-only game modes under `/games/[mode]` and the deprecated mock `/chat` route.
+- The suite intentionally excludes shell-only game modes under `/games/[mode]`.
 - Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
 
 ## Reminder Setup Verification
@@ -205,7 +204,7 @@ pnpm typecheck
 
 ## Notes
 - Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
-- `/chat` is a deprecated mock artifact because it renders sample conversation content, not real messages, and is no longer on the roadmap.
+- The deprecated `/chat` mock route has been removed; do not reintroduce live chat without a new product plan.
 - Shell-only routes are intentionally not evidence of backend/domain support.
 - Current runtime uses the OpenAI Responses API for `/games/daily-question` prompt generation and has no live Mapbox integration.
 - `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.

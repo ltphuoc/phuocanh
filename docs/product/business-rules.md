@@ -219,7 +219,6 @@ This file is the canonical business-rule reference for the current app. If this 
   - database writes fail unexpectedly
 
 ## Current Shell Boundaries
-- `/chat` is a deprecated mock artifact because it renders sample conversation content and is no longer on the product roadmap.
 - `/games` and `/stats` are implemented.
 - `/games/[mode]` is implemented only for `/games/daily-question`; other mode slugs remain shell-only.
-- Shell-only and mock-only routes must not be treated as proof that backend tables, jobs, or APIs exist.
+- Shell-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

@@ -8,7 +8,6 @@
       "acceptInvite": "Accept Invite | PhuocAnh",
       "addMemory": "Add Memory | PhuocAnh",
       "albumDetail": "Album Detail | PhuocAnh",
-      "chat": "Chat | PhuocAnh",
       "countdowns": "Countdowns | PhuocAnh",
       "futureNotes": "Future Notes | PhuocAnh",
       "gameMode": "Game Mode | PhuocAnh",
@@ -548,15 +547,6 @@
     },
     "mediaAlt": "Memory media"
   },
-  "chat": {
-    "header": {
-      "description": "A warm conversation canvas for the two of you, designed to feel private and unhurried.",
-      "eyebrow": "Private thread",
-      "quote": "The thread should feel like passing little keepsakes back and forth.",
-      "title": "Chat"
-    },
-    "note": "This is a deprecated mock conversation surface that remains reachable until route cleanup lands. Real messages, presence, and media attachments are intentionally not wired."
-  },
   "map": {
     "header": {
       "description": "A real atlas of the places you have already pinned inside your trip chapters.",
@@ -930,28 +920,6 @@
         "completed": "Completed",
         "planned": "Planned"
       }
-    },
-    "chatThread": {
-      "composerPlaceholder": "Write something warm, playful, or tiny.",
-      "header": {
-        "badge": "Mock surface",
-        "eyebrow": "Future thread",
-        "title": "Intimate, never noisy"
-      },
-      "messages": {
-        "m1": "I still keep thinking about the little cafe in Hoi An.",
-        "m2": "The lamp light made everything feel unreal. We should go back for two nights.",
-        "m3": "Saving that as our next mini trip plan.",
-        "m4": "And I want one more photo in that yellow hallway."
-      },
-      "timeLabels": {
-        "m1": "7:12 PM",
-        "m2": "7:14 PM",
-        "m3": "7:15 PM",
-        "m4": "7:16 PM"
-      },
-      "attachAriaLabel": "Attach media (not available yet)",
-      "sendAriaLabel": "Send message (mock only)"
     },
     "travelAtlas": {
       "header": {

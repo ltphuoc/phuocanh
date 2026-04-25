@@ -22,7 +22,6 @@ This file is the canonical “what exists today” route map.
 | `/albums` | implemented | `getAlbumsPageData(...)` | Albums are trip-rooted and group existing `memory_media`; no separate upload pipeline exists |
 | `/albums/[albumId]` | implemented | `getAlbumDetailData(...)` | Route param is a real album UUID; invalid or foreign IDs must not resolve |
 | `/map` | implemented | `getMapPageData(...)` + `visited_places` | Atlas is provider-free and trip-linked; no coordinates, tiles, or route polylines exist yet |
-| `/chat` | mock-only | local mock message array in `ChatThreadPreview` | Deprecated mock artifact only; no live chat backend, presence, or attachment model exists, and no roadmap work should assume it will be expanded |
 | `/games` | implemented | `getGamesHubData(...)` | Live hub for today’s `daily_question` status; non-live modes still render as shell-only entry points |
 | `/games/[mode]` | implemented for `/games/daily-question`; shell-only otherwise | `getDailyQuestionPageData(...)` + gameplay Server Actions for `daily-question`; route param only for other slugs | Only `/games/daily-question` has live prompt generation, answer capture, and reveal behavior in this slice |
 | `/stats` | implemented | `getGameplayStatsPageData(...)` | Gameplay-only metrics sourced from `daily_question` history; this is not a general analytics pipeline |
@@ -34,7 +33,7 @@ This file is the canonical “what exists today” route map.
   - `/games` is now a real backend-backed hub with live status and entry links for `daily-question`
   - `/games/[mode]` is live only for `/games/daily-question`
   - `/stats` now reads real couple-scoped gameplay aggregates instead of placeholder values
-- `/chat` cleanup remains maintenance work and is not part of the gameplay roadmap.
+- Deprecated `/chat` cleanup has been completed as maintenance work and is not part of the gameplay roadmap.
 
 ## Engineering Follow-Up Note
 - Reminder cron/invoke uses Vault-backed secrets in hosted environments.
@@ -44,5 +43,4 @@ This file is the canonical “what exists today” route map.
 ## Status Definitions
 - `implemented`: backed by current runtime data or auth logic
 - `shell-only`: route defines structure and navigation only
-- `mock-only`: route renders fake example data to preview UX or survives temporarily as a deprecated artifact pending cleanup
 - `planned`: not currently routed

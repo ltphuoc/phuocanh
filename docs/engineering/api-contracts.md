@@ -180,8 +180,7 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
   - Returns current completed streak, total rounds, total completed rounds, viewer participation metrics, and recent 14-day history
 
 ## Non-Contracts
-- Shell-only and mock-only routes do not imply backend/API support.
-- `/chat` adds no runtime API surface and remains a deprecated mock artifact pending cleanup.
+- Shell-only routes do not imply backend/API support.
 - `/games/[mode]` is only backend-backed for `/games/daily-question`; other mode slugs still do not imply additional gameplay APIs.
 - Coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract yet.
 

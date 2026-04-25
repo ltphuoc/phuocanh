@@ -45,7 +45,7 @@ This guide is the compact setup and validation reference for day-to-day developm
 - Run production-flow browser coverage with `pnpm test:e2e`.
 - Use `pnpm test:e2e:headed` only when interactive browser debugging is needed.
 - The harness starts a dedicated production server at `http://127.0.0.1:3100` by default, resets the local database, enables the loopback-only OTP helper, and stubs daily-question prompt generation.
-- The suite intentionally excludes `/chat` and shell-only non-`daily-question` game modes.
+- The suite intentionally excludes shell-only non-`daily-question` game modes.
 
 ## Docs Update Rules
 - Update `docs/engineering/route-capability-matrix.md` whenever route status changes.

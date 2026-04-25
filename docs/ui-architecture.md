@@ -35,12 +35,12 @@ Rules:
 - Desktop rail consumes primary routes directly and expands into a secondary drawer.
 - Navigation item shape includes typed Lucide icon and route match prefixes.
 - Current primary navigation is `Home` and `On this day`.
-- `/chat` remains a deprecated mock route until route cleanup lands and is no longer part of the intended primary IA.
+- The deprecated `/chat` mock route has been removed and is no longer part of the intended primary IA.
 
 ## Shared Component Boundaries
 - Foundation controls: `Button`, `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`.
 - State/display: `EmptyState`, `LoadingState`, `ListRow`, `MemoryCard`, `ComingSoonCard`, `PageReveal`.
-- Story/editorial: `AnniversarySpotlight`, `TimelineRibbon`, `TravelAtlasShell`, `ChatThreadPreview`.
+- Story/editorial: `AnniversarySpotlight`, `TimelineRibbon`, `TravelAtlasShell`.
 - Future templates: `TripCardTemplate`, `GameCardTemplate`, `CountdownWidgetTemplate`, `StatCardTemplate`.
 
 Rules:

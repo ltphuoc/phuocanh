@@ -1,6 +1,6 @@
 # Features
 
-Status values: `implemented`, `shell-only`, `mock-only`, `planned`.
+Status values: `implemented`, `shell-only`, `planned`, `removed`.
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-route current-state reference. This file tracks product features, not just routes.
 
@@ -51,7 +51,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: mobile navigation is now a floating dock with a centered memory action orb and a separate `More` sheet.
 - `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
 - `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
-- `mock-only`: `/chat` now exists as a styled route with sample conversation content, but it is a deprecated mock artifact rather than a planned product slice.
+- `removed`: the deprecated `/chat` mock route is no longer part of the app.
 - `implemented`: `/games` is now a real gameplay hub backed by today’s live daily-question state.
 - `implemented`: `/games/daily-question` is the first live gameplay route with on-demand prompt generation, one-answer-per-user locking, and both-answer reveal.
 - `implemented`: `/stats` now renders gameplay-only aggregates from real daily-question history.
@@ -104,7 +104,6 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `shell-only`: non-`daily-question` game modes remain presentational shells.
 
 ## Phase 3 Carry-Forward
-- `deprecated`: `/chat` remains in the app only as a mock artifact pending cleanup and is no longer part of the product roadmap.
-- `deprecated`: `/chat` route removal is maintenance work and not part of the next gameplay slice.
+- `removed`: `/chat` route removal landed as maintenance work and is not part of the next gameplay slice.
 - `implemented`: `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is now landed.
 - `planned`: additional game modes, leaderboards, sharing, similarity scoring, and travel-map depth remain outside the first Phase 3 slice.

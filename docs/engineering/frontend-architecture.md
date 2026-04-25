@@ -12,7 +12,6 @@ This file describes the current frontend operating model. It is the canonical re
 ## Route Categories
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
 - `shell-only`: non-`daily-question` slugs under `/games/[mode]`
-- `mock-only`: `/chat` (deprecated mock artifact pending cleanup)
 
 Use `docs/engineering/route-capability-matrix.md` for the full table.
 
@@ -78,7 +77,7 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
   - countdowns, future notes, shared timezone updates
   - trips, visited places, trip albums, and map
   - `/games/daily-question` and `/stats`
-- The suite explicitly excludes shell-only non-`daily-question` game modes and the deprecated mock `/chat` route.
+- The suite explicitly excludes shell-only non-`daily-question` game modes.
 - Daily-question generation has a narrow E2E seam through `OPENAI_DAILY_QUESTION_STUB_RESPONSE`; production behavior is unchanged when that env var is unset.
 - Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: the production-flow suite passed end to end with `7 passed (2.8m)`.
 
@@ -118,10 +117,9 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 
 New routes should compose these primitives rather than invent new layout systems per page.
 
-## Shell-Only And Mock-Only Rules
+## Shell-Only Rules
 - `shell-only` means the route exists to define layout and navigation, not to prove backend support.
-- `mock-only` means the route renders sample content for UX direction or survives temporarily as a deprecated artifact and must not be treated as real data.
-- Do not add server reads, new tables, or background jobs to shell-only or mock-only routes without updating `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md`.
+- Do not add server reads, new tables, or background jobs to shell-only routes without updating `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md`.
 
 ## Architecture Guardrails
 - Keep authenticated app-data reads server-prefetched and hydrated through TanStack Query.

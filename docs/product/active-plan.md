@@ -9,8 +9,8 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 - Keep `/stats` scoped to gameplay aggregates unless a new analytics contract is explicitly planned.
 
 ## Secondary Maintenance
-- Remove the deprecated `/chat` mock route after downstream references are cleared.
-- Do not expand `/chat` into a live backend feature; it is no longer on the product roadmap.
+- Deprecated `/chat` mock route cleanup is complete.
+- Do not reintroduce `/chat` as a live backend feature without a new product plan.
 
 ## Deferred
 - AI retrieval memory search remains Phase 4 work.
@@ -20,7 +20,6 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 
 ## Decision Queue
 - Choose the next live gameplay mode or slice before implementing more gameplay backend.
-- Decide whether `/chat` cleanup should happen before or after the next gameplay slice.
 - Decide whether travel-map depth should stay deferred until after the next gameplay expansion.
 - Decide when Phase 4 AI retrieval search should move from roadmap item to planned implementation slice.
 
