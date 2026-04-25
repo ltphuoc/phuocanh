@@ -1,5 +1,10 @@
 # User Decisions
 
+## Decision Recording Rule
+- Record user/product choices here.
+- Record engineering tradeoffs and implementation architecture choices in `docs/engineering/tech-decisions.md`.
+- Record shipped outcomes and verification history in `docs/changelog/implementation-log.md`.
+
 ## 2026-03-27
 - Confirmed phased delivery workflow: implement Phase 1, stop, report, then ask whether to continue.
 - Confirmed private scope: exactly two users in one couple space.

@@ -68,6 +68,7 @@
 ## Next Move
 - Primary: keep expanding Phase 3 gameplay beyond `daily-question` only from this now-green production-flow browser baseline.
 - Secondary maintenance: remove the deprecated `/chat` mock route once downstream references are cleared.
+- Current planning source: use `docs/product/active-plan.md` for the latest operating plan; this roadmap remains the phase-level history and direction.
 
 ## Phase 4 (Advanced+) - Status: planned
 - AI retrieval search with embeddings

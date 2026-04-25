@@ -84,6 +84,7 @@ If a change touches browser production flows:
 
 ## Agent Start Checklist
 - Read this file first.
+- Read `docs/product/active-plan.md` before roadmap, feature-planning, or "what should we build next" work.
 - Read `docs/product/business-rules.md` before changing auth, invite, memory, or list flows.
 - Read `docs/engineering/migration-playbook.md` before proposing schema work.
 - Read `docs/engineering/route-capability-matrix.md` before touching a route that is not obviously implemented.
