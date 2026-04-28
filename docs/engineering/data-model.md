@@ -28,6 +28,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `visited_places`
 - `game_rounds`
 - `game_round_answers`
+- `game_round_memory_targets`
 
 ## Core Relationships
 - One `couples` row -> many `couple_memberships`
@@ -42,6 +43,8 @@ This file summarizes the current schema. The authoritative source is always `sup
 - One `album_items` row -> one existing `memory_media` row
 - One `couples` row -> many `game_rounds`
 - One `game_rounds` row -> many `game_round_answers`
+- One `game_rounds` row -> zero or one `game_round_memory_targets` row in the current guess-date contract
+- One `memories` row -> many `game_round_memory_targets`
 
 ## Critical Constraints
 - Global singleton couple space via unique expression index on `couples ((true))`
@@ -61,6 +64,8 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_rounds` is unique on `(couple_id, mode, round_date)`
 - `game_round_answers` is unique on `(round_id, user_id)`
 - `game_round_answers.answer_body` must be trimmed non-empty text
+- `game_round_memory_targets.round_id` is primary-key unique and cascades when the round is deleted
+- `game_round_memory_targets.memory_id` restricts deletion of the linked source memory
 
 ## Security Posture
 - RLS is enabled across app tables.
@@ -76,6 +81,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `reminder_deliveries` is RLS-protected with no member-facing policies; reminder processing is handled by cron plus service-role reads/writes.
 - `game_rounds` is couple-scoped through RLS.
 - `game_round_answers` is not directly browser-readable or browser-writable in the current contract.
+- `game_round_memory_targets` has RLS enabled and no direct member-facing read/write policies; guess-date RPCs are the access path.
 - Gameplay round creation, answer submission, and reveal-safe gameplay reads are owned by SQL RPCs rather than client-only checks.
 
 ## RPCs In Use
@@ -90,6 +96,9 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `ensure_daily_question_round(target_mode game_mode, target_round_date date, prompt_locale text, prompt_text text, prompt_source text)`
 - `get_daily_question_round_state(target_round_date date)`
 - `get_daily_question_stats(target_history_days integer)`
+- `ensure_guess_date_round(target_round_date date)`
+- `submit_guess_date_answer(target_round_id uuid, guessed_date date)`
+- `get_guess_date_round_state(target_round_date date)`
 - `has_any_couple()`
 - `submit_daily_question_answer(target_round_id uuid, answer_body text)`
 
@@ -150,12 +159,23 @@ This file summarizes the current schema. The authoritative source is always `sup
 ## Phase 3 Slice 1 Tables
 - `game_rounds`
   - couple-scoped gameplay round rows with `mode`, `round_date`, `prompt_locale`, `prompt_text`, and `prompt_source`
-  - readable by active couple members; canonical inserts flow through `ensure_daily_question_round(...)`
+  - `game_mode` currently supports `daily_question` and `guess_date`
+  - `prompt_source` currently supports `openai` and `memory`
+  - readable by active couple members; canonical inserts flow through gameplay RPCs
 - `game_round_answers`
   - couple-scoped per-user answer rows keyed to a parent `game_round`
   - direct member reads/writes are not part of the runtime contract
   - secure read/reveal behavior flows through gameplay RPCs
   - stores one locked free-text answer per user per round
+
+## Phase 3 Slice 2 Tables
+- `game_round_memory_targets`
+  - links one `guess_date` round to the source `memories` row selected by SQL
+  - direct member reads/writes are not part of the runtime contract
+  - secure guess-date read/reveal behavior flows through `get_guess_date_round_state(...)`
+- `game_round_answers`
+  - also stores one locked ISO date guess per user for `guess_date` rounds in `answer_body`
+  - guess bodies remain hidden until all active partners submit
 
 ## Gameplay Stats Timezone Rule
 - `get_daily_question_stats(...)` now derives `today` from the saved `couples.timezone` value, not the database/server timezone.
@@ -163,4 +183,4 @@ This file summarizes the current schema. The authoritative source is always `sup
 
 ## Remaining Shell-Only Route Impact
 - The deprecated `/chat` mock route has been removed and should not be used to justify future schema work.
-- `/games/[mode]` still does not justify additional schema outside the delivered `daily_question` mode.
+- `/games/[mode]` still does not justify additional schema outside the delivered `daily_question` and `guess_date` modes.

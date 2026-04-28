@@ -475,6 +475,39 @@ export type Database = {
           },
         ]
       }
+      game_round_memory_targets: {
+        Row: {
+          created_at: string
+          memory_id: string
+          round_id: string
+        }
+        Insert: {
+          created_at?: string
+          memory_id: string
+          round_id: string
+        }
+        Update: {
+          created_at?: string
+          memory_id?: string
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_round_memory_targets_memory_id_fkey"
+            columns: ["memory_id"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_round_memory_targets_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: true
+            referencedRelation: "game_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_rounds: {
         Row: {
           couple_id: string
@@ -894,6 +927,10 @@ export type Database = {
         }
         Returns: string
       }
+      ensure_guess_date_round: {
+        Args: { target_round_date: string }
+        Returns: string
+      }
       get_daily_question_round_state: {
         Args: { target_round_date: string }
         Returns: {
@@ -919,7 +956,22 @@ export type Database = {
           viewer_participation_rate: number
         }[]
       }
-      has_any_couple: { Args: never; Returns: boolean }
+      get_guess_date_round_state: {
+        Args: { target_round_date: string }
+        Returns: {
+          active_partner_count: number
+          actual_date: string
+          answer_count: number
+          clue_text: string
+          id: string
+          prompt_locale: string
+          prompt_source: string
+          reveal_answers: boolean
+          revealed_guesses: Json
+          round_date: string
+          viewer_has_answered: boolean
+        }[]
+      }
       get_unlocked_future_note_contents: {
         Args: { target_couple_id: string }
         Returns: {
@@ -927,6 +979,7 @@ export type Database = {
           future_note_id: string
         }[]
       }
+      has_any_couple: { Args: never; Returns: boolean }
       invoke_reminder_processor: { Args: never; Returns: number }
       is_couple_member: { Args: { target_couple_id: string }; Returns: boolean }
       is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean }
@@ -953,6 +1006,10 @@ export type Database = {
         Args: { answer_body: string; target_round_id: string }
         Returns: string
       }
+      submit_guess_date_answer: {
+        Args: { guessed_date: string; target_round_id: string }
+        Returns: string
+      }
       update_couple_timezone: {
         Args: { target_couple_id: string; target_timezone: string }
         Returns: {
@@ -963,7 +1020,7 @@ export type Database = {
     }
     Enums: {
       countdown_kind: "anniversary" | "birthday" | "travel" | "plan" | "custom"
-      game_mode: "daily_question"
+      game_mode: "daily_question" | "guess_date"
       media_type: "image" | "video"
       membership_role: "partner_a" | "partner_b"
       membership_status: "active" | "inactive"
@@ -1102,7 +1159,7 @@ export const Constants = {
   public: {
     Enums: {
       countdown_kind: ["anniversary", "birthday", "travel", "plan", "custom"],
-      game_mode: ["daily_question"],
+      game_mode: ["daily_question", "guess_date"],
       media_type: ["image", "video"],
       membership_role: ["partner_a", "partner_b"],
       membership_status: ["active", "inactive"],

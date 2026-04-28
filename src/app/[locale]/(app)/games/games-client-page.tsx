@@ -68,6 +68,14 @@ export const GamesClientPage = (): ReactElement => {
         count: data.dailyQuestion.answerCount,
       })
     : gamesT("dailyQuestion.emptySummary");
+  const guessDateCtaLabel = data.guessDate
+    ? gamesT("guessDate.openCta")
+    : gamesT("guessDate.generateCta");
+  const guessDateSummary = data.guessDate
+    ? gamesT("guessDate.readySummary", {
+        count: data.guessDate.answerCount,
+      })
+    : gamesT("guessDate.emptySummary");
 
   return (
     <ShellPage
@@ -84,7 +92,7 @@ export const GamesClientPage = (): ReactElement => {
                   <Sparkles aria-hidden="true" className="size-4" strokeWidth={2.2} />
                   <p className="ui-meta">{gamesT("dailyQuestion.eyebrow")}</p>
                 </div>
-                <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
+                <h2 className="font-display text-[2rem] text-foreground">
                   {gamesT("dailyQuestion.title")}
                 </h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -131,28 +139,37 @@ export const GamesClientPage = (): ReactElement => {
                   <WandSparkles aria-hidden="true" className="size-4" strokeWidth={2.2} />
                   <p className="ui-meta">{gamesT("guessDate.eyebrow")}</p>
                 </div>
-                <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
+                <h2 className="font-display text-[2rem] text-foreground">
                   {gamesT("guessDate.title")}
                 </h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gamesT("guessDate.description")}
                 </p>
               </div>
-              <Badge>{gamesT("shellBadge")}</Badge>
+              <Badge variant="primary">
+                {dailyQuestionT(
+                  statusTranslationKeyByValue[data.guessDate?.status ?? "not_started"],
+                )}
+              </Badge>
             </div>
 
-            <p className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 text-sm text-muted-foreground shadow-whisper backdrop-blur-md">
-              {gamesT("guessDate.shellSummary")}
-            </p>
+            <div className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 shadow-whisper backdrop-blur-md">
+              <p className="text-sm font-semibold text-foreground">{guessDateSummary}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {data.guessDate
+                  ? gamesT("guessDate.clueSource")
+                  : gamesT("guessDate.generateHint")}
+              </p>
+            </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                className="inline-flex h-12 items-center justify-center rounded-pill border border-white/72 bg-white/78 px-5 text-sm font-semibold text-foreground shadow-whisper transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92"
+                className="inline-flex h-12 items-center justify-center rounded-pill ui-gradient-active px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-all duration-200 hover:-translate-y-0.5 hover:brightness-102"
                 href="/games/guess-date"
               >
-                {gamesT("guessDate.cta")}
+                {guessDateCtaLabel}
               </Link>
-              <p className="text-xs text-muted-foreground">{gamesT("guessDate.deferredNote")}</p>
+              <p className="text-xs text-muted-foreground">{gamesT("guessDate.liveNote")}</p>
             </div>
           </SectionCard>
         </PageReveal>
@@ -161,7 +178,7 @@ export const GamesClientPage = (): ReactElement => {
       <PageReveal delay={0.12}>
         <SectionCard className="flex flex-col gap-3" padding="comfortable" surface="petal">
           <p className="ui-meta">{gamesT("statsBridge.eyebrow")}</p>
-          <h2 className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
+          <h2 className="font-display text-[1.8rem] text-foreground">
             {gamesT("statsBridge.title")}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">

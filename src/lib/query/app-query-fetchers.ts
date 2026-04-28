@@ -5,6 +5,7 @@ import type {
   DailyQuestionAppData,
   FutureNotesAppData,
   GamesAppData,
+  GuessDateAppData,
   HomeAppData,
   ListsAppData,
   MapAppData,
@@ -40,6 +41,8 @@ export const appQueryFetchers = {
     fetchAppData("/api/app-data/games/daily-question"),
   futureNotes: (): Promise<FutureNotesAppData> => fetchAppData("/api/app-data/future-notes"),
   games: (): Promise<GamesAppData> => fetchAppData("/api/app-data/games"),
+  guessDate: (): Promise<GuessDateAppData> =>
+    fetchAppData("/api/app-data/games/guess-date"),
   home: (): Promise<HomeAppData> => fetchAppData("/api/app-data/home"),
   lists: (): Promise<ListsAppData> => fetchAppData("/api/app-data/lists"),
   map: (): Promise<MapAppData> => fetchAppData("/api/app-data/map"),

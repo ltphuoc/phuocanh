@@ -5,6 +5,7 @@ import {
   getDailyQuestionAppData,
   getFutureNotesAppData,
   getGamesAppData,
+  getGuessDateAppData,
   getHomeAppData,
   getListsAppData,
   getMapAppData,
@@ -83,6 +84,10 @@ export const GET = async (
 
         if (slug.length === 2 && slug[1] === "daily-question") {
           return json(await getDailyQuestionAppData(state.context));
+        }
+
+        if (slug.length === 2 && slug[1] === "guess-date") {
+          return json(await getGuessDateAppData(state.context));
         }
 
         break;

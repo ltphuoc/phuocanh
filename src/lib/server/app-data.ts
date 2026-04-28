@@ -8,6 +8,7 @@ import type {
   DailyQuestionAppData,
   FutureNotesAppData,
   GamesAppData,
+  GuessDateAppData,
   HomeAppData,
   ListsAppData,
   MapAppData,
@@ -39,6 +40,7 @@ import {
   getDailyQuestionPageData,
   getGameplayStatsPageData,
   getGamesHubData,
+  getGuessDatePageData,
 } from "@/lib/server/phase-three-data";
 
 const toAppDataContext = (context: CoupleContext): AppDataContext => ({
@@ -190,6 +192,13 @@ export const getDailyQuestionAppData = async (
   context: CoupleContext,
 ): Promise<DailyQuestionAppData> => ({
   ...(await getDailyQuestionPageData(context)),
+  context: toAppDataContext(context),
+});
+
+export const getGuessDateAppData = async (
+  context: CoupleContext,
+): Promise<GuessDateAppData> => ({
+  ...(await getGuessDatePageData(context)),
   context: toAppDataContext(context),
 });
 

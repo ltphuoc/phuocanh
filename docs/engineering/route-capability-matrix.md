@@ -22,17 +22,18 @@ This file is the canonical “what exists today” route map.
 | `/albums` | implemented | `getAlbumsPageData(...)` | Albums are trip-rooted and group existing `memory_media`; no separate upload pipeline exists |
 | `/albums/[albumId]` | implemented | `getAlbumDetailData(...)` | Route param is a real album UUID; invalid or foreign IDs must not resolve |
 | `/map` | implemented | `getMapPageData(...)` + `visited_places` | Atlas is provider-free and trip-linked; no coordinates, tiles, or route polylines exist yet |
-| `/games` | implemented | `getGamesHubData(...)` | Live hub for today’s `daily_question` status; non-live modes still render as shell-only entry points |
-| `/games/[mode]` | implemented for `/games/daily-question`; shell-only otherwise | `getDailyQuestionPageData(...)` + gameplay Server Actions for `daily-question`; route param only for other slugs | Only `/games/daily-question` has live prompt generation, answer capture, and reveal behavior in this slice |
+| `/games` | implemented | `getGamesHubData(...)` | Live hub for today’s `daily_question` and `guess_date` status; non-live modes still render as shell-only entry points |
+| `/games/[mode]` | implemented for `/games/daily-question` and `/games/guess-date`; shell-only otherwise | `getDailyQuestionPageData(...)` / `getGuessDatePageData(...)` + gameplay Server Actions for live modes; route param only for other slugs | Only `/games/daily-question` and `/games/guess-date` have live creation, answer capture, and reveal behavior in this slice |
 | `/stats` | implemented | `getGameplayStatsPageData(...)` | Gameplay-only metrics sourced from `daily_question` history; this is not a general analytics pipeline |
 | `/settings` | implemented | `getReadyCoupleContextOrRedirect()` + `updateCoupleTimezoneAction` | Owns the shared couple timezone only; account/privacy/per-user settings are still deferred |
 
 ## Latest Documented Backend Slice
-- `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is now the latest implemented slice after the Phase 2 closeout.
+- `Phase 3 Slice 2: Live Guess Date` is now the latest implemented slice after the Phase 3 Slice 1 gameplay foundation.
 - Delivered route capability in this slice:
-  - `/games` is now a real backend-backed hub with live status and entry links for `daily-question`
-  - `/games/[mode]` is live only for `/games/daily-question`
-  - `/stats` now reads real couple-scoped gameplay aggregates instead of placeholder values
+  - `/games` is a real backend-backed hub with live status and entry links for `daily-question` and `guess-date`
+  - `/games/[mode]` is live for `/games/daily-question` and `/games/guess-date`
+  - `/games/guess-date` creates one canonical memory-backed round per couple-local day, locks one date guess per active partner, and reveals only after all active partners submit
+  - `/stats` remains daily-question-only and is not expanded by guess-date
 - Deprecated `/chat` cleanup has been completed as maintenance work and is not part of the gameplay roadmap.
 
 ## Engineering Follow-Up Note

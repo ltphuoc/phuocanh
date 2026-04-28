@@ -114,16 +114,23 @@ This file is the canonical business-rule reference for the current app. If this 
 
 ## Gameplay
 - Gameplay is couple-scoped and readable by active couple members only.
-- The current live gameplay mode set contains one enum value: `daily_question`.
+- The current live gameplay mode set contains two enum values: `daily_question` and `guess_date`.
 - A gameplay round is unique per `(couple_id, mode, round_date)`.
 - `game_rounds.round_date` is the couple-local date token derived from the saved `couples.timezone`, not the server timezone.
 - The first successful round creation for a given couple-local day becomes canonical for that day.
 - Daily-question prompt generation is on demand, not cron-driven.
 - The stored prompt locale is set by the first successful opener for that couple-local day and is reused for both partners.
-- `game_rounds.prompt_source` currently records `openai` for generated prompts.
+- `game_rounds.prompt_source` records `openai` for generated daily-question prompts and `memory` for guess-date memory clues.
+- Guess-date round creation is on demand, not cron-driven.
+- A guess-date round is sourced from one existing couple memory selected in SQL: oldest unused by previous couple guess-date rounds, then oldest memory as fallback.
+- Guess-date clues are text-only in this slice and use memory note, then location, then a media/generic fallback.
+- Guess-date source memory IDs and actual memory dates stay hidden from browser clients until reveal.
+- Guess-date answer bodies store ISO date guesses in `game_round_answers.answer_body`.
 - A gameplay answer is unique per `(round_id, user_id)`.
-- Answers are trimmed non-empty free text and are locked after the first successful submission.
+- Daily-question answers are trimmed non-empty free text and locked after the first successful submission.
+- Guess-date answers are ISO date strings and locked after the first successful submission.
 - Daily-question answers remain hidden until both active partners have submitted for the same round.
+- Guess-date actual memory dates and both guesses remain hidden until both active partners have submitted for the same round.
 - Current gameplay stats are participation-only:
   - completed-round streak
   - total rounds
@@ -147,9 +154,12 @@ This file is the canonical business-rule reference for the current app. If this 
 - Duplicate `album_items` rows for the same `(album_id, memory_media_id)` pair
 - Visited-place row whose `visited_on` falls outside the parent trip window
 - More than one `game_rounds` row for the same `(couple_id, mode, round_date)` tuple
+- More than one `game_round_memory_targets` row for the same `round_id`
 - More than one `game_round_answers` row for the same `(round_id, user_id)` pair
 - Gameplay answer body that trims to empty text
 - Daily-question answers revealed before both partners have submitted
+- Guess-date actual date or guesses revealed before both active partners have submitted
+- Direct browser access to guess-date memory target rows
 - Non-member or cross-couple gameplay read/write access
 
 ## Enforcement Map
@@ -177,6 +187,10 @@ This file is the canonical business-rule reference for the current app. If this 
 - Canonical daily round creation: `ensure_daily_question_round(...)`
 - Locked single-answer submission: `submit_daily_question_answer(...)`
 - Hidden-until-reveal round reads: `get_daily_question_round_state(...)`
+- Guess-date memory target access: RLS on `game_round_memory_targets` with RPC-only member access
+- Canonical guess-date round creation and SQL memory selection: `ensure_guess_date_round(...)`
+- Locked single-date guess submission: `submit_guess_date_answer(...)`
+- Guess-date hidden-until-reveal reads: `get_guess_date_round_state(...)`
 - Gameplay aggregate reads: `get_daily_question_stats(...)`
 
 ## User-Visible Failure States
@@ -217,8 +231,18 @@ This file is the canonical business-rule reference for the current app. If this 
   - the answer body is empty or invalid
   - the viewer already submitted an answer for that round
   - database writes fail unexpectedly
+- Guess-date generation can fail if:
+  - the authenticated user lacks active couple membership
+  - the couple has no memories to source a clue
+  - the gameplay round RPC rejects the target day unexpectedly
+  - database writes fail unexpectedly
+- Guess-date answer submit can fail if:
+  - the round is missing or outside the member’s couple scope
+  - the guessed date is empty or invalid
+  - the viewer already submitted a guess for that round
+  - database writes fail unexpectedly
 
 ## Current Shell Boundaries
 - `/games` and `/stats` are implemented.
-- `/games/[mode]` is implemented only for `/games/daily-question`; other mode slugs remain shell-only.
+- `/games/[mode]` is implemented for `/games/daily-question` and `/games/guess-date`; other mode slugs remain shell-only.
 - Shell-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

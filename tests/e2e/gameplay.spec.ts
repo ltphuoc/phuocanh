@@ -4,7 +4,12 @@ import {
   onboardingTimeZone,
   partnerBStorageStatePath,
 } from "./support/runtime";
-import { buildUniqueText } from "./support/test-data";
+import {
+  buildUniqueText,
+  createOffsetDateInput,
+  createOffsetDateTimeLocalInput,
+  createTodayDateInput,
+} from "./support/test-data";
 
 test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end for both partners and updates the hub and stats", async ({
   browser,
@@ -67,4 +72,71 @@ test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(page.getByText("Current streak")).toBeVisible();
   await expect(page.getByText("1 day")).toBeVisible();
   await expect(page.getByText(/^Completed$/).first()).toBeVisible();
+});
+
+test("E2E-GAME-002 / E2E-GD-001 guess date runs end to end for both partners and updates the hub", async ({
+  browser,
+  page,
+}) => {
+  test.slow();
+
+  const memoryLocation = buildUniqueText("Guess date place", "E2E-GD-001");
+  const memoryNote = buildUniqueText("Guess date memory", "E2E-GD-001");
+  const actualDateInput = createOffsetDateInput(-30);
+  const partnerAAnswer = createTodayDateInput();
+  const partnerBAnswer = actualDateInput;
+
+  await page.goto("/en/memories/new");
+  await page.getByLabel("Happened at").fill(createOffsetDateTimeLocalInput(-30, 9, 15));
+  await page.getByLabel("Location").fill(memoryLocation);
+  await page.getByLabel("Note").fill(memoryNote);
+  await page.getByRole("button", { name: "Save memory" }).click();
+  await expect(page).toHaveURL(/\/en\/home$/, {
+    timeout: 20_000,
+  });
+
+  await page.goto("/en/games/guess-date");
+  await page.getByRole("button", { name: "Open today’s memory clue" }).click();
+  await expect(page.getByText(memoryNote)).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByLabel("Your date guess").fill(partnerAAnswer);
+  await page.getByRole("button", { name: "Lock date guess" }).click();
+  await expect(page.getByRole("heading", { name: "Waiting for the second guess" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("heading", { name: "Actual memory date" })).toHaveCount(0);
+
+  const partnerBContext = await browser.newContext({
+    locale: "en-US",
+    storageState: partnerBStorageStatePath,
+    timezoneId: onboardingTimeZone,
+  });
+  const partnerBPage = await partnerBContext.newPage();
+
+  await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
+  await expect(
+    partnerBPage.getByRole("link", { name: "Open today’s date guess" }),
+  ).toBeVisible();
+  await partnerBPage.goto(`${E2E_BASE_URL}/en/games/guess-date`);
+  await expect(partnerBPage.getByText(memoryNote)).toBeVisible();
+  await partnerBPage.getByLabel("Your date guess").fill(partnerBAnswer);
+  await partnerBPage.getByRole("button", { name: "Lock date guess" }).click();
+  await expect(
+    partnerBPage.getByRole("heading", { name: "Actual memory date" }),
+  ).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(partnerBPage.getByText("Guessed date")).toHaveCount(2);
+  await expect(partnerBPage.getByText("You", { exact: true })).toBeVisible();
+  await expect(partnerBPage.getByText("Partner", { exact: true })).toBeVisible();
+  await partnerBContext.close();
+
+  await page.goto("/en/games/guess-date");
+  await expect(page.getByRole("heading", { name: "Actual memory date" })).toBeVisible();
+  await expect(page.getByText("Guessed date")).toHaveCount(2);
+
+  await page.goto("/en/games");
+  await expect(page.getByText(/^Completed$/)).toHaveCount(2);
+  await expect(page.getByRole("link", { name: "Open today’s date guess" })).toBeVisible();
 });

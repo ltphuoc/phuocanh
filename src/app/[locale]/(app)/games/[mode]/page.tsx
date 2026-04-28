@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { ReactElement } from "react";
 import { DailyQuestionClientPage } from "@/app/[locale]/(app)/games/[mode]/daily-question-client-page";
+import { GuessDateClientPage } from "@/app/[locale]/(app)/games/[mode]/guess-date-client-page";
 import { ShellPage } from "@/components/layout/shell-page";
 import { ComingSoonCard } from "@/components/ui/coming-soon-card";
 import { SectionCard } from "@/components/ui/section-card";
@@ -11,7 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
 import { appQueryKeys } from "@/lib/query/app-query-keys";
 import { dehydrateAppQuery } from "@/lib/query/server-prefetch";
-import { getDailyQuestionAppData } from "@/lib/server/app-data";
+import { getDailyQuestionAppData, getGuessDateAppData } from "@/lib/server/app-data";
 import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
 
 interface GameModePageProps {
@@ -95,6 +96,20 @@ const renderDailyQuestionPage = async (locale: Locale): Promise<ReactElement> =>
   );
 };
 
+const renderGuessDatePage = async (locale: Locale): Promise<ReactElement> => {
+  const context = await getReadyCoupleContextOrRedirect(locale);
+  const dehydratedState = dehydrateAppQuery(
+    appQueryKeys.guessDate(),
+    await getGuessDateAppData(context),
+  );
+
+  return (
+    <HydrationBoundary state={dehydratedState}>
+      <GuessDateClientPage />
+    </HydrationBoundary>
+  );
+};
+
 export default async function GameModePage({
   params,
 }: GameModePageProps): Promise<ReactElement> {
@@ -102,6 +117,10 @@ export default async function GameModePage({
 
   if (mode === "daily-question") {
     return renderDailyQuestionPage(locale);
+  }
+
+  if (mode === "guess-date") {
+    return renderGuessDatePage(locale);
   }
 
   return renderShellModePage(locale, mode);

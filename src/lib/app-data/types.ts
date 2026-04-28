@@ -18,6 +18,7 @@ import type {
   DailyQuestionPageData,
   GamesHubData,
   GameplayStatsPageData,
+  GuessDatePageData,
 } from "@/lib/server/phase-three-data";
 
 export interface AppDataContext {
@@ -99,6 +100,10 @@ export interface GamesAppData extends GamesHubData {
 }
 
 export interface DailyQuestionAppData extends DailyQuestionPageData {
+  readonly context: AppDataContext;
+}
+
+export interface GuessDateAppData extends GuessDatePageData {
   readonly context: AppDataContext;
 }
 

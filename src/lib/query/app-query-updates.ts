@@ -44,6 +44,15 @@ export const invalidateGameplay = async (
   ]);
 };
 
+export const invalidateGuessDate = async (
+  queryClient: QueryClient,
+): Promise<void> => {
+  await Promise.all([
+    invalidate(queryClient, appQueryKeys.games()),
+    invalidate(queryClient, appQueryKeys.guessDate()),
+  ]);
+};
+
 export const invalidateTimezoneDerivedData = async (
   queryClient: QueryClient,
 ): Promise<void> => {
@@ -60,6 +69,7 @@ export const invalidateTimezoneDerivedData = async (
     invalidate(queryClient, appQueryKeys.albumDetails()),
     invalidate(queryClient, appQueryKeys.games()),
     invalidate(queryClient, appQueryKeys.dailyQuestion()),
+    invalidate(queryClient, appQueryKeys.guessDate()),
     invalidate(queryClient, appQueryKeys.stats()),
   ]);
 };

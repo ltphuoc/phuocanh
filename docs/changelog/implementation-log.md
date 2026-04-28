@@ -1,5 +1,29 @@
 # Implementation Log
 
+## 2026-04-28 - Phase 3 Slice 2: Live Guess Date
+
+### Delivered
+- Added SQL migrations for `guess_date`, memory-sourced prompts, `game_round_memory_targets`, and RPC-only guess-date gameplay:
+  - `ensure_guess_date_round(target_round_date date)`
+  - `submit_guess_date_answer(target_round_id uuid, guessed_date date)`
+  - `get_guess_date_round_state(target_round_date date)`
+- Updated generated Supabase types and schema inventory after applying the SQL locally.
+- Added server read/app-data/query wiring for `/games/guess-date` and extended `/games` with live `daily_question` plus `guess_date` status.
+- Added guess-date Server Actions, client forms, and the live `/games/guess-date` page flow.
+- Added English and Vietnamese copy for guess-date statuses, forms, and action messages.
+- Extended gameplay E2E coverage with the memory-backed guess-date partner reveal flow.
+- Synced product and engineering docs to mark `guess_date` live and document the hidden-until-reveal rule, memory target table, and RPC contract.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `pnpm i18n:check`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+- `git diff --check`
+- Focused E2E coverage was added and passed with `pnpm exec playwright test tests/e2e/gameplay.spec.ts` after a fresh local Supabase reset: `3 passed (19.7s)`.
+
 ## 2026-04-25 - Docs Refresh: Agent And Developer Guidance
 
 ### Delivered

@@ -283,6 +283,14 @@
         "answerRequired": "Hãy viết câu trả lời trước khi gửi."
       }
     },
+    "guessDate": {
+      "guessedDateDescription": "Chọn ngày bạn nghĩ kỷ niệm này đã diễn ra. Sau khi gửi thì không sửa được.",
+      "guessedDateLabel": "Ngày bạn đoán",
+      "submit": "Khoá ngày đoán",
+      "validation": {
+        "guessedDateRequired": "Hãy chọn một ngày trước khi gửi."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Múi giờ hiện tại: {timeZone}",
       "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
@@ -402,6 +410,13 @@
         "generationFailed": "Không thể tạo câu hỏi hôm nay lúc này.",
         "invalidSubmission": "Thông tin câu hỏi hằng ngày không hợp lệ.",
         "ready": "Câu hỏi hôm nay đã sẵn sàng."
+      },
+      "guessDate": {
+        "alreadyAnswered": "Bạn đã gửi lượt đoán ngày hôm nay rồi.",
+        "answered": "Đã khoá ngày bạn đoán cho hôm nay.",
+        "invalidSubmission": "Thông tin đoán ngày không hợp lệ.",
+        "noMemory": "Hãy thêm ít nhất một kỷ niệm trước khi bắt đầu đoán ngày.",
+        "ready": "Gợi ý kỷ niệm hôm nay đã sẵn sàng."
       }
     },
     "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại.",
@@ -750,11 +765,15 @@
       "title": "Câu hỏi hằng ngày"
     },
     "guessDate": {
-      "cta": "Mở shell mode",
-      "deferredNote": "Guess the date vẫn chỉ là shell cho tới khi hợp đồng daily-question ổn định.",
-      "description": "Mode đoán ngày vẫn chỉ giữ shell giao diện, chưa có runtime prompt hoặc câu trả lời thật trong slice này.",
-      "eyebrow": "Mode sau",
-      "shellSummary": "Route này vẫn chỉ để xem bố cục. Chưa có logic tính điểm, chọn kỷ niệm hay ghi nhận câu trả lời thật.",
+      "clueSource": "Gợi ý lấy từ một kỷ niệm đã lưu. Ngày thật vẫn ẩn cho tới lúc mở.",
+      "description": "Đoán xem một kỷ niệm đã lưu diễn ra vào ngày nào. Mỗi người gửi một lần, rồi cùng mở ngày thật.",
+      "emptySummary": "Hôm nay chưa có vòng đoán ngày. Mở vòng chơi để chọn một kỷ niệm đã lưu.",
+      "eyebrow": "Đang hoạt động",
+      "generateCta": "Bắt đầu đoán ngày hôm nay",
+      "generateHint": "Kỷ niệm cũ nhất chưa dùng sẽ được chọn trước; khi dùng hết thì quay lại kỷ niệm cũ nhất.",
+      "liveNote": "Đoán ngày đã có backend thật trong slice này.",
+      "openCta": "Mở vòng đoán ngày hôm nay",
+      "readySummary": "{count, plural, =0 {Gợi ý kỷ niệm hôm nay đã sẵn sàng và đang chờ cả hai lượt đoán.} one {Đã khoá 1 lượt đoán ngày cho hôm nay.} other {Cả hai lượt đoán ngày hôm nay đã được khoá.}}",
       "title": "Đoán ngày"
     },
     "statsBridge": {
@@ -833,6 +852,61 @@
         "not_started": "Chưa có câu trả lời nào. Hãy tạo câu hỏi khi hai bạn muốn bắt đầu.",
         "waiting_for_partner": "Bạn đã gửi câu trả lời. Vòng chơi sẽ mở ngay khi người ấy trả lời.",
         "waiting_for_you": "Người ấy đã trả lời trước. Hãy gửi phần của bạn để mở cả hai."
+      }
+    }
+  },
+  "guessDate": {
+    "header": {
+      "description": "Mở một gợi ý kỷ niệm cho hôm nay, mỗi người gửi một ngày đoán đã khoá, rồi cùng mở ngày thật khi cả hai hoàn tất.",
+      "eyebrow": "Chế độ kỷ niệm",
+      "title": "Đoán ngày"
+    },
+    "intro": {
+      "description": "Vòng đoán ngày hôm nay chưa tồn tại. Hãy bắt đầu từ một kỷ niệm đã lưu của hai bạn.",
+      "generateCta": "Mở gợi ý kỷ niệm hôm nay",
+      "title": "Mở vòng chơi"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {Chưa có lượt đoán nào} one {Đã khoá 1 lượt đoán} other {Đã khoá # lượt đoán}}",
+      "description": "Gợi ý này lấy từ một kỷ niệm đã lưu. Ngày thật của kỷ niệm vẫn đang được ẩn.",
+      "eyebrow": "Gợi ý kỷ niệm hôm nay",
+      "localDay": "Ngày cục bộ {date}",
+      "title": "Kỷ niệm này diễn ra ngày nào?"
+    },
+    "composer": {
+      "description": "Chọn một ngày. Slice này chưa hỗ trợ sửa sau khi gửi.",
+      "eyebrow": "Đến lượt bạn",
+      "title": "Gửi ngày bạn đoán"
+    },
+    "pending": {
+      "eyebrow": "Đã khoá",
+      "title": "Đang chờ lượt đoán thứ hai",
+      "viewerLocked": "Ngày bạn đoán đã được khoá. Ngày thật của kỷ niệm và cả hai lượt đoán vẫn ẩn cho tới khi người ấy gửi."
+    },
+    "reveal": {
+      "description": "Kỷ niệm này diễn ra vào {date}. Cả hai lượt đoán giờ đã được mở.",
+      "eyebrow": "Mở khoá",
+      "guessedDate": "Ngày đã đoán",
+      "title": "Ngày thật của kỷ niệm"
+    },
+    "guesses": {
+      "partner": "Người ấy",
+      "viewer": "Bạn"
+    },
+    "status": {
+      "completed": "Đã hoàn tất",
+      "not_started": "Chưa bắt đầu",
+      "waiting_for_partner": "Đang chờ người ấy",
+      "waiting_for_you": "Đang chờ bạn"
+    },
+    "statusNote": {
+      "eyebrow": "Trạng thái",
+      "title": "Hôm nay đang tiến triển thế nào",
+      "copy": {
+        "completed": "Vòng đoán ngày hôm nay đã hoàn tất và ngày thật của kỷ niệm đang hiển thị.",
+        "not_started": "Chưa mở vòng chơi nào. Hãy bắt đầu từ một kỷ niệm đã lưu khi hai bạn muốn chơi.",
+        "waiting_for_partner": "Bạn đã gửi lượt đoán. Phần mở khoá sẽ xuất hiện ngay khi người ấy đoán.",
+        "waiting_for_you": "Người ấy đã đoán trước. Hãy gửi ngày bạn đoán để mở ngày thật của kỷ niệm."
       }
     }
   },

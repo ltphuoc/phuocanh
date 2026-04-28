@@ -3,7 +3,7 @@
 This is the compact current-intent file for roadmap and feature-planning work. It is not a historical log. When this file conflicts with current runtime status, trust `docs/engineering/route-capability-matrix.md`.
 
 ## Current Direction
-- Primary priority: expand Phase 3 gameplay beyond the implemented `daily_question` mode.
+- Primary priority: choose the next Phase 3 gameplay slice after the implemented `daily_question` and `guess_date` modes.
 - Work should build from the green production-flow browser baseline for implemented routes.
 - Keep write paths behind Server Actions and SQL RPCs; do not add client-owned gameplay writes.
 - Keep `/stats` scoped to gameplay aggregates unless a new analytics contract is explicitly planned.
@@ -19,7 +19,7 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 - Leaderboards, sharing, scoring, similarity matching, answer edits, answer deletes, and gameplay backfill UI remain out of scope until separately decided.
 
 ## Decision Queue
-- Choose the next live gameplay mode or slice before implementing more gameplay backend.
+- Choose the next live gameplay mode or hardening slice before implementing more gameplay backend.
 - Decide whether travel-map depth should stay deferred until after the next gameplay expansion.
 - Decide when Phase 4 AI retrieval search should move from roadmap item to planned implementation slice.
 

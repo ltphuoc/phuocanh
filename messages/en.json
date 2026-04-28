@@ -283,6 +283,14 @@
         "answerRequired": "Write your answer before submitting."
       }
     },
+    "guessDate": {
+      "guessedDateDescription": "Choose the date you think this memory happened. You cannot change it after submission.",
+      "guessedDateLabel": "Your date guess",
+      "submit": "Lock date guess",
+      "validation": {
+        "guessedDateRequired": "Choose a date before submitting."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Current timezone: {timeZone}",
       "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
@@ -402,6 +410,13 @@
         "generationFailed": "Could not generate today’s question right now.",
         "invalidSubmission": "Daily question submission is invalid.",
         "ready": "Today’s question is ready."
+      },
+      "guessDate": {
+        "alreadyAnswered": "You already submitted today’s date guess.",
+        "answered": "Date guess locked for today.",
+        "invalidSubmission": "Guess-date submission is invalid.",
+        "noMemory": "Add at least one memory before starting guess the date.",
+        "ready": "Today’s memory clue is ready."
       }
     },
     "unexpectedError": "Something went wrong. Please try again.",
@@ -750,11 +765,15 @@
       "title": "Daily question"
     },
     "guessDate": {
-      "cta": "Open shell mode",
-      "deferredNote": "Guess the date stays shell-only until after the daily-question contract is stable.",
-      "description": "Memory-date guessing still keeps its presentation shell, but no real prompt or answer runtime ships here yet.",
-      "eyebrow": "Later mode",
-      "shellSummary": "This route still previews layout only. There is no live scoring, memory-pick logic, or answer capture behind it yet.",
+      "clueSource": "The clue comes from one saved couple memory. The actual date stays hidden until reveal.",
+      "description": "Guess which date a saved memory happened. Each partner submits once, then the memory date opens.",
+      "emptySummary": "No guess-date round exists for today yet. Open the round to pick one saved memory.",
+      "eyebrow": "Live now",
+      "generateCta": "Start today’s date guess",
+      "generateHint": "The oldest unused memory is selected first, with oldest-memory fallback after all have appeared.",
+      "liveNote": "Guess the date is backend-backed in this slice.",
+      "openCta": "Open today’s date guess",
+      "readySummary": "{count, plural, =0 {Today’s memory clue is ready and waiting for both guesses.} one {One date guess is locked for today.} other {Both date guesses are locked for today.}}",
       "title": "Guess the date"
     },
     "statsBridge": {
@@ -833,6 +852,61 @@
         "not_started": "No answers are in yet. Generate the question when you want to begin.",
         "waiting_for_partner": "Your answer is in. The round will reveal as soon as your partner answers.",
         "waiting_for_you": "Your partner already answered. Submit your side to reveal both."
+      }
+    }
+  },
+  "guessDate": {
+    "header": {
+      "description": "Open one memory clue for today, submit one locked date guess each, and reveal the actual memory date once both partners are in.",
+      "eyebrow": "Memory mode",
+      "title": "Guess the date"
+    },
+    "intro": {
+      "description": "Today’s date-guess round does not exist yet. Start it from an existing couple memory.",
+      "generateCta": "Open today’s memory clue",
+      "title": "Open the round"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {No guesses yet} one {1 guess locked} other {# guesses locked}}",
+      "description": "This clue is sourced from one saved memory. Its actual date stays hidden for now.",
+      "eyebrow": "Today’s memory clue",
+      "localDay": "Local day {date}",
+      "title": "Which date was this?"
+    },
+    "composer": {
+      "description": "Pick one date. Editing is not available after submission in this slice.",
+      "eyebrow": "Your turn",
+      "title": "Submit your date guess"
+    },
+    "pending": {
+      "eyebrow": "Locked",
+      "title": "Waiting for the second guess",
+      "viewerLocked": "Your date guess is locked. The actual memory date and both guesses stay hidden until your partner submits."
+    },
+    "reveal": {
+      "description": "The memory happened on {date}. Both date guesses are now open.",
+      "eyebrow": "Reveal",
+      "guessedDate": "Guessed date",
+      "title": "Actual memory date"
+    },
+    "guesses": {
+      "partner": "Partner",
+      "viewer": "You"
+    },
+    "status": {
+      "completed": "Completed",
+      "not_started": "Not started",
+      "waiting_for_partner": "Waiting for partner",
+      "waiting_for_you": "Waiting for you"
+    },
+    "statusNote": {
+      "eyebrow": "Status",
+      "title": "How today is moving",
+      "copy": {
+        "completed": "Today’s guess-date round is complete and the memory date is visible.",
+        "not_started": "No round is open yet. Start from a saved memory when you want to begin.",
+        "waiting_for_partner": "Your guess is in. The reveal opens as soon as your partner guesses.",
+        "waiting_for_you": "Your partner already guessed. Submit your date to reveal the memory date."
       }
     }
   },

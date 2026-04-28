@@ -10,7 +10,10 @@ import {
 import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
 import { generateDailyQuestionPrompt } from "@/lib/server/openai-daily-question";
 import { requireReadyCoupleContext } from "@/lib/server/couple-context";
-import { getTodayDailyQuestionRoundId } from "@/lib/server/phase-three-data";
+import {
+  getTodayDailyQuestionRoundId,
+  getTodayGuessDateRoundId,
+} from "@/lib/server/phase-three-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentDateTokenInTimeZone } from "@/lib/utils/couple-timezone";
 
@@ -20,6 +23,11 @@ const ensureDailyQuestionRoundSchema = z.object({
 
 const submitDailyQuestionAnswerSchema = z.object({
   answerBody: z.string().trim().min(1).max(800),
+  roundId: z.uuid(),
+});
+
+const submitGuessDateAnswerSchema = z.object({
+  guessedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   roundId: z.uuid(),
 });
 
@@ -36,10 +44,26 @@ const INVALID_DAILY_QUESTION_ANSWER_MESSAGES = new Set([
   "INVALID_GAME_ANSWER",
 ]);
 
+const INVALID_GUESS_DATE_ROUND_MESSAGES = new Set([
+  "COUPLE_CONTEXT_REQUIRED",
+  "GAME_ROUND_UNAVAILABLE",
+  "INVALID_ROUND_DATE",
+]);
+
+const INVALID_GUESS_DATE_ANSWER_MESSAGES = new Set([
+  "GAME_ROUND_NOT_FOUND",
+  "INVALID_GAME_ANSWER",
+]);
+
 const revalidateGameplayPaths = (): void => {
   revalidateLocalizedPath("/games");
   revalidateLocalizedPath("/games/daily-question");
   revalidateLocalizedPath("/stats");
+};
+
+const revalidateGuessDatePaths = (): void => {
+  revalidateLocalizedPath("/games");
+  revalidateLocalizedPath("/games/guess-date");
 };
 
 export const ensureDailyQuestionRoundAction = async (
@@ -133,6 +157,91 @@ export const submitDailyQuestionAnswerAction = async (
     }
 
     console.error("Failed to submit daily question answer", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const ensureGuessDateRoundAction = async (
+  _previousState: ActionState,
+  _formData: FormData,
+): Promise<ActionState> => {
+  void _previousState;
+  void _formData;
+
+  try {
+    const context = await requireReadyCoupleContext();
+    const roundDate = getCurrentDateTokenInTimeZone(context.timezone);
+    const existingRoundId = await getTodayGuessDateRoundId(context, roundDate);
+
+    if (existingRoundId) {
+      revalidateGuessDatePaths();
+      return createSuccessState("gameplay.guessDate.ready");
+    }
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("ensure_guess_date_round", {
+      target_round_date: roundDate,
+    });
+
+    if (error) {
+      if (error.message === "NO_GUESS_DATE_MEMORY") {
+        return createErrorState("gameplay.guessDate.noMemory");
+      }
+
+      if (INVALID_GUESS_DATE_ROUND_MESSAGES.has(error.message)) {
+        return createErrorState("gameplay.guessDate.invalidSubmission");
+      }
+
+      console.error("Failed to ensure guess date round", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateGuessDatePaths();
+    return createSuccessState("gameplay.guessDate.ready");
+  } catch (error: unknown) {
+    console.error("Failed to ensure guess date round", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const submitGuessDateAnswerAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    await requireReadyCoupleContext();
+    const parsed = submitGuessDateAnswerSchema.parse({
+      guessedDate: formData.get("guessedDate"),
+      roundId: formData.get("roundId"),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("submit_guess_date_answer", {
+      guessed_date: parsed.guessedDate,
+      target_round_id: parsed.roundId,
+    });
+
+    if (error) {
+      if (error.message === "GAME_ANSWER_ALREADY_SUBMITTED") {
+        return createErrorState("gameplay.guessDate.alreadyAnswered");
+      }
+
+      if (INVALID_GUESS_DATE_ANSWER_MESSAGES.has(error.message)) {
+        return createErrorState("gameplay.guessDate.invalidSubmission");
+      }
+
+      console.error("Failed to submit guess date answer", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateGuessDatePaths();
+    return createSuccessState("gameplay.guessDate.answered");
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState("gameplay.guessDate.invalidSubmission");
+    }
+
+    console.error("Failed to submit guess date answer", error);
     return createErrorState("unexpectedError");
   }
 };

@@ -31,6 +31,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `updateCoupleTimezoneAction` | `timeZone` | `ActionState` | Calls `update_couple_timezone(...)`; revalidates `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, and `/map` |
 | `ensureDailyQuestionRoundAction` | `locale` | `ActionState` | Generates one prompt through the OpenAI Responses API, calls `ensure_daily_question_round(...)`, and revalidates `/games`, `/games/daily-question`, and `/stats` |
 | `submitDailyQuestionAnswerAction` | `roundId`, `answerBody` | `ActionState` | Calls `submit_daily_question_answer(...)`; answers are single-submit and locked after success; revalidates `/games`, `/games/daily-question`, and `/stats` |
+| `ensureGuessDateRoundAction` | none | `ActionState` | Calls `ensure_guess_date_round(...)`; creates or opens one memory-backed `guess_date` round for the couple-local day; revalidates `/games` and `/games/guess-date` only |
+| `submitGuessDateAnswerAction` | `roundId`, `guessedDate` | `ActionState` | Calls `submit_guess_date_answer(...)`; guesses are single-submit and locked after success; revalidates `/games` and `/games/guess-date` only |
 
 Migrated authenticated app-data Server Actions no longer refresh the active router tree after success. They keep path revalidation for later server-rendered navigations; same-session UI freshness is owned by TanStack Query invalidation, cache updates, and optimistic updates in the calling form.
 
@@ -52,6 +54,12 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
   - `gameplay.dailyQuestion.ready`
   - `gameplay.dailyQuestion.answered`
   - `gameplay.dailyQuestion.alreadyAnswered`
+- Guess-date mutations return validation/action errors through:
+  - `gameplay.guessDate.invalidSubmission`
+  - `gameplay.guessDate.noMemory`
+  - `gameplay.guessDate.ready`
+  - `gameplay.guessDate.answered`
+  - `gameplay.guessDate.alreadyAnswered`
 - `/auth/callback` does not return a JSON error payload; it redirects to `/login` on callback failure.
 
 ## Route Handler
@@ -88,8 +96,9 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 | `GET /api/app-data/albums` | `albums` | Album summaries with signed covers |
 | `GET /api/app-data/albums/[albumId]` | `album(albumId)` | Album detail and signed media; `404` when not visible |
 | `GET /api/app-data/settings` | `settings` | Current shared timezone |
-| `GET /api/app-data/games` | `games` | Games hub daily-question state |
+| `GET /api/app-data/games` | `games` | Games hub daily-question and guess-date state |
 | `GET /api/app-data/games/daily-question` | `dailyQuestion` | Current daily-question round, viewer state, reveal state |
+| `GET /api/app-data/games/guess-date` | `guessDate` | Current guess-date round, viewer state, clue state, reveal state |
 | `GET /api/app-data/stats` | `stats` | Daily-question stats and recent history |
 
 ## Database RPCs Used By App Layer
@@ -133,6 +142,20 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 - `get_daily_question_round_state(target_round_date)`
   - Secure gameplay round read path only
   - Returns today’s round metadata plus revealed answers only when the round is complete
+- `ensure_guess_date_round(target_round_date)`
+  - Guess-date round creation path only
+  - Requires active membership and creates or returns the canonical `guess_date` round for the couple-local day
+  - Selects the source memory in SQL, preferring the oldest unused memory for this couple’s prior guess-date rounds, then the oldest memory fallback
+  - Stores a text clue in `game_rounds.prompt_text`, `prompt_source = 'memory'`, and links the round to `game_round_memory_targets`
+  - Raises `NO_GUESS_DATE_MEMORY` when no couple memory exists
+- `submit_guess_date_answer(target_round_id, guessed_date)`
+  - Guess-date answer mutation path only
+  - Verifies active membership, same-couple access, one-answer-per-user, and locked-after-submit behavior
+  - Stores the ISO date guess in `game_round_answers.answer_body`
+- `get_guess_date_round_state(target_round_date)`
+  - Secure guess-date read path only
+  - Returns clue/status fields before reveal without memory ID or actual date
+  - Reveals `actual_date` and both guesses only when all active partners have submitted
 - `get_daily_question_stats(target_history_days)`
   - Secure gameplay stats read path only
   - Computes `today` from the saved couple timezone before building streak/history output
@@ -166,14 +189,18 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 - `signMemoryMediaStorageItems(items)`
   - Shared server helper used by home, memory detail, and album reads for `memory-media` signed URLs
 
-## Phase 3 Slice 1 Read Model
+## Phase 3 Read Model
 - `getGamesHubData(context)`
-  - Reads today’s daily-question round for the couple-local day
-  - Returns the current viewer status for the hub card through `get_daily_question_round_state(...)`
+  - Reads today’s daily-question and guess-date rounds for the couple-local day
+  - Returns the current viewer status for the hub cards through secure gameplay state RPCs
 - `getDailyQuestionPageData(context, roundId?)`
   - Reads today’s daily-question round, the viewer submission state, and the reveal state
   - Uses `get_daily_question_round_state(...)` so answer bodies stay hidden until reveal
   - Returns `null` round state for missing/foreign/invalid round IDs
+- `getGuessDatePageData(context)`
+  - Reads today’s guess-date round, the viewer submission state, clue state, and reveal state
+  - Uses `get_guess_date_round_state(...)` so actual memory dates and guesses stay hidden until reveal
+  - Returns `null` round state when no canonical round exists for the couple-local day
 - `getGameplayStatsPageData(context)`
   - Reads gameplay-only daily-question aggregates for `/stats`
   - Uses `get_daily_question_stats(...)`
@@ -181,7 +208,7 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 
 ## Non-Contracts
 - Shell-only routes do not imply backend/API support.
-- `/games/[mode]` is only backend-backed for `/games/daily-question`; other mode slugs still do not imply additional gameplay APIs.
+- `/games/[mode]` is backend-backed for `/games/daily-question` and `/games/guess-date`; other mode slugs still do not imply additional gameplay APIs.
 - Coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract yet.
 
 ## Compatibility Rule

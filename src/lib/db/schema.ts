@@ -88,6 +88,11 @@ export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
     sourceMigration: "20260402100000_phase3_slice1_games_stats_foundation.sql",
     status: "planned_mirror",
   },
+  {
+    name: "public.game_round_memory_targets",
+    sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
+    status: "planned_mirror",
+  },
 ] as const;
 
 export const phaseOneTableBaseline = appTableBaseline;
@@ -186,6 +191,21 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.get_daily_question_stats(integer)",
     sourceMigration: "20260411110000_fix_daily_question_stats_today_timezone.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.ensure_guess_date_round(date)",
+    sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.submit_guess_date_answer(uuid, date)",
+    sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.get_guess_date_round_state(date)",
+    sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
     status: "sql_authoritative",
   },
   {

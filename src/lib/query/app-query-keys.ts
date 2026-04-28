@@ -8,6 +8,7 @@ export const appQueryKeys = {
   dailyQuestion: () => [...appDataRoot, "daily-question"] as const,
   futureNotes: () => [...appDataRoot, "future-notes"] as const,
   games: () => [...appDataRoot, "games"] as const,
+  guessDate: () => [...appDataRoot, "guess-date"] as const,
   home: () => [...appDataRoot, "home"] as const,
   lists: () => [...appDataRoot, "lists"] as const,
   map: () => [...appDataRoot, "map"] as const,
