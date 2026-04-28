@@ -291,6 +291,14 @@
         "guessedDateRequired": "Choose a date before submitting."
       }
     },
+    "trivia": {
+      "answerDescription": "Choose the saved location that matches today’s memory clue. You cannot change it after submission.",
+      "answerLabel": "Your location answer",
+      "submit": "Lock trivia answer",
+      "validation": {
+        "answerRequired": "Choose an answer before submitting."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Current timezone: {timeZone}",
       "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
@@ -417,6 +425,13 @@
         "invalidSubmission": "Guess-date submission is invalid.",
         "noMemory": "Add at least one memory before starting guess the date.",
         "ready": "Today’s memory clue is ready."
+      },
+      "trivia": {
+        "alreadyAnswered": "You already answered today’s trivia round.",
+        "answered": "Trivia answer locked for today.",
+        "invalidSubmission": "Trivia submission is invalid.",
+        "noMemory": "Add memories with at least two distinct locations before starting trivia.",
+        "ready": "Today’s trivia clue is ready."
       }
     },
     "unexpectedError": "Something went wrong. Please try again.",
@@ -758,7 +773,7 @@
       "eyebrow": "Live now",
       "generateCta": "Start today’s question",
       "generateHint": "The first partner who opens today’s round sets the stored prompt language for that day.",
-      "onlyLiveMode": "Daily question is the only live mode in this slice.",
+      "liveNote": "Daily question is backend-backed.",
       "openCta": "Open today’s round",
       "promptLocale": "Stored in {locale}.",
       "readySummary": "{count, plural, =0 {Today’s prompt is ready and waiting for both answers.} one {One answer is in for today’s round.} other {Both answer slots are active for today’s round.}}",
@@ -776,6 +791,18 @@
       "readySummary": "{count, plural, =0 {Today’s memory clue is ready and waiting for both guesses.} one {One date guess is locked for today.} other {Both date guesses are locked for today.}}",
       "title": "Guess the date"
     },
+    "trivia": {
+      "clueSource": "The clue comes from one saved memory. The correct location stays hidden until reveal.",
+      "description": "Guess which saved location belongs to a memory clue. Each partner chooses once, then correctness opens.",
+      "emptySummary": "No trivia round exists for today yet. Start from saved memories with locations.",
+      "eyebrow": "Live now",
+      "generateCta": "Start today’s trivia",
+      "generateHint": "Trivia needs at least two distinct saved memory locations for fair answer choices.",
+      "liveNote": "Trivia is backend-backed in this slice.",
+      "openCta": "Open today’s trivia",
+      "readySummary": "{count, plural, =0 {Today’s trivia clue is ready and waiting for both answers.} one {One trivia answer is locked for today.} other {Both trivia answers are locked for today.}}",
+      "title": "Who remembers better?"
+    },
     "statsBridge": {
       "cta": "Open live stats",
       "description": "The stats view now reflects real gameplay history from daily-question rounds instead of placeholder widgets.",
@@ -791,7 +818,7 @@
     "placeholder": "This route is a structured shell for the selected game mode. Prompt generation, answer capture, and streak updates will connect here in a later phase.",
     "comingSoon": {
       "cta": "Back to game hub",
-      "description": "This mode still stays shell-only while daily question owns the first live gameplay contract.",
+      "description": "This mode still stays shell-only while daily question, guess the date, and trivia own the current live gameplay contracts.",
       "title": "Gameplay wiring"
     },
     "fallbackModeLabel": "Mode"
@@ -907,6 +934,63 @@
         "not_started": "No round is open yet. Start from a saved memory when you want to begin.",
         "waiting_for_partner": "Your guess is in. The reveal opens as soon as your partner guesses.",
         "waiting_for_you": "Your partner already guessed. Submit your date to reveal the memory date."
+      }
+    }
+  },
+  "trivia": {
+    "header": {
+      "description": "Open one memory clue for today, choose the matching saved location, and reveal correctness once both partners are in.",
+      "eyebrow": "Memory quiz",
+      "title": "Who remembers better?"
+    },
+    "intro": {
+      "description": "Today’s trivia round does not exist yet. Start it from saved memories that have locations.",
+      "generateCta": "Open today’s trivia clue",
+      "title": "Open the round"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {No answers yet} one {1 answer locked} other {# answers locked}}",
+      "description": "This clue is sourced from one saved memory. Its matching location stays hidden for now.",
+      "eyebrow": "Today’s memory clue",
+      "localDay": "Local day {date}",
+      "title": "Which location was this?"
+    },
+    "composer": {
+      "description": "Pick one saved location. Editing is not available after submission in this slice.",
+      "eyebrow": "Your turn",
+      "title": "Choose the location"
+    },
+    "pending": {
+      "eyebrow": "Locked",
+      "title": "Waiting for the second answer",
+      "viewerLocked": "Your trivia answer is locked. The correct location and both answers stay hidden until your partner submits."
+    },
+    "reveal": {
+      "correct": "Correct",
+      "description": "The matching location was {answer}.",
+      "eyebrow": "Reveal",
+      "incorrect": "Not this time",
+      "selectedAnswer": "Selected answer",
+      "title": "Correct location"
+    },
+    "answers": {
+      "partner": "Partner",
+      "viewer": "You"
+    },
+    "status": {
+      "completed": "Completed",
+      "not_started": "Not started",
+      "waiting_for_partner": "Waiting for partner",
+      "waiting_for_you": "Waiting for you"
+    },
+    "statusNote": {
+      "eyebrow": "Status",
+      "title": "How today is moving",
+      "copy": {
+        "completed": "Today’s trivia round is complete and both answers are visible.",
+        "not_started": "No trivia round is open yet. Start from saved memory locations when you want to begin.",
+        "waiting_for_partner": "Your answer is in. The reveal opens as soon as your partner answers.",
+        "waiting_for_you": "Your partner already answered. Choose your location to reveal correctness."
       }
     }
   },

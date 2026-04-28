@@ -291,6 +291,14 @@
         "guessedDateRequired": "Hãy chọn một ngày trước khi gửi."
       }
     },
+    "trivia": {
+      "answerDescription": "Chọn địa điểm đã lưu khớp với gợi ý kỷ niệm hôm nay. Sau khi gửi thì không sửa được.",
+      "answerLabel": "Đáp án địa điểm của bạn",
+      "submit": "Khoá đáp án trivia",
+      "validation": {
+        "answerRequired": "Hãy chọn một đáp án trước khi gửi."
+      }
+    },
     "settingsTimezone": {
       "currentValue": "Múi giờ hiện tại: {timeZone}",
       "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
@@ -417,6 +425,13 @@
         "invalidSubmission": "Thông tin đoán ngày không hợp lệ.",
         "noMemory": "Hãy thêm ít nhất một kỷ niệm trước khi bắt đầu đoán ngày.",
         "ready": "Gợi ý kỷ niệm hôm nay đã sẵn sàng."
+      },
+      "trivia": {
+        "alreadyAnswered": "Bạn đã trả lời vòng trivia hôm nay rồi.",
+        "answered": "Đã khoá đáp án trivia cho hôm nay.",
+        "invalidSubmission": "Thông tin trivia không hợp lệ.",
+        "noMemory": "Hãy thêm các kỷ niệm có ít nhất hai địa điểm khác nhau trước khi bắt đầu trivia.",
+        "ready": "Gợi ý trivia hôm nay đã sẵn sàng."
       }
     },
     "unexpectedError": "Có lỗi xảy ra. Vui lòng thử lại.",
@@ -758,7 +773,7 @@
       "eyebrow": "Đang hoạt động",
       "generateCta": "Bắt đầu câu hỏi hôm nay",
       "generateHint": "Người mở vòng chơi đầu tiên hôm nay sẽ quyết định ngôn ngữ prompt được lưu cho ngày đó.",
-      "onlyLiveMode": "Trong slice này chỉ có daily question là mode thật.",
+      "liveNote": "Daily question đã có backend thật.",
       "openCta": "Mở vòng chơi hôm nay",
       "promptLocale": "Được lưu bằng {locale}.",
       "readySummary": "{count, plural, =0 {Prompt hôm nay đã sẵn sàng và đang chờ cả hai câu trả lời.} one {Đã có 1 câu trả lời cho vòng hôm nay.} other {Cả hai ô trả lời của hôm nay đều đã hoạt động.}}",
@@ -776,6 +791,18 @@
       "readySummary": "{count, plural, =0 {Gợi ý kỷ niệm hôm nay đã sẵn sàng và đang chờ cả hai lượt đoán.} one {Đã khoá 1 lượt đoán ngày cho hôm nay.} other {Cả hai lượt đoán ngày hôm nay đã được khoá.}}",
       "title": "Đoán ngày"
     },
+    "trivia": {
+      "clueSource": "Gợi ý lấy từ một kỷ niệm đã lưu. Địa điểm đúng vẫn ẩn cho tới lúc mở.",
+      "description": "Đoán địa điểm đã lưu nào thuộc về một gợi ý kỷ niệm. Mỗi người chọn một lần, rồi cùng mở đúng sai.",
+      "emptySummary": "Hôm nay chưa có vòng trivia. Hãy bắt đầu từ các kỷ niệm đã lưu có địa điểm.",
+      "eyebrow": "Đang hoạt động",
+      "generateCta": "Bắt đầu trivia hôm nay",
+      "generateHint": "Trivia cần ít nhất hai địa điểm kỷ niệm khác nhau để có lựa chọn công bằng.",
+      "liveNote": "Trivia đã có backend thật trong slice này.",
+      "openCta": "Mở trivia hôm nay",
+      "readySummary": "{count, plural, =0 {Gợi ý trivia hôm nay đã sẵn sàng và đang chờ cả hai đáp án.} one {Đã khoá 1 đáp án trivia cho hôm nay.} other {Cả hai đáp án trivia hôm nay đã được khoá.}}",
+      "title": "Ai nhớ rõ hơn?"
+    },
     "statsBridge": {
       "cta": "Mở thống kê thật",
       "description": "Màn hình stats giờ đọc từ lịch sử daily-question thật thay vì các widget placeholder.",
@@ -791,7 +818,7 @@
     "placeholder": "Route này là giao diện khung cho chế độ game đã chọn. Tạo prompt, ghi nhận câu trả lời và cập nhật chuỗi sẽ được nối ở phase sau.",
     "comingSoon": {
       "cta": "Về trung tâm trò chơi",
-      "description": "Mode này vẫn chỉ là shell trong khi daily question giữ hợp đồng gameplay thật đầu tiên.",
+      "description": "Mode này vẫn chỉ là shell trong khi daily question, đoán ngày và trivia là các gameplay thật hiện tại.",
       "title": "Nối gameplay"
     },
     "fallbackModeLabel": "Chế độ"
@@ -907,6 +934,63 @@
         "not_started": "Chưa mở vòng chơi nào. Hãy bắt đầu từ một kỷ niệm đã lưu khi hai bạn muốn chơi.",
         "waiting_for_partner": "Bạn đã gửi lượt đoán. Phần mở khoá sẽ xuất hiện ngay khi người ấy đoán.",
         "waiting_for_you": "Người ấy đã đoán trước. Hãy gửi ngày bạn đoán để mở ngày thật của kỷ niệm."
+      }
+    }
+  },
+  "trivia": {
+    "header": {
+      "description": "Mở một gợi ý kỷ niệm cho hôm nay, chọn địa điểm đã lưu khớp nhất, rồi cùng mở đúng sai khi cả hai hoàn tất.",
+      "eyebrow": "Quiz kỷ niệm",
+      "title": "Ai nhớ rõ hơn?"
+    },
+    "intro": {
+      "description": "Vòng trivia hôm nay chưa tồn tại. Hãy bắt đầu từ các kỷ niệm đã lưu có địa điểm.",
+      "generateCta": "Mở gợi ý trivia hôm nay",
+      "title": "Mở vòng chơi"
+    },
+    "round": {
+      "answerCount": "{count, plural, =0 {Chưa có đáp án nào} one {Đã khoá 1 đáp án} other {Đã khoá # đáp án}}",
+      "description": "Gợi ý này lấy từ một kỷ niệm đã lưu. Địa điểm khớp với kỷ niệm vẫn đang được ẩn.",
+      "eyebrow": "Gợi ý kỷ niệm hôm nay",
+      "localDay": "Ngày cục bộ {date}",
+      "title": "Kỷ niệm này ở địa điểm nào?"
+    },
+    "composer": {
+      "description": "Chọn một địa điểm đã lưu. Slice này chưa hỗ trợ sửa sau khi gửi.",
+      "eyebrow": "Đến lượt bạn",
+      "title": "Chọn địa điểm"
+    },
+    "pending": {
+      "eyebrow": "Đã khoá",
+      "title": "Đang chờ đáp án thứ hai",
+      "viewerLocked": "Đáp án trivia của bạn đã được khoá. Địa điểm đúng và cả hai đáp án vẫn ẩn cho tới khi người ấy gửi."
+    },
+    "reveal": {
+      "correct": "Đúng",
+      "description": "Địa điểm khớp là {answer}.",
+      "eyebrow": "Mở khoá",
+      "incorrect": "Chưa đúng lần này",
+      "selectedAnswer": "Đáp án đã chọn",
+      "title": "Địa điểm đúng"
+    },
+    "answers": {
+      "partner": "Người ấy",
+      "viewer": "Bạn"
+    },
+    "status": {
+      "completed": "Đã hoàn tất",
+      "not_started": "Chưa bắt đầu",
+      "waiting_for_partner": "Đang chờ người ấy",
+      "waiting_for_you": "Đang chờ bạn"
+    },
+    "statusNote": {
+      "eyebrow": "Trạng thái",
+      "title": "Hôm nay đang tiến triển thế nào",
+      "copy": {
+        "completed": "Vòng trivia hôm nay đã hoàn tất và cả hai đáp án đều đang hiển thị.",
+        "not_started": "Chưa mở vòng trivia nào. Hãy bắt đầu từ các địa điểm kỷ niệm đã lưu khi hai bạn muốn chơi.",
+        "waiting_for_partner": "Bạn đã gửi đáp án. Phần mở khoá sẽ xuất hiện ngay khi người ấy trả lời.",
+        "waiting_for_you": "Người ấy đã trả lời trước. Hãy chọn địa điểm của bạn để mở đúng sai."
       }
     }
   },

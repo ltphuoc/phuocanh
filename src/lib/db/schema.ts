@@ -93,6 +93,11 @@ export const appTableBaseline: readonly DrizzleBaselineEntity[] = [
     sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
     status: "planned_mirror",
   },
+  {
+    name: "public.game_round_trivia_targets",
+    sourceMigration: "20260428131000_phase3_slice3_trivia_runtime.sql",
+    status: "planned_mirror",
+  },
 ] as const;
 
 export const phaseOneTableBaseline = appTableBaseline;
@@ -206,6 +211,21 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
   {
     name: "public.get_guess_date_round_state(date)",
     sourceMigration: "20260428121000_phase3_slice2_guess_date_runtime.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.ensure_trivia_round(date)",
+    sourceMigration: "20260428131000_phase3_slice3_trivia_runtime.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.submit_trivia_answer(uuid, text)",
+    sourceMigration: "20260428131000_phase3_slice3_trivia_runtime.sql",
+    status: "sql_authoritative",
+  },
+  {
+    name: "public.get_trivia_round_state(date)",
+    sourceMigration: "20260428131000_phase3_slice3_trivia_runtime.sql",
     status: "sql_authoritative",
   },
   {

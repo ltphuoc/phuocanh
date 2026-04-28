@@ -15,7 +15,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 | 7 | Map các nơi đã đi cùng nhau | 2 | implemented |
 | 8 | Album theo từng chuyến đi | 2 | implemented |
 | 9 | Countdown sinh nhật / anniversary / chuyến đi | 2 | implemented |
-| 10 | Quiz ai nhớ rõ hơn | 3 | shell-only |
+| 10 | Quiz ai nhớ rõ hơn | 3 | implemented |
 | 11 | Guess the date | 3 | implemented |
 | 12 | This or that | 4 | planned |
 | 13 | Memory cards từ ảnh thật | 4 | planned |
@@ -52,10 +52,10 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
 - `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
 - `removed`: the deprecated `/chat` mock route is no longer part of the app.
-- `implemented`: `/games` is now a real gameplay hub backed by today’s live daily-question and guess-date state.
+- `implemented`: `/games` is now a real gameplay hub backed by today’s live daily-question, guess-date, and trivia state.
 - `implemented`: `/games/daily-question` is the first live gameplay route with on-demand prompt generation, one-answer-per-user locking, and both-answer reveal.
 - `implemented`: `/stats` now renders gameplay-only aggregates from real daily-question history.
-- `shell-only`: `/games/[mode]` remains shell-only for game slugs other than `daily-question` and `guess-date`.
+- `shell-only`: `/games/[mode]` remains shell-only for game slugs other than `daily-question`, `guess-date`, and `trivia`.
 
 ## Phase 2 Slice 1 (2026-03-29)
 - `implemented`: `/countdowns` now reads and writes live Phase 2 countdown rows.
@@ -101,7 +101,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: `/games` now reads real live status for the current couple-local day.
 - `implemented`: `/games/daily-question` now generates one canonical OpenAI-backed prompt per local day, stores the first successful opener locale, locks one answer per user, and reveals both answers only after both submit.
 - `implemented`: `/stats` now renders gameplay-only streak, participation, completed-round counts, and 14-day status history.
-- `shell-only`: game modes other than `daily-question` and `guess-date` remain presentational shells.
+- `shell-only`: game modes other than `daily-question`, `guess-date`, and `trivia` remain presentational shells.
 
 ## Phase 3 Slice 2 (2026-04-28)
 - `implemented`: `/games` now shows live status for both `daily_question` and `guess_date`.
@@ -109,7 +109,14 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: guess-date source memories are selected in SQL, one date guess is locked per partner, and the actual memory date plus guesses reveal only after both active partners submit.
 - `deferred`: scoring, winners, leaderboards, sharing, answer edits/deletes, OpenAI generation, and stats expansion remain out of scope.
 
+## Phase 3 Slice 3 (2026-04-28)
+- `implemented`: `/games` now shows live status for `daily_question`, `guess_date`, and `trivia`.
+- `implemented`: `/games/trivia` now opens one canonical memory-location quiz round per couple-local day.
+- `implemented`: trivia source memories and stable answer options are selected in SQL, one option is locked per partner, and the correct answer plus correctness reveal only after both active partners submit.
+- `implemented`: `/stats` remains daily-question-only and is not expanded by trivia.
+- `deferred`: scoring, winners, leaderboards, sharing, answer edits/deletes, OpenAI generation, and stats expansion remain out of scope.
+
 ## Phase 3 Carry-Forward
 - `removed`: `/chat` route removal landed as maintenance work and is not part of the next gameplay slice.
-- `implemented`: `Phase 3 Slice 2: Live Guess Date` is now landed.
+- `implemented`: `Phase 3 Slice 3: Live Trivia` is now landed.
 - `planned`: additional game modes, leaderboards, sharing, similarity scoring, and travel-map depth remain outside the delivered Phase 3 slices.

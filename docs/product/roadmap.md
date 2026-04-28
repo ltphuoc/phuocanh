@@ -35,14 +35,14 @@
 - Post-closeout reminder validation note:
   - hosted environments use Vault-backed secrets for reminder invocation
   - local and CI replay now falls back to a private secret store when Vault is unavailable
-- Latest documented slice: `Phase 3 Slice 1: Live Daily Question + Gameplay Stats`
-  - `/games` is now a backend-backed hub with live mode status and entry links
-  - `/games/[mode]` now has one live gameplay runtime: `/games/daily-question`
-  - `/stats` is now a real couple-scoped gameplay read model with participation/streak aggregates
+- Latest documented slice: `Phase 3 Slice 3: Live Trivia`
+  - `/games` is now a backend-backed hub with live status and entry links for `daily-question`, `guess-date`, and `trivia`
+  - `/games/[mode]` is backend-backed for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; other game slugs remain shell-only
+  - `/stats` remains the daily-question-only gameplay read model with participation/streak aggregates
   - write paths stay on Server Actions or SQL RPCs; no client-owned gameplay write layer was introduced
-  - this slice still does not include additional game modes or deeper travel-map work
-- Downstream implementation order after `Phase 3 Slice 1`:
-  - extend gameplay beyond `daily-question` only after the first stats read model is live
+  - this slice still does not include scoring, winners, leaderboards, sharing, answer edits/deletes, stats expansion, or deeper travel-map work
+- Downstream implementation order after `Phase 3 Slice 3`:
+  - choose the next gameplay hardening slice or another explicit live Phase 3 gameplay candidate
   - revisit travel-map depth after the gameplay and stats contract is stable
 - Latest hardening wave after `Phase 3 Slice 1`:
   - production-flow Playwright coverage for implemented backend-backed routes
@@ -56,17 +56,25 @@
   - provider-backed geographic tiles
 - See `docs/product/phase-2-status.md` for the living status tracker.
 
-## Phase 3 (Advanced) - Status: first slice implemented
+## Phase 3 (Advanced) - Status: first three slices implemented
 - Implemented in Slice 1:
   - game kernel for `daily_question`
   - live daily-question route with prompt generation, locked answers, and reveal
   - real gameplay streak and stats read model
+- Implemented in Slice 2:
+  - live `guess_date` mode backed by memory clues
+  - `/games/guess-date` with one locked date guess per active partner
+  - reveal only after both active partners submit
+- Implemented in Slice 3:
+  - live `trivia` mode backed by saved memory locations
+  - `/games/trivia` with one locked selected option per active partner
+  - correctness reveal only after both active partners submit
 - Next Phase 3 target:
-  - extend beyond `/games/daily-question` only after the first gameplay contract and production-flow browser coverage are stable
+  - choose a hardening slice or another explicit live gameplay candidate
 - `/chat` is not part of the Phase 3 feature roadmap; the deprecated mock route has been removed as maintenance.
 
 ## Next Move
-- Primary: keep expanding Phase 3 gameplay beyond `daily-question` only from this now-green production-flow browser baseline.
+- Primary: choose the next gameplay hardening slice or another explicit live gameplay candidate from this now-green production-flow browser baseline.
 - Secondary maintenance: deprecated `/chat` mock route removal is complete.
 - Current planning source: use `docs/product/active-plan.md` for the latest operating plan; this roadmap remains the phase-level history and direction.
 

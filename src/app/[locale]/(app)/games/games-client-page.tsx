@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, WandSparkles } from "lucide-react";
+import { Brain, Sparkles, WandSparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactElement } from "react";
 import { ResponsiveGrid } from "@/components/layout/responsive-grid";
@@ -76,6 +76,14 @@ export const GamesClientPage = (): ReactElement => {
         count: data.guessDate.answerCount,
       })
     : gamesT("guessDate.emptySummary");
+  const triviaCtaLabel = data.trivia
+    ? gamesT("trivia.openCta")
+    : gamesT("trivia.generateCta");
+  const triviaSummary = data.trivia
+    ? gamesT("trivia.readySummary", {
+        count: data.trivia.answerCount,
+      })
+    : gamesT("trivia.emptySummary");
 
   return (
     <ShellPage
@@ -83,7 +91,7 @@ export const GamesClientPage = (): ReactElement => {
       eyebrow={gamesT("header.eyebrow")}
       title={gamesT("header.title")}
     >
-      <ResponsiveGrid columns={2}>
+      <ResponsiveGrid columns={3}>
         <PageReveal delay={0.04}>
           <SectionCard className="flex h-full flex-col gap-5" padding="comfortable" surface="glass">
             <div className="flex items-start justify-between gap-4">
@@ -126,7 +134,7 @@ export const GamesClientPage = (): ReactElement => {
               >
                 {dailyQuestionCtaLabel}
               </Link>
-              <p className="text-xs text-muted-foreground">{gamesT("dailyQuestion.onlyLiveMode")}</p>
+              <p className="text-xs text-muted-foreground">{gamesT("dailyQuestion.liveNote")}</p>
             </div>
           </SectionCard>
         </PageReveal>
@@ -170,6 +178,49 @@ export const GamesClientPage = (): ReactElement => {
                 {guessDateCtaLabel}
               </Link>
               <p className="text-xs text-muted-foreground">{gamesT("guessDate.liveNote")}</p>
+            </div>
+          </SectionCard>
+        </PageReveal>
+
+        <PageReveal delay={0.12}>
+          <SectionCard className="flex h-full flex-col gap-5" padding="comfortable" surface="glass">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-primary">
+                  <Brain aria-hidden="true" className="size-4" strokeWidth={2.2} />
+                  <p className="ui-meta">{gamesT("trivia.eyebrow")}</p>
+                </div>
+                <h2 className="font-display text-[2rem] text-foreground">
+                  {gamesT("trivia.title")}
+                </h2>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {gamesT("trivia.description")}
+                </p>
+              </div>
+              <Badge variant="primary">
+                {dailyQuestionT(
+                  statusTranslationKeyByValue[data.trivia?.status ?? "not_started"],
+                )}
+              </Badge>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 shadow-whisper backdrop-blur-md">
+              <p className="text-sm font-semibold text-foreground">{triviaSummary}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {data.trivia
+                  ? gamesT("trivia.clueSource")
+                  : gamesT("trivia.generateHint")}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                className="inline-flex h-12 items-center justify-center rounded-pill ui-gradient-active px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-all duration-200 hover:-translate-y-0.5 hover:brightness-102"
+                href="/games/trivia"
+              >
+                {triviaCtaLabel}
+              </Link>
+              <p className="text-xs text-muted-foreground">{gamesT("trivia.liveNote")}</p>
             </div>
           </SectionCard>
         </PageReveal>

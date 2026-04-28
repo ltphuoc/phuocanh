@@ -508,6 +508,45 @@ export type Database = {
           },
         ]
       }
+      game_round_trivia_targets: {
+        Row: {
+          answer_options: Json
+          correct_answer: string
+          created_at: string
+          memory_id: string
+          round_id: string
+        }
+        Insert: {
+          answer_options: Json
+          correct_answer: string
+          created_at?: string
+          memory_id: string
+          round_id: string
+        }
+        Update: {
+          answer_options?: Json
+          correct_answer?: string
+          created_at?: string
+          memory_id?: string
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_round_trivia_targets_memory_id_fkey"
+            columns: ["memory_id"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_round_trivia_targets_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: true
+            referencedRelation: "game_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_rounds: {
         Row: {
           couple_id: string
@@ -931,6 +970,10 @@ export type Database = {
         Args: { target_round_date: string }
         Returns: string
       }
+      ensure_trivia_round: {
+        Args: { target_round_date: string }
+        Returns: string
+      }
       get_daily_question_round_state: {
         Args: { target_round_date: string }
         Returns: {
@@ -968,6 +1011,23 @@ export type Database = {
           prompt_source: string
           reveal_answers: boolean
           revealed_guesses: Json
+          round_date: string
+          viewer_has_answered: boolean
+        }[]
+      }
+      get_trivia_round_state: {
+        Args: { target_round_date: string }
+        Returns: {
+          active_partner_count: number
+          answer_count: number
+          answer_options: Json
+          clue_text: string
+          correct_answer: string
+          id: string
+          prompt_locale: string
+          prompt_source: string
+          reveal_answers: boolean
+          revealed_answers: Json
           round_date: string
           viewer_has_answered: boolean
         }[]
@@ -1010,6 +1070,10 @@ export type Database = {
         Args: { guessed_date: string; target_round_id: string }
         Returns: string
       }
+      submit_trivia_answer: {
+        Args: { selected_answer: string; target_round_id: string }
+        Returns: string
+      }
       update_couple_timezone: {
         Args: { target_couple_id: string; target_timezone: string }
         Returns: {
@@ -1020,7 +1084,7 @@ export type Database = {
     }
     Enums: {
       countdown_kind: "anniversary" | "birthday" | "travel" | "plan" | "custom"
-      game_mode: "daily_question" | "guess_date"
+      game_mode: "daily_question" | "guess_date" | "trivia"
       media_type: "image" | "video"
       membership_role: "partner_a" | "partner_b"
       membership_status: "active" | "inactive"
@@ -1159,7 +1223,7 @@ export const Constants = {
   public: {
     Enums: {
       countdown_kind: ["anniversary", "birthday", "travel", "plan", "custom"],
-      game_mode: ["daily_question", "guess_date"],
+      game_mode: ["daily_question", "guess_date", "trivia"],
       media_type: ["image", "video"],
       membership_role: ["partner_a", "partner_b"],
       membership_status: ["active", "inactive"],

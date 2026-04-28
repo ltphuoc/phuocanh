@@ -8,7 +8,7 @@ Status values:
 - `missing`
 - `needs rework`
 
-## Current Status (2026-04-02)
+## Current Status (2026-04-28)
 - Phase 1 runtime remains stable.
 - Phase 2 Slice 1 is implemented for:
   - `/countdowns`
@@ -36,6 +36,16 @@ Status values:
   - `/games/daily-question`
   - `/stats`
   - gameplay schema, gameplay RPCs, and gameplay read model helpers
+- Phase 3 Slice 2 is implemented for:
+  - `/games/guess-date`
+  - live guess-date status on `/games`
+  - memory-backed guess-date rounds, locked partner guesses, and both-partner reveal
+  - `/stats` unchanged as daily-question-only gameplay metrics
+- Phase 3 Slice 3 is implemented for:
+  - `/games/trivia`
+  - live trivia status on `/games`
+  - memory-location trivia rounds, locked partner answers, and both-partner correctness reveal
+  - `/stats` unchanged as daily-question-only gameplay metrics
 - Post-closeout engineering follow-up:
   - hosted reminder invocation uses Vault-backed secrets
   - local and CI replay now uses a private fallback secret store when Vault is unavailable
@@ -113,8 +123,24 @@ Status values:
 8. Replaced `/games/daily-question` with a live mode flow while keeping other `/games/[mode]` slugs shell-only.
 9. Synced docs/specs to the delivered runtime and moved Phase 3 forward to additional gameplay modes rather than the first foundation slice.
 
+## Phase 3 Slice 2 Delivered
+1. Added live `guess_date` gameplay alongside the existing `daily_question` mode.
+2. Added memory-backed guess-date round creation, one locked ISO date guess per active partner, and both-partner reveal behavior.
+3. Replaced `/games/guess-date` with a live mode flow and updated `/games` to show daily-question plus guess-date status.
+4. Kept `/stats` scoped to daily-question-only gameplay metrics.
+5. Kept all other `/games/[mode]` slugs shell-only.
+6. Synced product and engineering docs for `Phase 3 Slice 2: Live Guess Date`.
+
+## Phase 3 Slice 3 Delivered
+1. Added live `trivia` gameplay alongside the existing `daily_question` and `guess_date` modes.
+2. Added memory-location trivia round creation, stable answer options, one locked option per active partner, and both-partner correctness reveal behavior.
+3. Replaced `/games/trivia` with a live mode flow and updated `/games` to show daily-question, guess-date, and trivia status.
+4. Kept `/stats` scoped to daily-question-only gameplay metrics.
+5. Kept all other `/games/[mode]` slugs shell-only.
+6. Synced product and engineering docs so `Phase 3 Slice 3: Live Trivia` is the latest implemented backend slice.
+
 ## Recommended Next Order
-1. Extend gameplay beyond `daily-question` only after the first stats read model is stable.
+1. Choose a hardening slice or another explicit live Phase 3 gameplay candidate.
 2. Revisit travel-map depth only after the gameplay and analytics contract is stable.
 3. Deprecated `/chat` scaffolding removal is complete.
 
@@ -124,6 +150,6 @@ Status values:
 - The atlas is provider-free; coordinates, route polylines, and provider-backed geographic tiles remain deferred.
 
 ## Phase 3 Carry-Forward
-- Deprecated `/chat` cleanup is complete and was maintenance work, not part of `Phase 3 Slice 1`.
-- `/games/[mode]` remains shell-only for non-`daily-question` slugs.
+- Deprecated `/chat` cleanup is complete and was maintenance work, not part of the gameplay slices.
+- `/games/[mode]` is live for `daily-question`, `guess-date`, and `trivia`; other game slugs remain shell-only.
 - Additional gameplay modes, leaderboards, sharing, and similarity scoring remain deferred follow-up work.

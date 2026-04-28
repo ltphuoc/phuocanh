@@ -1,17 +1,17 @@
 # Games Manual Tests
 
 ## Feature Summary
-- Covers the games hub status cards and link states for the live daily-question and guess-date modes.
+- Covers the games hub status cards and link states for the live daily-question, guess-date, and trivia modes.
 
 ## Routes Covered
 - `/games`
 
 ## Preconditions
 - User is authenticated in a ready couple context.
-- Use debug token format `DBG-GAME-<YYYYMMDD>-<INITIALS>-<NN>` in any related daily-question answers or guess-date memory notes.
+- Use debug token format `DBG-GAME-<YYYYMMDD>-<INITIALS>-<NN>` in any related daily-question answers, guess-date memory notes, or trivia memory notes.
 
 ## Required Test Data
-- None initially. The hub state should change as the daily-question and guess-date flows progress.
+- None initially. The hub state should change as the daily-question, guess-date, and trivia flows progress.
 
 ## Core Smoke Cases
 ### MAN-GAME-001 Games hub reflects daily-question status transitions
@@ -44,6 +44,23 @@ Failure triage:
 - Read helper: `getGamesHubData(...)`, `getGuessDatePageData(...)`
 - RPC: `get_guess_date_round_state(...)`, `ensure_guess_date_round(...)`, `submit_guess_date_answer(...)`
 
+### MAN-GAME-003 Games hub reflects trivia status transitions
+1. Create at least two memories from `/memories/new` with distinct location values.
+2. Open `/games/trivia` from the hub and start today’s trivia clue.
+3. Submit one partner’s location answer, then return to `/games`.
+4. After the second partner completes the round, return to `/games` again.
+
+Expected result:
+- The hub transitions through the expected trivia state and keeps the open CTA available.
+- `/stats` remains scoped to daily-question metrics.
+
+Failure triage:
+- Route: `/games`, `/games/trivia`
+- Action: `ensureTriviaRoundAction`, `submitTriviaAnswerAction`
+- Read helper: `getGamesHubData(...)`, `getTriviaPageData(...)`
+- RPC: `get_trivia_round_state(...)`, `ensure_trivia_round(...)`, `submit_trivia_answer(...)`
+
 ## Automated Coverage
 - `E2E-GAME-001`
 - `E2E-GAME-002`
+- `E2E-GAME-003`

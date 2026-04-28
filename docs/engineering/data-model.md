@@ -29,6 +29,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_rounds`
 - `game_round_answers`
 - `game_round_memory_targets`
+- `game_round_trivia_targets`
 
 ## Core Relationships
 - One `couples` row -> many `couple_memberships`
@@ -44,7 +45,9 @@ This file summarizes the current schema. The authoritative source is always `sup
 - One `couples` row -> many `game_rounds`
 - One `game_rounds` row -> many `game_round_answers`
 - One `game_rounds` row -> zero or one `game_round_memory_targets` row in the current guess-date contract
+- One `game_rounds` row -> zero or one `game_round_trivia_targets` row in the current trivia contract
 - One `memories` row -> many `game_round_memory_targets`
+- One `memories` row -> many `game_round_trivia_targets`
 
 ## Critical Constraints
 - Global singleton couple space via unique expression index on `couples ((true))`
@@ -66,6 +69,10 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_round_answers.answer_body` must be trimmed non-empty text
 - `game_round_memory_targets.round_id` is primary-key unique and cascades when the round is deleted
 - `game_round_memory_targets.memory_id` restricts deletion of the linked source memory
+- `game_round_trivia_targets.round_id` is primary-key unique and cascades when the round is deleted
+- `game_round_trivia_targets.memory_id` restricts deletion of the linked source memory
+- `game_round_trivia_targets.correct_answer` must be trimmed non-empty text
+- `game_round_trivia_targets.answer_options` must be a JSON array with 2 to 4 options
 
 ## Security Posture
 - RLS is enabled across app tables.
@@ -82,6 +89,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_rounds` is couple-scoped through RLS.
 - `game_round_answers` is not directly browser-readable or browser-writable in the current contract.
 - `game_round_memory_targets` has RLS enabled and no direct member-facing read/write policies; guess-date RPCs are the access path.
+- `game_round_trivia_targets` has RLS enabled and no direct member-facing read/write policies; trivia RPCs are the access path.
 - Gameplay round creation, answer submission, and reveal-safe gameplay reads are owned by SQL RPCs rather than client-only checks.
 
 ## RPCs In Use
@@ -99,6 +107,9 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `ensure_guess_date_round(target_round_date date)`
 - `submit_guess_date_answer(target_round_id uuid, guessed_date date)`
 - `get_guess_date_round_state(target_round_date date)`
+- `ensure_trivia_round(target_round_date date)`
+- `submit_trivia_answer(target_round_id uuid, selected_answer text)`
+- `get_trivia_round_state(target_round_date date)`
 - `has_any_couple()`
 - `submit_daily_question_answer(target_round_id uuid, answer_body text)`
 
@@ -159,7 +170,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 ## Phase 3 Slice 1 Tables
 - `game_rounds`
   - couple-scoped gameplay round rows with `mode`, `round_date`, `prompt_locale`, `prompt_text`, and `prompt_source`
-  - `game_mode` currently supports `daily_question` and `guess_date`
+  - `game_mode` currently supports `daily_question`, `guess_date`, and `trivia`
   - `prompt_source` currently supports `openai` and `memory`
   - readable by active couple members; canonical inserts flow through gameplay RPCs
 - `game_round_answers`
@@ -177,10 +188,20 @@ This file summarizes the current schema. The authoritative source is always `sup
   - also stores one locked ISO date guess per user for `guess_date` rounds in `answer_body`
   - guess bodies remain hidden until all active partners submit
 
+## Phase 3 Slice 3 Tables
+- `game_round_trivia_targets`
+  - links one `trivia` round to the source `memories` row selected by SQL
+  - stores the correct location answer and stable answer options server-side
+  - direct member reads/writes are not part of the runtime contract
+  - secure trivia read/reveal behavior flows through `get_trivia_round_state(...)`
+- `game_round_answers`
+  - also stores one locked selected option per user for `trivia` rounds in `answer_body`
+  - selected answers and correctness remain hidden until all active partners submit
+
 ## Gameplay Stats Timezone Rule
 - `get_daily_question_stats(...)` now derives `today` from the saved `couples.timezone` value, not the database/server timezone.
 - Streak and recent-history output therefore follow the same couple-local day boundary as the live gameplay routes.
 
 ## Remaining Shell-Only Route Impact
 - The deprecated `/chat` mock route has been removed and should not be used to justify future schema work.
-- `/games/[mode]` still does not justify additional schema outside the delivered `daily_question` and `guess_date` modes.
+- `/games/[mode]` still does not justify additional schema outside the delivered `daily_question`, `guess_date`, and `trivia` modes.

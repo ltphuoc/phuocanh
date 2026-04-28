@@ -33,6 +33,8 @@ This app does not expose a public REST or GraphQL API. The live runtime contract
 | `submitDailyQuestionAnswerAction` | `roundId`, `answerBody` | `ActionState` | Calls `submit_daily_question_answer(...)`; answers are single-submit and locked after success; revalidates `/games`, `/games/daily-question`, and `/stats` |
 | `ensureGuessDateRoundAction` | none | `ActionState` | Calls `ensure_guess_date_round(...)`; creates or opens one memory-backed `guess_date` round for the couple-local day; revalidates `/games` and `/games/guess-date` only |
 | `submitGuessDateAnswerAction` | `roundId`, `guessedDate` | `ActionState` | Calls `submit_guess_date_answer(...)`; guesses are single-submit and locked after success; revalidates `/games` and `/games/guess-date` only |
+| `ensureTriviaRoundAction` | none | `ActionState` | Calls `ensure_trivia_round(...)`; creates or opens one memory-location `trivia` round for the couple-local day; revalidates `/games` and `/games/trivia` only |
+| `submitTriviaAnswerAction` | `roundId`, `selectedAnswer` | `ActionState` | Calls `submit_trivia_answer(...)`; selected options are single-submit and locked after success; revalidates `/games` and `/games/trivia` only |
 
 Migrated authenticated app-data Server Actions no longer refresh the active router tree after success. They keep path revalidation for later server-rendered navigations; same-session UI freshness is owned by TanStack Query invalidation, cache updates, and optimistic updates in the calling form.
 
@@ -60,6 +62,12 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
   - `gameplay.guessDate.ready`
   - `gameplay.guessDate.answered`
   - `gameplay.guessDate.alreadyAnswered`
+- Trivia mutations return validation/action errors through:
+  - `gameplay.trivia.invalidSubmission`
+  - `gameplay.trivia.noMemory`
+  - `gameplay.trivia.ready`
+  - `gameplay.trivia.answered`
+  - `gameplay.trivia.alreadyAnswered`
 - `/auth/callback` does not return a JSON error payload; it redirects to `/login` on callback failure.
 
 ## Route Handler
@@ -96,9 +104,10 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 | `GET /api/app-data/albums` | `albums` | Album summaries with signed covers |
 | `GET /api/app-data/albums/[albumId]` | `album(albumId)` | Album detail and signed media; `404` when not visible |
 | `GET /api/app-data/settings` | `settings` | Current shared timezone |
-| `GET /api/app-data/games` | `games` | Games hub daily-question and guess-date state |
+| `GET /api/app-data/games` | `games` | Games hub daily-question, guess-date, and trivia state |
 | `GET /api/app-data/games/daily-question` | `dailyQuestion` | Current daily-question round, viewer state, reveal state |
 | `GET /api/app-data/games/guess-date` | `guessDate` | Current guess-date round, viewer state, clue state, reveal state |
+| `GET /api/app-data/games/trivia` | `trivia` | Current trivia round, viewer state, clue/options state, reveal state |
 | `GET /api/app-data/stats` | `stats` | Daily-question stats and recent history |
 
 ## Database RPCs Used By App Layer
@@ -156,6 +165,21 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
   - Secure guess-date read path only
   - Returns clue/status fields before reveal without memory ID or actual date
   - Reveals `actual_date` and both guesses only when all active partners have submitted
+- `ensure_trivia_round(target_round_date)`
+  - Trivia round creation path only
+  - Requires active membership and creates or returns the canonical `trivia` round for the couple-local day
+  - Requires at least two distinct non-empty same-couple memory locations
+  - Selects the source memory in SQL, preferring the oldest unused eligible memory for prior trivia rounds, then the oldest eligible memory fallback
+  - Stores a text clue in `game_rounds.prompt_text`, `prompt_source = 'memory'`, and links the round to `game_round_trivia_targets`
+  - Stores stable answer options server-side and raises `NO_TRIVIA_MEMORY` when the couple has insufficient location data
+- `submit_trivia_answer(target_round_id, selected_answer)`
+  - Trivia answer mutation path only
+  - Verifies active membership, same-couple access, one-answer-per-user, locked-after-submit behavior, and selected option membership
+  - Stores the selected option text in `game_round_answers.answer_body`
+- `get_trivia_round_state(target_round_date)`
+  - Secure trivia read path only
+  - Returns clue, options, answer count, viewer submission state, and status before reveal without memory ID or correct answer
+  - Reveals `correct_answer` plus both selected answers and `is_correct` only when all active partners have submitted
 - `get_daily_question_stats(target_history_days)`
   - Secure gameplay stats read path only
   - Computes `today` from the saved couple timezone before building streak/history output
@@ -191,7 +215,7 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 
 ## Phase 3 Read Model
 - `getGamesHubData(context)`
-  - Reads today’s daily-question and guess-date rounds for the couple-local day
+  - Reads today’s daily-question, guess-date, and trivia rounds for the couple-local day
   - Returns the current viewer status for the hub cards through secure gameplay state RPCs
 - `getDailyQuestionPageData(context, roundId?)`
   - Reads today’s daily-question round, the viewer submission state, and the reveal state
@@ -201,6 +225,10 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
   - Reads today’s guess-date round, the viewer submission state, clue state, and reveal state
   - Uses `get_guess_date_round_state(...)` so actual memory dates and guesses stay hidden until reveal
   - Returns `null` round state when no canonical round exists for the couple-local day
+- `getTriviaPageData(context)`
+  - Reads today’s trivia round, the viewer submission state, clue/options state, and reveal state
+  - Uses `get_trivia_round_state(...)` so the source memory ID, correct answer, and selected answers stay hidden until reveal
+  - Returns `null` round state when no canonical round exists for the couple-local day
 - `getGameplayStatsPageData(context)`
   - Reads gameplay-only daily-question aggregates for `/stats`
   - Uses `get_daily_question_stats(...)`
@@ -208,7 +236,7 @@ Migrated authenticated app-data Server Actions no longer refresh the active rout
 
 ## Non-Contracts
 - Shell-only routes do not imply backend/API support.
-- `/games/[mode]` is backend-backed for `/games/daily-question` and `/games/guess-date`; other mode slugs still do not imply additional gameplay APIs.
+- `/games/[mode]` is backend-backed for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; other mode slugs still do not imply additional gameplay APIs.
 - Coordinates, route polylines, captions, album reordering, and provider-backed geographic tiles are not part of the current runtime contract yet.
 
 ## Compatibility Rule

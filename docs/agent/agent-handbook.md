@@ -49,7 +49,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical “what exist
 - Any change touching `couples`, `couple_memberships`, invite lifecycle, RLS, RPCs, or storage policies
 - Any schema change that edits TypeScript mirrors without matching SQL migrations
 - Any work that reintroduces `/chat` without a new product plan
-- Any work that assumes game slugs other than `daily-question` and `guess-date` under `/games/[mode]` are live gameplay routes
+- Any work that assumes game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]` are live gameplay routes
 - Any work that treats `/stats` as a general analytics system beyond the current gameplay read model
 - Any work that changes the trip/album contract without also reviewing the trip-rooted album rules in `docs/product/business-rules.md`
 - Any work that skips `docs/engineering/route-capability-matrix.md` and invents route status from older logs or shell polish alone

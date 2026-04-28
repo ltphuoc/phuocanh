@@ -16,6 +16,7 @@ import type {
   OnThisDayAppData,
   SettingsAppData,
   StatsAppData,
+  TriviaAppData,
   TripDetailAppData,
   TripsAppData,
 } from "@/lib/app-data/types";
@@ -41,6 +42,7 @@ import {
   getGameplayStatsPageData,
   getGamesHubData,
   getGuessDatePageData,
+  getTriviaPageData,
 } from "@/lib/server/phase-three-data";
 
 const toAppDataContext = (context: CoupleContext): AppDataContext => ({
@@ -199,6 +201,13 @@ export const getGuessDateAppData = async (
   context: CoupleContext,
 ): Promise<GuessDateAppData> => ({
   ...(await getGuessDatePageData(context)),
+  context: toAppDataContext(context),
+});
+
+export const getTriviaAppData = async (
+  context: CoupleContext,
+): Promise<TriviaAppData> => ({
+  ...(await getTriviaPageData(context)),
   context: toAppDataContext(context),
 });
 

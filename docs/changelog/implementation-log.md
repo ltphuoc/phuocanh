@@ -1,5 +1,28 @@
 # Implementation Log
 
+## 2026-04-28 - Phase 3 Slice 3: Live Trivia
+
+### Delivered
+- Added SQL migrations for `trivia`, protected `game_round_trivia_targets`, stable memory-location answer options, and RPC-only trivia gameplay:
+  - `ensure_trivia_round(target_round_date date)`
+  - `submit_trivia_answer(target_round_id uuid, selected_answer text)`
+  - `get_trivia_round_state(target_round_date date)`
+- Updated generated Supabase types and schema inventory after applying the SQL locally.
+- Added server read/app-data/query wiring for `/games/trivia` and extended `/games` with live `daily_question`, `guess_date`, and `trivia` status.
+- Added trivia Server Actions, client forms, and the live `/games/trivia` page flow.
+- Added English and Vietnamese copy for trivia statuses, forms, no-memory state, pending state, reveal state, and action messages.
+- Extended gameplay E2E coverage with the memory-location trivia partner reveal flow and kept `/stats` daily-question-only.
+- Synced product and engineering docs to mark `trivia` live and document the hidden-until-reveal rule, trivia target table, and RPC contract.
+
+### Verification
+- `supabase db reset --local`
+- `supabase gen types typescript --local > src/lib/supabase/database.types.ts`
+- `pnpm i18n:check`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+- Focused E2E coverage passed with `E2E_ENABLE_EMAIL_OTP_HELPER=true OPENAI_DAILY_QUESTION_STUB_RESPONSE="What small thing made you feel especially cared for recently?" pnpm exec playwright test tests/e2e/gameplay.spec.ts`: `5 passed (29.6s)`.
+
 ## 2026-04-28 - Phase 3 Slice 2: Live Guess Date
 
 ### Delivered

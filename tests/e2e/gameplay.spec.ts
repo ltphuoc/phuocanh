@@ -12,8 +12,8 @@ import {
 } from "./support/test-data";
 
 test("E2E-GAME-000 shell-only game mode stays non-live", async ({ page }) => {
-  await page.goto("/en/games/trivia");
-  await expect(page.getByRole("heading", { name: "Trivia" })).toBeVisible();
+  await page.goto("/en/games/compatibility");
+  await expect(page.getByRole("heading", { name: "Compatibility" })).toBeVisible();
   await expect(
     page.getByText(
       "This route is a structured shell for the selected game mode. Prompt generation, answer capture, and streak updates will connect here in a later phase.",
@@ -22,6 +22,7 @@ test("E2E-GAME-000 shell-only game mode stays non-live", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Back to games" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Generate today’s question" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open today’s memory clue" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open today’s trivia clue" })).toHaveCount(0);
 });
 
 test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end for both partners and updates the hub and stats", async ({
@@ -152,4 +153,85 @@ test("E2E-GAME-002 / E2E-GD-001 guess date runs end to end for both partners and
   await page.goto("/en/games");
   await expect(page.getByText(/^Completed$/)).toHaveCount(2);
   await expect(page.getByRole("link", { name: "Open today’s date guess" })).toBeVisible();
+});
+
+test("E2E-GAME-003 / E2E-TRIVIA-001 trivia runs end to end for both partners without expanding stats", async ({
+  browser,
+  page,
+}) => {
+  test.slow();
+
+  const targetLocation = buildUniqueText("Trivia correct place", "E2E-TRIVIA-001");
+  const distractorLocation = buildUniqueText("Trivia distractor place", "E2E-TRIVIA-001");
+  const targetNote = buildUniqueText("Trivia target memory", "E2E-TRIVIA-001");
+  const distractorNote = buildUniqueText("Trivia distractor memory", "E2E-TRIVIA-001");
+
+  await page.goto("/en/memories/new");
+  await page.getByLabel("Happened at").fill(createOffsetDateTimeLocalInput(-80, 9, 15));
+  await page.getByLabel("Location").fill(targetLocation);
+  await page.getByLabel("Note").fill(targetNote);
+  await page.getByRole("button", { name: "Save memory" }).click();
+  await expect(page).toHaveURL(/\/en\/home$/, {
+    timeout: 20_000,
+  });
+
+  await page.goto("/en/memories/new");
+  await page.getByLabel("Happened at").fill(createOffsetDateTimeLocalInput(-79, 10, 30));
+  await page.getByLabel("Location").fill(distractorLocation);
+  await page.getByLabel("Note").fill(distractorNote);
+  await page.getByRole("button", { name: "Save memory" }).click();
+  await expect(page).toHaveURL(/\/en\/home$/, {
+    timeout: 20_000,
+  });
+
+  await page.goto("/en/games/trivia");
+  await page.getByRole("button", { name: "Open today’s trivia clue" }).click();
+  await expect(page.getByText(targetNote)).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByLabel(targetLocation).check();
+  await page.getByRole("button", { name: "Lock trivia answer" }).click();
+  await expect(page.getByRole("heading", { name: "Waiting for the second answer" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("heading", { name: "Correct location" })).toHaveCount(0);
+
+  const partnerBContext = await browser.newContext({
+    locale: "en-US",
+    storageState: partnerBStorageStatePath,
+    timezoneId: onboardingTimeZone,
+  });
+  const partnerBPage = await partnerBContext.newPage();
+
+  await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
+  await expect(
+    partnerBPage.getByRole("link", { name: "Open today’s trivia" }),
+  ).toBeVisible();
+  await partnerBPage.goto(`${E2E_BASE_URL}/en/games/trivia`);
+  await expect(partnerBPage.getByText(targetNote)).toBeVisible();
+  await partnerBPage.getByLabel(distractorLocation).check();
+  await partnerBPage.getByRole("button", { name: "Lock trivia answer" }).click();
+  await expect(partnerBPage.getByRole("heading", { name: "Correct location" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(partnerBPage.getByText(`The matching location was ${targetLocation}.`)).toBeVisible();
+  await expect(partnerBPage.getByText("Selected answer")).toHaveCount(2);
+  await expect(partnerBPage.getByText("Correct", { exact: true })).toBeVisible();
+  await expect(partnerBPage.getByText("Not this time")).toBeVisible();
+  await partnerBContext.close();
+
+  await page.goto("/en/games/trivia");
+  await expect(page.getByRole("heading", { name: "Correct location" })).toBeVisible();
+  await expect(page.getByText(targetLocation, { exact: true })).toBeVisible();
+  await expect(page.getByText(distractorLocation, { exact: true })).toBeVisible();
+
+  await page.goto("/en/games");
+  await expect(page.getByText(/^Completed$/)).toHaveCount(3);
+  await expect(page.getByRole("link", { name: "Open today’s trivia" })).toBeVisible();
+
+  await page.goto("/en/stats");
+  await expect(page.getByRole("heading", { name: "Stats" })).toBeVisible();
+  await expect(page.getByText("Current streak")).toBeVisible();
+  await expect(page.getByText("1 day")).toBeVisible();
+  await expect(page.getByText(/^Completed$/).first()).toBeVisible();
 });

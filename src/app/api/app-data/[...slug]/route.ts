@@ -14,6 +14,7 @@ import {
   getSettingsAppData,
   getStatsAppData,
   getTripDetailAppData,
+  getTriviaAppData,
   getTripsAppData,
 } from "@/lib/server/app-data";
 import { getAuthGateState } from "@/lib/server/couple-context";
@@ -88,6 +89,10 @@ export const GET = async (
 
         if (slug.length === 2 && slug[1] === "guess-date") {
           return json(await getGuessDateAppData(state.context));
+        }
+
+        if (slug.length === 2 && slug[1] === "trivia") {
+          return json(await getTriviaAppData(state.context));
         }
 
         break;

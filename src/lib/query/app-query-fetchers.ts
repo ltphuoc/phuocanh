@@ -13,6 +13,7 @@ import type {
   OnThisDayAppData,
   SettingsAppData,
   StatsAppData,
+  TriviaAppData,
   TripDetailAppData,
   TripsAppData,
 } from "@/lib/app-data/types";
@@ -51,6 +52,7 @@ export const appQueryFetchers = {
   onThisDay: (): Promise<OnThisDayAppData> => fetchAppData("/api/app-data/on-this-day"),
   settings: (): Promise<SettingsAppData> => fetchAppData("/api/app-data/settings"),
   stats: (): Promise<StatsAppData> => fetchAppData("/api/app-data/stats"),
+  trivia: (): Promise<TriviaAppData> => fetchAppData("/api/app-data/games/trivia"),
   trip: (tripId: string): Promise<TripDetailAppData> =>
     fetchAppData(`/api/app-data/trips/${encodeURIComponent(tripId)}`),
   trips: (): Promise<TripsAppData> => fetchAppData("/api/app-data/trips"),

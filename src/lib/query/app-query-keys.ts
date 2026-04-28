@@ -17,6 +17,7 @@ export const appQueryKeys = {
   onThisDay: () => [...appDataRoot, "on-this-day"] as const,
   settings: () => [...appDataRoot, "settings"] as const,
   stats: () => [...appDataRoot, "stats"] as const,
+  trivia: () => [...appDataRoot, "trivia"] as const,
   trip: (tripId: string) => [...appDataRoot, "trip", tripId] as const,
   tripDetails: () => [...appDataRoot, "trip"] as const,
   trips: () => [...appDataRoot, "trips"] as const,

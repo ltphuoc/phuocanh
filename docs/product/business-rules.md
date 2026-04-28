@@ -114,29 +114,38 @@ This file is the canonical business-rule reference for the current app. If this 
 
 ## Gameplay
 - Gameplay is couple-scoped and readable by active couple members only.
-- The current live gameplay mode set contains two enum values: `daily_question` and `guess_date`.
+- The current live gameplay mode set contains three enum values: `daily_question`, `guess_date`, and `trivia`.
 - A gameplay round is unique per `(couple_id, mode, round_date)`.
 - `game_rounds.round_date` is the couple-local date token derived from the saved `couples.timezone`, not the server timezone.
 - The first successful round creation for a given couple-local day becomes canonical for that day.
 - Daily-question prompt generation is on demand, not cron-driven.
 - The stored prompt locale is set by the first successful opener for that couple-local day and is reused for both partners.
-- `game_rounds.prompt_source` records `openai` for generated daily-question prompts and `memory` for guess-date memory clues.
+- `game_rounds.prompt_source` records `openai` for generated daily-question prompts and `memory` for guess-date and trivia memory clues.
 - Guess-date round creation is on demand, not cron-driven.
 - A guess-date round is sourced from one existing couple memory selected in SQL: oldest unused by previous couple guess-date rounds, then oldest memory as fallback.
 - Guess-date clues are text-only in this slice and use memory note, then location, then a media/generic fallback.
 - Guess-date source memory IDs and actual memory dates stay hidden from browser clients until reveal.
 - Guess-date answer bodies store ISO date guesses in `game_round_answers.answer_body`.
+- Trivia round creation is on demand, not cron-driven.
+- A trivia round is sourced from one couple memory with a non-empty `location_name`, selected in SQL: oldest unused by previous couple trivia rounds, then oldest eligible memory as fallback.
+- Trivia requires at least two distinct non-empty memory locations for the couple.
+- Trivia clue text is stored on the round, while source memory IDs stay hidden from browser clients.
+- Trivia answer options are stored server-side as the correct location plus up to three same-couple distractor locations in a stable order.
+- Trivia answer bodies store the selected option text in `game_round_answers.answer_body`.
 - A gameplay answer is unique per `(round_id, user_id)`.
 - Daily-question answers are trimmed non-empty free text and locked after the first successful submission.
 - Guess-date answers are ISO date strings and locked after the first successful submission.
+- Trivia answers must match one stored option exactly and are locked after the first successful submission.
 - Daily-question answers remain hidden until both active partners have submitted for the same round.
 - Guess-date actual memory dates and both guesses remain hidden until both active partners have submitted for the same round.
+- Trivia correct locations and both selected answers remain hidden until both active partners have submitted for the same round.
 - Current gameplay stats are participation-only:
   - completed-round streak
   - total rounds
   - total completed rounds
   - per-viewer participation count and rate
   - recent 14-day status history
+- Current gameplay stats are sourced from `daily_question` history only; guess-date and trivia do not expand `/stats`.
 - The current slice has no winner, scoring, similarity matching, answer edits, answer deletes, or backfill UI.
 
 ## Forbidden States
@@ -160,6 +169,10 @@ This file is the canonical business-rule reference for the current app. If this 
 - Daily-question answers revealed before both partners have submitted
 - Guess-date actual date or guesses revealed before both active partners have submitted
 - Direct browser access to guess-date memory target rows
+- More than one `game_round_trivia_targets` row for the same `round_id`
+- Trivia correct answer or selected answers revealed before both active partners have submitted
+- Trivia source memory ID exposed to browser clients
+- Direct browser access to trivia target rows
 - Non-member or cross-couple gameplay read/write access
 
 ## Enforcement Map
@@ -191,6 +204,10 @@ This file is the canonical business-rule reference for the current app. If this 
 - Canonical guess-date round creation and SQL memory selection: `ensure_guess_date_round(...)`
 - Locked single-date guess submission: `submit_guess_date_answer(...)`
 - Guess-date hidden-until-reveal reads: `get_guess_date_round_state(...)`
+- Trivia target access: RLS on `game_round_trivia_targets` with RPC-only member access
+- Canonical trivia round creation and SQL memory/location selection: `ensure_trivia_round(...)`
+- Locked single-option trivia submission: `submit_trivia_answer(...)`
+- Trivia hidden-until-reveal reads: `get_trivia_round_state(...)`
 - Gameplay aggregate reads: `get_daily_question_stats(...)`
 
 ## User-Visible Failure States
@@ -241,8 +258,18 @@ This file is the canonical business-rule reference for the current app. If this 
   - the guessed date is empty or invalid
   - the viewer already submitted a guess for that round
   - database writes fail unexpectedly
+- Trivia generation can fail if:
+  - the authenticated user lacks active couple membership
+  - the couple has fewer than two distinct saved memory locations
+  - the gameplay round RPC rejects the target day unexpectedly
+  - database writes fail unexpectedly
+- Trivia answer submit can fail if:
+  - the round is missing or outside the member’s couple scope
+  - the selected answer is missing or is not one of the stored options
+  - the viewer already submitted an answer for that round
+  - database writes fail unexpectedly
 
 ## Current Shell Boundaries
 - `/games` and `/stats` are implemented.
-- `/games/[mode]` is implemented for `/games/daily-question` and `/games/guess-date`; other mode slugs remain shell-only.
+- `/games/[mode]` is implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; other mode slugs remain shell-only.
 - Shell-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

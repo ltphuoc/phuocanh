@@ -13,6 +13,7 @@ import { requireReadyCoupleContext } from "@/lib/server/couple-context";
 import {
   getTodayDailyQuestionRoundId,
   getTodayGuessDateRoundId,
+  getTodayTriviaRoundId,
 } from "@/lib/server/phase-three-data";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentDateTokenInTimeZone } from "@/lib/utils/couple-timezone";
@@ -29,6 +30,11 @@ const submitDailyQuestionAnswerSchema = z.object({
 const submitGuessDateAnswerSchema = z.object({
   guessedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   roundId: z.uuid(),
+});
+
+const submitTriviaAnswerSchema = z.object({
+  roundId: z.uuid(),
+  selectedAnswer: z.string().trim().min(1).max(240),
 });
 
 const INVALID_DAILY_QUESTION_ROUND_MESSAGES = new Set([
@@ -55,6 +61,17 @@ const INVALID_GUESS_DATE_ANSWER_MESSAGES = new Set([
   "INVALID_GAME_ANSWER",
 ]);
 
+const INVALID_TRIVIA_ROUND_MESSAGES = new Set([
+  "COUPLE_CONTEXT_REQUIRED",
+  "GAME_ROUND_UNAVAILABLE",
+  "INVALID_ROUND_DATE",
+]);
+
+const INVALID_TRIVIA_ANSWER_MESSAGES = new Set([
+  "GAME_ROUND_NOT_FOUND",
+  "INVALID_GAME_ANSWER",
+]);
+
 const revalidateGameplayPaths = (): void => {
   revalidateLocalizedPath("/games");
   revalidateLocalizedPath("/games/daily-question");
@@ -64,6 +81,11 @@ const revalidateGameplayPaths = (): void => {
 const revalidateGuessDatePaths = (): void => {
   revalidateLocalizedPath("/games");
   revalidateLocalizedPath("/games/guess-date");
+};
+
+const revalidateTriviaPaths = (): void => {
+  revalidateLocalizedPath("/games");
+  revalidateLocalizedPath("/games/trivia");
 };
 
 export const ensureDailyQuestionRoundAction = async (
@@ -242,6 +264,91 @@ export const submitGuessDateAnswerAction = async (
     }
 
     console.error("Failed to submit guess date answer", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const ensureTriviaRoundAction = async (
+  _previousState: ActionState,
+  _formData: FormData,
+): Promise<ActionState> => {
+  void _previousState;
+  void _formData;
+
+  try {
+    const context = await requireReadyCoupleContext();
+    const roundDate = getCurrentDateTokenInTimeZone(context.timezone);
+    const existingRoundId = await getTodayTriviaRoundId(context, roundDate);
+
+    if (existingRoundId) {
+      revalidateTriviaPaths();
+      return createSuccessState("gameplay.trivia.ready");
+    }
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("ensure_trivia_round", {
+      target_round_date: roundDate,
+    });
+
+    if (error) {
+      if (error.message === "NO_TRIVIA_MEMORY") {
+        return createErrorState("gameplay.trivia.noMemory");
+      }
+
+      if (INVALID_TRIVIA_ROUND_MESSAGES.has(error.message)) {
+        return createErrorState("gameplay.trivia.invalidSubmission");
+      }
+
+      console.error("Failed to ensure trivia round", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateTriviaPaths();
+    return createSuccessState("gameplay.trivia.ready");
+  } catch (error: unknown) {
+    console.error("Failed to ensure trivia round", error);
+    return createErrorState("unexpectedError");
+  }
+};
+
+export const submitTriviaAnswerAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    await requireReadyCoupleContext();
+    const parsed = submitTriviaAnswerSchema.parse({
+      roundId: formData.get("roundId"),
+      selectedAnswer: formData.get("selectedAnswer"),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("submit_trivia_answer", {
+      selected_answer: parsed.selectedAnswer,
+      target_round_id: parsed.roundId,
+    });
+
+    if (error) {
+      if (error.message === "GAME_ANSWER_ALREADY_SUBMITTED") {
+        return createErrorState("gameplay.trivia.alreadyAnswered");
+      }
+
+      if (INVALID_TRIVIA_ANSWER_MESSAGES.has(error.message)) {
+        return createErrorState("gameplay.trivia.invalidSubmission");
+      }
+
+      console.error("Failed to submit trivia answer", error);
+      return createErrorState("unexpectedError");
+    }
+
+    revalidateTriviaPaths();
+    return createSuccessState("gameplay.trivia.answered");
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState("gameplay.trivia.invalidSubmission");
+    }
+
+    console.error("Failed to submit trivia answer", error);
     return createErrorState("unexpectedError");
   }
 };
