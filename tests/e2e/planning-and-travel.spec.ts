@@ -27,6 +27,12 @@ test("E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   const unlockedFutureNoteTitle = buildUniqueText("Unlocked note", "E2E-FNOTE-001");
   const unlockedFutureNoteBody = buildUniqueText("Unlocked note body", "E2E-FNOTE-001");
 
+  await page.goto("/en/settings");
+  await replaceInputValue(page.getByLabel("Couple timezone"), "Not/A_Real_Zone");
+  await page.getByRole("button", { name: "Save timezone" }).click();
+  await expect(page.getByText("Enter a valid IANA timezone.")).toBeVisible();
+  await expect(page.getByText(`Current timezone: ${onboardingTimeZone}`)).toBeVisible();
+
   await page.goto("/en/countdowns");
   await page.getByLabel("Title").fill(countdownTitle);
   await page.getByLabel("Type").selectOption("plan");
@@ -123,6 +129,13 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   const albumNote = buildUniqueText("Album note", "E2E-ALBUM-001");
 
   await page.goto("/en/trips");
+  await page.getByLabel("Trip title").fill(buildUniqueText("Invalid trip", "E2E-TRIP-000"));
+  await page.getByLabel("Start date").fill(createOffsetDateInput(2));
+  await page.getByLabel("End date").fill(createOffsetDateInput(-2));
+  await page.getByRole("button", { name: "Save trip" }).click();
+  await expect(page.getByText("End date must be on or after the start date.")).toBeVisible();
+
+  await page.goto("/en/trips");
   await page.getByLabel("Trip title").fill(tripTitle);
   await page.getByLabel("Start date").fill(createOffsetDateInput(-2));
   await page.getByLabel("End date").fill(createOffsetDateInput(2));
@@ -135,6 +148,11 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await page.getByRole("link", { name: new RegExp(tripTitle) }).click();
   await expect(page).toHaveURL(/\/en\/trips\/[0-9a-f-]+$/);
   const tripUrl = page.url();
+
+  await page.getByLabel("Place title").fill(buildUniqueText("Invalid place", "E2E-PLACE-000"));
+  await page.getByLabel("Visited on").fill(createOffsetDateInput(10));
+  await page.getByRole("button", { name: "Save visited place" }).click();
+  await expect(page.getByText("Choose a date inside this trip window.")).toBeVisible();
 
   await page.getByLabel("Place title").fill(visitedPlaceTitle);
   await page.getByLabel("Visited on").fill(createTodayDateInput());
@@ -177,6 +195,8 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   }).first();
   await albumComposer.getByLabel("Album title").fill(albumTitle);
   await albumComposer.getByLabel("Album note (optional)").fill(albumNote);
+  await albumComposer.getByRole("button", { name: "Create album" }).click();
+  await expect(albumComposer.getByText("Select at least one memory item.")).toBeVisible();
   await albumComposer.locator("label").filter({ hasText: firstTripMemoryNote }).click();
   await albumComposer.getByRole("button", { name: "Create album" }).click();
   await expect(page.getByRole("link", { name: new RegExp(albumTitle) })).toBeVisible({

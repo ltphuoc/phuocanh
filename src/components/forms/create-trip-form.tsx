@@ -89,7 +89,7 @@ export const CreateTripForm = (): ReactElement => {
   });
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-4" noValidate onSubmit={onSubmit}>
       <FormSection
         errorId="trip-title-error"
         errorMessage={titleErrorMessage}

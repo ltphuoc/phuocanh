@@ -5,6 +5,15 @@ import {
   createTodayDateTimeLocalInput,
 } from "./support/test-data";
 
+test("E2E-MEM-000 memory creation requires a note or media", async ({ page }) => {
+  await page.goto("/en/memories/new");
+  await page.getByLabel("Note").fill("");
+  await page.getByRole("button", { name: "Save memory" }).click();
+
+  await expect(page).toHaveURL(/\/en\/memories\/new$/);
+  await expect(page.getByText("Add a note or at least one media file.")).toBeVisible();
+});
+
 test("E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memory, wishlist, and checklist flows work across home, detail, and lists", async ({
   page,
 }) => {

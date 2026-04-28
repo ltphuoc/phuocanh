@@ -1,4 +1,5 @@
 import { differenceInCalendarDays } from "date-fns";
+import { z } from "zod";
 import type { CoupleContext } from "@/lib/server/couple-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
@@ -56,6 +57,8 @@ export interface MemoryDetailData {
   }[];
   readonly note: string | null;
 }
+
+const memoryIdSchema = z.uuid();
 
 const toMemoryCard = (
   memory: Database["public"]["Tables"]["memories"]["Row"],
@@ -262,12 +265,17 @@ export const getMemoryDetailData = async (
   context: CoupleContext,
   memoryId: string,
 ): Promise<MemoryDetailData | null> => {
+  const parsedMemoryId = memoryIdSchema.safeParse(memoryId);
+  if (!parsedMemoryId.success) {
+    return null;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: memories, error } = await supabase
     .from("memories")
     .select("*")
     .eq("couple_id", context.coupleId)
-    .eq("id", memoryId)
+    .eq("id", parsedMemoryId.data)
     .limit(1);
 
   if (error) {
@@ -282,7 +290,7 @@ export const getMemoryDetailData = async (
   const { data: mediaRows, error: mediaError } = await supabase
     .from("memory_media")
     .select("*")
-    .eq("memory_id", memoryId)
+    .eq("memory_id", parsedMemoryId.data)
     .order("created_at", { ascending: true });
 
   if (mediaError) {

@@ -111,7 +111,7 @@ export const CreateVisitedPlaceForm = ({
   });
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-4" noValidate onSubmit={onSubmit}>
       <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <FormSection
           errorId="visited-place-title-error"

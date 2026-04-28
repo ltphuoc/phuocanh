@@ -32,6 +32,11 @@ test("E2E-AUTH-002 partner auth state redirects root to home", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Latest chapters" })).toBeVisible();
 });
 
+test("E2E-ROUTE-001 invalid memory detail route renders not found", async ({ page }) => {
+  await page.goto("/en/memories/not-a-uuid");
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+});
+
 test("E2E-AUTH-003 invite login preserves token through the Mailpit magic link", async ({
   browser,
 }) => {

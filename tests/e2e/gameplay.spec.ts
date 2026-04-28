@@ -11,6 +11,19 @@ import {
   createTodayDateInput,
 } from "./support/test-data";
 
+test("E2E-GAME-000 shell-only game mode stays non-live", async ({ page }) => {
+  await page.goto("/en/games/trivia");
+  await expect(page.getByRole("heading", { name: "Trivia" })).toBeVisible();
+  await expect(
+    page.getByText(
+      "This route is a structured shell for the selected game mode. Prompt generation, answer capture, and streak updates will connect here in a later phase.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to games" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Generate today’s question" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open today’s memory clue" })).toHaveCount(0);
+});
+
 test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end for both partners and updates the hub and stats", async ({
   browser,
   page,
