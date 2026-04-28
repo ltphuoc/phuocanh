@@ -32,4 +32,6 @@ Failure triage:
 - RPC: none
 
 ## Automated Coverage
+- `E2E-MEM-000`
+- `E2E-MEM-000-TYPE`
 - `E2E-MEM-001`

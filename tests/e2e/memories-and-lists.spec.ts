@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { Buffer } from "node:buffer";
 import { memoryFixturePath } from "./support/runtime";
 import {
   buildUniqueText,
@@ -12,6 +13,31 @@ test("E2E-MEM-000 memory creation requires a note or media", async ({ page }) =>
 
   await expect(page).toHaveURL(/\/en\/memories\/new$/);
   await expect(page.getByText("Add a note or at least one media file.")).toBeVisible();
+});
+
+test("E2E-MEM-000-TYPE unsupported memory media is rejected before save", async ({ page }) => {
+  await page.goto("/en/memories/new");
+  const mediaInput = page.locator('input[type="file"]');
+  const fileChooserPromise = page.waitForEvent("filechooser");
+
+  await page.getByLabel("Media").click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles({
+    buffer: Buffer.from("not an image or video"),
+    mimeType: "text/plain",
+    name: "unsupported-memory-file.txt",
+  });
+  await expect.poll(async () => mediaInput.evaluate((input) => {
+    const fileInput = input as HTMLInputElement;
+
+    return fileInput.files?.[0]?.type ?? null;
+  })).toBe("text/plain");
+  await page.getByLabel("Note").fill(buildUniqueText("Unsupported media note", "E2E-MEM-000-TYPE"));
+
+  await page.getByRole("button", { name: "Save memory" }).click();
+
+  await expect(page).toHaveURL(/\/en\/memories\/new$/);
+  await expect(page.getByText("Only image and video files are supported.")).toBeVisible();
 });
 
 test("E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memory, wishlist, and checklist flows work across home, detail, and lists", async ({
@@ -94,5 +120,14 @@ test("E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   }).first();
   await expect(completedChecklistCard.getByText(checklistItemText)).toBeVisible();
   await expect(completedChecklistCard.getByText("Completed")).toBeVisible();
-  await expect(completedChecklistCard.getByRole("button", { name: "Undo" })).toBeVisible();
+  await completedChecklistCard.getByRole("button", { name: "Undo" }).click();
+
+  const pendingChecklistCard = page.locator("div").filter({
+    has: page.getByRole("heading", { name: checklistTitle }),
+  }).first();
+  await expect(pendingChecklistCard.getByText(checklistItemText)).toBeVisible();
+  await expect(pendingChecklistCard.getByRole("button", { name: "Done" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(pendingChecklistCard.getByText("Completed")).toHaveCount(0);
 });

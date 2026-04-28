@@ -11,6 +11,8 @@ import {
   createTodayDateInput,
 } from "./support/test-data";
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 test("E2E-GAME-000 shell-only game mode stays non-live", async ({ page }) => {
   await page.goto("/en/games/compatibility");
   await expect(page.getByRole("heading", { name: "Compatibility" })).toBeVisible();
@@ -23,6 +25,35 @@ test("E2E-GAME-000 shell-only game mode stays non-live", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Generate today’s question" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open today’s memory clue" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open today’s trivia clue" })).toHaveCount(0);
+});
+
+test("E2E-GAME-000-PREQ / E2E-GD-000 / E2E-TRIVIA-000 gameplay prerequisites block memory-backed rounds before seed data exists", async ({
+  page,
+}) => {
+  await page.goto("/en/games/guess-date");
+  await page.getByRole("button", { name: "Open today’s memory clue" }).click();
+  await expect(
+    page.getByText("Add at least one memory before starting guess the date."),
+  ).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("button", { name: "Lock date guess" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Actual memory date" })).toHaveCount(0);
+
+  await page.goto("/en/games/trivia");
+  await page.getByRole("button", { name: "Open today’s trivia clue" }).click();
+  await expect(
+    page.getByText("Add memories with at least two distinct locations before starting trivia."),
+  ).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("button", { name: "Lock trivia answer" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Correct location" })).toHaveCount(0);
+
+  await page.goto("/en/games");
+  await expect(page.getByText(/^Not started$/)).toHaveCount(3);
+  await expect(page.getByRole("link", { name: "Start today’s date guess" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start today’s trivia" })).toBeVisible();
 });
 
 test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end for both partners and updates the hub and stats", async ({
@@ -47,6 +78,8 @@ test("E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(page.getByRole("heading", { name: "Waiting for the second answer" })).toBeVisible({
     timeout: 15_000,
   });
+  await expect(page.getByLabel("Your answer")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Today’s answers" })).toHaveCount(0);
 
   const partnerBContext = await browser.newContext({
     locale: "en-US",
@@ -119,6 +152,7 @@ test("E2E-GAME-002 / E2E-GD-001 guess date runs end to end for both partners and
   await expect(page.getByRole("heading", { name: "Waiting for the second guess" })).toBeVisible({
     timeout: 15_000,
   });
+  await expect(page.getByLabel("Your date guess")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Actual memory date" })).toHaveCount(0);
 
   const partnerBContext = await browser.newContext({
@@ -186,14 +220,20 @@ test("E2E-GAME-003 / E2E-TRIVIA-001 trivia runs end to end for both partners wit
 
   await page.goto("/en/games/trivia");
   await page.getByRole("button", { name: "Open today’s trivia clue" }).click();
-  await expect(page.getByText(targetNote)).toBeVisible({
+  await expect(
+    page.getByText(new RegExp(`${escapeRegExp(targetNote)}|${escapeRegExp(distractorNote)}`)),
+  ).toBeVisible({
     timeout: 15_000,
   });
-  await page.getByLabel(targetLocation).check();
+  const targetMemoryIsClue = await page.getByText(targetNote).isVisible();
+  const correctLocation = targetMemoryIsClue ? targetLocation : distractorLocation;
+  const incorrectLocation = targetMemoryIsClue ? distractorLocation : targetLocation;
+  await page.getByLabel(correctLocation).check();
   await page.getByRole("button", { name: "Lock trivia answer" }).click();
   await expect(page.getByRole("heading", { name: "Waiting for the second answer" })).toBeVisible({
     timeout: 15_000,
   });
+  await expect(page.getByRole("button", { name: "Lock trivia answer" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Correct location" })).toHaveCount(0);
 
   const partnerBContext = await browser.newContext({
@@ -208,13 +248,13 @@ test("E2E-GAME-003 / E2E-TRIVIA-001 trivia runs end to end for both partners wit
     partnerBPage.getByRole("link", { name: "Open today’s trivia" }),
   ).toBeVisible();
   await partnerBPage.goto(`${E2E_BASE_URL}/en/games/trivia`);
-  await expect(partnerBPage.getByText(targetNote)).toBeVisible();
-  await partnerBPage.getByLabel(distractorLocation).check();
+  await expect(partnerBPage.getByText(targetMemoryIsClue ? targetNote : distractorNote)).toBeVisible();
+  await partnerBPage.getByLabel(incorrectLocation).check();
   await partnerBPage.getByRole("button", { name: "Lock trivia answer" }).click();
   await expect(partnerBPage.getByRole("heading", { name: "Correct location" })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(partnerBPage.getByText(`The matching location was ${targetLocation}.`)).toBeVisible();
+  await expect(partnerBPage.getByText(`The matching location was ${correctLocation}.`)).toBeVisible();
   await expect(partnerBPage.getByText("Selected answer")).toHaveCount(2);
   await expect(partnerBPage.getByText("Correct", { exact: true })).toBeVisible();
   await expect(partnerBPage.getByText("Not this time")).toBeVisible();

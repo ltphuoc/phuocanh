@@ -5,6 +5,23 @@ import {
   partnerAStorageStatePath,
 } from "./support/runtime";
 
+const implementedAppDataPaths = [
+  "/api/app-data/home",
+  "/api/app-data/lists",
+  "/api/app-data/on-this-day",
+  "/api/app-data/countdowns",
+  "/api/app-data/future-notes",
+  "/api/app-data/trips",
+  "/api/app-data/albums",
+  "/api/app-data/map",
+  "/api/app-data/games",
+  "/api/app-data/games/daily-question",
+  "/api/app-data/games/guess-date",
+  "/api/app-data/games/trivia",
+  "/api/app-data/stats",
+  "/api/app-data/settings",
+] as const;
+
 test("E2E-APPDATA-001 app-data routes enforce auth and no-store JSON contracts", async ({
   browser,
 }) => {
@@ -30,18 +47,26 @@ test("E2E-APPDATA-001 app-data routes enforce auth and no-store JSON contracts",
     storageState: partnerAStorageStatePath,
     timezoneId: onboardingTimeZone,
   });
-  const settingsResponse = await partnerAContext.request.get(
-    `${E2E_BASE_URL}/api/app-data/settings`,
-  );
 
-  expect(settingsResponse.status()).toBe(200);
-  expect(settingsResponse.headers()["cache-control"]).toBe("no-store");
-  await expect(settingsResponse.json()).resolves.toMatchObject({
-    context: {
-      timeZone: onboardingTimeZone,
-    },
-    currentTimeZone: onboardingTimeZone,
-  });
+  for (const path of implementedAppDataPaths) {
+    const response = await partnerAContext.request.get(`${E2E_BASE_URL}${path}`);
+
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["cache-control"], path).toBe("no-store");
+
+    const body = await response.json();
+    expect(body, path).toMatchObject({
+      context: {
+        timeZone: onboardingTimeZone,
+      },
+    });
+
+    if (path === "/api/app-data/settings") {
+      expect(body).toMatchObject({
+        currentTimeZone: onboardingTimeZone,
+      });
+    }
+  }
 
   const notFoundPaths = [
     "/api/app-data/games/unknown",

@@ -57,3 +57,5 @@ Failure triage:
 - `E2E-AUTH-SETUP-000`
 - `E2E-AUTH-001`
 - `E2E-AUTH-002`
+- `E2E-AUTH-003`
+- `E2E-AUTH-004`

@@ -202,6 +202,8 @@ test("E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await expect(page.getByRole("link", { name: new RegExp(albumTitle) })).toBeVisible({
     timeout: 15_000,
   });
+  await expect(page.getByRole("heading", { name: "This trip already has an album" })).toBeVisible();
+  await expect(page.getByLabel("Album title")).toHaveCount(0);
 
   const addAlbumItemsForm = page.locator("form").filter({
     has: page.getByRole("button", { name: "Add selected media" }),

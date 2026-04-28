@@ -14,6 +14,23 @@
 - None initially. The hub state should change as the daily-question, guess-date, and trivia flows progress.
 
 ## Core Smoke Cases
+### MAN-GAME-000 Memory-backed modes block missing prerequisites
+1. Open `/games/guess-date` before any memories exist.
+2. Try to start today’s memory clue.
+3. Open `/games/trivia` before at least two distinct memory locations exist.
+4. Try to start today’s trivia clue.
+5. Return to `/games`.
+
+Expected result:
+- Guess-date shows the missing-memory failure and does not render the date answer or reveal UI.
+- Trivia shows the missing-location failure and does not render the trivia answer or reveal UI.
+- The hub still treats both memory-backed modes as not started.
+
+Failure triage:
+- Route: `/games`, `/games/guess-date`, `/games/trivia`
+- Action: `ensureGuessDateRoundAction`, `ensureTriviaRoundAction`
+- RPC: `ensure_guess_date_round(...)`, `ensure_trivia_round(...)`
+
 ### MAN-GAME-001 Games hub reflects daily-question status transitions
 1. Open `/games` before starting today’s round and note the status badge.
 2. Start today’s daily question from the hub.
@@ -61,6 +78,7 @@ Failure triage:
 - RPC: `get_trivia_round_state(...)`, `ensure_trivia_round(...)`, `submit_trivia_answer(...)`
 
 ## Automated Coverage
+- `E2E-GAME-000-PREQ`
 - `E2E-GAME-001`
 - `E2E-GAME-002`
 - `E2E-GAME-003`
