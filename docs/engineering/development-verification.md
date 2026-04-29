@@ -35,6 +35,7 @@ This guide is the compact setup and validation reference for day-to-day developm
 ## Verification Commands
 
 - Baseline:
+  - `pnpm test:unit`
   - `pnpm lint`
   - `pnpm typecheck`
   - `pnpm typecheck:functions`

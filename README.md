@@ -129,6 +129,7 @@ pnpm dev
 Run all of these before opening a PR:
 
 ```bash
+pnpm test:unit
 pnpm lint
 pnpm typecheck
 pnpm typecheck:functions
