@@ -16,10 +16,10 @@ test('E2E-MEM-000 memory creation requires a note or media', async ({ page }) =>
 
 test('E2E-MEM-000-TYPE unsupported memory media is rejected before save', async ({ page }) => {
   await page.goto('/en/memories/new');
-  const mediaInput = page.locator('input[type="file"]');
+  const mediaInput = page.getByLabel('Media');
   const fileChooserPromise = page.waitForEvent('filechooser');
 
-  await page.getByLabel('Media').click();
+  await mediaInput.click();
   const fileChooser = await fileChooserPromise;
   await fileChooser.setFiles({
     buffer: Buffer.from('not an image or video'),
@@ -67,7 +67,7 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   await expect(page.getByText(/^Day \d+$/).first()).toBeVisible();
   await expect(page.getByText(memoryNote).first()).toBeVisible();
 
-  const memoryLink = page.locator('a').filter({ hasText: memoryNote }).first();
+  const memoryLink = page.getByRole('link').filter({ hasText: memoryNote }).first();
   await expect(memoryLink).toBeVisible();
   await memoryLink.click();
   await expect(page).toHaveURL(/\/en\/memories\/[0-9a-f-]+$/);
@@ -100,49 +100,37 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   await expect(page.getByText(wishNote)).toBeVisible();
   await expect(page.getByRole('heading', { name: checklistTitle })).toBeVisible();
 
-  const checklistCard = page
-    .locator('div')
-    .filter({
-      has: page.getByRole('heading', { name: checklistTitle }),
-    })
-    .first();
+  const getChecklistCard = () =>
+    page
+      .locator('section')
+      .filter({
+        has: page.getByRole('heading', { name: checklistTitle }),
+      })
+      .last();
+
+  const checklistCard = getChecklistCard();
   await checklistCard.getByPlaceholder('Add item').fill(checklistItemText);
   await checklistCard.getByRole('button', { exact: true, name: 'Add' }).click();
   await expect(checklistCard.getByText(checklistItemText)).toBeVisible({
     timeout: 15_000,
   });
 
-  const refreshedChecklistCard = page
-    .locator('div')
-    .filter({
-      has: page.getByRole('heading', { name: checklistTitle }),
-    })
-    .first();
+  const refreshedChecklistCard = getChecklistCard();
   await expect(refreshedChecklistCard.getByText(checklistItemText)).toBeVisible();
   await refreshedChecklistCard.getByRole('button', { name: 'Done' }).click();
   await expect(refreshedChecklistCard.getByText('Completed')).toBeVisible({
     timeout: 15_000,
   });
 
-  const completedChecklistCard = page
-    .locator('div')
-    .filter({
-      has: page.getByRole('heading', { name: checklistTitle }),
-    })
-    .first();
+  const completedChecklistCard = getChecklistCard();
   await expect(completedChecklistCard.getByText(checklistItemText)).toBeVisible();
   await expect(completedChecklistCard.getByText('Completed')).toBeVisible();
   await completedChecklistCard.getByRole('button', { name: 'Undo' }).click();
 
-  const pendingChecklistCard = page
-    .locator('div')
-    .filter({
-      has: page.getByRole('heading', { name: checklistTitle }),
-    })
-    .first();
+  const pendingChecklistCard = getChecklistCard();
   await expect(pendingChecklistCard.getByText(checklistItemText)).toBeVisible();
   await expect(pendingChecklistCard.getByRole('button', { name: 'Done' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(pendingChecklistCard.getByText('Completed')).toHaveCount(0);
+  await expect(pendingChecklistCard.getByText('Completed')).toBeHidden();
 });

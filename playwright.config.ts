@@ -13,6 +13,7 @@ export default defineConfig({
   expect: {
     timeout: 10_000,
   },
+  forbidOnly: Boolean(process.env.CI),
   fullyParallel: false,
   reporter: [['list'], ['html', { open: 'never' }]],
   retries: process.env.CI ? 2 : 0,
@@ -22,8 +23,10 @@ export default defineConfig({
     baseURL: BASE_URL,
     headless: process.env.PLAYWRIGHT_HEADLESS === '0' ? false : undefined,
     locale: 'en-US',
+    screenshot: 'only-on-failure',
     timezoneId: COUPLE_TIME_ZONE,
     trace: 'on-first-retry',
+    video: 'retain-on-failure',
   },
   webServer: {
     command: 'pnpm start',
@@ -33,6 +36,7 @@ export default defineConfig({
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? BASE_URL,
     },
     reuseExistingServer: false,
+    timeout: 120_000,
     url: BASE_URL,
   },
   workers: 1,

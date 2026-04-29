@@ -19,9 +19,9 @@ test('E2E-GAME-000 shell-only game mode stays non-live', async ({ page }) => {
     ),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back to games' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Generate today’s question' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Open today’s memory clue' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Open today’s trivia clue' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Generate today’s question' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Open today’s memory clue' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Open today’s trivia clue' })).toBeHidden();
 });
 
 test('E2E-GAME-000-PREQ / E2E-GD-000 / E2E-TRIVIA-000 gameplay prerequisites block memory-backed rounds before seed data exists', async ({
@@ -34,8 +34,8 @@ test('E2E-GAME-000-PREQ / E2E-GD-000 / E2E-TRIVIA-000 gameplay prerequisites blo
   ).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole('button', { name: 'Lock date guess' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Lock date guess' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toBeHidden();
 
   await page.goto('/en/games/trivia');
   await page.getByRole('button', { name: 'Open today’s trivia clue' }).click();
@@ -44,8 +44,8 @@ test('E2E-GAME-000-PREQ / E2E-GD-000 / E2E-TRIVIA-000 gameplay prerequisites blo
   ).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole('button', { name: 'Lock trivia answer' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Correct location' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Lock trivia answer' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Correct location' })).toBeHidden();
 
   await page.goto('/en/games');
   await expect(page.getByText(/^Not started$/)).toHaveCount(3);
@@ -75,28 +75,32 @@ test('E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(page.getByRole('heading', { name: 'Waiting for the second answer' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByLabel('Your answer')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Today’s answers' })).toHaveCount(0);
+  await expect(page.getByLabel('Your answer')).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Today’s answers' })).toBeHidden();
 
   const partnerBContext = await browser.newContext({
     locale: 'en-US',
     storageState: partnerBStorageStatePath,
     timezoneId: onboardingTimeZone,
   });
-  const partnerBPage = await partnerBContext.newPage();
 
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
-  await expect(partnerBPage.getByRole('link', { name: 'Open today’s round' })).toBeVisible();
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games/daily-question`);
-  await expect(partnerBPage.getByText(promptText)).toBeVisible();
-  await partnerBPage.getByLabel('Your answer').fill(partnerBAnswer);
-  await partnerBPage.getByRole('button', { name: 'Lock answer' }).click();
-  await expect(partnerBPage.getByRole('heading', { name: 'Today’s answers' })).toBeVisible({
-    timeout: 15_000,
-  });
-  await expect(partnerBPage.getByText(partnerAAnswer)).toBeVisible();
-  await expect(partnerBPage.getByText(partnerBAnswer)).toBeVisible();
-  await partnerBContext.close();
+  try {
+    const partnerBPage = await partnerBContext.newPage();
+
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
+    await expect(partnerBPage.getByRole('link', { name: 'Open today’s round' })).toBeVisible();
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games/daily-question`);
+    await expect(partnerBPage.getByText(promptText)).toBeVisible();
+    await partnerBPage.getByLabel('Your answer').fill(partnerBAnswer);
+    await partnerBPage.getByRole('button', { name: 'Lock answer' }).click();
+    await expect(partnerBPage.getByRole('heading', { name: 'Today’s answers' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(partnerBPage.getByText(partnerAAnswer)).toBeVisible();
+    await expect(partnerBPage.getByText(partnerBAnswer)).toBeVisible();
+  } finally {
+    await partnerBContext.close();
+  }
 
   await expect(page.getByRole('heading', { name: 'Today’s answers' })).toBeVisible({
     timeout: 15_000,
@@ -146,29 +150,33 @@ test('E2E-GAME-002 / E2E-GD-001 guess date runs end to end for both partners and
   await expect(page.getByRole('heading', { name: 'Waiting for the second guess' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByLabel('Your date guess')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toHaveCount(0);
+  await expect(page.getByLabel('Your date guess')).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toBeHidden();
 
   const partnerBContext = await browser.newContext({
     locale: 'en-US',
     storageState: partnerBStorageStatePath,
     timezoneId: onboardingTimeZone,
   });
-  const partnerBPage = await partnerBContext.newPage();
 
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
-  await expect(partnerBPage.getByRole('link', { name: 'Open today’s date guess' })).toBeVisible();
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games/guess-date`);
-  await expect(partnerBPage.getByText(memoryNote)).toBeVisible();
-  await partnerBPage.getByLabel('Your date guess').fill(partnerBAnswer);
-  await partnerBPage.getByRole('button', { name: 'Lock date guess' }).click();
-  await expect(partnerBPage.getByRole('heading', { name: 'Actual memory date' })).toBeVisible({
-    timeout: 15_000,
-  });
-  await expect(partnerBPage.getByText('Guessed date')).toHaveCount(2);
-  await expect(partnerBPage.getByText('You', { exact: true })).toBeVisible();
-  await expect(partnerBPage.getByText('Partner', { exact: true })).toBeVisible();
-  await partnerBContext.close();
+  try {
+    const partnerBPage = await partnerBContext.newPage();
+
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
+    await expect(partnerBPage.getByRole('link', { name: 'Open today’s date guess' })).toBeVisible();
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games/guess-date`);
+    await expect(partnerBPage.getByText(memoryNote)).toBeVisible();
+    await partnerBPage.getByLabel('Your date guess').fill(partnerBAnswer);
+    await partnerBPage.getByRole('button', { name: 'Lock date guess' }).click();
+    await expect(partnerBPage.getByRole('heading', { name: 'Actual memory date' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(partnerBPage.getByText('Guessed date')).toHaveCount(2);
+    await expect(partnerBPage.getByText('You', { exact: true })).toBeVisible();
+    await expect(partnerBPage.getByText('Partner', { exact: true })).toBeVisible();
+  } finally {
+    await partnerBContext.close();
+  }
 
   await expect(page.getByRole('heading', { name: 'Actual memory date' })).toBeVisible({
     timeout: 15_000,
@@ -224,34 +232,38 @@ test('E2E-GAME-003 / E2E-TRIVIA-001 trivia runs end to end for both partners wit
   await expect(page.getByRole('heading', { name: 'Waiting for the second answer' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole('button', { name: 'Lock trivia answer' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Correct location' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Lock trivia answer' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Correct location' })).toBeHidden();
 
   const partnerBContext = await browser.newContext({
     locale: 'en-US',
     storageState: partnerBStorageStatePath,
     timezoneId: onboardingTimeZone,
   });
-  const partnerBPage = await partnerBContext.newPage();
 
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
-  await expect(partnerBPage.getByRole('link', { name: 'Open today’s trivia' })).toBeVisible();
-  await partnerBPage.goto(`${E2E_BASE_URL}/en/games/trivia`);
-  await expect(
-    partnerBPage.getByText(targetMemoryIsClue ? targetNote : distractorNote),
-  ).toBeVisible();
-  await partnerBPage.getByLabel(incorrectLocation).check();
-  await partnerBPage.getByRole('button', { name: 'Lock trivia answer' }).click();
-  await expect(partnerBPage.getByRole('heading', { name: 'Correct location' })).toBeVisible({
-    timeout: 15_000,
-  });
-  await expect(
-    partnerBPage.getByText(`The matching location was ${correctLocation}.`),
-  ).toBeVisible();
-  await expect(partnerBPage.getByText('Selected answer')).toHaveCount(2);
-  await expect(partnerBPage.getByText('Correct', { exact: true })).toBeVisible();
-  await expect(partnerBPage.getByText('Not this time')).toBeVisible();
-  await partnerBContext.close();
+  try {
+    const partnerBPage = await partnerBContext.newPage();
+
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games`);
+    await expect(partnerBPage.getByRole('link', { name: 'Open today’s trivia' })).toBeVisible();
+    await partnerBPage.goto(`${E2E_BASE_URL}/en/games/trivia`);
+    await expect(
+      partnerBPage.getByText(targetMemoryIsClue ? targetNote : distractorNote),
+    ).toBeVisible();
+    await partnerBPage.getByLabel(incorrectLocation).check();
+    await partnerBPage.getByRole('button', { name: 'Lock trivia answer' }).click();
+    await expect(partnerBPage.getByRole('heading', { name: 'Correct location' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      partnerBPage.getByText(`The matching location was ${correctLocation}.`),
+    ).toBeVisible();
+    await expect(partnerBPage.getByText('Selected answer')).toHaveCount(2);
+    await expect(partnerBPage.getByText('Correct', { exact: true })).toBeVisible();
+    await expect(partnerBPage.getByText('Not this time')).toBeVisible();
+  } finally {
+    await partnerBContext.close();
+  }
 
   await expect(page.getByRole('heading', { name: 'Correct location' })).toBeVisible({
     timeout: 15_000,

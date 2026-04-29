@@ -1,5 +1,6 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
+import { TZDate } from '@date-fns/tz';
 import { expect, test } from '@playwright/test';
 
 import { memoryFixturePath, onboardingTimeZone } from './support/runtime';
@@ -10,13 +11,46 @@ import {
   createTodayDateInput,
 } from './support/test-data';
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const replaceInputValue = async (input: Locator, value: string): Promise<void> => {
-  await input.click();
-  await input.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
-  await input.press('Backspace');
-  await input.pressSequentially(value);
+  await input.fill(value);
   await input.press('Tab');
 };
+
+const createCalendarDate = (dateInput: string): TZDate => {
+  const [year, month, day] = dateInput.split('-').map(Number);
+
+  if (!year || !month || !day) {
+    throw new Error(`Invalid date input: ${dateInput}`);
+  }
+
+  return new TZDate(year, month - 1, day, onboardingTimeZone);
+};
+
+const formatCalendarDateLabel = (dateInput: string): string =>
+  new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: onboardingTimeZone,
+    year: 'numeric',
+  }).format(createCalendarDate(dateInput));
+
+const getSectionByHeading = (page: Page, heading: string | RegExp): Locator =>
+  page
+    .locator('section')
+    .filter({
+      has: page.getByRole('heading', { name: heading }),
+    })
+    .last();
+
+const getSectionByText = (page: Page, text: string | RegExp): Locator =>
+  page
+    .locator('section')
+    .filter({
+      hasText: text,
+    })
+    .last();
 
 test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and timezone updates preserve selected calendar dates', async ({
   page,
@@ -29,6 +63,12 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   const lockedFutureNoteBody = buildUniqueText('Locked note body', 'E2E-FNOTE-001');
   const unlockedFutureNoteTitle = buildUniqueText('Unlocked note', 'E2E-FNOTE-001');
   const unlockedFutureNoteBody = buildUniqueText('Unlocked note body', 'E2E-FNOTE-001');
+  const countdownTargetDate = createOffsetDateInput(30);
+  const countdownDateLabel = `On ${formatCalendarDateLabel(countdownTargetDate)}`;
+  const lockedFutureNoteUnlockDate = createOffsetDateInput(45);
+  const lockedUnlockDateLabel = `Unlocks ${formatCalendarDateLabel(lockedFutureNoteUnlockDate)}`;
+  const unlockedFutureNoteUnlockDate = createTodayDateInput();
+  const unlockedUnlockDateLabel = `Unlocks ${formatCalendarDateLabel(unlockedFutureNoteUnlockDate)}`;
 
   await page.goto('/en/settings');
   await replaceInputValue(page.getByLabel('Couple timezone'), 'Not/A_Real_Zone');
@@ -39,28 +79,20 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.goto('/en/countdowns');
   await page.getByLabel('Title').fill(countdownTitle);
   await page.getByLabel('Type').selectOption('plan');
-  await page.getByLabel('Target date').fill(createOffsetDateInput(30));
+  await page.getByLabel('Target date').fill(countdownTargetDate);
   await page.getByLabel('Note (optional)').fill(countdownNote);
   await page.getByRole('button', { name: 'Save countdown' }).click();
   await expect(page.getByText(countdownTitle)).toBeVisible({
     timeout: 15_000,
   });
 
-  const countdownCard = page
-    .locator('div')
-    .filter({
-      hasText: countdownTitle,
-    })
-    .first();
+  const countdownCard = getSectionByText(page, countdownTitle);
   await expect(countdownCard.getByText(countdownNote)).toBeVisible();
-  const countdownDateLabel = await countdownCard.getByText(/^On /).first().textContent();
-  if (!countdownDateLabel) {
-    throw new Error('Countdown card did not render a target date label.');
-  }
+  await expect(countdownCard.getByText(countdownDateLabel)).toBeVisible();
 
   await page.goto('/en/future-notes');
   await page.getByLabel('Title').fill(lockedFutureNoteTitle);
-  await page.getByLabel('Unlock date').fill(createOffsetDateInput(45));
+  await page.getByLabel('Unlock date').fill(lockedFutureNoteUnlockDate);
   await page.getByLabel('Note body').fill(lockedFutureNoteBody);
   await page.getByRole('button', { name: 'Seal future note' }).click();
   await expect(page.getByText(lockedFutureNoteTitle)).toBeVisible({
@@ -68,39 +100,19 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   });
 
   await page.getByLabel('Title').fill(unlockedFutureNoteTitle);
-  await page.getByLabel('Unlock date').fill(createTodayDateInput());
+  await page.getByLabel('Unlock date').fill(unlockedFutureNoteUnlockDate);
   await page.getByLabel('Note body').fill(unlockedFutureNoteBody);
   await page.getByRole('button', { name: 'Seal future note' }).click();
   await expect(page.getByText(unlockedFutureNoteTitle)).toBeVisible({
     timeout: 15_000,
   });
 
-  const lockedFutureNoteCard = page
-    .locator('div')
-    .filter({
-      hasText: lockedFutureNoteTitle,
-    })
-    .first();
-  const unlockedFutureNoteCard = page
-    .locator('div')
-    .filter({
-      hasText: unlockedFutureNoteTitle,
-    })
-    .first();
-  const lockedUnlockDateLabel = await lockedFutureNoteCard
-    .getByText(/^Unlocks /)
-    .first()
-    .textContent();
-  const unlockedUnlockDateLabel = await unlockedFutureNoteCard
-    .getByText(/^Unlocks /)
-    .first()
-    .textContent();
+  const lockedFutureNoteCard = getSectionByHeading(page, lockedFutureNoteTitle);
+  const unlockedFutureNoteCard = getSectionByHeading(page, unlockedFutureNoteTitle);
 
-  if (!lockedUnlockDateLabel || !unlockedUnlockDateLabel) {
-    throw new Error('Future note cards did not render unlock date labels.');
-  }
-
-  await expect(lockedFutureNoteCard.getByText(lockedFutureNoteBody)).toHaveCount(0);
+  await expect(lockedFutureNoteCard.getByText(lockedFutureNoteBody)).toBeHidden();
+  await expect(lockedFutureNoteCard.getByText(lockedUnlockDateLabel)).toBeVisible();
+  await expect(unlockedFutureNoteCard.getByText(unlockedUnlockDateLabel)).toBeVisible();
   await expect(unlockedFutureNoteCard.getByText(unlockedFutureNoteBody)).toBeVisible();
 
   await page.goto('/en/settings');
@@ -111,12 +123,18 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   });
 
   await page.goto('/en/countdowns');
-  await expect(page.getByText(countdownDateLabel)).toBeVisible();
+  await expect(getSectionByText(page, countdownTitle).getByText(countdownDateLabel)).toBeVisible();
 
   await page.goto('/en/future-notes');
-  await expect(page.getByText(lockedUnlockDateLabel)).toBeVisible();
-  await expect(page.getByText(unlockedUnlockDateLabel)).toBeVisible();
-  await expect(page.getByText(unlockedFutureNoteBody)).toBeVisible();
+  await expect(
+    getSectionByHeading(page, lockedFutureNoteTitle).getByText(lockedUnlockDateLabel),
+  ).toBeVisible();
+  await expect(
+    getSectionByHeading(page, unlockedFutureNoteTitle).getByText(unlockedUnlockDateLabel),
+  ).toBeVisible();
+  await expect(
+    getSectionByHeading(page, unlockedFutureNoteTitle).getByText(unlockedFutureNoteBody),
+  ).toBeVisible();
 
   await page.goto('/en/settings');
   await replaceInputValue(page.getByLabel('Couple timezone'), onboardingTimeZone);
@@ -176,7 +194,7 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
 
   await page.goto('/en/map');
   await expect(page.getByRole('heading', { name: 'Places map' })).toBeVisible();
-  await expect(page.locator(`button[aria-label="${visitedPlaceTitle}"]`)).toBeVisible();
+  await expect(page.getByRole('button', { exact: true, name: visitedPlaceTitle })).toBeVisible();
 
   await page.goto('/en/memories/new');
   await page.getByLabel('Happened at').fill(createOffsetDateTimeLocalInput(-1, 10, 15));
@@ -212,13 +230,17 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await albumComposer.getByLabel('Album note (optional)').fill(albumNote);
   await albumComposer.getByRole('button', { name: 'Create album' }).click();
   await expect(albumComposer.getByText('Select at least one memory item.')).toBeVisible();
-  await albumComposer.locator('label').filter({ hasText: firstTripMemoryNote }).click();
+  const firstAlbumMediaCheckbox = albumComposer.getByRole('checkbox', {
+    name: new RegExp(escapeRegExp(firstTripMemoryNote)),
+  });
+  await albumComposer.getByText(firstTripMemoryNote, { exact: true }).click();
+  await expect(firstAlbumMediaCheckbox).toBeChecked();
   await albumComposer.getByRole('button', { name: 'Create album' }).click();
   await expect(page.getByRole('link', { name: new RegExp(albumTitle) })).toBeVisible({
     timeout: 15_000,
   });
   await expect(page.getByRole('heading', { name: 'This trip already has an album' })).toBeVisible();
-  await expect(page.getByLabel('Album title')).toHaveCount(0);
+  await expect(page.getByLabel('Album title')).toBeHidden();
 
   const addAlbumItemsForm = page
     .locator('form')
@@ -226,9 +248,13 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
       has: page.getByRole('button', { name: 'Add selected media' }),
     })
     .first();
-  await addAlbumItemsForm.locator('label').filter({ hasText: secondTripMemoryNote }).click();
+  const secondAlbumMediaCheckbox = addAlbumItemsForm.getByRole('checkbox', {
+    name: new RegExp(escapeRegExp(secondTripMemoryNote)),
+  });
+  await addAlbumItemsForm.getByText(secondTripMemoryNote, { exact: true }).click();
+  await expect(secondAlbumMediaCheckbox).toBeChecked();
   await addAlbumItemsForm.getByRole('button', { name: 'Add selected media' }).click();
-  await expect(addAlbumItemsForm.getByText(secondTripMemoryNote)).toHaveCount(0, {
+  await expect(addAlbumItemsForm.getByText(secondTripMemoryNote)).toBeHidden({
     timeout: 15_000,
   });
   const linkedAlbum = page.getByRole('link', { name: new RegExp(albumTitle) }).first();
