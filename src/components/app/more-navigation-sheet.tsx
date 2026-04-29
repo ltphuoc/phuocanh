@@ -3,6 +3,8 @@
 import type { ReactElement } from 'react';
 import type { AppNavigationItem } from '@/components/app/navigation-model';
 
+import { useEffect } from 'react';
+
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 
@@ -11,6 +13,7 @@ import {
   appSecondaryNavigationItems,
   isAppNavigationItemActive,
 } from '@/components/app/navigation-model';
+import { useHydratedReducedMotion } from '@/hooks/use-hydrated-reduced-motion';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils/cn';
 
@@ -50,11 +53,34 @@ export const MoreNavigationSheet = ({
   open,
 }: MoreNavigationSheetProps): ReactElement => {
   const t = useTranslations();
+  const reduceMotion = useHydratedReducedMotion();
+  const sheetId = id ?? 'mobile-more-navigation-sheet';
+  const titleId = `${sheetId}-title`;
+  const fadeTransition = reduceMotion ? { duration: 0 } : { duration: 0.18 };
+  const sheetTransition = reduceMotion
+    ? { duration: 0 }
+    : { damping: 28, stiffness: 280, type: 'spring' as const };
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, open]);
 
   return (
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 overscroll-contain md:hidden">
           <motion.button
             animate={{ opacity: 1 }}
             aria-label={t('nav.moreSheet.closeAriaLabel')}
@@ -62,20 +88,27 @@ export const MoreNavigationSheet = ({
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             onClick={onClose}
+            transition={fadeTransition}
             type="button"
           />
           <motion.div
             animate={{ opacity: 1, y: 0 }}
+            aria-labelledby={titleId}
+            aria-modal="true"
             className="absolute inset-x-4 bottom-4 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.92)] px-5 py-5 shadow-cloud backdrop-blur-xl"
-            exit={{ opacity: 0, y: 18 }}
-            id={id}
-            initial={{ opacity: 0, y: 24 }}
-            transition={{ damping: 28, stiffness: 280, type: 'spring' }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+            id={sheetId}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+            role="dialog"
+            transition={sheetTransition}
           >
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <p className="ui-meta ui-couple-mark">{t('nav.moreSheet.eyebrow')}</p>
-                <h2 className="mt-2 font-display text-[1.8rem] tracking-[-0.035em] text-foreground">
+                <h2
+                  className="mt-2 font-display text-[1.8rem] tracking-[-0.035em] text-foreground"
+                  id={titleId}
+                >
                   {t('nav.moreSheet.title')}
                 </h2>
               </div>
@@ -88,7 +121,7 @@ export const MoreNavigationSheet = ({
               </button>
             </div>
             <LanguageSwitcher className="mb-5 w-fit" />
-            <div className="flex max-h-[65svh] flex-col gap-5 overflow-y-auto pb-2">
+            <div className="flex max-h-[65svh] flex-col gap-5 overflow-y-auto overscroll-contain pb-2">
               {groupedSecondaryItems.map((group) => (
                 <div
                   className="flex flex-col gap-3"

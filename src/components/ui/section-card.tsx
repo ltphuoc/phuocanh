@@ -9,7 +9,7 @@ type LegacyTone = 'default' | 'gradient' | 'muted';
 type SectionCardSurface = 'glass' | 'hero' | 'paper' | 'petal';
 
 const sectionCardVariants = tv({
-  base: "relative overflow-hidden border text-foreground transition-all duration-300 before:absolute before:inset-[1px] before:rounded-[inherit] before:content-['']",
+  base: "relative overflow-hidden border text-foreground transition-[color,background-color,border-color,box-shadow,transform] duration-300 before:absolute before:inset-[1px] before:rounded-[inherit] before:content-['']",
   variants: {
     padding: {
       compact: 'p-5 md:p-6',

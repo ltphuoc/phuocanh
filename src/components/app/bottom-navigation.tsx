@@ -14,6 +14,7 @@ import {
   appMoreNavigationItem,
   isAppNavigationItemActive,
 } from '@/components/app/navigation-model';
+import { useHydratedReducedMotion } from '@/hooks/use-hydrated-reduced-motion';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils/cn';
 
@@ -25,12 +26,15 @@ interface MoreSheetState {
 export const BottomNavigation = (): ReactElement => {
   const pathname = usePathname();
   const t = useTranslations();
+  const reduceMotion = useHydratedReducedMotion();
   const [moreSheetState, setMoreSheetState] = useState<MoreSheetState>({
     open: false,
     pathname,
   });
   const MemoryActionIcon = appMemoryActionItem.icon;
   const isMoreOpen = moreSheetState.pathname === pathname ? moreSheetState.open : false;
+  const easing = [0.22, 1, 0.36, 1] as const;
+  const activeTransition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: easing };
 
   return (
     <>
@@ -47,6 +51,7 @@ export const BottomNavigation = (): ReactElement => {
                   className="size-7"
                   strokeWidth={2.1}
                 />
+                <span className="sr-only">{t(appMemoryActionItem.labelKey)}</span>
               </Link>
             </div>
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-[rgba(255,249,242,0.74)] px-3 py-3 shadow-cloud backdrop-blur-xl">
@@ -61,7 +66,7 @@ export const BottomNavigation = (): ReactElement => {
                       <motion.span
                         className="absolute inset-0 rounded-full bg-[rgba(255,255,255,0.88)] shadow-whisper"
                         layoutId="mobile-dock-active"
-                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        transition={activeTransition}
                       />
                     ) : null}
                     <span className="relative flex flex-col items-center gap-1">

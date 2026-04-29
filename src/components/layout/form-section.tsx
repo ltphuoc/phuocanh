@@ -26,17 +26,22 @@ export const FormSection = ({
     {...props}
   >
     <div className="flex flex-col gap-1">
-      <label
-        className="text-sm font-semibold text-foreground"
-        htmlFor={htmlFor}
-      >
-        {label}
-      </label>
+      {htmlFor ? (
+        <label
+          className="text-sm font-semibold text-foreground"
+          htmlFor={htmlFor}
+        >
+          {label}
+        </label>
+      ) : (
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+      )}
       {description ? <p className="ui-body-sm text-muted-foreground">{description}</p> : null}
     </div>
     {children}
     {errorMessage ? (
       <p
+        aria-live="polite"
         className="text-sm font-medium text-primary"
         id={errorId}
       >

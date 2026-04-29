@@ -177,7 +177,7 @@ export const AddAlbumItemsForm = ({
                 />
                 <div
                   className={cn(
-                    'flex h-full cursor-pointer flex-col gap-3 rounded-[1.6rem] border bg-white/72 p-4 shadow-whisper transition-all',
+                    'flex h-full cursor-pointer flex-col gap-3 rounded-[1.6rem] border bg-white/72 p-4 shadow-whisper transition-[border-color,box-shadow,transform]',
                     isSelected
                       ? 'border-primary shadow-cloud ring-2 ring-primary/20'
                       : 'border-white/70 hover:-translate-y-0.5 hover:shadow-cloud',

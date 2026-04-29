@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactElement, ReactNode } from 'react';
 
 import { NextIntlClientProvider } from 'next-intl';
@@ -23,6 +23,12 @@ export const generateStaticParams = (): Array<{ locale: string }> =>
   routing.locales.map((locale) => ({
     locale,
   }));
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  themeColor: '#fff5e4',
+  width: 'device-width',
+};
 
 export const generateMetadata = async ({
   params,

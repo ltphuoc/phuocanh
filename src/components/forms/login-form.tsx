@@ -71,9 +71,9 @@ export const LoginForm = ({ initialNextPath }: LoginFormProps): ReactElement => 
     >
       {initialNextPath ? (
         <input
+          defaultValue={initialNextPath}
           name="next"
           type="hidden"
-          value={initialNextPath}
         />
       ) : null}
       <FormSection
@@ -85,6 +85,7 @@ export const LoginForm = ({ initialNextPath }: LoginFormProps): ReactElement => 
           autoComplete="email"
           id="email"
           placeholder={formT('emailPlaceholder')}
+          spellCheck={false}
           type="email"
           {...form.register('email')}
         />

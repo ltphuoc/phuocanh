@@ -14,6 +14,7 @@ import {
   appSecondaryNavigationItems,
   isAppNavigationItemActive,
 } from '@/components/app/navigation-model';
+import { useHydratedReducedMotion } from '@/hooks/use-hydrated-reduced-motion';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils/cn';
 
@@ -25,6 +26,7 @@ interface ExpansionState {
 export const SideNavigation = (): ReactElement => {
   const pathname = usePathname();
   const t = useTranslations();
+  const reduceMotion = useHydratedReducedMotion();
   const MemoryActionIcon = appMemoryActionItem.icon;
   const hasSecondaryActive = appSecondaryNavigationItems.some((item) =>
     isAppNavigationItemActive(pathname, item),
@@ -35,6 +37,9 @@ export const SideNavigation = (): ReactElement => {
   }));
   const isExpanded =
     expansionState.pathname === pathname ? expansionState.open : hasSecondaryActive;
+  const easing = [0.22, 1, 0.36, 1] as const;
+  const activeTransition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: easing };
+  const panelTransition = reduceMotion ? { duration: 0 } : { duration: 0.24, ease: easing };
 
   return (
     <aside className="hidden shrink-0 md:block">
@@ -42,7 +47,7 @@ export const SideNavigation = (): ReactElement => {
         <div className="sticky top-6 flex items-start gap-3">
           <motion.div
             className="flex w-[92px] flex-col items-center gap-4 rounded-[2.25rem] border border-white/62 bg-[rgba(255,249,242,0.64)] p-4 shadow-cloud backdrop-blur-xl"
-            layout
+            layout={!reduceMotion}
           >
             <Link
               className="ui-gradient-hero flex size-[60px] items-center justify-center rounded-[1.7rem] border border-white/62 text-center shadow-whisper"
@@ -76,7 +81,7 @@ export const SideNavigation = (): ReactElement => {
                       <motion.span
                         className="absolute inset-0 rounded-full bg-white/86 shadow-whisper"
                         layoutId="desktop-rail-active"
-                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        transition={activeTransition}
                       />
                     ) : null}
                     <Icon
@@ -98,6 +103,7 @@ export const SideNavigation = (): ReactElement => {
                 className="size-6"
                 strokeWidth={2.1}
               />
+              <span className="sr-only">{t(appMemoryActionItem.labelKey)}</span>
             </Link>
             <LanguageSwitcher />
             <button
@@ -135,9 +141,9 @@ export const SideNavigation = (): ReactElement => {
               <motion.div
                 animate={{ opacity: 1, x: 0 }}
                 className="w-[240px] rounded-[2rem] border border-white/62 bg-[rgba(255,249,242,0.72)] p-5 shadow-cloud backdrop-blur-xl"
-                exit={{ opacity: 0, x: -12 }}
-                initial={{ opacity: 0, x: -18 }}
-                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -12 }}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -18 }}
+                transition={panelTransition}
               >
                 <div className="mb-4">
                   <p className="ui-meta ui-couple-mark">{t('nav.side.sharedCornersEyebrow')}</p>

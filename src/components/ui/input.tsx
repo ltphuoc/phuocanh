@@ -6,15 +6,18 @@ import { cn } from '@/lib/utils/cn';
 
 export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => (
-  <input
-    ref={ref}
-    className={cn(
-      'h-12 w-full rounded-control border border-white/70 bg-white/76 px-4 text-sm text-foreground shadow-whisper backdrop-blur-md outline-none placeholder:text-muted-foreground focus:border-primary focus:shadow-glow focus:ring-2 focus:ring-ring/30',
-      className,
-    )}
-    {...props}
-  />
-));
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ autoComplete, className, ...props }, ref) => (
+    <input
+      ref={ref}
+      autoComplete={autoComplete ?? 'off'}
+      className={cn(
+        'h-12 w-full rounded-control border border-white/70 bg-white/76 px-4 text-sm text-foreground shadow-whisper backdrop-blur-md outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:shadow-glow focus-visible:ring-2 focus-visible:ring-ring/30',
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
 
 Input.displayName = 'Input';

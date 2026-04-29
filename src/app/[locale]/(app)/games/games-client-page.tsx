@@ -137,7 +137,7 @@ export const GamesClientPage = (): ReactElement => {
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-all duration-200 hover:-translate-y-0.5 hover:brightness-102"
+                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-102"
                 href="/games/daily-question"
               >
                 {dailyQuestionCtaLabel}
@@ -186,7 +186,7 @@ export const GamesClientPage = (): ReactElement => {
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-all duration-200 hover:-translate-y-0.5 hover:brightness-102"
+                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-102"
                 href="/games/guess-date"
               >
                 {guessDateCtaLabel}
@@ -233,7 +233,7 @@ export const GamesClientPage = (): ReactElement => {
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
-                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-all duration-200 hover:-translate-y-0.5 hover:brightness-102"
+                className="ui-gradient-active inline-flex h-12 items-center justify-center rounded-pill px-5 text-sm font-semibold text-primary-foreground shadow-cloud transition-[filter,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:brightness-102"
                 href="/games/trivia"
               >
                 {triviaCtaLabel}
@@ -259,7 +259,7 @@ export const GamesClientPage = (): ReactElement => {
           </p>
           <div>
             <Link
-              className="inline-flex h-10 items-center justify-center rounded-pill border border-white/72 bg-white/78 px-4 text-sm font-semibold text-foreground shadow-whisper transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/92"
+              className="inline-flex h-10 items-center justify-center rounded-pill border border-white/72 bg-white/78 px-4 text-sm font-semibold text-foreground shadow-whisper transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/92"
               href="/stats"
             >
               {gamesT('statsBridge.cta')}

@@ -6,7 +6,7 @@ import { tv } from 'tailwind-variants';
 import { cn } from '@/lib/utils/cn';
 
 const buttonVariants = tv({
-  base: 'inline-flex items-center justify-center gap-2 rounded-pill text-sm font-semibold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60',
+  base: 'inline-flex items-center justify-center gap-2 rounded-pill text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform,filter] duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60',
   variants: {
     size: {
       default: 'h-12 px-5',

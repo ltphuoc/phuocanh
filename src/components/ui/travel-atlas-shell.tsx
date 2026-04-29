@@ -9,6 +9,7 @@ import { MapPinned, Route } from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { SectionCard } from '@/components/ui/section-card';
+import { useHydratedReducedMotion } from '@/hooks/use-hydrated-reduced-motion';
 import { useI18n } from '@/hooks/useI18n';
 import { cn } from '@/lib/utils/cn';
 import { parseDateInputValueInTimeZone } from '@/lib/utils/couple-timezone';
@@ -49,6 +50,7 @@ const getAtlasPlaces = (groups: readonly MapTripGroup[]): readonly AtlasPlace[] 
 
 export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): ReactElement => {
   const { format, t } = useI18n('ui.travelAtlas');
+  const reduceMotion = useHydratedReducedMotion();
   const atlasPlaces = getAtlasPlaces(groups);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>(atlasPlaces[0]?.id ?? '');
   const selectedPlace =
@@ -177,12 +179,14 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
                 type="button"
               >
                 <motion.span
-                  animate={{ scale: isSelected ? 1.06 : 1 }}
+                  animate={{ scale: !reduceMotion && isSelected ? 1.06 : 1 }}
                   className={cn(
                     'relative inline-flex flex-col items-center gap-2',
                     isSelected ? 'text-foreground' : 'text-muted-foreground',
                   )}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  transition={
+                    reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
+                  }
                 >
                   <span
                     className={cn(

@@ -37,7 +37,7 @@
     "backToTrips": "Về chuyến đi",
     "comingSoon": "Sắp ra mắt",
     "openShell": "Mở giao diện mẫu",
-    "working": "Đang xử lý..."
+    "working": "Đang xử lý…"
   },
   "nav": {
     "groups": {
@@ -156,7 +156,7 @@
     "login": {
       "emailDescription": "Dùng email đã liên kết với không gian cặp đôi.",
       "emailLabel": "Email",
-      "emailPlaceholder": "you@example.com",
+      "emailPlaceholder": "you@example.com…",
       "submit": "Gửi magic link"
     },
     "acceptInvite": {
@@ -170,7 +170,7 @@
       "confirmationLabel": "Xác nhận rõ ràng",
       "coupleNameDescription": "Dùng tên thật cho không gian chung của hai bạn.",
       "coupleNameLabel": "Tên cặp đôi",
-      "coupleNamePlaceholder": "Phuoc & Anh",
+      "coupleNamePlaceholder": "Phuoc & Anh…",
       "next": "Tiếp tục",
       "startedDateDescription": "Ngày này dùng cho bộ đếm yêu nhau và các mốc trên timeline.",
       "startedDateLabel": "Ngày bắt đầu",
@@ -184,7 +184,7 @@
       "summaryLabel": "Tổng kết trước khi xác nhận",
       "timeZoneDescription": "Dùng múi giờ chung thật để tính các mốc ngày.",
       "timeZoneLabel": "Múi giờ cặp đôi",
-      "timeZonePlaceholder": "Asia/Ho_Chi_Minh",
+      "timeZonePlaceholder": "Asia/Ho_Chi_Minh…",
       "validation": {
         "confirmationRequired": "Bạn phải xác nhận trước khi tạo không gian cặp đôi.",
         "coupleNameMax": "Tên cặp đôi tối đa 120 ký tự.",
@@ -208,18 +208,18 @@
       },
       "categoryLabel": "Danh mục",
       "noteLabel": "Ghi chú (tuỳ chọn)",
-      "notePlaceholder": "Ghi chú tuỳ chọn",
+      "notePlaceholder": "Ghi chú tuỳ chọn…",
       "submit": "Thêm mục",
       "titleLabel": "Tiêu đề",
-      "titlePlaceholder": "Đi ăn bánh xèo ở Hội An"
+      "titlePlaceholder": "Đi ăn bánh xèo ở Hội An…"
     },
     "checklist": {
       "submit": "Tạo checklist",
       "titleLabel": "Tiêu đề checklist",
-      "titlePlaceholder": "Mục tiêu cuối tuần"
+      "titlePlaceholder": "Mục tiêu cuối tuần…"
     },
     "checklistItem": {
-      "placeholder": "Thêm mục",
+      "placeholder": "Thêm mục…",
       "submit": "Thêm"
     },
     "checklistToggle": {
@@ -231,24 +231,24 @@
       "happenedAtLabel": "Thời điểm xảy ra",
       "locationDescription": "Địa điểm tùy chọn của khoảnh khắc này.",
       "locationLabel": "Địa điểm",
-      "locationPlaceholder": "Đà Nẵng",
+      "locationPlaceholder": "Đà Nẵng…",
       "mediaDescription": "Ảnh hoặc video tối đa 25MB.",
       "mediaLabel": "Media",
       "noteDescription": "Một câu chuyện ngắn giúp tìm kiếm và xem lại tốt hơn.",
       "noteLabel": "Ghi chú",
-      "notePlaceholder": "Đã xảy ra chuyện gì?",
+      "notePlaceholder": "Đã xảy ra chuyện gì?…",
       "submit": "Lưu kỷ niệm"
     },
     "countdown": {
       "kindLabel": "Loại",
       "noteDescription": "Ngữ cảnh tuỳ chọn cho cột mốc mà hai bạn đang đếm tới.",
       "noteLabel": "Ghi chú (tuỳ chọn)",
-      "notePlaceholder": "Đặt bàn ở quán quen của hai đứa",
+      "notePlaceholder": "Đặt bàn ở quán quen của hai đứa…",
       "submit": "Lưu đếm ngược",
       "targetDateDescription": "Ngày này được lưu theo múi giờ chung của hai bạn và giữ nguyên ngày lịch đã chọn.",
       "targetDateLabel": "Ngày mục tiêu",
       "titleLabel": "Tiêu đề",
-      "titlePlaceholder": "Bữa tối kỷ niệm",
+      "titlePlaceholder": "Bữa tối kỷ niệm…",
       "validation": {
         "noteMax": "Ghi chú tối đa 280 ký tự.",
         "targetDateRequired": "Hãy chọn ngày mục tiêu.",
@@ -259,10 +259,10 @@
     "futureNote": {
       "bodyDescription": "Phần nội dung sẽ không thể đọc cho tới khi ngày mở khoá đi qua.",
       "bodyLabel": "Nội dung ghi chú",
-      "bodyPlaceholder": "Viết điều mà hai bạn tương lai sẽ mở lại sau này.",
+      "bodyPlaceholder": "Viết điều mà hai bạn tương lai sẽ mở lại sau này…",
       "submit": "Niêm phong ghi chú",
       "titleLabel": "Tiêu đề",
-      "titlePlaceholder": "Cho ngày kỷ niệm tiếp theo của tụi mình",
+      "titlePlaceholder": "Cho ngày kỷ niệm tiếp theo của tụi mình…",
       "unlockDateDescription": "Mở khoá vào đầu ngày đã chọn theo múi giờ chung của hai bạn.",
       "unlockDateLabel": "Ngày mở khoá",
       "validation": {
@@ -276,7 +276,7 @@
     "dailyQuestion": {
       "answerDescription": "Khi đã gửi thì câu trả lời sẽ khoá lại cho tới khi cả hai cùng trả lời.",
       "answerLabel": "Câu trả lời của bạn",
-      "answerPlaceholder": "Viết câu trả lời bạn muốn người ấy đọc khi cả hai cùng hoàn tất.",
+      "answerPlaceholder": "Viết câu trả lời bạn muốn người ấy đọc khi cả hai cùng hoàn tất…",
       "submit": "Khoá câu trả lời",
       "validation": {
         "answerMax": "Câu trả lời tối đa 800 ký tự.",
@@ -303,7 +303,7 @@
       "currentValue": "Múi giờ hiện tại: {timeZone}",
       "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
       "label": "Múi giờ của cặp đôi",
-      "placeholder": "Asia/Ho_Chi_Minh",
+      "placeholder": "Asia/Ho_Chi_Minh…",
       "submit": "Lưu múi giờ",
       "validation": {
         "invalid": "Hãy nhập một múi giờ IANA hợp lệ.",
@@ -315,12 +315,12 @@
       "endDateLabel": "Ngày kết thúc",
       "noteDescription": "Ngữ cảnh tuỳ chọn cho kế hoạch, cảm xúc hoặc lý do của chuyến đi này.",
       "noteLabel": "Ghi chú chuyến đi (tuỳ chọn)",
-      "notePlaceholder": "Đi bộ dưới đèn lồng, ăn cả chiều và một buổi sáng thật chậm.",
+      "notePlaceholder": "Đi bộ dưới đèn lồng, ăn cả chiều và một buổi sáng thật chậm…",
       "startDateDescription": "Chuyến đi được xem là bắt đầu từ ngày này.",
       "startDateLabel": "Ngày bắt đầu",
       "submit": "Lưu chuyến đi",
       "titleLabel": "Tên chuyến đi",
-      "titlePlaceholder": "Cuối tuần dài ở Hội An",
+      "titlePlaceholder": "Cuối tuần dài ở Hội An…",
       "validation": {
         "dateRangeInvalid": "Ngày kết thúc phải cùng ngày hoặc sau ngày bắt đầu.",
         "endDateRequired": "Chọn ngày kết thúc.",
@@ -336,7 +336,7 @@
       "addMediaSubmit": "Thêm media đã chọn",
       "descriptionDescription": "Một ghi chú ngắn giúp album này đọc lên như một chương du lịch thật.",
       "descriptionLabel": "Ghi chú album (tuỳ chọn)",
-      "descriptionPlaceholder": "Ánh đèn lồng, bữa sáng chậm rãi và một cuộn camera thật đầy.",
+      "descriptionPlaceholder": "Ánh đèn lồng, bữa sáng chậm rãi và một cuộn camera thật đầy…",
       "mediaDescription": "Chọn những kỷ niệm hợp lệ nên nằm trong album này. {count, plural, =0 {Chưa chọn mục nào.} one {Đã chọn # mục.} other {Đã chọn # mục.}}",
       "mediaFallback": "Media chuyến đi",
       "mediaLabel": "Media chuyến đi",
@@ -345,7 +345,7 @@
       "selectedLabel": "Đã chọn",
       "submit": "Tạo album",
       "titleLabel": "Tên album",
-      "titlePlaceholder": "Đêm đèn lồng Hội An",
+      "titlePlaceholder": "Đêm đèn lồng Hội An…",
       "validation": {
         "descriptionMax": "Ghi chú album tối đa 800 ký tự.",
         "mediaRequired": "Hãy chọn ít nhất một mục kỷ niệm.",
@@ -357,10 +357,10 @@
     "visitedPlace": {
       "noteDescription": "Ngữ cảnh tuỳ chọn cho lý do nơi này đáng nhớ.",
       "noteLabel": "Ghi chú địa điểm (tuỳ chọn)",
-      "notePlaceholder": "Đèn lồng phía trên đầu, hai ly cà phê đá và một khoảng lặng tụi mình muốn giữ lại.",
+      "notePlaceholder": "Đèn lồng phía trên đầu, hai ly cà phê đá và một khoảng lặng tụi mình muốn giữ lại…",
       "submit": "Lưu địa điểm đã ghé",
       "titleLabel": "Tên địa điểm",
-      "titlePlaceholder": "Bình minh ở biển An Bàng",
+      "titlePlaceholder": "Bình minh ở biển An Bàng…",
       "validation": {
         "noteMax": "Ghi chú địa điểm tối đa 800 ký tự.",
         "titleMax": "Tên địa điểm tối đa 120 ký tự.",

@@ -37,7 +37,7 @@
     "backToTrips": "Back to trips",
     "comingSoon": "Coming soon",
     "openShell": "Open shell",
-    "working": "Working..."
+    "working": "Working…"
   },
   "nav": {
     "groups": {
@@ -156,7 +156,7 @@
     "login": {
       "emailDescription": "Use the email linked to your couple space.",
       "emailLabel": "Email",
-      "emailPlaceholder": "you@example.com",
+      "emailPlaceholder": "you@example.com…",
       "submit": "Send magic link"
     },
     "acceptInvite": {
@@ -170,7 +170,7 @@
       "confirmationLabel": "Explicit confirmation",
       "coupleNameDescription": "Use the real name for your shared space.",
       "coupleNameLabel": "Couple name",
-      "coupleNamePlaceholder": "Phuoc & Anh",
+      "coupleNamePlaceholder": "Phuoc & Anh…",
       "next": "Next",
       "startedDateDescription": "This date powers relationship day counts and timeline milestones.",
       "startedDateLabel": "Started date",
@@ -184,7 +184,7 @@
       "summaryLabel": "Final confirmation summary",
       "timeZoneDescription": "Use your real shared timezone for date boundaries.",
       "timeZoneLabel": "Couple timezone",
-      "timeZonePlaceholder": "Asia/Ho_Chi_Minh",
+      "timeZonePlaceholder": "Asia/Ho_Chi_Minh…",
       "validation": {
         "confirmationRequired": "You must confirm before creating the couple space.",
         "coupleNameMax": "Couple name must be 120 characters or fewer.",
@@ -208,18 +208,18 @@
       },
       "categoryLabel": "Category",
       "noteLabel": "Note (optional)",
-      "notePlaceholder": "Optional note",
+      "notePlaceholder": "Optional note…",
       "submit": "Add item",
       "titleLabel": "Title",
-      "titlePlaceholder": "Try bánh xèo in Hội An"
+      "titlePlaceholder": "Try bánh xèo in Hội An…"
     },
     "checklist": {
       "submit": "Create checklist",
       "titleLabel": "Checklist title",
-      "titlePlaceholder": "Weekend goals"
+      "titlePlaceholder": "Weekend goals…"
     },
     "checklistItem": {
-      "placeholder": "Add item",
+      "placeholder": "Add item…",
       "submit": "Add"
     },
     "checklistToggle": {
@@ -231,24 +231,24 @@
       "happenedAtLabel": "Happened at",
       "locationDescription": "Optional place where this happened.",
       "locationLabel": "Location",
-      "locationPlaceholder": "Da Nang",
+      "locationPlaceholder": "Da Nang…",
       "mediaDescription": "Image or video up to 25MB.",
       "mediaLabel": "Media",
       "noteDescription": "A short story helps future search and recap.",
       "noteLabel": "Note",
-      "notePlaceholder": "What happened?",
+      "notePlaceholder": "What happened?…",
       "submit": "Save memory"
     },
     "countdown": {
       "kindLabel": "Type",
       "noteDescription": "Optional context for the moment you are counting toward.",
       "noteLabel": "Note (optional)",
-      "notePlaceholder": "Dinner reservation at our favorite place",
+      "notePlaceholder": "Dinner reservation at our favorite place…",
       "submit": "Save countdown",
       "targetDateDescription": "This date is saved against your couple timezone and keeps the selected calendar day.",
       "targetDateLabel": "Target date",
       "titleLabel": "Title",
-      "titlePlaceholder": "Anniversary dinner",
+      "titlePlaceholder": "Anniversary dinner…",
       "validation": {
         "noteMax": "Note must be 280 characters or fewer.",
         "targetDateRequired": "Choose a target date.",
@@ -259,10 +259,10 @@
     "futureNote": {
       "bodyDescription": "The body stays unreadable until the unlock date passes.",
       "bodyLabel": "Note body",
-      "bodyPlaceholder": "Write something your future selves should open later.",
+      "bodyPlaceholder": "Write something your future selves should open later…",
       "submit": "Seal future note",
       "titleLabel": "Title",
-      "titlePlaceholder": "For our next anniversary",
+      "titlePlaceholder": "For our next anniversary…",
       "unlockDateDescription": "Unlocks at the start of the selected date in your couple timezone.",
       "unlockDateLabel": "Unlock date",
       "validation": {
@@ -276,7 +276,7 @@
     "dailyQuestion": {
       "answerDescription": "Once you submit, your answer locks until both partners have answered.",
       "answerLabel": "Your answer",
-      "answerPlaceholder": "Write the answer you want your partner to read once both of you are in.",
+      "answerPlaceholder": "Write the answer you want your partner to read once both of you are in…",
       "submit": "Lock answer",
       "validation": {
         "answerMax": "Answer must be 800 characters or fewer.",
@@ -303,7 +303,7 @@
       "currentValue": "Current timezone: {timeZone}",
       "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
       "label": "Couple timezone",
-      "placeholder": "Asia/Ho_Chi_Minh",
+      "placeholder": "Asia/Ho_Chi_Minh…",
       "submit": "Save timezone",
       "validation": {
         "invalid": "Enter a valid IANA timezone.",
@@ -315,12 +315,12 @@
       "endDateLabel": "End date",
       "noteDescription": "Optional context for the plan, mood, or reason behind this trip.",
       "noteLabel": "Trip note (optional)",
-      "notePlaceholder": "Lantern walk, food crawl, and one very slow morning.",
+      "notePlaceholder": "Lantern walk, food crawl, and one very slow morning…",
       "startDateDescription": "Trips become active on this date.",
       "startDateLabel": "Start date",
       "submit": "Save trip",
       "titleLabel": "Trip title",
-      "titlePlaceholder": "Hoi An long weekend",
+      "titlePlaceholder": "Hoi An long weekend…",
       "validation": {
         "dateRangeInvalid": "End date must be on or after the start date.",
         "endDateRequired": "Choose an end date.",
@@ -336,7 +336,7 @@
       "addMediaSubmit": "Add selected media",
       "descriptionDescription": "A short note helps this album read like a real travel chapter.",
       "descriptionLabel": "Album note (optional)",
-      "descriptionPlaceholder": "Lantern light, slow breakfasts, and one very full camera roll.",
+      "descriptionPlaceholder": "Lantern light, slow breakfasts, and one very full camera roll…",
       "mediaDescription": "Choose the eligible memories that belong in this album. {count, plural, =0 {No items selected yet.} one {# item selected.} other {# items selected.}}",
       "mediaFallback": "Trip media",
       "mediaLabel": "Trip media",
@@ -345,7 +345,7 @@
       "selectedLabel": "Selected",
       "submit": "Create album",
       "titleLabel": "Album title",
-      "titlePlaceholder": "Hoi An lantern nights",
+      "titlePlaceholder": "Hoi An lantern nights…",
       "validation": {
         "descriptionMax": "Album note must be 800 characters or fewer.",
         "mediaRequired": "Select at least one memory item.",
@@ -357,10 +357,10 @@
     "visitedPlace": {
       "noteDescription": "Optional context for why this stop mattered.",
       "noteLabel": "Place note (optional)",
-      "notePlaceholder": "Lanterns overhead, two iced coffees, and the kind of quiet we wanted to keep.",
+      "notePlaceholder": "Lanterns overhead, two iced coffees, and the kind of quiet we wanted to keep…",
       "submit": "Save visited place",
       "titleLabel": "Place title",
-      "titlePlaceholder": "An Bang beach sunrise",
+      "titlePlaceholder": "An Bang beach sunrise…",
       "validation": {
         "noteMax": "Place note must be 800 characters or fewer.",
         "titleMax": "Place title must be 120 characters or fewer.",

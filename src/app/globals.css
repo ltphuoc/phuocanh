@@ -99,11 +99,13 @@
 html {
   background: var(--background);
   scroll-behavior: smooth;
+  scroll-padding-top: 1.5rem;
 }
 
 body {
   position: relative;
   min-height: 100svh;
+  overflow-x: hidden;
   background: var(--background);
   background-image:
     radial-gradient(circle at 10% 10%, rgba(255, 209, 209, 0.56), transparent 28%),
@@ -135,9 +137,27 @@ button,
 input,
 textarea,
 select {
+  -webkit-tap-highlight-color: rgba(255, 148, 148, 0.18);
+  touch-action: manipulation;
   transition-duration: 220ms;
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-glow);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 ::selection {
@@ -261,6 +281,21 @@ select {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 @media (min-width: 768px) {

@@ -191,6 +191,7 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
       >
         <Input
           id="media"
+          name="media"
           onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
           type="file"
         />

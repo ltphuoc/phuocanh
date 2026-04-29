@@ -5,10 +5,11 @@ import type { ReactElement } from 'react';
 import Image from 'next/image';
 
 import { parseISO } from 'date-fns';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { useFormatter, useTranslations } from 'next-intl';
 
 import { Badge } from '@/components/ui/badge';
+import { useHydratedReducedMotion } from '@/hooks/use-hydrated-reduced-motion';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils/cn';
 
@@ -66,7 +67,7 @@ export const MemoryCard = ({
   timeZone,
   variant = 'compact',
 }: MemoryCardProps): ReactElement => {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useHydratedReducedMotion();
   const format = useFormatter();
   const t = useTranslations('ui.memoryCard');
   const date = parseISO(happenedAt);

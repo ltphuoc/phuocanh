@@ -14,6 +14,7 @@ export const LoadingState = ({
   title,
 }: LoadingStateProps): ReactElement => (
   <div
+    aria-live="polite"
     className={cn(
       'flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-muted-soft/70 px-4 py-6 text-center',
       className,
