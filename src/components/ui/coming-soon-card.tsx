@@ -33,14 +33,14 @@ export const ComingSoonCard = ({
           className="size-4 text-primary"
           strokeWidth={2.2}
         />
-        <p className="font-display text-2xl tracking-[-0.025em] text-foreground">{title}</p>
+        <p className="ui-panel-title">{title}</p>
       </div>
       <Badge variant="primary">{badgeLabel}</Badge>
     </div>
     <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">{description}</p>
     {ctaHref && ctaLabel ? (
       <Link
-        className="inline-flex h-11 w-fit items-center rounded-pill border border-white/70 bg-white/68 px-5 text-sm font-semibold text-foreground shadow-whisper transition-colors hover:bg-white/85"
+        className="inline-flex h-11 w-fit items-center rounded-pill border border-white/70 bg-white/68 px-5 text-sm font-semibold text-foreground shadow-whisper transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/85"
         href={ctaHref}
       >
         {ctaLabel}

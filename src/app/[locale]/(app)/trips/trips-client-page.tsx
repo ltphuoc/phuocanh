@@ -116,16 +116,17 @@ export const TripsClientPage = (): ReactElement => {
     }
 
     return (
-      <PageReveal delay={section.delay}>
+      <PageReveal
+        delay={section.delay}
+        key={section.eyebrow}
+      >
         <section className="flex flex-col gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary">
               {section.icon}
               <p className="ui-meta">{section.eyebrow}</p>
             </div>
-            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-              {section.title}
-            </h2>
+            <h2 className="ui-card-title">{section.title}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">{section.description}</p>
           </div>
 
@@ -165,9 +166,7 @@ export const TripsClientPage = (): ReactElement => {
         >
           <div className="space-y-2">
             <p className="ui-meta">{tripsT('composer.eyebrow')}</p>
-            <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
-              {tripsT('composer.title')}
-            </h2>
+            <h2 className="ui-card-title">{tripsT('composer.title')}</h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
               {tripsT('composer.description')}
             </p>
@@ -206,9 +205,7 @@ export const TripsClientPage = (): ReactElement => {
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
-              {tripsT('deferred.title')}
-            </p>
+            <p className="ui-panel-title">{tripsT('deferred.title')}</p>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {tripsT('deferred.description')}

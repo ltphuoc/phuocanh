@@ -197,7 +197,9 @@
       }
     },
     "invite": {
+      "copyLabel": "Sao chép link mời",
       "copySuccess": "Đã sao chép link mời.",
+      "readyStatus": "Link mời đã sẵn sàng.",
       "submit": "Tạo link mời cho người ấy"
     },
     "wishItem": {
@@ -211,16 +213,30 @@
       "notePlaceholder": "Ghi chú tuỳ chọn…",
       "submit": "Thêm mục",
       "titleLabel": "Tiêu đề",
-      "titlePlaceholder": "Đi ăn bánh xèo ở Hội An…"
+      "titlePlaceholder": "Đi ăn bánh xèo ở Hội An…",
+      "validation": {
+        "noteMax": "Ghi chú tối đa 200 ký tự.",
+        "titleMax": "Tiêu đề tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tiêu đề wishlist."
+      }
     },
     "checklist": {
       "submit": "Tạo checklist",
       "titleLabel": "Tiêu đề checklist",
-      "titlePlaceholder": "Mục tiêu cuối tuần…"
+      "titlePlaceholder": "Mục tiêu cuối tuần…",
+      "validation": {
+        "titleMax": "Tiêu đề checklist tối đa 120 ký tự.",
+        "titleRequired": "Hãy nhập tiêu đề checklist."
+      }
     },
     "checklistItem": {
+      "label": "Mục checklist",
       "placeholder": "Thêm mục…",
-      "submit": "Thêm"
+      "submit": "Thêm",
+      "validation": {
+        "textMax": "Mục này tối đa 180 ký tự.",
+        "textRequired": "Hãy nhập một mục."
+      }
     },
     "checklistToggle": {
       "done": "Xong",

@@ -197,7 +197,9 @@
       }
     },
     "invite": {
+      "copyLabel": "Copy invite link",
       "copySuccess": "Invite link copied.",
+      "readyStatus": "Invite link ready.",
       "submit": "Generate partner invite"
     },
     "wishItem": {
@@ -211,16 +213,30 @@
       "notePlaceholder": "Optional note…",
       "submit": "Add item",
       "titleLabel": "Title",
-      "titlePlaceholder": "Try bánh xèo in Hội An…"
+      "titlePlaceholder": "Try bánh xèo in Hội An…",
+      "validation": {
+        "noteMax": "Keep the note to 200 characters or fewer.",
+        "titleMax": "Keep the title to 120 characters or fewer.",
+        "titleRequired": "Enter a wishlist title."
+      }
     },
     "checklist": {
       "submit": "Create checklist",
       "titleLabel": "Checklist title",
-      "titlePlaceholder": "Weekend goals…"
+      "titlePlaceholder": "Weekend goals…",
+      "validation": {
+        "titleMax": "Keep the checklist title to 120 characters or fewer.",
+        "titleRequired": "Enter a checklist title."
+      }
     },
     "checklistItem": {
+      "label": "Checklist item",
       "placeholder": "Add item…",
-      "submit": "Add"
+      "submit": "Add",
+      "validation": {
+        "textMax": "Keep the item to 180 characters or fewer.",
+        "textRequired": "Enter an item."
+      }
     },
     "checklistToggle": {
       "done": "Done",

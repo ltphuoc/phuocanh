@@ -81,7 +81,7 @@ export const FutureNotesClientPage = (): ReactElement => {
         >
           <div className="space-y-2">
             <p className="ui-meta">{futureNotesT('composer.eyebrow')}</p>
-            <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
+            <h2 className="font-display text-[2rem] text-foreground">
               {futureNotesT('composer.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -96,7 +96,7 @@ export const FutureNotesClientPage = (): ReactElement => {
         <section className="flex flex-col gap-4">
           <div className="space-y-2">
             <p className="ui-meta">{futureNotesT('sections.lockedEyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+            <h2 className="font-display text-[1.9rem] text-foreground">
               {futureNotesT('sections.lockedTitle')}
             </h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -139,7 +139,7 @@ export const FutureNotesClientPage = (): ReactElement => {
         <section className="flex flex-col gap-4">
           <div className="space-y-2">
             <p className="ui-meta">{futureNotesT('sections.unlockedEyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+            <h2 className="font-display text-[1.9rem] text-foreground">
               {futureNotesT('sections.unlockedTitle')}
             </h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -191,7 +191,7 @@ export const FutureNotesClientPage = (): ReactElement => {
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
+            <p className="font-display text-[1.5rem] text-foreground">
               {futureNotesT('securityNote.title')}
             </p>
           </div>

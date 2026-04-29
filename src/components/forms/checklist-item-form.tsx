@@ -15,11 +15,12 @@ import { useI18n } from '@/hooks/useI18n';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { invalidateHomeAndLists } from '@/lib/query/app-query-updates';
 
-const checklistItemSchema = z.object({
-  text: z.string().min(1).max(180),
-});
+const buildChecklistItemSchema = (t: ReturnType<typeof useI18n>['t']) =>
+  z.object({
+    text: z.string().trim().min(1, t('validation.textRequired')).max(180, t('validation.textMax')),
+  });
 
-type ChecklistItemValues = z.infer<typeof checklistItemSchema>;
+type ChecklistItemValues = z.infer<ReturnType<typeof buildChecklistItemSchema>>;
 
 interface ChecklistItemFormProps {
   readonly checklistId: string;
@@ -35,8 +36,11 @@ export const ChecklistItemForm = ({ checklistId }: ChecklistItemFormProps): Reac
     defaultValues: {
       text: '',
     },
-    resolver: zodResolver(checklistItemSchema),
+    resolver: zodResolver(buildChecklistItemSchema(formT)),
   });
+  const textErrorMessage = form.formState.errors.text?.message;
+  const inputId = `checklist-item-${checklistId}`;
+  const errorId = `${inputId}-error`;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
@@ -62,11 +66,31 @@ export const ChecklistItemForm = ({ checklistId }: ChecklistItemFormProps): Reac
       className="mt-3 flex flex-col gap-2 sm:flex-row"
       onSubmit={onSubmit}
     >
-      <Input
-        placeholder={formT('placeholder')}
-        type="text"
-        {...form.register('text')}
-      />
+      <div className="min-w-0 flex-1">
+        <label
+          className="sr-only"
+          htmlFor={inputId}
+        >
+          {formT('label')}
+        </label>
+        <Input
+          aria-describedby={textErrorMessage ? errorId : undefined}
+          aria-invalid={Boolean(textErrorMessage)}
+          id={inputId}
+          placeholder={formT('placeholder')}
+          type="text"
+          {...form.register('text')}
+        />
+        {textErrorMessage ? (
+          <p
+            aria-live="polite"
+            className="mt-2 text-sm font-medium text-error"
+            id={errorId}
+          >
+            {textErrorMessage}
+          </p>
+        ) : null}
+      </div>
       <Button
         busyLabel={commonT('working')}
         className="sm:w-auto"

@@ -83,7 +83,7 @@ const renderMediaPreview = (
 
   return (
     <div className="ui-gradient-memory flex aspect-[4/3] items-end rounded-[1.3rem] border border-white/70 p-4 shadow-whisper">
-      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
         {candidate.mediaType === 'video' ? videoLabel : fallbackLabel}
       </div>
     </div>
@@ -232,7 +232,7 @@ export const CreateAlbumForm = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <p className="ui-meta">{happenedAtLabel}</p>
-                      <span className="text-xs font-semibold tracking-[0.08em] text-primary uppercase">
+                      <span className="text-xs font-semibold tracking-[0.06em] text-primary uppercase">
                         {isSelected ? formT('selectedLabel') : formT('selectLabel')}
                       </span>
                     </div>
@@ -240,7 +240,7 @@ export const CreateAlbumForm = ({
                       {candidate.note?.trim() || formT('mediaNoteFallback')}
                     </p>
                     {candidate.locationName ? (
-                      <p className="text-xs tracking-[0.08em] text-muted-foreground uppercase">
+                      <p className="text-xs tracking-[0.06em] text-muted-foreground uppercase">
                         {candidate.locationName}
                       </p>
                     ) : null}

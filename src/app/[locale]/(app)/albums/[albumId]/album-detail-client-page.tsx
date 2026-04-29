@@ -94,7 +94,7 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
             {item.note?.trim() || albumDetailT('mediaNoteFallback')}
           </p>
           {item.locationName ? (
-            <p className="text-xs tracking-[0.08em] text-muted-foreground uppercase">
+            <p className="text-xs tracking-[0.06em] text-muted-foreground uppercase">
               {item.locationName}
             </p>
           ) : null}
@@ -166,7 +166,7 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
           >
             <div className="space-y-2">
               <p className="ui-meta">{albumDetailT('summaryEyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+              <h2 className="font-display text-[1.9rem] text-foreground">
                 {albumDetailT('summaryTitle')}
               </h2>
             </div>
@@ -175,11 +175,9 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
             </p>
             <div className="rounded-[1.4rem] border border-white/70 bg-white/72 p-4 shadow-whisper">
               <p className="ui-meta">{albumDetailT('tripLabel')}</p>
-              <p className="mt-2 font-display text-[1.5rem] tracking-[-0.03em] text-foreground">
-                {album.trip.title}
-              </p>
+              <p className="mt-2 font-display text-[1.5rem] text-foreground">{album.trip.title}</p>
               <p className="mt-2 text-sm text-muted-foreground">{tripDateRangeLabel}</p>
-              <p className="mt-1 text-xs tracking-[0.08em] text-muted-foreground uppercase">
+              <p className="mt-1 text-xs tracking-[0.06em] text-muted-foreground uppercase">
                 {tripDurationLabel}
               </p>
             </div>
@@ -195,7 +193,7 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
         >
           <div className="space-y-2">
             <p className="ui-meta">{albumDetailT('mediaEyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+            <h2 className="font-display text-[1.9rem] text-foreground">
               {albumDetailT('mediaTitle')}
             </h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -237,7 +235,7 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
+            <p className="font-display text-[1.5rem] text-foreground">
               {albumDetailT('deferredTitle')}
             </p>
           </div>

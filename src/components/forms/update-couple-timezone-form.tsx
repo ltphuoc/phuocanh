@@ -120,7 +120,7 @@ export const UpdateCoupleTimezoneForm = ({
         </>
       </FormSection>
 
-      <p className="text-xs tracking-[0.08em] text-muted-foreground uppercase">
+      <p className="text-xs tracking-[0.06em] text-muted-foreground uppercase">
         {formT('currentValue', {
           timeZone: currentTimeZone,
         })}

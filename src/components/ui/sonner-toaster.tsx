@@ -19,7 +19,7 @@ export const SonnerToaster = (): ReactElement => (
         info: '!border !border-border !bg-card !text-foreground',
         success: '!border !border-border !bg-card !text-foreground',
         toast:
-          '!rounded-2xl !border !border-border !bg-card !text-foreground !shadow-[var(--elevation-soft)]',
+          '!rounded-[var(--radius-panel)] !border !border-border !bg-card !text-foreground !shadow-[var(--elevation-soft)]',
         warning: '!border !border-border !bg-card !text-foreground',
       },
     }}

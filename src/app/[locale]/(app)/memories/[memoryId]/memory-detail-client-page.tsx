@@ -103,12 +103,12 @@ export const MemoryDetailClientPage = ({ memoryId }: MemoryDetailClientPageProps
           >
             <div className="space-y-3">
               <p className="ui-meta">{t('story.label')}</p>
-              <p className="font-display text-[2rem] leading-[1.28] tracking-[-0.03em] text-foreground">
+              <p className="font-display text-[2rem] leading-[1.28] text-foreground">
                 {memory.note?.trim() || t('story.empty')}
               </p>
             </div>
             {memory.locationName ? (
-              <div className="rounded-pill border border-white/72 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+              <div className="rounded-pill border border-white/72 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
                 {memory.locationName}
               </div>
             ) : null}
@@ -123,9 +123,7 @@ export const MemoryDetailClientPage = ({ memoryId }: MemoryDetailClientPageProps
           >
             <div>
               <p className="ui-meta">{t('media.label')}</p>
-              <h2 className="mt-2 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-                {t('media.title')}
-              </h2>
+              <h2 className="mt-2 font-display text-[2rem] text-foreground">{t('media.title')}</h2>
             </div>
             <div className="grid gap-4">
               {media.length ? (

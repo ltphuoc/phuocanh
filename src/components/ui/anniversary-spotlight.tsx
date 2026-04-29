@@ -116,9 +116,7 @@ export const AnniversarySpotlight = ({
         ) : (
           <div className="rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,255,255,0.72)] p-6 shadow-cloud backdrop-blur-md">
             <p className="ui-meta">{t('empty.eyebrow')}</p>
-            <p className="mt-3 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-              {t('empty.title')}
-            </p>
+            <p className="mt-3 font-display text-[2rem] text-foreground">{t('empty.title')}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               {t('empty.description')}
             </p>

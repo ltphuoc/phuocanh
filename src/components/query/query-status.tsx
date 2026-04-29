@@ -32,9 +32,7 @@ export const QueryErrorState = ({ onRetry }: QueryErrorStateProps): ReactElement
       tone="muted"
     >
       <div className="space-y-2">
-        <h2 className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-          {t('genericTitle')}
-        </h2>
+        <h2 className="ui-card-title">{t('genericTitle')}</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{t('genericDescription')}</p>
       </div>
       <Button

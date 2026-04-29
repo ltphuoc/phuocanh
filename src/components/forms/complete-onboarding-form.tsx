@@ -193,7 +193,7 @@ export const CompleteOnboardingForm = (): ReactElement => {
       className="flex flex-col gap-5"
       onSubmit={onSubmit}
     >
-      <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+      <p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {formT('stepIndicator', {
           step,
           total: 4,
@@ -271,7 +271,7 @@ export const CompleteOnboardingForm = (): ReactElement => {
 
       {step === 4 ? (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border/70 bg-card px-4 py-4">
+          <div className="rounded-[var(--radius-panel)] border border-white/72 bg-white/76 px-4 py-4 shadow-whisper">
             <p className="ui-meta">{formT('summaryLabel')}</p>
             <dl className="mt-3 space-y-2 text-sm text-foreground">
               <div className="flex items-start justify-between gap-4">
@@ -294,7 +294,7 @@ export const CompleteOnboardingForm = (): ReactElement => {
             htmlFor="onboardingConfirmation"
             label={formT('confirmationLabel')}
           >
-            <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card px-4 py-3 text-sm text-foreground">
+            <label className="flex min-h-12 items-start gap-3 rounded-[var(--radius-control)] border border-white/72 bg-white/76 px-4 py-3 text-sm text-foreground shadow-whisper transition-[background-color,box-shadow] duration-200 hover:bg-white/90">
               <input
                 aria-describedby={confirmationError ? 'onboarding-confirmation-error' : undefined}
                 aria-invalid={Boolean(confirmationError)}

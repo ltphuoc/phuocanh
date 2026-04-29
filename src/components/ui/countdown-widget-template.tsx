@@ -25,10 +25,8 @@ export const CountdownWidgetTemplate = ({
     surface="glass"
   >
     <div className="min-w-0">
-      <p className="truncate font-display text-[1.55rem] tracking-[-0.03em] text-foreground">
-        {eventName}
-      </p>
-      <p className="mt-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+      <p className="truncate font-display text-[1.55rem] text-foreground">{eventName}</p>
+      <p className="mt-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {eventType}
       </p>
       {targetDateLabel ? (

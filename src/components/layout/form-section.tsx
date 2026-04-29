@@ -42,7 +42,7 @@ export const FormSection = ({
     {errorMessage ? (
       <p
         aria-live="polite"
-        className="text-sm font-medium text-primary"
+        className="text-sm font-medium text-error"
         id={errorId}
       >
         {errorMessage}

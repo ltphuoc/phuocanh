@@ -22,7 +22,7 @@ export const GameCardTemplate = ({
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
-        <h3 className="font-display text-[1.55rem] tracking-[-0.03em] text-foreground">{title}</h3>
+        <h3 className="ui-panel-title">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {trailing}

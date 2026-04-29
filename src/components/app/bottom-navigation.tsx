@@ -38,12 +38,12 @@ export const BottomNavigation = (): ReactElement => {
 
   return (
     <>
-      <nav className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+18px)] z-40 flex justify-center md:hidden">
+      <nav className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+16px)] z-40 flex justify-center md:hidden">
         <LayoutGroup id="mobile-dock">
           <div className="pointer-events-auto relative w-[min(92vw,420px)]">
             <div className="absolute inset-x-[calc(50%-36px)] -top-7 flex justify-center">
               <Link
-                className="ui-gradient-active inline-flex size-[72px] items-center justify-center rounded-full border border-white/70 text-primary-foreground shadow-cloud"
+                className="ui-gradient-active inline-flex size-[72px] items-center justify-center rounded-full border border-white/70 text-primary-foreground shadow-cloud transition-transform active:translate-y-px"
                 href={appMemoryActionItem.href}
               >
                 <MemoryActionIcon
@@ -54,7 +54,7 @@ export const BottomNavigation = (): ReactElement => {
                 <span className="sr-only">{t(appMemoryActionItem.labelKey)}</span>
               </Link>
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-[rgba(255,249,242,0.74)] px-3 py-3 shadow-cloud backdrop-blur-xl">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-[rgba(255,249,242,0.82)] px-3 py-3 shadow-cloud backdrop-blur-xl">
               {appMobileNavigationItems.map((item, index) => {
                 const active = isAppNavigationItemActive(pathname, item);
                 const Icon = item.icon;
@@ -75,7 +75,7 @@ export const BottomNavigation = (): ReactElement => {
                         className="size-[18px]"
                         strokeWidth={2.2}
                       />
-                      <span className="text-[10px] font-semibold tracking-[0.08em] uppercase">
+                      <span className="text-[10px] font-semibold tracking-[0.04em] uppercase">
                         {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
                       </span>
                     </span>

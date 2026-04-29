@@ -6,23 +6,25 @@ import { tv } from 'tailwind-variants';
 import { cn } from '@/lib/utils/cn';
 
 type LegacyTone = 'default' | 'gradient' | 'muted';
-type SectionCardSurface = 'glass' | 'hero' | 'paper' | 'petal';
+type SectionCardSurface = 'glass' | 'hero' | 'inset' | 'paper' | 'petal';
 
 const sectionCardVariants = tv({
   base: "relative overflow-hidden border text-foreground transition-[color,background-color,border-color,box-shadow,transform] duration-300 before:absolute before:inset-[1px] before:rounded-[inherit] before:content-['']",
   variants: {
     padding: {
-      compact: 'p-5 md:p-6',
-      comfortable: 'p-6 md:p-8',
+      compact: 'p-4 md:p-5',
+      comfortable: 'p-5 md:p-7',
     },
     surface: {
       glass:
-        'rounded-[var(--radius-panel)] border-white/55 bg-white/56 shadow-whisper backdrop-blur-xl before:bg-white/18',
-      hero: 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/55 shadow-cloud before:bg-white/14',
+        'rounded-[var(--radius-panel)] border-white/70 bg-white/68 shadow-whisper backdrop-blur-xl before:bg-white/12',
+      hero: 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/64 shadow-cloud before:bg-white/10',
+      inset:
+        'rounded-[var(--radius-panel)] border-[#e8c8bf]/70 bg-[rgba(255,248,241,0.72)] shadow-none before:bg-white/14',
       paper:
-        'rounded-[var(--radius-panel)] border-white/62 bg-card/92 shadow-whisper before:bg-white/28',
+        'rounded-[var(--radius-panel)] border-white/72 bg-card/95 shadow-whisper before:bg-white/20',
       petal:
-        'rounded-[var(--radius-panel)] border-[#f4d7d2] bg-panel/88 shadow-whisper before:bg-white/18',
+        'rounded-[var(--radius-panel)] border-[#e8c8bf]/75 bg-panel/90 shadow-whisper before:bg-white/16',
     },
   },
   defaultVariants: {

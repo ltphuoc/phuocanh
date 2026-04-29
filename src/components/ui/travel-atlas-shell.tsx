@@ -67,7 +67,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
       className="flex flex-col gap-3"
       key={group.trip.id}
     >
-      <div className="rounded-[1.4rem] border border-white/70 bg-[rgba(255,249,242,0.72)] px-4 py-3 shadow-whisper backdrop-blur-xl">
+      <div className="rounded-[var(--radius-panel)] border border-white/70 bg-[rgba(255,249,242,0.72)] px-4 py-3 shadow-whisper backdrop-blur-xl">
         <p className="ui-meta">
           {t('tripWindow', {
             end: formatDateLabel(group.trip.endDate),
@@ -76,14 +76,12 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
         </p>
         <div className="mt-2 flex items-center justify-between gap-3">
           <div>
-            <p className="font-display text-[1.35rem] tracking-[-0.03em] text-foreground">
-              {group.trip.title}
-            </p>
-            <p className="mt-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+            <p className="ui-panel-title text-[1.3rem]">{group.trip.title}</p>
+            <p className="mt-1 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
               {t(atlasTripStatusTranslationKeyByValue[group.trip.status])}
             </p>
           </div>
-          <span className="rounded-pill border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+          <span className="rounded-pill border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
             {t('tripCount', { count: group.visitedPlaces.length })}
           </span>
         </div>
@@ -96,8 +94,10 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
           return (
             <button
               className={cn(
-                'w-full rounded-[1.3rem] border px-4 py-3 text-left shadow-whisper transition-transform hover:-translate-y-0.5',
-                isSelected ? 'border-primary/22 bg-primary/14' : 'border-white/72 bg-white/72',
+                'w-full rounded-[var(--radius-panel)] border px-4 py-3 text-left shadow-whisper transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none',
+                isSelected
+                  ? 'border-accent-blue/30 bg-accent-blue-soft text-accent-blue-strong'
+                  : 'border-white/72 bg-white/72 text-foreground',
               )}
               key={visitedPlace.id}
               onClick={() => setSelectedPlaceId(visitedPlace.id)}
@@ -127,7 +127,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
       surface="hero"
     >
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="relative min-h-[440px] overflow-hidden rounded-[calc(var(--radius-hero)-0.5rem)] border border-white/60 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.5),transparent_28%),linear-gradient(160deg,#fff7f0_0%,#ffe7e3_44%,#ffd6d6_100%)]">
+        <div className="relative min-h-[440px] overflow-hidden rounded-[calc(var(--radius-hero)-0.5rem)] border border-white/60 bg-[linear-gradient(160deg,#fff8f1_0%,#ffede8_48%,#f8d6d2_100%)]">
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,245,228,0.18)_0%,rgba(255,227,225,0.05)_100%)]" />
           <svg
             aria-hidden="true"
@@ -149,16 +149,14 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
             />
           </svg>
 
-          <div className="absolute inset-x-4 top-4 rounded-[1.4rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-4 py-3 shadow-whisper backdrop-blur-xl md:inset-x-6">
+          <div className="absolute inset-x-4 top-4 rounded-[var(--radius-panel)] border border-white/70 bg-[rgba(255,249,242,0.78)] px-4 py-3 shadow-whisper backdrop-blur-xl md:inset-x-6">
             <p className="ui-meta ui-couple-mark">{t('header.eyebrow')}</p>
             <div className="mt-2 flex items-center justify-between gap-3">
               <div>
-                <p className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-                  {t('header.title')}
-                </p>
+                <p className="ui-card-title">{t('header.title')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{t('header.description')}</p>
               </div>
-              <div className="rounded-pill border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+              <div className="rounded-pill border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
                 {t('header.badge', { count: atlasPlaces.length })}
               </div>
             </div>
@@ -190,11 +188,11 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
                 >
                   <span
                     className={cn(
-                      'inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_12px_rgba(255,148,148,0.14)]',
-                      isSelected ? 'bg-primary' : 'bg-[rgba(255,227,225,0.88)]',
+                      'inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_10px_rgba(190,52,85,0.12)]',
+                      isSelected ? 'bg-accent-blue' : 'bg-primary/45',
                     )}
                   />
-                  <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold tracking-[0.08em] uppercase shadow-whisper backdrop-blur-lg">
+                  <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold tracking-[0.06em] uppercase shadow-whisper backdrop-blur-lg">
                     {visitedPlace.title}
                   </span>
                 </motion.span>
@@ -203,7 +201,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
           })}
 
           {selectedPlace ? (
-            <div className="absolute inset-x-4 bottom-4 rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.88)] px-4 py-4 shadow-cloud backdrop-blur-xl md:inset-x-6">
+            <div className="absolute inset-x-4 bottom-4 rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,249,242,0.9)] px-4 py-4 shadow-cloud backdrop-blur-xl md:inset-x-6">
               <div className="flex items-center gap-2 text-primary">
                 <MapPinned
                   aria-hidden="true"
@@ -216,16 +214,14 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
                   })}
                 </p>
               </div>
-              <p className="mt-2 font-display text-[1.6rem] tracking-[-0.03em] text-foreground">
-                {selectedPlace.title}
-              </p>
+              <p className="ui-panel-title mt-2">{selectedPlace.title}</p>
               <p className="mt-1 text-sm font-semibold text-foreground/80">
                 {selectedPlace.trip.title}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {selectedPlace.note?.trim() || t('noteFallback')}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
                 <span>{t(atlasTripStatusTranslationKeyByValue[selectedPlace.trip.status])}</span>
                 <span>&bull;</span>
                 <span>
@@ -240,7 +236,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
         </div>
 
         <div className="hidden flex-col gap-4 xl:flex">
-          <div className="rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
+          <div className="rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
             <div className="flex items-center gap-2 text-primary">
               <Route
                 aria-hidden="true"
@@ -249,9 +245,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
               />
               <p className="ui-meta">{t('side.eyebrow')}</p>
             </div>
-            <p className="mt-2 font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-              {t('side.title')}
-            </p>
+            <p className="ui-card-title mt-2">{t('side.title')}</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {t('side.description')}
             </p>
@@ -261,7 +255,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
       </div>
 
       <div className="space-y-4 xl:hidden">
-        <div className="rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
+        <div className="rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
           <div className="flex items-center gap-2 text-primary">
             <Route
               aria-hidden="true"
@@ -270,9 +264,7 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
             />
             <p className="ui-meta">{t('side.eyebrow')}</p>
           </div>
-          <p className="mt-2 font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-            {t('side.title')}
-          </p>
+          <p className="ui-card-title mt-2">{t('side.title')}</p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {t('side.description')}
           </p>

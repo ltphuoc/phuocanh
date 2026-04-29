@@ -34,8 +34,7 @@ export const AuthShell = async ({
             padding="comfortable"
             surface="hero"
           >
-            <div className="absolute -top-16 -right-20 size-56 rounded-full bg-primary/15 blur-2xl" />
-            <div className="absolute -bottom-20 left-0 size-60 rounded-full bg-surface-strong/20 blur-2xl" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,248,241,0)_56%)]" />
 
             <div className="relative z-10">
               <p className="ui-meta ui-couple-mark">{t('eyebrow')}</p>
@@ -44,11 +43,9 @@ export const AuthShell = async ({
                 {t('description')}
               </p>
             </div>
-            <div className="relative z-10 max-w-md rounded-[1.8rem] border border-white/70 bg-[rgba(255,255,255,0.7)] px-5 py-5 shadow-whisper backdrop-blur-md">
+            <div className="relative z-10 max-w-md rounded-[var(--radius-panel)] border border-white/72 bg-[rgba(255,255,255,0.72)] px-5 py-5 shadow-whisper backdrop-blur-md">
               <p className="ui-meta">{t('noteLabel')}</p>
-              <p className="mt-3 font-display text-[1.5rem] leading-[1.32] tracking-[-0.02em] text-foreground">
-                {helper}
-              </p>
+              <p className="ui-panel-title mt-3">{helper}</p>
             </div>
           </SectionCard>
         </PageReveal>

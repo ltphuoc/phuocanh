@@ -17,6 +17,7 @@ import { QueryErrorState, QueryLoadingState } from '@/components/query/query-sta
 import { AnniversarySpotlight } from '@/components/ui/anniversary-spotlight';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { InsetPanel } from '@/components/ui/inset-panel';
 import { ListRow } from '@/components/ui/list-row';
 import { PageReveal } from '@/components/ui/page-reveal';
 import { SectionCard } from '@/components/ui/section-card';
@@ -146,9 +147,7 @@ export const HomeClientPage = (): ReactElement => {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="ui-meta ui-couple-mark">{homeT('wishlist.eyebrow')}</p>
-                    <h2 className="mt-2 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-                      {homeT('wishlist.title')}
-                    </h2>
+                    <h2 className="ui-card-title mt-2">{homeT('wishlist.title')}</h2>
                   </div>
                   <Sparkles
                     aria-hidden="true"
@@ -197,9 +196,7 @@ export const HomeClientPage = (): ReactElement => {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="ui-meta ui-couple-mark">{homeT('checklists.eyebrow')}</p>
-                    <h2 className="mt-2 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-                      {homeT('checklists.title')}
-                    </h2>
+                    <h2 className="ui-card-title mt-2">{homeT('checklists.title')}</h2>
                   </div>
                   <ClipboardList
                     aria-hidden="true"
@@ -211,18 +208,13 @@ export const HomeClientPage = (): ReactElement => {
                 <div className="flex flex-col gap-4">
                   {data.checklists.length ? (
                     data.checklists.map((checklist) => (
-                      <SectionCard
+                      <InsetPanel
                         className="flex flex-col gap-4"
-                        hoverLift={false}
                         key={checklist.id}
-                        padding="compact"
-                        surface="paper"
                       >
                         <div>
                           <p className="ui-meta">{homeT('checklists.sectionLabel')}</p>
-                          <h3 className="mt-2 font-display text-[1.45rem] tracking-[-0.02em] text-foreground">
-                            {checklist.title}
-                          </h3>
+                          <h3 className="ui-panel-title mt-2 break-words">{checklist.title}</h3>
                         </div>
                         <div className="flex flex-col gap-3">
                           {checklist.items.map((item) => (
@@ -244,7 +236,7 @@ export const HomeClientPage = (): ReactElement => {
                           ))}
                         </div>
                         <ChecklistItemForm checklistId={checklist.id} />
-                      </SectionCard>
+                      </InsetPanel>
                     ))
                   ) : (
                     <EmptyState

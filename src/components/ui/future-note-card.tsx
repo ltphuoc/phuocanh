@@ -29,9 +29,7 @@ export const FutureNoteCard = ({
     <div className="flex items-start justify-between gap-3">
       <div className="space-y-2">
         <p className="ui-meta">{unlockDateLabel}</p>
-        <h3 className="font-display text-[1.5rem] leading-[1.2] tracking-[-0.03em] text-foreground">
-          {title}
-        </h3>
+        <h3 className="ui-panel-title break-words">{title}</h3>
       </div>
       <Badge
         className="gap-2"

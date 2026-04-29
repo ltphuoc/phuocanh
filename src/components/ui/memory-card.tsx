@@ -88,12 +88,12 @@ export const MemoryCard = ({
 
   return (
     <motion.article
-      whileHover={reduceMotion ? undefined : { rotate: 1, y: -4 }}
-      whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+      whileHover={reduceMotion ? undefined : { y: -3 }}
+      whileTap={reduceMotion ? undefined : { scale: 0.99 }}
     >
       <Link
         className={cn(
-          'group relative block overflow-hidden rounded-[var(--radius-memory)] border border-white/72 bg-[rgba(255,248,241,0.88)] shadow-cloud backdrop-blur-xl',
+          'group relative block overflow-hidden rounded-[var(--radius-memory)] border border-white/72 bg-[rgba(255,248,241,0.9)] shadow-cloud backdrop-blur-xl',
           variant === 'compact' ? 'p-4 md:p-5' : 'p-5 md:p-6',
           className,
         )}
@@ -104,16 +104,14 @@ export const MemoryCard = ({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="ui-meta">{monthYearLabel}</p>
-              <p className="mt-2 font-display text-[1.5rem] tracking-[-0.03em] text-foreground">
-                {dayLabel}
-              </p>
+              <p className="mt-2 font-display text-[1.4rem] text-foreground">{dayLabel}</p>
               <p className="text-sm text-muted-foreground">{weekdayLabel}</p>
             </div>
             {mediaLabel ? <Badge variant="primary">{mediaLabel}</Badge> : null}
           </div>
           <div
             className={cn(
-              'overflow-hidden rounded-[1.6rem]',
+              'overflow-hidden rounded-[var(--radius-panel)] border border-white/70 bg-white/60',
               isFeatureVariant ? 'aspect-[4/3]' : 'aspect-[5/3]',
             )}
           >
@@ -130,7 +128,7 @@ export const MemoryCard = ({
               </div>
             ) : (
               <div className="ui-gradient-memory flex h-full items-end p-4">
-                <div className="rounded-pill border border-white/65 bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+                <div className="rounded-pill border border-white/65 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
                   {mediaLabel ?? t('journalNote')}
                 </div>
               </div>
@@ -141,13 +139,13 @@ export const MemoryCard = ({
               className={cn(
                 'text-foreground',
                 isFeatureVariant
-                  ? 'font-display text-[1.35rem] leading-[1.32] tracking-[-0.02em]'
-                  : 'text-sm leading-relaxed',
+                  ? 'ui-panel-title break-words'
+                  : 'text-sm leading-relaxed break-words',
               )}
             >
               {noteText}
             </p>
-            <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted-foreground uppercase">
+            <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.06em] text-muted-foreground uppercase">
               <span>{fullDateLabel}</span>
               {locationName ? (
                 <>

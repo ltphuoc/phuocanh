@@ -10,6 +10,7 @@ import { ResponsiveGrid } from '@/components/layout/responsive-grid';
 import { ShellPage } from '@/components/layout/shell-page';
 import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
 import { Badge } from '@/components/ui/badge';
+import { InsetPanel } from '@/components/ui/inset-panel';
 import { PageReveal } from '@/components/ui/page-reveal';
 import { SectionCard } from '@/components/ui/section-card';
 import { useI18n } from '@/hooks/useI18n';
@@ -108,9 +109,7 @@ export const GamesClientPage = (): ReactElement => {
                   />
                   <p className="ui-meta">{gamesT('dailyQuestion.eyebrow')}</p>
                 </div>
-                <h2 className="font-display text-[2rem] text-foreground">
-                  {gamesT('dailyQuestion.title')}
-                </h2>
+                <h2 className="ui-card-title">{gamesT('dailyQuestion.title')}</h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gamesT('dailyQuestion.description')}
                 </p>
@@ -122,7 +121,7 @@ export const GamesClientPage = (): ReactElement => {
               </Badge>
             </div>
 
-            <div className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 shadow-whisper backdrop-blur-md">
+            <InsetPanel>
               <p className="text-sm font-semibold text-foreground">{dailyQuestionSummary}</p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {data.dailyQuestion
@@ -133,7 +132,7 @@ export const GamesClientPage = (): ReactElement => {
                     })
                   : gamesT('dailyQuestion.generateHint')}
               </p>
-            </div>
+            </InsetPanel>
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -163,9 +162,7 @@ export const GamesClientPage = (): ReactElement => {
                   />
                   <p className="ui-meta">{gamesT('guessDate.eyebrow')}</p>
                 </div>
-                <h2 className="font-display text-[2rem] text-foreground">
-                  {gamesT('guessDate.title')}
-                </h2>
+                <h2 className="ui-card-title">{gamesT('guessDate.title')}</h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gamesT('guessDate.description')}
                 </p>
@@ -177,12 +174,12 @@ export const GamesClientPage = (): ReactElement => {
               </Badge>
             </div>
 
-            <div className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 shadow-whisper backdrop-blur-md">
+            <InsetPanel>
               <p className="text-sm font-semibold text-foreground">{guessDateSummary}</p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {data.guessDate ? gamesT('guessDate.clueSource') : gamesT('guessDate.generateHint')}
               </p>
-            </div>
+            </InsetPanel>
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -212,9 +209,7 @@ export const GamesClientPage = (): ReactElement => {
                   />
                   <p className="ui-meta">{gamesT('trivia.eyebrow')}</p>
                 </div>
-                <h2 className="font-display text-[2rem] text-foreground">
-                  {gamesT('trivia.title')}
-                </h2>
+                <h2 className="ui-card-title">{gamesT('trivia.title')}</h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {gamesT('trivia.description')}
                 </p>
@@ -224,12 +219,12 @@ export const GamesClientPage = (): ReactElement => {
               </Badge>
             </div>
 
-            <div className="rounded-[1.5rem] border border-white/65 bg-white/72 px-4 py-4 shadow-whisper backdrop-blur-md">
+            <InsetPanel>
               <p className="text-sm font-semibold text-foreground">{triviaSummary}</p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {data.trivia ? gamesT('trivia.clueSource') : gamesT('trivia.generateHint')}
               </p>
-            </div>
+            </InsetPanel>
 
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -251,9 +246,7 @@ export const GamesClientPage = (): ReactElement => {
           surface="petal"
         >
           <p className="ui-meta">{gamesT('statsBridge.eyebrow')}</p>
-          <h2 className="font-display text-[1.8rem] text-foreground">
-            {gamesT('statsBridge.title')}
-          </h2>
+          <h2 className="ui-card-title text-accent-blue-strong">{gamesT('statsBridge.title')}</h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {gamesT('statsBridge.description')}
           </p>

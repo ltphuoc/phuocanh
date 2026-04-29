@@ -31,14 +31,12 @@ export const TripCardTemplate = ({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="ui-meta">{eyebrowLabel}</p>
-          <p className="mt-2 truncate font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-            {title}
-          </p>
+          <p className="ui-card-title mt-2 truncate">{title}</p>
         </div>
         <Badge variant="primary">{badgeLabel}</Badge>
       </div>
       <p className="text-sm font-medium text-foreground/86">{dateRangeLabel}</p>
-      <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+      <p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {metaLabel}
       </p>
       {note?.trim() ? (
@@ -53,7 +51,7 @@ export const TripCardTemplate = ({
 
   return (
     <Link
-      className="block rounded-[var(--radius-panel)] focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+      className="block rounded-[var(--radius-panel)] transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none active:translate-y-px"
       href={href}
     >
       {content}

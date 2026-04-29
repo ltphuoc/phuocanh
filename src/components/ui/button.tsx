@@ -6,19 +6,19 @@ import { tv } from 'tailwind-variants';
 import { cn } from '@/lib/utils/cn';
 
 const buttonVariants = tv({
-  base: 'inline-flex items-center justify-center gap-2 rounded-pill text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform,filter] duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60',
+  base: 'inline-flex cursor-pointer items-center justify-center gap-2 rounded-pill text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform,filter] duration-200 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none active:translate-y-px disabled:cursor-not-allowed disabled:opacity-55',
   variants: {
     size: {
       default: 'h-12 px-5',
       icon: 'size-12',
-      sm: 'h-10 px-4 text-xs',
+      sm: 'h-11 px-4 text-xs',
     },
     variant: {
-      ghost: 'bg-transparent text-foreground hover:bg-white/60',
+      ghost: 'bg-transparent text-foreground hover:bg-white/62',
       outline:
-        'border border-white/70 bg-white/64 text-foreground shadow-whisper backdrop-blur-md hover:-translate-y-0.5 hover:bg-white/80',
+        'border border-white/72 bg-white/70 text-foreground shadow-whisper backdrop-blur-md hover:-translate-y-0.5 hover:bg-white/88',
       primary:
-        'ui-gradient-active text-primary-foreground shadow-cloud hover:-translate-y-0.5 hover:brightness-102',
+        'ui-gradient-active text-primary-foreground shadow-cloud hover:-translate-y-0.5 hover:brightness-105',
     },
   },
   defaultVariants: {

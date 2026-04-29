@@ -34,7 +34,7 @@ export const AlbumCard = ({
       className="flex h-full flex-col gap-4"
       surface="glass"
     >
-      <div className="overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/70 shadow-whisper">
+      <div className="overflow-hidden rounded-[var(--radius-panel)] border border-white/70 bg-white/70 shadow-whisper">
         {coverMediaType === 'image' && coverSignedUrl ? (
           <div className="relative aspect-[4/3]">
             <Image
@@ -48,7 +48,7 @@ export const AlbumCard = ({
           </div>
         ) : (
           <div className="ui-gradient-memory flex aspect-[4/3] items-end p-4">
-            <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+            <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
               {coverMediaType === 'video' ? videoCoverLabel : itemCountLabel}
             </div>
           </div>
@@ -58,9 +58,7 @@ export const AlbumCard = ({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-2">
           <p className="ui-meta">{tripTitle}</p>
-          <p className="truncate font-display text-[1.7rem] tracking-[-0.03em] text-foreground">
-            {title}
-          </p>
+          <p className="ui-card-title truncate">{title}</p>
         </div>
         <Badge variant="primary">{itemCountLabel}</Badge>
       </div>
@@ -82,7 +80,7 @@ export const AlbumCard = ({
 
   return (
     <Link
-      className="block rounded-[var(--radius-panel)] focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+      className="block rounded-[var(--radius-panel)] transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none active:translate-y-px"
       href={href}
     >
       {content}

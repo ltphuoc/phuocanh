@@ -61,7 +61,7 @@ export const SettingsClientPage = (): ReactElement => {
       >
         <div className="space-y-2">
           <p className="ui-meta">{settingsT('timezone.eyebrow')}</p>
-          <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
+          <h2 className="font-display text-[2rem] text-foreground">
             {settingsT('timezone.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">

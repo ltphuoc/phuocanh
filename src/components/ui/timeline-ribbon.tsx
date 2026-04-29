@@ -51,7 +51,7 @@ export const TimelineRibbon = ({ items, timeZone }: TimelineRibbonProps): ReactE
             key={item.id}
           >
             {shouldRenderDivider ? (
-              <div className="sticky top-4 z-10 ml-4 self-start rounded-pill border border-white/72 bg-[rgba(255,249,242,0.84)] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper backdrop-blur-xl md:ml-6">
+              <div className="sticky top-4 z-10 ml-4 self-start rounded-pill border border-white/72 bg-[rgba(255,249,242,0.84)] px-4 py-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper backdrop-blur-xl md:ml-6">
                 {monthKey}
               </div>
             ) : null}

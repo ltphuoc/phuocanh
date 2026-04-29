@@ -144,7 +144,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
                   {dailyQuestionT('round.eyebrow')}
                 </p>
               </div>
-              <h2 className="font-display text-[2rem] tracking-[-0.03em] text-primary-foreground">
+              <h2 className="font-display text-[2rem] text-primary-foreground">
                 {data.round ? dailyQuestionT('round.title') : dailyQuestionT('intro.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/82">
@@ -160,7 +160,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
 
           {data.round ? (
             <div className="space-y-4 rounded-[1.7rem] border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
-              <div className="flex flex-wrap items-center gap-3 text-xs tracking-[0.08em] text-primary-foreground/75 uppercase">
+              <div className="flex flex-wrap items-center gap-3 text-xs tracking-[0.06em] text-primary-foreground/75 uppercase">
                 <span>{dailyQuestionT('round.date', { date: roundDateLabel })}</span>
                 <span>
                   {dailyQuestionT('round.locale', {
@@ -171,7 +171,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
                   {dailyQuestionT('round.answerCount', { count: data.round.answerCount })}
                 </span>
               </div>
-              <p className="font-display text-[2rem] leading-tight tracking-[-0.03em] text-primary-foreground">
+              <p className="font-display text-[2rem] leading-tight text-primary-foreground">
                 {data.round.promptText}
               </p>
             </div>
@@ -190,7 +190,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
           >
             <div className="space-y-2">
               <p className="ui-meta">{dailyQuestionT('composer.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+              <h2 className="font-display text-[1.9rem] text-foreground">
                 {dailyQuestionT('composer.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -210,7 +210,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
             surface="paper"
           >
             <p className="ui-meta">{dailyQuestionT('pending.eyebrow')}</p>
-            <h2 className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
+            <h2 className="font-display text-[1.8rem] text-foreground">
               {dailyQuestionT('pending.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -225,7 +225,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
           <section className="flex flex-col gap-4">
             <div className="space-y-2">
               <p className="ui-meta">{dailyQuestionT('reveal.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
+              <h2 className="font-display text-[1.9rem] text-foreground">
                 {dailyQuestionT('reveal.title')}
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -260,7 +260,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
           surface="petal"
         >
           <p className="ui-meta">{dailyQuestionT('statusNote.eyebrow')}</p>
-          <h2 className="font-display text-[1.7rem] tracking-[-0.03em] text-foreground">
+          <h2 className="font-display text-[1.7rem] text-foreground">
             {dailyQuestionT('statusNote.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">

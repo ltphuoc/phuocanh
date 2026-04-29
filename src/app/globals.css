@@ -4,54 +4,58 @@
   color-scheme: light;
   --bg-canvas: #fff5e4;
   --bg-soft: #fff9f2;
-  --surface: #ffe3e1;
-  --surface-tint: #ffd1d1;
-  --brand-rose: #ff9494;
-  --brand-rose-strong: #ff8686;
+  --surface: #ffe6e0;
+  --surface-tint: #f8d6d2;
+  --brand-rose: #be3455;
+  --brand-rose-strong: #a8324b;
+  --accent-blue: #2563eb;
+  --accent-blue-strong: #1d4ed8;
+  --accent-blue-soft: #edf4ff;
   --ink-deep: #4b3742;
   --ink-soft: #79636e;
-  --stroke-soft: #f1caca;
+  --stroke-soft: #e8c8bf;
   --background: var(--bg-canvas);
   --background-elevated: #fff8ee;
   --foreground: var(--ink-deep);
   --foreground-muted: var(--ink-soft);
   --muted-foreground: var(--foreground-muted);
-  --card: #fff6f0;
-  --card-strong: #ffe9e7;
-  --panel: #ffeae7;
-  --panel-strong: #ffdcdc;
+  --card: #fff8f1;
+  --card-strong: #ffede8;
+  --panel: #fff0eb;
+  --panel-strong: #f8ddd6;
   --primary: var(--brand-rose);
   --primary-hover: var(--brand-rose-strong);
   --primary-foreground: #ffffff;
   --secondary: var(--surface-tint);
-  --accent: var(--surface);
+  --accent: var(--accent-blue);
+  --accent-foreground: #ffffff;
   --soft-accent: var(--surface-tint);
   --surface-strong: #fff1ed;
   --muted: #fff2ea;
   --muted-soft: #fff8f3;
   --border: color-mix(in srgb, var(--stroke-soft) 78%, #ffffff 22%);
-  --ring: rgba(255, 148, 148, 0.38);
-  --success: #d88c9a;
-  --warning: #efb38d;
-  --error: #ec7f7f;
-  --glow-rose: rgba(255, 148, 148, 0.24);
-  --glow-blush: rgba(255, 209, 209, 0.34);
-  --gradient-hero: linear-gradient(135deg, #fff5e4 0%, #ffece7 42%, #ffd1d1 100%);
-  --gradient-memory: linear-gradient(160deg, #fff8f1 0%, #ffe3e1 48%, #ffd1d1 100%);
-  --gradient-active: linear-gradient(180deg, #ffb1b1 0%, #ff9494 100%);
+  --ring: rgba(190, 52, 85, 0.34);
+  --success: #2f7d5d;
+  --warning: #a15c20;
+  --error: #be2f3b;
+  --glow-rose: rgba(190, 52, 85, 0.18);
+  --glow-blush: rgba(248, 214, 210, 0.34);
+  --gradient-hero: linear-gradient(135deg, #fff8f1 0%, #fff0eb 48%, #f8d6d2 100%);
+  --gradient-memory: linear-gradient(160deg, #fff9f2 0%, #fff0eb 54%, #f8d6d2 100%);
+  --gradient-active: linear-gradient(180deg, #c84866 0%, #be3455 100%);
   --gradient-map-overlay: linear-gradient(
     180deg,
     rgba(255, 245, 228, 0.86) 0%,
     rgba(255, 227, 225, 0.94) 100%
   );
-  --radius-control: 1rem;
-  --radius-panel: 1.5rem;
-  --radius-memory: 2rem;
-  --radius-hero: 2.5rem;
+  --radius-control: 0.75rem;
+  --radius-panel: 1rem;
+  --radius-memory: 1.5rem;
+  --radius-hero: 1.75rem;
   --radius-pill: 999px;
-  --shadow-whisper: 0 10px 30px -16px rgba(163, 96, 112, 0.18);
-  --shadow-cloud: 0 22px 60px -28px rgba(163, 96, 112, 0.24);
-  --shadow-glow: 0 0 0 4px rgba(255, 148, 148, 0.18);
+  --shadow-whisper: 0 12px 28px -20px rgba(95, 54, 66, 0.26);
+  --shadow-cloud: 0 22px 50px -30px rgba(95, 54, 66, 0.32);
+  --shadow-glow: 0 0 0 4px rgba(190, 52, 85, 0.16);
   --elevation-soft: var(--shadow-whisper);
   --elevation-medium: var(--shadow-cloud);
 }
@@ -74,6 +78,10 @@
   --color-ring: var(--ring);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-strong: var(--accent-blue-strong);
+  --color-accent-blue-soft: var(--accent-blue-soft);
+  --color-accent-foreground: var(--accent-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
@@ -108,10 +116,13 @@ body {
   overflow-x: hidden;
   background: var(--background);
   background-image:
-    radial-gradient(circle at 10% 10%, rgba(255, 209, 209, 0.56), transparent 28%),
-    radial-gradient(circle at 88% 0%, rgba(255, 148, 148, 0.24), transparent 34%),
-    radial-gradient(circle at 52% 100%, rgba(255, 227, 225, 0.72), transparent 36%),
-    linear-gradient(180deg, #fff8ef 0%, #fff5e4 52%, #fff7ee 100%);
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.74) 0%,
+      rgba(255, 240, 235, 0.46) 46%,
+      rgba(255, 248, 239, 0.7) 100%
+    ),
+    linear-gradient(180deg, #fff9f2 0%, #fff5e4 52%, #fff7ee 100%);
   color: var(--foreground);
   font-family: var(--font-manrope), sans-serif;
   text-rendering: optimizeLegibility;
@@ -122,7 +133,7 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.16;
+  opacity: 0.11;
   background-image:
     radial-gradient(circle at 20% 20%, rgba(75, 55, 66, 0.06) 0.6px, transparent 0.7px),
     radial-gradient(circle at 80% 70%, rgba(121, 99, 110, 0.05) 0.5px, transparent 0.8px);
@@ -161,7 +172,7 @@ h3 {
 }
 
 ::selection {
-  background: rgba(255, 148, 148, 0.24);
+  background: rgba(190, 52, 85, 0.18);
   color: var(--foreground);
 }
 
@@ -190,24 +201,24 @@ h3 {
 }
 
 .ui-page-title {
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
-  line-height: 1.02;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  line-height: 1.04;
   font-weight: 600;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
 }
 
 .ui-display {
-  font-size: clamp(2.75rem, 7vw, 4.5rem);
-  line-height: 0.96;
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  line-height: 1;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 
 .ui-heading-xl {
-  font-size: 2rem;
-  line-height: 1.08;
+  font-size: clamp(1.7rem, 3vw, 2rem);
+  line-height: 1.12;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .ui-page-description {
@@ -218,17 +229,17 @@ h3 {
 }
 
 .ui-heading-lg {
-  font-size: 1.625rem;
-  line-height: 1.15;
+  font-size: clamp(1.35rem, 2.5vw, 1.625rem);
+  line-height: 1.18;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .ui-meta {
   color: var(--foreground-muted);
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -237,7 +248,7 @@ h3 {
   font-size: clamp(1.15rem, 2vw, 1.5rem);
   line-height: 1.35;
   font-style: italic;
-  letter-spacing: -0.015em;
+  letter-spacing: 0;
 }
 
 .ui-copy-lg {
@@ -248,7 +259,25 @@ h3 {
 .ui-body-sm {
   font-size: 0.875rem;
   line-height: 1.55;
-  letter-spacing: 0.005em;
+  letter-spacing: 0;
+}
+
+.ui-card-title {
+  color: var(--foreground);
+  font-family: var(--font-fraunces), serif;
+  font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: 0;
+}
+
+.ui-panel-title {
+  color: var(--foreground);
+  font-family: var(--font-fraunces), serif;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 
 .ui-couple-mark {
@@ -267,14 +296,14 @@ h3 {
 .ui-couple-mark::before {
   width: 0.75rem;
   height: 0.75rem;
-  background: rgba(255, 148, 148, 0.8);
-  box-shadow: 0 0 0 6px rgba(255, 148, 148, 0.14);
+  background: rgba(190, 52, 85, 0.86);
+  box-shadow: 0 0 0 6px rgba(190, 52, 85, 0.12);
 }
 
 .ui-couple-mark::after {
   width: 0.45rem;
   height: 0.45rem;
-  background: rgba(255, 209, 209, 0.92);
+  background: rgba(37, 99, 235, 0.28);
 }
 
 .ui-section-gap {

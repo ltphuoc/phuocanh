@@ -16,11 +16,16 @@ import { useI18n } from '@/hooks/useI18n';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { invalidateHomeAndLists } from '@/lib/query/app-query-updates';
 
-const checklistSchema = z.object({
-  title: z.string().min(1).max(120),
-});
+const buildChecklistSchema = (t: ReturnType<typeof useI18n>['t']) =>
+  z.object({
+    title: z
+      .string()
+      .trim()
+      .min(1, t('validation.titleRequired'))
+      .max(120, t('validation.titleMax')),
+  });
 
-type ChecklistValues = z.infer<typeof checklistSchema>;
+type ChecklistValues = z.infer<ReturnType<typeof buildChecklistSchema>>;
 
 export const CreateChecklistForm = (): ReactElement => {
   const { t: actionsT } = useI18n('actions');
@@ -32,8 +37,9 @@ export const CreateChecklistForm = (): ReactElement => {
     defaultValues: {
       title: '',
     },
-    resolver: zodResolver(checklistSchema),
+    resolver: zodResolver(buildChecklistSchema(formT)),
   });
+  const titleErrorMessage = form.formState.errors.title?.message;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
@@ -59,10 +65,14 @@ export const CreateChecklistForm = (): ReactElement => {
       onSubmit={onSubmit}
     >
       <FormSection
+        errorId="checklistTitle-error"
+        errorMessage={titleErrorMessage}
         htmlFor="checklistTitle"
         label={formT('titleLabel')}
       >
         <Input
+          aria-describedby={titleErrorMessage ? 'checklistTitle-error' : undefined}
+          aria-invalid={Boolean(titleErrorMessage)}
           id="checklistTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"

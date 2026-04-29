@@ -14,6 +14,7 @@ import { ShellPage } from '@/components/layout/shell-page';
 import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
 import { AlbumCard } from '@/components/ui/album-card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { InsetPanel } from '@/components/ui/inset-panel';
 import { ListRow } from '@/components/ui/list-row';
 import { PageReveal } from '@/components/ui/page-reveal';
 import { SectionCard } from '@/components/ui/section-card';
@@ -44,7 +45,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
   });
   const action = (
     <Link
-      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+      className="inline-flex h-10 items-center rounded-pill border border-white/72 bg-white/78 px-4 text-sm font-semibold text-foreground shadow-whisper transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/92"
       href="/trips"
     >
       {commonT('backToTrips')}
@@ -115,9 +116,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
           >
             <div className="space-y-2">
               <p className="ui-meta">{tripDetailT('noteEyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-                {tripDetailT('noteTitle')}
-              </h2>
+              <h2 className="ui-card-title">{tripDetailT('noteTitle')}</h2>
             </div>
             <p className="text-sm leading-relaxed text-muted-foreground">
               {trip.note?.trim() || tripDetailT('noteEmpty')}
@@ -142,9 +141,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                 />
                 <p className="ui-meta">{tripDetailT('albumLinkedEyebrow')}</p>
               </div>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-                {tripDetailT('albumLinkedTitle')}
-              </h2>
+              <h2 className="ui-card-title">{tripDetailT('albumLinkedTitle')}</h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {tripDetailT('albumLinkedDescription')}
               </p>
@@ -163,11 +160,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                 videoCoverLabel={albumCardT('videoCoverLabel')}
               />
 
-              <SectionCard
-                className="flex flex-col gap-5"
-                padding="comfortable"
-                surface="glass"
-              >
+              <InsetPanel className="flex flex-col gap-5">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-primary">
                     <Plus
@@ -177,7 +170,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                     />
                     <p className="ui-meta">{tripDetailT('albumAddEyebrow')}</p>
                   </div>
-                  <h3 className="font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
+                  <h3 className="ui-panel-title">
                     {trip.availableMedia.length
                       ? tripDetailT('albumAddTitle')
                       : tripDetailT('albumGroupedTitle')}
@@ -209,7 +202,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                     title={tripDetailT('albumGroupedTitle')}
                   />
                 )}
-              </SectionCard>
+              </InsetPanel>
             </ResponsiveGrid>
           </SectionCard>
         </PageReveal>
@@ -229,9 +222,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                 />
                 <p className="ui-meta">{tripDetailT('albumComposerEyebrow')}</p>
               </div>
-              <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-                {tripDetailT('albumComposerTitle')}
-              </h2>
+              <h2 className="ui-card-title">{tripDetailT('albumComposerTitle')}</h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {tripDetailT('albumComposerDescription')}
               </p>
@@ -274,25 +265,17 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
               />
               <p className="ui-meta">{tripDetailT('placesEyebrow')}</p>
             </div>
-            <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-              {tripDetailT('placesTitle')}
-            </h2>
+            <h2 className="ui-card-title">{tripDetailT('placesTitle')}</h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
               {tripDetailT('placesDescription')}
             </p>
           </div>
 
           <ResponsiveGrid columns={2}>
-            <SectionCard
-              className="flex flex-col gap-5"
-              padding="comfortable"
-              surface="glass"
-            >
+            <InsetPanel className="flex flex-col gap-5">
               <div className="space-y-2">
                 <p className="ui-meta">{tripDetailT('placesComposerEyebrow')}</p>
-                <h3 className="font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
-                  {tripDetailT('placesComposerTitle')}
-                </h3>
+                <h3 className="ui-panel-title">{tripDetailT('placesComposerTitle')}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {tripDetailT('placesComposerDescription')}
                 </p>
@@ -302,19 +285,13 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                 startDate={trip.startDate}
                 tripId={trip.id}
               />
-            </SectionCard>
+            </InsetPanel>
 
             {trip.visitedPlaces.length ? (
-              <SectionCard
-                className="flex flex-col gap-5"
-                padding="comfortable"
-                surface="paper"
-              >
+              <InsetPanel className="flex flex-col gap-5">
                 <div className="space-y-2">
                   <p className="ui-meta">{tripDetailT('placesListEyebrow')}</p>
-                  <h3 className="font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
-                    {tripDetailT('placesListTitle')}
-                  </h3>
+                  <h3 className="ui-panel-title">{tripDetailT('placesListTitle')}</h3>
                   <p className="text-sm leading-relaxed text-muted-foreground">
                     {tripDetailT('placesListDescription')}
                   </p>
@@ -335,7 +312,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
                     />
                   ))}
                 </div>
-              </SectionCard>
+              </InsetPanel>
             ) : (
               <EmptyState
                 description={tripDetailT('placesEmptyDescription')}

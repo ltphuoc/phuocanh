@@ -48,20 +48,14 @@ export default async function AppLayout({
 
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-5 pt-5 pb-32 md:px-7 md:pt-6 md:pb-12 lg:px-10">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] overflow-hidden">
-        <div className="absolute top-10 left-[-8%] size-64 rounded-full bg-[rgba(255,209,209,0.34)] blur-3xl" />
-        <div className="absolute top-[-2%] right-[-4%] size-72 rounded-full bg-[rgba(255,148,148,0.16)] blur-3xl" />
-      </div>
-      <div className="mb-6 rounded-[2rem] border border-white/65 bg-[rgba(255,249,242,0.58)] px-5 py-4 shadow-whisper backdrop-blur-xl md:hidden">
+      <div className="mb-6 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.68)] px-4 py-3 shadow-whisper backdrop-blur-xl md:hidden">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="ui-meta ui-couple-mark">{t('mobile.eyebrow')}</p>
-            <p className="mt-2 font-display text-[2rem] tracking-[-0.045em] text-foreground">
-              PhuocAnh
-            </p>
+            <p className="mt-1 font-display text-[1.65rem] text-foreground">PhuocAnh</p>
           </div>
           <Link
-            className="inline-flex items-center rounded-pill border border-white/72 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.08em] text-foreground uppercase shadow-whisper"
+            className="inline-flex min-h-11 items-center rounded-pill border border-white/72 bg-white/76 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper"
             href="/memories/new"
           >
             {t('mobile.addMemory')}

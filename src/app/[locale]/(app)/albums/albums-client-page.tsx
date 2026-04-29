@@ -126,7 +126,7 @@ export const AlbumsClientPage = (): ReactElement => {
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
+            <p className="font-display text-[1.5rem] text-foreground">
               {albumsT('deferred.title')}
             </p>
           </div>

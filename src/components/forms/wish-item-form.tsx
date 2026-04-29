@@ -17,13 +17,18 @@ import { useI18n } from '@/hooks/useI18n';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { invalidateHomeAndLists } from '@/lib/query/app-query-updates';
 
-const wishItemSchema = z.object({
-  category: z.enum(['place', 'food', 'movie']),
-  note: z.string().max(200).optional(),
-  title: z.string().min(1).max(120),
-});
+const buildWishItemSchema = (t: ReturnType<typeof useI18n>['t']) =>
+  z.object({
+    category: z.enum(['place', 'food', 'movie']),
+    note: z.string().max(200, t('validation.noteMax')).optional(),
+    title: z
+      .string()
+      .trim()
+      .min(1, t('validation.titleRequired'))
+      .max(120, t('validation.titleMax')),
+  });
 
-type WishItemValues = z.infer<typeof wishItemSchema>;
+type WishItemValues = z.infer<ReturnType<typeof buildWishItemSchema>>;
 
 export const WishItemForm = (): ReactElement => {
   const { t: actionsT } = useI18n('actions');
@@ -37,8 +42,10 @@ export const WishItemForm = (): ReactElement => {
       note: '',
       title: '',
     },
-    resolver: zodResolver(wishItemSchema),
+    resolver: zodResolver(buildWishItemSchema(formT)),
   });
+  const titleErrorMessage = form.formState.errors.title?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
@@ -81,10 +88,14 @@ export const WishItemForm = (): ReactElement => {
         </Select>
       </FormSection>
       <FormSection
+        errorId="wishTitle-error"
+        errorMessage={titleErrorMessage}
         htmlFor="wishTitle"
         label={formT('titleLabel')}
       >
         <Input
+          aria-describedby={titleErrorMessage ? 'wishTitle-error' : undefined}
+          aria-invalid={Boolean(titleErrorMessage)}
           id="wishTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"
@@ -92,10 +103,14 @@ export const WishItemForm = (): ReactElement => {
         />
       </FormSection>
       <FormSection
+        errorId="wishNote-error"
+        errorMessage={noteErrorMessage}
         htmlFor="wishNote"
         label={formT('noteLabel')}
       >
         <Input
+          aria-describedby={noteErrorMessage ? 'wishNote-error' : undefined}
+          aria-invalid={Boolean(noteErrorMessage)}
           id="wishNote"
           placeholder={formT('notePlaceholder')}
           type="text"
