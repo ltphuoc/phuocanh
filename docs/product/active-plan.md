@@ -4,10 +4,11 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 
 ## Current Direction
 
-- Primary priority: choose the next Phase 3 gameplay or hardening slice after the implemented `daily_question`, `guess_date`, and `trivia` modes.
+- Primary priority: choose the next Phase 3 gameplay mode or hardening slice after completed cross-session reveal freshness for `daily_question`, `guess_date`, and `trivia`.
 - Work should build from the green production-flow browser baseline for implemented routes.
 - Keep write paths behind Server Actions and SQL RPCs; do not add client-owned gameplay writes.
 - Keep `/stats` scoped to daily-question gameplay aggregates unless a new analytics contract is explicitly planned.
+- Latest shipped hardening: `/games/daily-question`, `/games/guess-date`, and `/games/trivia` now refresh waiting first-partner sessions after the second partner submits, without requiring a manual reload.
 
 ## Secondary Maintenance
 
@@ -23,7 +24,7 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 
 ## Decision Queue
 
-- Choose the next live gameplay mode or hardening slice before implementing more gameplay backend.
+- Choose the next live gameplay mode or another hardening slice before implementing more gameplay backend.
 - Decide whether travel-map depth should stay deferred until after the next gameplay expansion.
 - Decide when Phase 4 AI retrieval search should move from roadmap item to planned implementation slice.
 

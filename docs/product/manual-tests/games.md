@@ -44,7 +44,7 @@ Failure triage:
 1. Open `/games` before starting today’s round and note the status badge.
 2. Start today’s daily question from the hub.
 3. After the first answer is locked, return to `/games`.
-4. After the second partner completes the round, return to `/games` again.
+4. After the second partner completes the round, confirm the first partner page reveals without manual refresh, then return to `/games` again.
 
 Expected result:
 
@@ -66,7 +66,7 @@ Failure triage:
 
 Expected result:
 
-- The hub transitions through the expected guess-date state and keeps the open CTA available.
+- The first partner waiting page reveals without manual refresh, and the hub transitions through the expected guess-date state while keeping the open CTA available.
 
 Failure triage:
 
@@ -80,11 +80,11 @@ Failure triage:
 1. Create at least two memories from `/memories/new` with distinct location values.
 2. Open `/games/trivia` from the hub and start today’s trivia clue.
 3. Submit one partner’s location answer, then return to `/games`.
-4. After the second partner completes the round, return to `/games` again.
+4. After the second partner completes the round, confirm the first partner page reveals without manual refresh, then return to `/games` again.
 
 Expected result:
 
-- The hub transitions through the expected trivia state and keeps the open CTA available.
+- The first partner waiting page reveals without manual refresh, and the hub transitions through the expected trivia state while keeping the open CTA available.
 - `/stats` remains scoped to daily-question metrics.
 
 Failure triage:

@@ -1,5 +1,23 @@
 # Implementation Log
 
+## 2026-04-29 - Phase 3 Gameplay Freshness Hardening
+
+### Delivered
+
+- Added conditional polling to `/games/daily-question` only while the viewer has submitted and answers remain hidden.
+- Added the same conditional polling to `/games/guess-date` and `/games/trivia`.
+- Stopped polling automatically once answers reveal.
+- Invalidated the current browser context’s `games` app-data query cache after live gameplay reveal, plus `stats` after daily-question reveal.
+- Updated focused gameplay E2E coverage so partner A remains on the waiting page and sees reveal state after partner B submits without a manual reload.
+- Synced product, engineering, README, agent, and manual-test docs to mark cross-session reveal hardening complete for all three live gameplay modes.
+
+### Verification
+
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+- `./scripts/e2e/run.sh tests/e2e/gameplay.spec.ts`: `6 passed (34.2s)`
+
 ## 2026-04-28 - Phase 3 Slice 3: Live Trivia
 
 ### Delivered

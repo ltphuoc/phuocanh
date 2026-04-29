@@ -9,7 +9,7 @@ Status values:
 - `missing`
 - `needs rework`
 
-## Current Status (2026-04-28)
+## Current Status (2026-04-29)
 
 - Phase 1 runtime remains stable.
 - Phase 2 Slice 1 is implemented for:
@@ -48,6 +48,12 @@ Status values:
   - live trivia status on `/games`
   - memory-location trivia rounds, locked partner answers, and both-partner correctness reveal
   - `/stats` unchanged as daily-question-only gameplay metrics
+- Phase 3 gameplay freshness hardening is implemented for:
+  - `/games/daily-question`
+  - `/games/guess-date`
+  - `/games/trivia`
+  - first-partner waiting sessions revealing completed state after the second partner submits without a manual reload
+  - same-browser `/games` cache invalidation after reveal, plus `/stats` cache invalidation for daily-question only
 - Post-closeout engineering follow-up:
   - hosted reminder invocation uses Vault-backed secrets
   - local and CI replay now uses a private fallback secret store when Vault is unavailable
@@ -150,6 +156,13 @@ Status values:
 4. Kept `/stats` scoped to daily-question-only gameplay metrics.
 5. Kept all other `/games/[mode]` slugs shell-only.
 6. Synced product and engineering docs so `Phase 3 Slice 3: Live Trivia` is the latest implemented backend slice.
+
+## Phase 3 Gameplay Freshness Hardening Delivered
+
+1. Added conditional polling for `/games/daily-question`, `/games/guess-date`, and `/games/trivia` only while the viewer has submitted and answers remain hidden.
+2. Stopped polling once answers reveal and invalidated the same-browser `games` query cache, plus `stats` for daily-question only.
+3. Updated focused gameplay E2E coverage so the first partner remains on the waiting page and sees reveal state without reloading.
+4. Kept schema, RPCs, and stats scope unchanged.
 
 ## Recommended Next Order
 

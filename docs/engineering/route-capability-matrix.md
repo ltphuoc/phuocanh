@@ -37,6 +37,13 @@ This file is the canonical “what exists today” route map.
   - `/stats` remains daily-question-only and is not expanded by guess-date or trivia
 - Deprecated `/chat` cleanup has been completed as maintenance work and is not part of the gameplay roadmap.
 
+## Latest Documented Hardening
+
+- `/games/daily-question`, `/games/guess-date`, and `/games/trivia` now refresh waiting first-partner sessions after the second partner submits without requiring a manual reload.
+- After daily-question reveal, the current browser context invalidates the `/games` and `/stats` app-data caches so hub and stats navigation sees completed state.
+- After guess-date or trivia reveal, the current browser context invalidates the `/games` app-data cache so hub navigation sees completed state.
+- Next move: choose the next live gameplay mode or another explicit hardening slice.
+
 ## Engineering Follow-Up Note
 
 - Reminder cron/invoke uses Vault-backed secrets in hosted environments.

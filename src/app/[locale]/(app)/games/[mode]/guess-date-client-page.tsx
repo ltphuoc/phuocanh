@@ -2,7 +2,9 @@
 
 import type { ReactElement } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, LockKeyhole, Sparkles } from 'lucide-react';
 
 import { GenerateGuessDateRoundForm } from '@/components/forms/generate-guess-date-round-form';
@@ -37,13 +39,33 @@ const guessAuthorTranslationKeyByValue = {
   viewer: 'guesses.viewer',
 } as const;
 
+const WAITING_REVEAL_REFETCH_INTERVAL_MS = 3_000;
+
 export const GuessDateClientPage = (): ReactElement => {
   const { t: commonT } = useI18n('common');
   const { format, t: guessDateT } = useI18n('guessDate');
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryFn: appQueryFetchers.guessDate,
     queryKey: appQueryKeys.guessDate(),
+    refetchInterval: (currentQuery) => {
+      const round = currentQuery.state.data?.round;
+      return round?.viewerHasAnswered && !round.revealAnswers
+        ? WAITING_REVEAL_REFETCH_INTERVAL_MS
+        : false;
+    },
+    refetchIntervalInBackground: true,
   });
+  const hasRevealedAnswers = query.data?.round?.revealAnswers ?? false;
+
+  useEffect(() => {
+    if (!hasRevealedAnswers) {
+      return;
+    }
+
+    void queryClient.invalidateQueries({ queryKey: appQueryKeys.games() });
+  }, [hasRevealedAnswers, queryClient]);
+
   const action = (
     <Link
       className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"

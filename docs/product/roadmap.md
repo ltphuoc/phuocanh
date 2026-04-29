@@ -37,16 +37,20 @@
 - Post-closeout reminder validation note:
   - hosted environments use Vault-backed secrets for reminder invocation
   - local and CI replay now falls back to a private secret store when Vault is unavailable
-- Latest documented slice: `Phase 3 Slice 3: Live Trivia`
+- Latest documented backend slice: `Phase 3 Slice 3: Live Trivia`
   - `/games` is now a backend-backed hub with live status and entry links for `daily-question`, `guess-date`, and `trivia`
   - `/games/[mode]` is backend-backed for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; other game slugs remain shell-only
   - `/stats` remains the daily-question-only gameplay read model with participation/streak aggregates
   - write paths stay on Server Actions or SQL RPCs; no client-owned gameplay write layer was introduced
   - this slice still does not include scoring, winners, leaderboards, sharing, answer edits/deletes, stats expansion, or deeper travel-map work
-- Downstream implementation order after `Phase 3 Slice 3`:
-  - choose the next gameplay hardening slice or another explicit live Phase 3 gameplay candidate
+- Latest documented gameplay hardening:
+  - `/games/daily-question`, `/games/guess-date`, and `/games/trivia` now conditionally poll while the viewer is waiting for the partner answer
+  - the first partner sees reveal state after the second partner submits without a manual reload
+  - the same browser context invalidates affected `/games` and `/stats` query caches after reveal
+- Downstream implementation order after this hardening:
+  - choose another explicit live Phase 3 gameplay candidate or hardening slice
   - revisit travel-map depth after the gameplay and stats contract is stable
-- Latest hardening wave after `Phase 3 Slice 1`:
+- Earlier production-flow hardening wave after `Phase 3 Slice 1`:
   - production-flow Playwright coverage for implemented backend-backed routes
   - real auth bootstrap through Mailpit-backed magic-link OTP flows
   - serial production-mode browser validation harness for local Supabase on a dedicated configurable `E2E_BASE_URL` that defaults to `http://127.0.0.1:3100`
@@ -58,7 +62,7 @@
   - provider-backed geographic tiles
 - See `docs/product/phase-2-status.md` for the living status tracker.
 
-## Phase 3 (Advanced) - Status: first three slices implemented
+## Phase 3 (Advanced) - Status: first three slices plus gameplay freshness hardening implemented
 
 - Implemented in Slice 1:
   - game kernel for `daily_question`
@@ -78,7 +82,7 @@
 
 ## Next Move
 
-- Primary: choose the next gameplay hardening slice or another explicit live gameplay candidate from this now-green production-flow browser baseline.
+- Primary: choose the next gameplay hardening slice or another explicit live gameplay candidate from the now-green production-flow browser baseline.
 - Secondary maintenance: deprecated `/chat` mock route removal is complete.
 - Current planning source: use `docs/product/active-plan.md` for the latest operating plan; this roadmap remains the phase-level history and direction.
 

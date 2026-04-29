@@ -2,7 +2,9 @@
 
 import type { ReactElement } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Brain, CheckCircle2, LockKeyhole, Sparkles, XCircle } from 'lucide-react';
 
 import { GenerateTriviaRoundForm } from '@/components/forms/generate-trivia-round-form';
@@ -36,13 +38,33 @@ const answerAuthorTranslationKeyByValue = {
   viewer: 'answers.viewer',
 } as const;
 
+const WAITING_REVEAL_REFETCH_INTERVAL_MS = 3_000;
+
 export const TriviaClientPage = (): ReactElement => {
   const { t: commonT } = useI18n('common');
   const { t: triviaT } = useI18n('trivia');
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryFn: appQueryFetchers.trivia,
     queryKey: appQueryKeys.trivia(),
+    refetchInterval: (currentQuery) => {
+      const round = currentQuery.state.data?.round;
+      return round?.viewerHasAnswered && !round.revealAnswers
+        ? WAITING_REVEAL_REFETCH_INTERVAL_MS
+        : false;
+    },
+    refetchIntervalInBackground: true,
   });
+  const hasRevealedAnswers = query.data?.round?.revealAnswers ?? false;
+
+  useEffect(() => {
+    if (!hasRevealedAnswers) {
+      return;
+    }
+
+    void queryClient.invalidateQueries({ queryKey: appQueryKeys.games() });
+  }, [hasRevealedAnswers, queryClient]);
+
   const action = (
     <Link
       className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"

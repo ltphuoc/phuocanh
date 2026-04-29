@@ -2,7 +2,9 @@
 
 import type { ReactElement } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Sparkles } from 'lucide-react';
 
 import { GenerateDailyQuestionForm } from '@/components/forms/generate-daily-question-form';
@@ -42,13 +44,36 @@ const answerAuthorTranslationKeyByValue = {
   viewer: 'answers.viewer',
 } as const;
 
+const WAITING_REVEAL_REFETCH_INTERVAL_MS = 3_000;
+
 export const DailyQuestionClientPage = (): ReactElement => {
   const { t: commonT } = useI18n('common');
   const { format, t: dailyQuestionT } = useI18n('dailyQuestion');
+  const queryClient = useQueryClient();
   const query = useQuery({
     queryFn: appQueryFetchers.dailyQuestion,
     queryKey: appQueryKeys.dailyQuestion(),
+    refetchInterval: (currentQuery) => {
+      const round = currentQuery.state.data?.round;
+      return round?.viewerHasAnswered && !round.revealAnswers
+        ? WAITING_REVEAL_REFETCH_INTERVAL_MS
+        : false;
+    },
+    refetchIntervalInBackground: true,
   });
+  const hasRevealedAnswers = query.data?.round?.revealAnswers ?? false;
+
+  useEffect(() => {
+    if (!hasRevealedAnswers) {
+      return;
+    }
+
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: appQueryKeys.games() }),
+      queryClient.invalidateQueries({ queryKey: appQueryKeys.stats() }),
+    ]);
+  }, [hasRevealedAnswers, queryClient]);
+
   const action = (
     <Link
       className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"

@@ -4,8 +4,8 @@ Private couple memory web app built with Next.js App Router + Supabase.
 
 ## Current Product State
 
-- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/stats`, `/settings`
-- `shell-only`: non-`daily-question` slugs under `/games/[mode]`
+- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/games/guess-date`, `/games/trivia`, `/stats`, `/settings`
+- `shell-only`: game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]`
 - internal-only route handlers also exist at `/auth/callback/verify-email-otp` for local Playwright auth bootstrap when explicitly enabled from a loopback host
 
 Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
@@ -173,7 +173,8 @@ E2E-specific runtime notes:
 - `OPENAI_DAILY_QUESTION_STUB_RESPONSE` is a test-only override for `/games/daily-question` prompt generation. When unset, the app uses the normal OpenAI Responses API path.
 - `scripts/e2e/run.sh` defaults `E2E_BASE_URL=http://127.0.0.1:3100`, aligns `NEXT_PUBLIC_SITE_URL` to that URL, and also sets `E2E_ENABLE_EMAIL_OTP_HELPER`, `OPENAI_DAILY_QUESTION_STUB_RESPONSE`, and `TZ=Asia/Ho_Chi_Minh`.
 - Playwright auth state files are written under `playwright/.auth/` and are gitignored.
-- The suite intentionally excludes shell-only game modes under `/games/[mode]`.
+- The suite intentionally excludes shell-only game modes other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]`.
+- Latest focused gameplay hardening verification on 2026-04-29: `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `./scripts/e2e/run.sh tests/e2e/gameplay.spec.ts` passed; Playwright finished `6 passed (34.2s)`.
 - Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
 
 ## Reminder Setup Verification
@@ -232,7 +233,7 @@ pnpm typecheck
 - Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
 - The deprecated `/chat` mock route has been removed; do not reintroduce live chat without a new product plan.
 - Shell-only routes are intentionally not evidence of backend/domain support.
-- Current runtime uses the OpenAI Responses API for `/games/daily-question` prompt generation and has no live Mapbox integration.
+- Current runtime uses the OpenAI Responses API for `/games/daily-question` prompt generation and has live memory-backed `/games/guess-date` and `/games/trivia` modes. It has no live Mapbox integration.
 - `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.
 - `/settings` now owns the shared couple timezone, which drives countdown, future-note, trip-status, album-eligibility, and other couple-level day boundaries.
 - Gameplay writes are RPC-only and raw `game_round_answers` rows are not directly browser-readable; reveal state flows through secure server read helpers.

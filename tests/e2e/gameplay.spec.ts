@@ -98,8 +98,9 @@ test('E2E-GAME-001 / E2E-DQ-001 / E2E-STAT-001 daily question runs end to end fo
   await expect(partnerBPage.getByText(partnerBAnswer)).toBeVisible();
   await partnerBContext.close();
 
-  await page.goto('/en/games/daily-question');
-  await expect(page.getByRole('heading', { name: 'Today’s answers' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Today’s answers' })).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByText(partnerAAnswer)).toBeVisible();
   await expect(page.getByText(partnerBAnswer)).toBeVisible();
 
@@ -169,8 +170,9 @@ test('E2E-GAME-002 / E2E-GD-001 guess date runs end to end for both partners and
   await expect(partnerBPage.getByText('Partner', { exact: true })).toBeVisible();
   await partnerBContext.close();
 
-  await page.goto('/en/games/guess-date');
-  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Actual memory date' })).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByText('Guessed date')).toHaveCount(2);
 
   await page.goto('/en/games');
@@ -251,8 +253,9 @@ test('E2E-GAME-003 / E2E-TRIVIA-001 trivia runs end to end for both partners wit
   await expect(partnerBPage.getByText('Not this time')).toBeVisible();
   await partnerBContext.close();
 
-  await page.goto('/en/games/trivia');
-  await expect(page.getByRole('heading', { name: 'Correct location' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Correct location' })).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByText(targetLocation, { exact: true })).toBeVisible();
   await expect(page.getByText(distractorLocation, { exact: true })).toBeVisible();
 

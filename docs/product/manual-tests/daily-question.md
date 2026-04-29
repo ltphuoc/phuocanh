@@ -43,11 +43,11 @@ Failure triage:
 1. Open the same round from the second partner session.
 2. Submit the second answer with the debug token.
 3. Confirm the page reveals both answers.
-4. Confirm the first partner session also reveals both answers after refresh.
+4. Confirm the first partner session also reveals both answers without manually refreshing the page.
 
 Expected result:
 
-- Both answers are shown only after both partners submit.
+- Both answers are shown only after both partners submit, and the waiting first-partner page updates without a manual reload.
 
 Failure triage:
 

@@ -83,8 +83,8 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 - `E2E_ENABLE_EMAIL_OTP_HELPER` explicitly gates the OTP helper route and must stay disabled outside local browser E2E runs.
 - The OTP helper also rejects non-loopback hosts even when the env flag is enabled.
 - Feature data creation stays inside browser flows; the suite does not use SQL seed fixtures for route-level test content.
-- Targeted freshness assertions now verify post-action UI updates without helper-driven hard reloads for memories, lists, planning, travel, and same-session gameplay actions.
-- The only remaining explicit revisit is the cross-session daily-question reveal check, where a second browser session performs the mutation.
+- Targeted freshness assertions now verify post-action UI updates without helper-driven hard reloads for memories, lists, planning, travel, same-session gameplay actions, and cross-session gameplay reveal.
+- `/games/daily-question`, `/games/guess-date`, and `/games/trivia` conditionally poll only while the viewer is waiting for the partner answer, then stop once answers reveal. Daily-question invalidates hub/stats query caches; guess-date and trivia invalidate the hub cache only.
 - The current production-flow suite covers only implemented, backend-backed routes:
   - auth gatekeeping and invite join flow
   - memories, wishlists, and checklists

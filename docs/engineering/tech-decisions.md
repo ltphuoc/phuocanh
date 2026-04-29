@@ -82,3 +82,9 @@
 - Chosen read shape: server-prefetch exact app-data query keys, hydrate client page components, and use internal `/api/app-data/...` JSON routes only for client refetch after invalidation.
 - Chosen mutation shape: keep existing Server Actions and SQL RPC business rules, remove active-tree `refresh()` calls from migrated app-data actions, and update the client cache with exact invalidation, `setQueryData`, or optimistic updates.
 - Chosen freshness policy: avoid broad invalidation and hard reloads; successful same-session actions must update through the query cache.
+
+## 2026-04-29 (Gameplay Cross-Session Freshness)
+
+- Chosen freshness mechanism for live gameplay reveal: conditional TanStack Query polling while the viewer has submitted and answers are still hidden.
+- Chosen scope: no realtime subscription, schema change, new route handler, or background job for this hardening slice.
+- Chosen cache follow-up: once answers reveal, invalidate `games` in the current browser context; invalidate `stats` only for daily-question because stats remain daily-question-only.

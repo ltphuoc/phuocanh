@@ -64,3 +64,8 @@
 - Confirmed `/chat` remains only as a temporary mock artifact and is no longer a planned product feature.
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
 - Confirmed visited-place atlas v1: ship trip-linked `visited_places` and a provider-free atlas first; coordinates and Mapbox-backed tiles remain deferred.
+
+## 2026-04-29
+
+- Cross-session reveal hardening is considered complete once waiting first-partner sessions update without a manual refresh after the second partner submits for all three live gameplay modes.
+- Current next move: choose another live gameplay mode or hardening slice before expanding gameplay stats.

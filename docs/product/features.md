@@ -129,8 +129,14 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-rout
 - `implemented`: `/stats` remains daily-question-only and is not expanded by trivia.
 - `deferred`: scoring, winners, leaderboards, sharing, answer edits/deletes, OpenAI generation, and stats expansion remain out of scope.
 
+## Phase 3 Gameplay Freshness Hardening (2026-04-29)
+
+- `implemented`: `/games/daily-question` now conditionally refreshes the waiting first-partner session after the second partner submits, so both answers reveal without a manual reload.
+- `implemented`: the daily-question client invalidates the hub and stats query caches after reveal so same-browser navigation sees completed state.
+- `implemented`: `/games/guess-date` and `/games/trivia` now apply the same waiting-session refresh pattern and invalidate the hub query cache after reveal.
+
 ## Phase 3 Carry-Forward
 
 - `removed`: `/chat` route removal landed as maintenance work and is not part of the next gameplay slice.
-- `implemented`: `Phase 3 Slice 3: Live Trivia` is now landed.
+- `implemented`: `Phase 3 Slice 3: Live Trivia` and cross-session reveal hardening for all three live gameplay modes are now landed.
 - `planned`: additional game modes, leaderboards, sharing, similarity scoring, and travel-map depth remain outside the delivered Phase 3 slices.
