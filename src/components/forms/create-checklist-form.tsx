@@ -1,21 +1,20 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import type { ReactElement } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { createChecklistAction } from "@/app/actions/list-actions";
-import { useI18n } from "@/hooks/useI18n";
-import { FormSection } from "@/components/layout/form-section";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  getActionErrorMessage,
-  useActionMutation,
-} from "@/lib/query/action-mutation";
-import { invalidateHomeAndLists } from "@/lib/query/app-query-updates";
+import type { ReactElement } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { createChecklistAction } from '@/app/actions/list-actions';
+import { FormSection } from '@/components/layout/form-section';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useI18n } from '@/hooks/useI18n';
+import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
+import { invalidateHomeAndLists } from '@/lib/query/app-query-updates';
 
 const checklistSchema = z.object({
   title: z.string().min(1).max(120),
@@ -24,54 +23,60 @@ const checklistSchema = z.object({
 type ChecklistValues = z.infer<typeof checklistSchema>;
 
 export const CreateChecklistForm = (): ReactElement => {
-  const { t: actionsT } = useI18n("actions");
-  const { t: commonT } = useI18n("common");
-  const { t: formT } = useI18n("forms.checklist");
+  const { t: actionsT } = useI18n('actions');
+  const { t: commonT } = useI18n('common');
+  const { t: formT } = useI18n('forms.checklist');
   const queryClient = useQueryClient();
   const mutation = useActionMutation(createChecklistAction);
   const form = useForm<ChecklistValues>({
     defaultValues: {
-      title: "",
+      title: '',
     },
     resolver: zodResolver(checklistSchema),
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
-    payload.set("title", values.title);
+    payload.set('title', values.title);
 
     try {
       const nextState = await mutation.mutateAsync(payload);
-      const actionMessageKey = nextState.message || "unexpectedError";
+      const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
       form.reset({
-        title: "",
+        title: '',
       });
       await invalidateHomeAndLists(queryClient);
     } catch (error: unknown) {
-      console.error("Failed to submit checklist form", error);
+      console.error('Failed to submit checklist form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
     }
   });
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-      <FormSection htmlFor="checklistTitle" label={formT("titleLabel")}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={onSubmit}
+    >
+      <FormSection
+        htmlFor="checklistTitle"
+        label={formT('titleLabel')}
+      >
         <Input
           id="checklistTitle"
-          placeholder={formT("titlePlaceholder")}
+          placeholder={formT('titlePlaceholder')}
           type="text"
-          {...form.register("title")}
+          {...form.register('title')}
         />
       </FormSection>
       <Button
-        busyLabel={commonT("working")}
+        busyLabel={commonT('working')}
         className="w-full md:w-auto"
         isBusy={mutation.isPending}
         type="submit"
         variant="outline"
       >
-        {formT("submit")}
+        {formT('submit')}
       </Button>
     </form>
   );

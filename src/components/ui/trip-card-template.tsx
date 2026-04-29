@@ -1,7 +1,8 @@
-import type { ReactElement } from "react";
-import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { SectionCard } from "@/components/ui/section-card";
+import type { ReactElement } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { SectionCard } from '@/components/ui/section-card';
+import { Link } from '@/i18n/navigation';
 
 interface TripCardTemplateProps {
   readonly badgeLabel: string;
@@ -23,7 +24,10 @@ export const TripCardTemplate = ({
   title,
 }: TripCardTemplateProps): ReactElement => {
   const content = (
-    <SectionCard className="flex h-full flex-col gap-4" surface="glass">
+    <SectionCard
+      className="flex h-full flex-col gap-4"
+      surface="glass"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="ui-meta">{eyebrowLabel}</p>
@@ -34,7 +38,7 @@ export const TripCardTemplate = ({
         <Badge variant="primary">{badgeLabel}</Badge>
       </div>
       <p className="text-sm font-medium text-foreground/86">{dateRangeLabel}</p>
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {metaLabel}
       </p>
       {note?.trim() ? (
@@ -49,7 +53,7 @@ export const TripCardTemplate = ({
 
   return (
     <Link
-      className="block rounded-[var(--radius-panel)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+      className="block rounded-[var(--radius-panel)] focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
       href={href}
     >
       {content}

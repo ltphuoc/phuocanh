@@ -1,7 +1,10 @@
-import "server-only";
-import { z } from "zod";
-import type { Locale } from "@/i18n/routing";
-import { env } from "@/lib/env";
+import 'server-only';
+
+import type { Locale } from '@/i18n/routing';
+
+import { z } from 'zod';
+
+import { env } from '@/lib/env';
 
 const OPENAI_DAILY_QUESTION_TIMEOUT_MS = 15_000;
 
@@ -31,9 +34,7 @@ const responsesApiResponseSchema = z.object({
     .array(
       z.object({
         type: z.string().optional(),
-        content: z
-          .array(responsesApiContentSchema)
-          .optional(),
+        content: z.array(responsesApiContentSchema).optional(),
       }),
     )
     .optional(),
@@ -49,8 +50,8 @@ interface GenerateDailyQuestionPromptOptions {
 }
 
 const localeInstructionByValue: Record<Locale, string> = {
-  en: "Write the final question in English.",
-  vi: "Write the final question in Vietnamese.",
+  en: 'Write the final question in English.',
+  vi: 'Write the final question in Vietnamese.',
 };
 
 const buildPromptInput = ({
@@ -60,19 +61,19 @@ const buildPromptInput = ({
 }: GenerateDailyQuestionPromptOptions): string => {
   const namedCoupleInstruction = coupleName
     ? `The couple space is named "${coupleName}".`
-    : "The couple has not set a visible couple name.";
+    : 'The couple has not set a visible couple name.';
 
   return [
-    "You are writing one daily question for a private two-person couple app.",
-    "Return exactly one short open-ended question that invites a thoughtful personal answer.",
-    "Keep it warm, specific, and safe for a real relationship.",
-    "Do not mention games, scoring, or streaks.",
-    "Avoid yes/no questions, roleplay, therapy language, or anything sexual, explicit, or hostile.",
-    "Do not include numbering, labels, or extra commentary.",
+    'You are writing one daily question for a private two-person couple app.',
+    'Return exactly one short open-ended question that invites a thoughtful personal answer.',
+    'Keep it warm, specific, and safe for a real relationship.',
+    'Do not mention games, scoring, or streaks.',
+    'Avoid yes/no questions, roleplay, therapy language, or anything sexual, explicit, or hostile.',
+    'Do not include numbering, labels, or extra commentary.',
     namedCoupleInstruction,
     `This question is for the couple's local day ${roundDate}.`,
     localeInstructionByValue[locale],
-  ].join(" ");
+  ].join(' ');
 };
 
 const parseResponseJson = (rawResponseText: string): unknown | null => {
@@ -87,14 +88,12 @@ const parseResponseJson = (rawResponseText: string): unknown | null => {
   }
 };
 
-const extractParsedPrompt = (
-  response: z.infer<typeof responsesApiResponseSchema>,
-): string => {
-  if (response.status === "incomplete") {
+const extractParsedPrompt = (response: z.infer<typeof responsesApiResponseSchema>): string => {
+  if (response.status === 'incomplete') {
     throw new Error(
       response.incomplete_details?.reason
         ? `OPENAI_INCOMPLETE_RESPONSE:${response.incomplete_details.reason}`
-        : "OPENAI_INCOMPLETE_RESPONSE",
+        : 'OPENAI_INCOMPLETE_RESPONSE',
     );
   }
 
@@ -104,8 +103,9 @@ const extractParsedPrompt = (
 
   const refusalMessage = (response.output ?? [])
     .flatMap((item) => item.content ?? [])
-    .find((content) => typeof content.refusal === "string" && content.refusal.trim().length > 0)
-    ?.refusal;
+    .find(
+      (content) => typeof content.refusal === 'string' && content.refusal.trim().length > 0,
+    )?.refusal;
 
   if (refusalMessage) {
     throw new Error(`OPENAI_REFUSAL:${refusalMessage}`);
@@ -113,23 +113,22 @@ const extractParsedPrompt = (
 
   const parsedPrompt = (response.output ?? [])
     .flatMap((item) => item.content ?? [])
-    .find((content) => content.parsed)
-    ?.parsed;
+    .find((content) => content.parsed)?.parsed;
 
   if (parsedPrompt) {
     return parsedPrompt.question;
   }
 
-  if (typeof response.output_text === "string" && response.output_text.trim().length > 0) {
+  if (typeof response.output_text === 'string' && response.output_text.trim().length > 0) {
     try {
       const parsedPromptJson: unknown = JSON.parse(response.output_text);
       return generatedDailyQuestionSchema.parse(parsedPromptJson).question;
     } catch {
-      throw new Error("OPENAI_UNPARSEABLE_OUTPUT_TEXT");
+      throw new Error('OPENAI_UNPARSEABLE_OUTPUT_TEXT');
     }
   }
 
-  throw new Error("OPENAI_EMPTY_RESPONSE");
+  throw new Error('OPENAI_EMPTY_RESPONSE');
 };
 
 export const generateDailyQuestionPrompt = async (
@@ -142,41 +141,41 @@ export const generateDailyQuestionPrompt = async (
   }
 
   if (!env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY_MISSING");
+    throw new Error('OPENAI_API_KEY_MISSING');
   }
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const response = await fetch('https://api.openai.com/v1/responses', {
     body: JSON.stringify({
       input: buildPromptInput(options),
       model: env.OPENAI_DAILY_QUESTION_MODEL,
       store: false,
       text: {
         format: {
-          name: "daily_question_prompt",
+          name: 'daily_question_prompt',
           schema: {
             additionalProperties: false,
             properties: {
               question: {
                 maxLength: 240,
                 minLength: 1,
-                type: "string",
+                type: 'string',
               },
             },
-            required: ["question"],
-            type: "object",
+            required: ['question'],
+            type: 'object',
           },
           strict: true,
-          type: "json_schema",
+          type: 'json_schema',
         },
       },
     }),
-    cache: "no-store",
+    cache: 'no-store',
     headers: {
       Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-      "X-Client-Request-Id": crypto.randomUUID(),
+      'Content-Type': 'application/json',
+      'X-Client-Request-Id': crypto.randomUUID(),
     },
-    method: "POST",
+    method: 'POST',
     signal: AbortSignal.timeout(OPENAI_DAILY_QUESTION_TIMEOUT_MS),
   });
 
@@ -186,14 +185,14 @@ export const generateDailyQuestionPrompt = async (
 
   if (!response.ok) {
     if (parsedResponseResult.success) {
-      throw new Error(parsedResponseResult.data.error?.message ?? "OPENAI_RESPONSE_FAILED");
+      throw new Error(parsedResponseResult.data.error?.message ?? 'OPENAI_RESPONSE_FAILED');
     }
 
     throw new Error(`OPENAI_RESPONSE_FAILED:${response.status}`);
   }
 
   if (!parsedResponseResult.success) {
-    throw new Error("OPENAI_RESPONSE_SCHEMA_INVALID");
+    throw new Error('OPENAI_RESPONSE_SCHEMA_INVALID');
   }
 
   return extractParsedPrompt(parsedResponseResult.data);

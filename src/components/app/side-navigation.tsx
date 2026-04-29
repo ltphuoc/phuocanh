@@ -1,17 +1,21 @@
-"use client";
+'use client';
 
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { useTranslations } from "next-intl";
-import { useState, type ReactElement } from "react";
-import { LanguageSwitcher } from "@/components/app/language-switcher";
+import type { ReactElement } from 'react';
+
+import { useState } from 'react';
+
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+
+import { LanguageSwitcher } from '@/components/app/language-switcher';
 import {
   appMemoryActionItem,
   appPrimaryNavigationItems,
   appSecondaryNavigationItems,
   isAppNavigationItemActive,
-} from "@/components/app/navigation-model";
-import { Link, usePathname } from "@/i18n/navigation";
-import { cn } from "@/lib/utils/cn";
+} from '@/components/app/navigation-model';
+import { Link, usePathname } from '@/i18n/navigation';
+import { cn } from '@/lib/utils/cn';
 
 interface ExpansionState {
   readonly open: boolean;
@@ -45,14 +49,13 @@ export const SideNavigation = (): ReactElement => {
               href="/home"
             >
               <span className="font-display text-lg tracking-[-0.04em] text-foreground">
-                P
-                <span className="text-primary">&</span>A
+                P<span className="text-primary">&</span>A
               </span>
             </Link>
             <div className="text-center">
               <p className="ui-meta">PhuocAnh</p>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                {t("nav.side.keepsakeSpace")}
+                {t('nav.side.keepsakeSpace')}
               </p>
             </div>
             <nav className="flex w-full flex-col items-center gap-3">
@@ -63,8 +66,8 @@ export const SideNavigation = (): ReactElement => {
                 return (
                   <Link
                     className={cn(
-                      "relative flex size-14 items-center justify-center rounded-full",
-                      active ? "text-foreground" : "text-muted-foreground",
+                      'relative flex size-14 items-center justify-center rounded-full',
+                      active ? 'text-foreground' : 'text-muted-foreground',
                     )}
                     href={item.href}
                     key={item.href}
@@ -76,7 +79,11 @@ export const SideNavigation = (): ReactElement => {
                         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                       />
                     ) : null}
-                    <Icon aria-hidden="true" className="relative size-5" strokeWidth={2.1} />
+                    <Icon
+                      aria-hidden="true"
+                      className="relative size-5"
+                      strokeWidth={2.1}
+                    />
                     <span className="sr-only">{t(item.labelKey)}</span>
                   </Link>
                 );
@@ -86,13 +93,17 @@ export const SideNavigation = (): ReactElement => {
               className="ui-gradient-active mt-1 inline-flex size-[58px] items-center justify-center rounded-full border border-white/70 text-primary-foreground shadow-cloud"
               href={appMemoryActionItem.href}
             >
-              <MemoryActionIcon aria-hidden="true" className="size-6" strokeWidth={2.1} />
+              <MemoryActionIcon
+                aria-hidden="true"
+                className="size-6"
+                strokeWidth={2.1}
+              />
             </Link>
             <LanguageSwitcher />
             <button
               className={cn(
-                "mt-auto inline-flex size-12 items-center justify-center rounded-full border border-white/66 bg-white/72 shadow-whisper",
-                isExpanded ? "text-foreground" : "text-muted-foreground",
+                'mt-auto inline-flex size-12 items-center justify-center rounded-full border border-white/66 bg-white/72 shadow-whisper',
+                isExpanded ? 'text-foreground' : 'text-muted-foreground',
               )}
               onClick={() =>
                 setExpansionState({
@@ -102,7 +113,7 @@ export const SideNavigation = (): ReactElement => {
               }
               type="button"
             >
-              <span className="sr-only">{t("nav.side.toggleNavigation")}</span>
+              <span className="sr-only">{t('nav.side.toggleNavigation')}</span>
               <svg
                 aria-hidden="true"
                 className="size-4"
@@ -129,9 +140,9 @@ export const SideNavigation = (): ReactElement => {
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div className="mb-4">
-                  <p className="ui-meta ui-couple-mark">{t("nav.side.sharedCornersEyebrow")}</p>
+                  <p className="ui-meta ui-couple-mark">{t('nav.side.sharedCornersEyebrow')}</p>
                   <p className="mt-2 font-display text-[1.75rem] tracking-[-0.03em] text-foreground">
-                    {t("nav.side.sharedCornersTitle")}
+                    {t('nav.side.sharedCornersTitle')}
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -142,17 +153,21 @@ export const SideNavigation = (): ReactElement => {
                     return (
                       <Link
                         className={cn(
-                          "rounded-[1.4rem] border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5",
+                          'rounded-[1.4rem] border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5',
                           active
-                            ? "border-primary/20 bg-primary/14"
-                            : "border-white/70 bg-white/70",
+                            ? 'border-primary/20 bg-primary/14'
+                            : 'border-white/70 bg-white/70',
                         )}
                         href={item.href}
                         key={item.href}
                       >
                         <div className="flex items-start gap-3">
                           <span className="inline-flex size-10 items-center justify-center rounded-full bg-[rgba(255,227,225,0.82)] text-primary">
-                            <Icon aria-hidden="true" className="size-[18px]" strokeWidth={2.1} />
+                            <Icon
+                              aria-hidden="true"
+                              className="size-[18px]"
+                              strokeWidth={2.1}
+                            />
                           </span>
                           <span className="min-w-0">
                             <span className="block text-sm font-semibold text-foreground">

@@ -1,5 +1,6 @@
-import type { ReactElement } from "react";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement } from 'react';
+
+import { cn } from '@/lib/utils/cn';
 
 interface LoadingStateProps {
   readonly className?: string;
@@ -14,7 +15,7 @@ export const LoadingState = ({
 }: LoadingStateProps): ReactElement => (
   <div
     className={cn(
-      "flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-muted-soft/70 px-4 py-6 text-center",
+      'flex flex-col items-center gap-3 rounded-2xl border border-border/70 bg-muted-soft/70 px-4 py-6 text-center',
       className,
     )}
   >

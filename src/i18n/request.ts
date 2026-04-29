@@ -1,9 +1,13 @@
-import { hasLocale, IntlErrorCode } from "next-intl";
-import { getRequestConfig } from "next-intl/server";
-import type { PartialDeep, Simplify } from "type-fest";
-import enMessages from "../../messages/en.json";
-import viMessages from "../../messages/vi.json";
-import { routing, type Locale } from "@/i18n/routing";
+import type { Locale } from '@/i18n/routing';
+import type { PartialDeep, Simplify } from 'type-fest';
+
+import { hasLocale, IntlErrorCode } from 'next-intl';
+import { getRequestConfig } from 'next-intl/server';
+
+import { routing } from '@/i18n/routing';
+
+import enMessages from '../../messages/en.json';
+import viMessages from '../../messages/vi.json';
 
 interface MessagesTree {
   readonly [key: string]: string | MessagesTree;
@@ -17,7 +21,7 @@ const dictionaries: Record<Locale, MessagesTree> = {
 };
 
 const isMessagesTree = (value: unknown): value is MessagesTree =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const mergeMessages = (
   base: MessagesTree,
@@ -34,7 +38,7 @@ const mergeMessages = (
 
     const baseValue = base[key];
 
-    if (typeof overrideValue === "string") {
+    if (typeof overrideValue === 'string') {
       merged[key] = overrideValue;
       return;
     }
@@ -59,7 +63,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     : routing.defaultLocale;
 
   const localeMessages = dictionaries[locale];
-  const messages = locale === "en" ? dictionaries.en : mergeMessages(dictionaries.en, localeMessages);
+  const messages =
+    locale === 'en' ? dictionaries.en : mergeMessages(dictionaries.en, localeMessages);
 
   return {
     getMessageFallback: ({ key, namespace }) => {
@@ -73,11 +78,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
     messages,
     onError: (error) => {
       if (error.code === IntlErrorCode.MISSING_MESSAGE) {
-        console.error("Missing translation message", error);
+        console.error('Missing translation message', error);
         return;
       }
 
-      console.error("Translation runtime error", error);
+      console.error('Translation runtime error', error);
     },
   };
 });

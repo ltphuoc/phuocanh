@@ -1,17 +1,16 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
 
-const messagesDirectory = path.resolve(process.cwd(), "messages");
+const messagesDirectory = path.resolve(process.cwd(), 'messages');
 
 const readJsonFile = async (fileName) => {
   const filePath = path.join(messagesDirectory, fileName);
-  const fileContent = await readFile(filePath, "utf8");
+  const fileContent = await readFile(filePath, 'utf8');
   return JSON.parse(fileContent);
 };
 
-const isRecord = (value) =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+const isRecord = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const mergeMessages = (base, override) => {
   const merged = {
@@ -25,7 +24,7 @@ const mergeMessages = (base, override) => {
 
     const baseValue = base[key];
 
-    if (typeof overrideValue === "string") {
+    if (typeof overrideValue === 'string') {
       merged[key] = overrideValue;
       return;
     }
@@ -72,33 +71,33 @@ const getDeepValue = (source, pathSegments) => {
 };
 
 const run = async () => {
-  const enMessages = await readJsonFile("en.json");
-  const viMessages = await readJsonFile("vi.json");
+  const enMessages = await readJsonFile('en.json');
+  const viMessages = await readJsonFile('vi.json');
 
-  const fallbackTarget = ["common", "working"];
+  const fallbackTarget = ['common', 'working'];
   const viWithMissingKey = structuredClone(viMessages);
   deleteDeepKey(viWithMissingKey, fallbackTarget);
 
   const merged = mergeMessages(enMessages, viWithMissingKey);
   const fallbackValue = getDeepValue(merged, fallbackTarget);
   const expectedFallbackValue = getDeepValue(enMessages, fallbackTarget);
-  const existingLocaleValue = getDeepValue(merged, ["common", "backHome"]);
-  const expectedLocaleValue = getDeepValue(viMessages, ["common", "backHome"]);
+  const existingLocaleValue = getDeepValue(merged, ['common', 'backHome']);
+  const expectedLocaleValue = getDeepValue(viMessages, ['common', 'backHome']);
 
   if (fallbackValue !== expectedFallbackValue) {
     throw new Error(
-      `Fallback mismatch for ${fallbackTarget.join(".")}: expected '${expectedFallbackValue}', received '${fallbackValue}'`,
+      `Fallback mismatch for ${fallbackTarget.join('.')}: expected '${expectedFallbackValue}', received '${fallbackValue}'`,
     );
   }
 
   if (existingLocaleValue !== expectedLocaleValue) {
-    throw new Error("Locale override regression detected while validating fallback behavior.");
+    throw new Error('Locale override regression detected while validating fallback behavior.');
   }
 
-  console.log("Fallback merge check passed.");
+  console.log('Fallback merge check passed.');
 };
 
 run().catch((error) => {
-  console.error("Fallback merge check failed.", error);
+  console.error('Fallback merge check failed.', error);
   process.exitCode = 1;
 });

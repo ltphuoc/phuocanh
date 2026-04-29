@@ -1,25 +1,27 @@
-"use client";
+'use client';
 
-import { BriefcaseBusiness, Compass, PlaneTakeoff, Stamp } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { ReactElement } from "react";
-import { CreateTripForm } from "@/components/forms/create-trip-form";
-import { ResponsiveGrid } from "@/components/layout/responsive-grid";
-import { ShellPage } from "@/components/layout/shell-page";
-import { QueryErrorState, QueryLoadingState } from "@/components/query/query-status";
-import { EmptyState } from "@/components/ui/empty-state";
-import { PageReveal } from "@/components/ui/page-reveal";
-import { SectionCard } from "@/components/ui/section-card";
-import { TripCardTemplate } from "@/components/ui/trip-card-template";
-import { useI18n } from "@/hooks/useI18n";
-import { appQueryFetchers } from "@/lib/query/app-query-fetchers";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import type { TripCard } from "@/lib/server/phase-two-data";
+import type { ReactElement } from 'react';
+import type { TripCard } from '@/lib/server/phase-two-data';
+
+import { useQuery } from '@tanstack/react-query';
+import { BriefcaseBusiness, Compass, PlaneTakeoff, Stamp } from 'lucide-react';
+
+import { CreateTripForm } from '@/components/forms/create-trip-form';
+import { ResponsiveGrid } from '@/components/layout/responsive-grid';
+import { ShellPage } from '@/components/layout/shell-page';
+import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageReveal } from '@/components/ui/page-reveal';
+import { SectionCard } from '@/components/ui/section-card';
+import { TripCardTemplate } from '@/components/ui/trip-card-template';
+import { useI18n } from '@/hooks/useI18n';
+import { appQueryFetchers } from '@/lib/query/app-query-fetchers';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
 import {
   formatTripDateRange,
   formatTripDuration,
   tripStatusTranslationKeyByValue,
-} from "@/lib/utils/trip-display";
+} from '@/lib/utils/trip-display';
 
 interface TripSectionDefinition {
   readonly delay: number;
@@ -31,8 +33,8 @@ interface TripSectionDefinition {
 }
 
 export const TripsClientPage = (): ReactElement => {
-  const { format, t: tripsT } = useI18n("trips");
-  const { t: tripCardT } = useI18n("ui.tripCard");
+  const { format, t: tripsT } = useI18n('trips');
+  const { t: tripCardT } = useI18n('ui.tripCard');
   const query = useQuery({
     queryFn: appQueryFetchers.trips,
     queryKey: appQueryKeys.trips(),
@@ -41,9 +43,9 @@ export const TripsClientPage = (): ReactElement => {
   if (query.isPending) {
     return (
       <ShellPage
-        description={tripsT("header.description")}
-        eyebrow={tripsT("header.eyebrow")}
-        title={tripsT("header.title")}
+        description={tripsT('header.description')}
+        eyebrow={tripsT('header.eyebrow')}
+        title={tripsT('header.title')}
       >
         <QueryLoadingState />
       </ShellPage>
@@ -53,9 +55,9 @@ export const TripsClientPage = (): ReactElement => {
   if (query.isError && query.data === undefined) {
     return (
       <ShellPage
-        description={tripsT("header.description")}
-        eyebrow={tripsT("header.eyebrow")}
-        title={tripsT("header.title")}
+        description={tripsT('header.description')}
+        eyebrow={tripsT('header.eyebrow')}
+        title={tripsT('header.title')}
       >
         <QueryErrorState onRetry={() => void query.refetch()} />
       </ShellPage>
@@ -67,26 +69,44 @@ export const TripsClientPage = (): ReactElement => {
   const sections: readonly TripSectionDefinition[] = [
     {
       delay: 0.08,
-      description: tripsT("sections.activeDescription"),
-      eyebrow: tripsT("sections.activeEyebrow"),
-      icon: <PlaneTakeoff aria-hidden="true" className="size-4" strokeWidth={2.2} />,
-      title: tripsT("sections.activeTitle"),
+      description: tripsT('sections.activeDescription'),
+      eyebrow: tripsT('sections.activeEyebrow'),
+      icon: (
+        <PlaneTakeoff
+          aria-hidden="true"
+          className="size-4"
+          strokeWidth={2.2}
+        />
+      ),
+      title: tripsT('sections.activeTitle'),
       trips: data.active,
     },
     {
       delay: 0.12,
-      description: tripsT("sections.plannedDescription"),
-      eyebrow: tripsT("sections.plannedEyebrow"),
-      icon: <Compass aria-hidden="true" className="size-4" strokeWidth={2.2} />,
-      title: tripsT("sections.plannedTitle"),
+      description: tripsT('sections.plannedDescription'),
+      eyebrow: tripsT('sections.plannedEyebrow'),
+      icon: (
+        <Compass
+          aria-hidden="true"
+          className="size-4"
+          strokeWidth={2.2}
+        />
+      ),
+      title: tripsT('sections.plannedTitle'),
       trips: data.planned,
     },
     {
       delay: 0.16,
-      description: tripsT("sections.completedDescription"),
-      eyebrow: tripsT("sections.completedEyebrow"),
-      icon: <Stamp aria-hidden="true" className="size-4" strokeWidth={2.2} />,
-      title: tripsT("sections.completedTitle"),
+      description: tripsT('sections.completedDescription'),
+      eyebrow: tripsT('sections.completedEyebrow'),
+      icon: (
+        <Stamp
+          aria-hidden="true"
+          className="size-4"
+          strokeWidth={2.2}
+        />
+      ),
+      title: tripsT('sections.completedTitle'),
       trips: data.completed,
     },
   ];
@@ -109,12 +129,15 @@ export const TripsClientPage = (): ReactElement => {
             <p className="text-sm leading-relaxed text-muted-foreground">{section.description}</p>
           </div>
 
-          <ResponsiveGrid columns={2} density="compact">
+          <ResponsiveGrid
+            columns={2}
+            density="compact"
+          >
             {section.trips.map((trip) => (
               <TripCardTemplate
                 badgeLabel={tripCardT(tripStatusTranslationKeyByValue[trip.status])}
                 dateRangeLabel={formatTripDateRange(trip, format, tripCardT, data.context.timeZone)}
-                eyebrowLabel={tripCardT("eyebrow")}
+                eyebrowLabel={tripCardT('eyebrow')}
                 href={`/trips/${trip.id}`}
                 key={trip.id}
                 metaLabel={formatTripDuration(trip, tripCardT)}
@@ -130,19 +153,23 @@ export const TripsClientPage = (): ReactElement => {
 
   return (
     <ShellPage
-      description={tripsT("header.description")}
-      eyebrow={tripsT("header.eyebrow")}
-      title={tripsT("header.title")}
+      description={tripsT('header.description')}
+      eyebrow={tripsT('header.eyebrow')}
+      title={tripsT('header.title')}
     >
       <PageReveal delay={0.04}>
-        <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="glass">
+        <SectionCard
+          className="flex flex-col gap-5"
+          padding="comfortable"
+          surface="glass"
+        >
           <div className="space-y-2">
-            <p className="ui-meta">{tripsT("composer.eyebrow")}</p>
+            <p className="ui-meta">{tripsT('composer.eyebrow')}</p>
             <h2 className="font-display text-[2rem] tracking-[-0.03em] text-foreground">
-              {tripsT("composer.title")}
+              {tripsT('composer.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              {tripsT("composer.description")}
+              {tripsT('composer.description')}
             </p>
           </div>
           <CreateTripForm />
@@ -154,23 +181,37 @@ export const TripsClientPage = (): ReactElement => {
       ) : (
         <PageReveal delay={0.08}>
           <EmptyState
-            description={tripsT("empty.description")}
-            icon={<BriefcaseBusiness aria-hidden="true" className="size-4" strokeWidth={2.2} />}
-            title={tripsT("empty.title")}
+            description={tripsT('empty.description')}
+            icon={
+              <BriefcaseBusiness
+                aria-hidden="true"
+                className="size-4"
+                strokeWidth={2.2}
+              />
+            }
+            title={tripsT('empty.title')}
           />
         </PageReveal>
       )}
 
       <PageReveal delay={0.2}>
-        <SectionCard className="flex flex-col gap-3" padding="comfortable" surface="paper">
+        <SectionCard
+          className="flex flex-col gap-3"
+          padding="comfortable"
+          surface="paper"
+        >
           <div className="flex items-center gap-3">
-            <Compass aria-hidden="true" className="size-5 text-primary" strokeWidth={2.1} />
+            <Compass
+              aria-hidden="true"
+              className="size-5 text-primary"
+              strokeWidth={2.1}
+            />
             <p className="font-display text-[1.5rem] tracking-[-0.02em] text-foreground">
-              {tripsT("deferred.title")}
+              {tripsT('deferred.title')}
             </p>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            {tripsT("deferred.description")}
+            {tripsT('deferred.description')}
           </p>
         </SectionCard>
       </PageReveal>

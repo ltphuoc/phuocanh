@@ -1,13 +1,13 @@
-import { format, parseISO } from "date-fns";
+import { format, parseISO } from 'date-fns';
 
 const DATE_SEGMENT_COUNT = 3;
 
 const isValidDateSegment = (value: number): boolean => Number.isInteger(value) && value > 0;
 
-export const formatDateInputValue = (value: Date): string => format(value, "yyyy-MM-dd");
+export const formatDateInputValue = (value: Date): string => format(value, 'yyyy-MM-dd');
 
 export const parseDateInputValueAsUtc = (dateValue: string): Date => {
-  const segments = dateValue.split("-");
+  const segments = dateValue.split('-');
   if (segments.length !== DATE_SEGMENT_COUNT) {
     throw new Error(`Invalid date input: ${dateValue}`);
   }
@@ -16,7 +16,7 @@ export const parseDateInputValueAsUtc = (dateValue: string): Date => {
 };
 
 export const toUtcDateStartIso = (dateValue: string): string => {
-  const segments = dateValue.split("-");
+  const segments = dateValue.split('-');
   if (segments.length !== DATE_SEGMENT_COUNT) {
     throw new Error(`Invalid date input: ${dateValue}`);
   }
@@ -34,7 +34,7 @@ export const toUtcDateStartIso = (dateValue: string): string => {
 };
 
 export const toUtcDateEndExclusiveIso = (dateValue: string): string => {
-  const segments = dateValue.split("-");
+  const segments = dateValue.split('-');
   if (segments.length !== DATE_SEGMENT_COUNT) {
     throw new Error(`Invalid date input: ${dateValue}`);
   }

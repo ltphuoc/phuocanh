@@ -1,62 +1,58 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useState,
-  type ReactElement,
-} from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { completeOnboardingAction } from "@/app/actions/auth-actions";
-import { FormSection } from "@/components/layout/form-section";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useI18n } from "@/hooks/useI18n";
-import { useRouter } from "@/i18n/navigation";
-import { initialActionState } from "@/lib/actions/action-state";
+import type { ReactElement } from 'react';
+
+import { startTransition, useActionState, useEffect, useState } from 'react';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { completeOnboardingAction } from '@/app/actions/auth-actions';
+import { FormSection } from '@/components/layout/form-section';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useI18n } from '@/hooks/useI18n';
+import { useRouter } from '@/i18n/navigation';
+import { initialActionState } from '@/lib/actions/action-state';
 import {
   getCurrentDateTokenInTimeZone,
   getSupportedCoupleTimeZones,
   isSupportedCoupleTimeZone,
-} from "@/lib/utils/couple-timezone";
+} from '@/lib/utils/couple-timezone';
 
 const ONBOARDING_TIME_ZONE_OPTIONS = getSupportedCoupleTimeZones();
-const TIME_ZONE_DATALIST_ID = "onboarding-timezone-options";
+const TIME_ZONE_DATALIST_ID = 'onboarding-timezone-options';
 
 type OnboardingStep = 1 | 2 | 3 | 4;
 
 const isIsoDate = (value: string): boolean => z.iso.date().safeParse(value).success;
 
-const buildCompleteOnboardingSchema = (
-  t: ReturnType<typeof useI18n<"forms.onboarding">>["t"],
-) =>
+const buildCompleteOnboardingSchema = (t: ReturnType<typeof useI18n<'forms.onboarding'>>['t']) =>
   z
     .object({
       confirmation: z.boolean().refine((value) => value, {
-        message: t("validation.confirmationRequired"),
+        message: t('validation.confirmationRequired'),
       }),
       coupleName: z
         .string()
         .trim()
-        .min(1, t("validation.coupleNameRequired"))
-        .max(120, t("validation.coupleNameMax")),
+        .min(1, t('validation.coupleNameRequired'))
+        .max(120, t('validation.coupleNameMax')),
       startedDate: z
         .string()
         .trim()
-        .min(1, t("validation.startedDateRequired"))
+        .min(1, t('validation.startedDateRequired'))
         .refine((value) => isIsoDate(value), {
-          message: t("validation.startedDateInvalid"),
+          message: t('validation.startedDateInvalid'),
         }),
       timeZone: z
         .string()
         .trim()
-        .min(1, t("validation.timeZoneRequired"))
+        .min(1, t('validation.timeZoneRequired'))
         .refine((value) => isSupportedCoupleTimeZone(value), {
-          message: t("validation.timeZoneInvalid"),
+          message: t('validation.timeZoneInvalid'),
         }),
     })
     .superRefine(({ startedDate, timeZone }, context) => {
@@ -67,9 +63,9 @@ const buildCompleteOnboardingSchema = (
       const todayInSelectedTimezone = getCurrentDateTokenInTimeZone(timeZone);
       if (startedDate > todayInSelectedTimezone) {
         context.addIssue({
-          code: "custom",
-          path: ["startedDate"],
-          message: t("validation.startedDateFuture"),
+          code: 'custom',
+          path: ['startedDate'],
+          message: t('validation.startedDateFuture'),
         });
       }
     });
@@ -77,10 +73,10 @@ const buildCompleteOnboardingSchema = (
 type CompleteOnboardingValues = z.infer<ReturnType<typeof buildCompleteOnboardingSchema>>;
 
 const STEP_FIELDS: Readonly<Record<OnboardingStep, readonly (keyof CompleteOnboardingValues)[]>> = {
-  1: ["coupleName"],
-  2: ["timeZone"],
-  3: ["startedDate"],
-  4: ["confirmation"],
+  1: ['coupleName'],
+  2: ['timeZone'],
+  3: ['startedDate'],
+  4: ['confirmation'],
 };
 
 const getNextStep = (currentStep: OnboardingStep): OnboardingStep => {
@@ -112,9 +108,9 @@ const getPreviousStep = (currentStep: OnboardingStep): OnboardingStep => {
 };
 
 export const CompleteOnboardingForm = (): ReactElement => {
-  const { t: actionsT } = useI18n("actions");
-  const { t: commonT } = useI18n("common");
-  const { t: formT } = useI18n("forms.onboarding");
+  const { t: actionsT } = useI18n('actions');
+  const { t: commonT } = useI18n('common');
+  const { t: formT } = useI18n('forms.onboarding');
   const router = useRouter();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [state, submitAction, isPending] = useActionState(
@@ -125,9 +121,9 @@ export const CompleteOnboardingForm = (): ReactElement => {
   const form = useForm<CompleteOnboardingValues>({
     defaultValues: {
       confirmation: false,
-      coupleName: "",
-      startedDate: "",
-      timeZone: "",
+      coupleName: '',
+      startedDate: '',
+      timeZone: '',
     },
     resolver: zodResolver(buildCompleteOnboardingSchema(formT)),
   });
@@ -137,17 +133,17 @@ export const CompleteOnboardingForm = (): ReactElement => {
       return;
     }
 
-    const actionMessageKey = state.message || "unexpectedError";
-    if (state.status === "success") {
+    const actionMessageKey = state.message || 'unexpectedError';
+    if (state.status === 'success') {
       toast.success(actionsT(actionMessageKey));
-      router.replace("/home");
+      router.replace('/home');
       return;
     }
 
-    if (state.status === "error") {
+    if (state.status === 'error') {
       toast.error(actionsT(actionMessageKey));
-      if (state.message === "auth.onboarding.coupleExists") {
-        router.replace("/accept-invite");
+      if (state.message === 'auth.onboarding.coupleExists') {
+        router.replace('/accept-invite');
       }
     }
   }, [actionsT, hasSubmitted, router, state.message, state.status]);
@@ -176,10 +172,10 @@ export const CompleteOnboardingForm = (): ReactElement => {
   const onSubmit = form.handleSubmit((values) => {
     setHasSubmitted(true);
     const payload = new FormData();
-    payload.set("confirmation", String(values.confirmation));
-    payload.set("coupleName", values.coupleName);
-    payload.set("startedDate", values.startedDate);
-    payload.set("timeZone", values.timeZone);
+    payload.set('confirmation', String(values.confirmation));
+    payload.set('coupleName', values.coupleName);
+    payload.set('startedDate', values.startedDate);
+    payload.set('timeZone', values.timeZone);
 
     startTransition(() => {
       submitAction(payload);
@@ -193,9 +189,12 @@ export const CompleteOnboardingForm = (): ReactElement => {
   const confirmationError = form.formState.errors.confirmation?.message;
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-        {formT("stepIndicator", {
+    <form
+      className="flex flex-col gap-5"
+      onSubmit={onSubmit}
+    >
+      <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        {formT('stepIndicator', {
           step,
           total: 4,
         })}
@@ -203,46 +202,49 @@ export const CompleteOnboardingForm = (): ReactElement => {
 
       {step === 1 ? (
         <FormSection
-          description={formT("coupleNameDescription")}
+          description={formT('coupleNameDescription')}
           errorId="onboarding-couple-name-error"
           errorMessage={coupleNameError}
           htmlFor="onboardingCoupleName"
-          label={formT("coupleNameLabel")}
+          label={formT('coupleNameLabel')}
         >
           <Input
-            aria-describedby={coupleNameError ? "onboarding-couple-name-error" : undefined}
+            aria-describedby={coupleNameError ? 'onboarding-couple-name-error' : undefined}
             aria-invalid={Boolean(coupleNameError)}
             id="onboardingCoupleName"
-            placeholder={formT("coupleNamePlaceholder")}
+            placeholder={formT('coupleNamePlaceholder')}
             type="text"
-            {...form.register("coupleName")}
+            {...form.register('coupleName')}
           />
         </FormSection>
       ) : null}
 
       {step === 2 ? (
         <FormSection
-          description={formT("timeZoneDescription")}
+          description={formT('timeZoneDescription')}
           errorId="onboarding-timezone-error"
           errorMessage={timeZoneError}
           htmlFor="onboardingTimeZone"
-          label={formT("timeZoneLabel")}
+          label={formT('timeZoneLabel')}
         >
           <>
             <Input
-              aria-describedby={timeZoneError ? "onboarding-timezone-error" : undefined}
+              aria-describedby={timeZoneError ? 'onboarding-timezone-error' : undefined}
               aria-invalid={Boolean(timeZoneError)}
               autoComplete="off"
               id="onboardingTimeZone"
               list={TIME_ZONE_DATALIST_ID}
-              placeholder={formT("timeZonePlaceholder")}
+              placeholder={formT('timeZonePlaceholder')}
               spellCheck={false}
               type="text"
-              {...form.register("timeZone")}
+              {...form.register('timeZone')}
             />
             <datalist id={TIME_ZONE_DATALIST_ID}>
               {ONBOARDING_TIME_ZONE_OPTIONS.map((timeZone) => (
-                <option key={timeZone} value={timeZone} />
+                <option
+                  key={timeZone}
+                  value={timeZone}
+                />
               ))}
             </datalist>
           </>
@@ -251,18 +253,18 @@ export const CompleteOnboardingForm = (): ReactElement => {
 
       {step === 3 ? (
         <FormSection
-          description={formT("startedDateDescription")}
+          description={formT('startedDateDescription')}
           errorId="onboarding-started-date-error"
           errorMessage={startedDateError}
           htmlFor="onboardingStartedDate"
-          label={formT("startedDateLabel")}
+          label={formT('startedDateLabel')}
         >
           <Input
-            aria-describedby={startedDateError ? "onboarding-started-date-error" : undefined}
+            aria-describedby={startedDateError ? 'onboarding-started-date-error' : undefined}
             aria-invalid={Boolean(startedDateError)}
             id="onboardingStartedDate"
             type="date"
-            {...form.register("startedDate")}
+            {...form.register('startedDate')}
           />
         </FormSection>
       ) : null}
@@ -270,18 +272,18 @@ export const CompleteOnboardingForm = (): ReactElement => {
       {step === 4 ? (
         <div className="space-y-4">
           <div className="rounded-2xl border border-border/70 bg-card px-4 py-4">
-            <p className="ui-meta">{formT("summaryLabel")}</p>
+            <p className="ui-meta">{formT('summaryLabel')}</p>
             <dl className="mt-3 space-y-2 text-sm text-foreground">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-muted-foreground">{formT("summary.coupleName")}</dt>
+                <dt className="text-muted-foreground">{formT('summary.coupleName')}</dt>
                 <dd className="text-right font-medium">{values.coupleName}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-muted-foreground">{formT("summary.timeZone")}</dt>
+                <dt className="text-muted-foreground">{formT('summary.timeZone')}</dt>
                 <dd className="text-right font-medium">{values.timeZone}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-muted-foreground">{formT("summary.startedDate")}</dt>
+                <dt className="text-muted-foreground">{formT('summary.startedDate')}</dt>
                 <dd className="text-right font-medium">{values.startedDate}</dd>
               </div>
             </dl>
@@ -290,18 +292,18 @@ export const CompleteOnboardingForm = (): ReactElement => {
             errorId="onboarding-confirmation-error"
             errorMessage={confirmationError}
             htmlFor="onboardingConfirmation"
-            label={formT("confirmationLabel")}
+            label={formT('confirmationLabel')}
           >
             <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-card px-4 py-3 text-sm text-foreground">
               <input
-                aria-describedby={confirmationError ? "onboarding-confirmation-error" : undefined}
+                aria-describedby={confirmationError ? 'onboarding-confirmation-error' : undefined}
                 aria-invalid={Boolean(confirmationError)}
                 className="mt-1 size-4 rounded border-border accent-primary"
                 id="onboardingConfirmation"
                 type="checkbox"
-                {...form.register("confirmation")}
+                {...form.register('confirmation')}
               />
-              <span>{formT("confirmationDescription")}</span>
+              <span>{formT('confirmationDescription')}</span>
             </label>
           </FormSection>
         </div>
@@ -316,7 +318,7 @@ export const CompleteOnboardingForm = (): ReactElement => {
             type="button"
             variant="outline"
           >
-            {formT("back")}
+            {formT('back')}
           </Button>
         ) : null}
 
@@ -329,16 +331,16 @@ export const CompleteOnboardingForm = (): ReactElement => {
             }}
             type="button"
           >
-            {formT("next")}
+            {formT('next')}
           </Button>
         ) : (
           <Button
-            busyLabel={commonT("working")}
+            busyLabel={commonT('working')}
             className="w-full md:w-auto"
             isBusy={isPending}
             type="submit"
           >
-            {formT("submit")}
+            {formT('submit')}
           </Button>
         )}
       </div>

@@ -6,17 +6,17 @@ export const normalizeAuthRedirectPath = (
     return fallbackPath;
   }
 
-  if (!candidatePath.startsWith("/") || candidatePath.startsWith("//")) {
+  if (!candidatePath.startsWith('/') || candidatePath.startsWith('//')) {
     return fallbackPath;
   }
 
-  if (candidatePath.includes("\\")) {
+  if (candidatePath.includes('\\')) {
     return fallbackPath;
   }
 
   try {
-    const normalizedUrl = new URL(candidatePath, "https://internal.local");
-    if (normalizedUrl.origin !== "https://internal.local") {
+    const normalizedUrl = new URL(candidatePath, 'https://internal.local');
+    if (normalizedUrl.origin !== 'https://internal.local') {
       return fallbackPath;
     }
 

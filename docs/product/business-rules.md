@@ -3,6 +3,7 @@
 This file is the canonical business-rule reference for the current app. If this file and code disagree, SQL migrations win for schema/security behavior.
 
 ## Global Invariants
+
 - The product is a single private couple space for exactly two users.
 - The database currently enforces a global singleton couple space via a unique expression index on `public.couples ((true))`.
 - A couple can have at most two active memberships.
@@ -10,6 +11,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Membership and invite safety rules are enforced in SQL, not just in UI or Server Actions.
 
 ## Membership Roles And States
+
 - Roles are `partner_a` and `partner_b`.
 - Membership status values are `active` and `inactive`.
 - The current app only creates `active` memberships. There is no UI flow for deactivation yet.
@@ -18,6 +20,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - If the invite target user is already an active member of that couple, invite acceptance returns the existing role and marks the invite accepted.
 
 ## Couple Bootstrap Rules
+
 - Bootstrap is only allowed through the `bootstrap_first_couple(started_date, couple_name, target_timezone)` RPC.
 - Auth-gate reads must not create bootstrap data implicitly.
 - First-user onboarding must collect draft values step by step and show a final confirmation summary before calling bootstrap.
@@ -27,6 +30,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - If a couple already exists and the authenticated user is not a member, bootstrap must not attach them implicitly. They must join through an invite.
 
 ## Couple Timezone
+
 - The couple owns one shared timezone stored on `couples.timezone`.
 - The current default and backfill timezone is `Asia/Ho_Chi_Minh`.
 - The timezone must be a valid IANA timezone name and is validated in SQL.
@@ -42,6 +46,7 @@ This file is the canonical business-rule reference for the current app. If this 
   - album media eligibility
 
 ## Invite Lifecycle
+
 - Invites are created by an active couple member through `createInviteAction`.
 - Invite tokens are UUIDs and expire 14 days after creation.
 - Invite acceptance is only allowed through the `accept_couple_invite(invite_token)` RPC.
@@ -51,6 +56,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Successful invite acceptance creates an active membership, records `accepted_at`, and records `accepted_by_user_id`.
 
 ## Memory And Media Rules
+
 - A memory currently requires either:
   - a non-empty note, or
   - one uploaded media file
@@ -62,12 +68,14 @@ This file is the canonical business-rule reference for the current app. If this 
 - If media upload or media metadata insert fails, the app attempts rollback so partial storage/database state is not left behind.
 
 ## Lists And Checklists
+
 - Wish items are couple-scoped and member-visible through RLS.
 - Checklists are couple-scoped and member-visible through RLS.
 - Checklist item writes are authorized through the parent checklist’s couple membership in SQL.
 - Checklist item actions do not need to fetch the couple context explicitly because RLS enforces the parent checklist relationship.
 
 ## Countdowns
+
 - Countdown kinds are `anniversary`, `birthday`, `travel`, `plan`, and `custom`.
 - Countdowns are couple-scoped and readable by active couple members only.
 - Countdown creation records the creating member in `created_by_user_id` and is authorized by RLS.
@@ -76,6 +84,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Countdowns enqueue one day-of reminder email per active partner based on the saved couple timezone.
 
 ## Future Notes
+
 - Future-note metadata (`title`, `unlock_at`) is visible immediately to active couple members.
 - Future-note bodies are stored in a separate one-to-one table (`future_note_contents`).
 - Future-note bodies are encrypted at rest and are unreadable until the parent note satisfies `unlock_at <= now()` through the unlocked-body RPC.
@@ -86,6 +95,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - The current slice has no edit/delete UI.
 
 ## Trips
+
 - Trips are couple-scoped and readable by active couple members only.
 - Trip creation records the creating member in `created_by_user_id` and is authorized by RLS.
 - Trip dates are stored as date-only fields (`start_date`, `end_date`), not timestamps.
@@ -94,6 +104,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - This slice has no edit/delete flow.
 
 ## Albums
+
 - Albums are couple-scoped and readable by active couple members only.
 - Albums are rooted in `trips`, not in a separate travel hierarchy.
 - Slice 3 enforces one album per trip through a unique `albums.trip_id` constraint.
@@ -105,6 +116,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - This slice has no captions, reordering, removal, delete flow, or multi-album-per-trip behavior.
 
 ## Visited Places
+
 - Visited places are couple-scoped and readable by active couple members only.
 - Visited places are rooted in `trips`, not in a separate travel hierarchy.
 - Visited-place creation records the creating member in `created_by_user_id` and is authorized by RLS.
@@ -113,6 +125,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - This slice has no edit/delete flow, geocoding flow, or memory-location auto-derivation.
 
 ## Gameplay
+
 - Gameplay is couple-scoped and readable by active couple members only.
 - The current live gameplay mode set contains three enum values: `daily_question`, `guess_date`, and `trivia`.
 - A gameplay round is unique per `(couple_id, mode, round_date)`.
@@ -149,6 +162,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - The current slice has no winner, scoring, similarity matching, answer edits, answer deletes, or backfill UI.
 
 ## Forbidden States
+
 - More than one `couples` row
 - More than two active memberships in a couple
 - Two active `partner_a` memberships in one couple
@@ -176,6 +190,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Non-member or cross-couple gameplay read/write access
 
 ## Enforcement Map
+
 - Singleton couple space: SQL unique index
 - Max two active members: SQL trigger
 - Unique active roles: SQL partial unique index
@@ -211,6 +226,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Gameplay aggregate reads: `get_daily_question_stats(...)`
 
 ## User-Visible Failure States
+
 - Login can fail if Supabase Auth is unreachable.
 - Invite acceptance can fail with:
   - invalid or already used invite
@@ -270,6 +286,7 @@ This file is the canonical business-rule reference for the current app. If this 
   - database writes fail unexpectedly
 
 ## Current Shell Boundaries
+
 - `/games` and `/stats` are implemented.
 - `/games/[mode]` is implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; other mode slugs remain shell-only.
 - Shell-only routes must not be treated as proof that backend tables, jobs, or APIs exist.

@@ -1,31 +1,21 @@
-import type { QueryClient } from "@tanstack/react-query";
-import type {
-  HomeAppData,
-  ListsAppData,
-  SettingsAppData,
-} from "@/lib/app-data/types";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
+import type { HomeAppData, ListsAppData, SettingsAppData } from '@/lib/app-data/types';
+import type { QueryClient } from '@tanstack/react-query';
 
-const invalidate = (
-  queryClient: QueryClient,
-  queryKey: readonly unknown[],
-): Promise<void> =>
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+
+const invalidate = (queryClient: QueryClient, queryKey: readonly unknown[]): Promise<void> =>
   queryClient.invalidateQueries({
     queryKey,
   });
 
-export const invalidateHomeAndLists = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateHomeAndLists = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.home()),
     invalidate(queryClient, appQueryKeys.lists()),
   ]);
 };
 
-export const invalidateMemoryCreated = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateMemoryCreated = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.home()),
     invalidate(queryClient, appQueryKeys.onThisDay()),
@@ -34,9 +24,7 @@ export const invalidateMemoryCreated = async (
   ]);
 };
 
-export const invalidateGameplay = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateGameplay = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.games()),
     invalidate(queryClient, appQueryKeys.dailyQuestion()),
@@ -44,27 +32,21 @@ export const invalidateGameplay = async (
   ]);
 };
 
-export const invalidateGuessDate = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateGuessDate = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.games()),
     invalidate(queryClient, appQueryKeys.guessDate()),
   ]);
 };
 
-export const invalidateTrivia = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateTrivia = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.games()),
     invalidate(queryClient, appQueryKeys.trivia()),
   ]);
 };
 
-export const invalidateTimezoneDerivedData = async (
-  queryClient: QueryClient,
-): Promise<void> => {
+export const invalidateTimezoneDerivedData = async (queryClient: QueryClient): Promise<void> => {
   await Promise.all([
     invalidate(queryClient, appQueryKeys.home()),
     invalidate(queryClient, appQueryKeys.onThisDay()),
@@ -84,10 +66,7 @@ export const invalidateTimezoneDerivedData = async (
   ]);
 };
 
-export const setSettingsTimeZone = (
-  queryClient: QueryClient,
-  timeZone: string,
-): void => {
+export const setSettingsTimeZone = (queryClient: QueryClient, timeZone: string): void => {
   queryClient.setQueryData<SettingsAppData>(appQueryKeys.settings(), (current) =>
     current
       ? {

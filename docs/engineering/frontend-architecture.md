@@ -3,6 +3,7 @@
 This file describes the current frontend operating model. It is the canonical reference for route behavior and UI/runtime boundaries.
 
 ## Route Groups
+
 - `src/app/[locale]/(public)`: `/login`, `/onboarding`, and `/accept-invite`
 - `src/app/[locale]/(app)`: authenticated routes rendered inside one shared app shell
 - `src/app/auth/callback/route.ts`: Supabase auth callback exchange and safe redirect
@@ -10,12 +11,14 @@ This file describes the current frontend operating model. It is the canonical re
 - `src/app/[locale]/page.tsx`: redirect-only route that resolves auth gate state
 
 ## Route Categories
+
 - `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/games/guess-date`, `/games/trivia`, `/stats`, `/settings`
 - `shell-only`: game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]`
 
 Use `docs/engineering/route-capability-matrix.md` for the full table.
 
 ## Server vs Client Boundary
+
 - Public auth/onboarding routes stay server-first with form-local action state.
 - Authenticated interactive routes server-prefetch TanStack Query data, then render the hydrated data inside client page components.
 - Server Components prefetch by calling helpers in `src/lib/server/*` and `src/lib/server/app-data.ts` directly. They do not fetch internal API routes.
@@ -23,6 +26,7 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 - Client components own forms, query cache updates, navigation interaction, motion wrappers, toast feedback, and file input handling.
 
 ## Data Read Pattern
+
 - Authenticated pages first resolve couple context through `getAuthGateState()` or `getReadyCoupleContextOrRedirect()`.
 - Authenticated page reads flow through app-data wrappers such as `getHomeAppData(...)`, `getListsAppData(...)`, `getMemoryDetailAppData(...)`, `getCountdownsAppData(...)`, `getTripDetailAppData(...)`, `getAlbumDetailAppData(...)`, `getGamesAppData(...)`, `getDailyQuestionAppData(...)`, `getGuessDateAppData(...)`, `getTriviaAppData(...)`, and `getStatsAppData(...)`.
 - Query keys live in `src/lib/query/app-query-keys.ts` under one `["app-data", ...]` root. Use exact keys (`home`, `lists`, `trip(id)`, `album(id)`, `dailyQuestion`, `guessDate`, `trivia`, `stats`) instead of broad invalidation.
@@ -42,6 +46,7 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 - Shared date helpers and date-rendering components receive the couple timezone explicitly instead of relying on environment defaults.
 
 ## Mutation Pattern
+
 - Forms use `react-hook-form`, `zodResolver`, TanStack `useMutation`, Server Actions, and Sonner toasts.
 - Authenticated app-data mutations keep Server Actions as the write boundary and keep the existing `ActionState` response shape.
 - Phase 2 planning forms also use inline field errors via `FormSection` in addition to toast feedback.
@@ -65,6 +70,7 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 - `/settings` owns the `updateCoupleTimezoneAction` flow for the shared couple timezone.
 
 ## Production-Flow E2E Coverage
+
 - Browser coverage is now anchored in Playwright under `tests/e2e/*`.
 - The suite runs against `next build` + `next start`, not the dev server.
 - `playwright.config.ts` keeps the suite serial (`workers: 1`) because the app is a singleton couple space on one local Supabase stack.
@@ -90,37 +96,40 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 - Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: the production-flow suite passed end to end with `7 passed (2.8m)`.
 
 ## ActionState Contract
+
 - `ActionState = { status: "idle" | "success" | "error"; message: string }`
 - `ActionStateWithData<T>` extends `ActionState` with optional `data`
 - Client forms should not invent alternate success/error payload shapes for the current runtime without updating `docs/engineering/api-contracts.md`
 
 ## Revalidation Rules
-| Mutation | Revalidated routes | Client query sync |
-|---|---|
-| `sendMagicLinkAction` | none | not applicable |
-| `completeOnboardingAction` | `/`, `/home` | not migrated |
-| `createInviteAction` | none | not app data |
-| `acceptInviteAction` | `/home` | not migrated |
-| `createMemoryAction` | `/home`, `/on-this-day`, `/lists` | invalidate `home`, `onThisDay`, `lists`, `tripDetails` |
-| `addWishItemAction` | `/home`, `/lists` | invalidate `home`, `lists` |
-| `createChecklistAction` | `/home`, `/lists` | invalidate `home`, `lists` |
-| `addChecklistItemAction` | `/home`, `/lists` | invalidate `home`, `lists` |
-| `toggleChecklistItemAction` | `/home`, `/lists` | optimistic update `home`, `lists`; invalidate after settle |
-| `createCountdownAction` | `/countdowns` | invalidate `countdowns` |
-| `createFutureNoteAction` | `/future-notes` | invalidate `futureNotes` |
-| `createTripAction` | `/trips` | invalidate `trips` |
-| `createVisitedPlaceAction` | `/map`, `/trips/[tripId]` | invalidate `map`, `trip(tripId)` |
-| `createAlbumAction` | `/albums`, `/trips/[tripId]` | invalidate `albums`, `trip(tripId)` |
-| `addAlbumItemsAction` | `/albums`, `/albums/[albumId]`, `/trips/[tripId]` | invalidate `albums`, `album(albumId)`, `trip(tripId)` |
-| `ensureDailyQuestionRoundAction` | `/games`, `/games/daily-question`, `/stats` | invalidate `games`, `dailyQuestion`, `stats` |
-| `submitDailyQuestionAnswerAction` | `/games`, `/games/daily-question`, `/stats` | update safe answered state, then invalidate `games`, `dailyQuestion`, `stats` |
-| `ensureGuessDateRoundAction` | `/games`, `/games/guess-date` | invalidate `games`, `guessDate` |
-| `submitGuessDateAnswerAction` | `/games`, `/games/guess-date` | update safe answered state, then invalidate `games`, `guessDate` |
-| `ensureTriviaRoundAction` | `/games`, `/games/trivia` | invalidate `games`, `trivia` |
-| `submitTriviaAnswerAction` | `/games`, `/games/trivia` | update safe answered state, then invalidate `games`, `trivia` |
-| `updateCoupleTimezoneAction` | `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, `/map` | update `settings`, invalidate timezone-derived app-data keys |
+
+| Mutation                          | Revalidated routes                                                                                | Client query sync                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `sendMagicLinkAction`             | none                                                                                              | not applicable                                                                |
+| `completeOnboardingAction`        | `/`, `/home`                                                                                      | not migrated                                                                  |
+| `createInviteAction`              | none                                                                                              | not app data                                                                  |
+| `acceptInviteAction`              | `/home`                                                                                           | not migrated                                                                  |
+| `createMemoryAction`              | `/home`, `/on-this-day`, `/lists`                                                                 | invalidate `home`, `onThisDay`, `lists`, `tripDetails`                        |
+| `addWishItemAction`               | `/home`, `/lists`                                                                                 | invalidate `home`, `lists`                                                    |
+| `createChecklistAction`           | `/home`, `/lists`                                                                                 | invalidate `home`, `lists`                                                    |
+| `addChecklistItemAction`          | `/home`, `/lists`                                                                                 | invalidate `home`, `lists`                                                    |
+| `toggleChecklistItemAction`       | `/home`, `/lists`                                                                                 | optimistic update `home`, `lists`; invalidate after settle                    |
+| `createCountdownAction`           | `/countdowns`                                                                                     | invalidate `countdowns`                                                       |
+| `createFutureNoteAction`          | `/future-notes`                                                                                   | invalidate `futureNotes`                                                      |
+| `createTripAction`                | `/trips`                                                                                          | invalidate `trips`                                                            |
+| `createVisitedPlaceAction`        | `/map`, `/trips/[tripId]`                                                                         | invalidate `map`, `trip(tripId)`                                              |
+| `createAlbumAction`               | `/albums`, `/trips/[tripId]`                                                                      | invalidate `albums`, `trip(tripId)`                                           |
+| `addAlbumItemsAction`             | `/albums`, `/albums/[albumId]`, `/trips/[tripId]`                                                 | invalidate `albums`, `album(albumId)`, `trip(tripId)`                         |
+| `ensureDailyQuestionRoundAction`  | `/games`, `/games/daily-question`, `/stats`                                                       | invalidate `games`, `dailyQuestion`, `stats`                                  |
+| `submitDailyQuestionAnswerAction` | `/games`, `/games/daily-question`, `/stats`                                                       | update safe answered state, then invalidate `games`, `dailyQuestion`, `stats` |
+| `ensureGuessDateRoundAction`      | `/games`, `/games/guess-date`                                                                     | invalidate `games`, `guessDate`                                               |
+| `submitGuessDateAnswerAction`     | `/games`, `/games/guess-date`                                                                     | update safe answered state, then invalidate `games`, `guessDate`              |
+| `ensureTriviaRoundAction`         | `/games`, `/games/trivia`                                                                         | invalidate `games`, `trivia`                                                  |
+| `submitTriviaAnswerAction`        | `/games`, `/games/trivia`                                                                         | update safe answered state, then invalidate `games`, `trivia`                 |
+| `updateCoupleTimezoneAction`      | `/settings`, `/home`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/albums`, `/map` | update `settings`, invalidate timezone-derived app-data keys                  |
 
 ## Shared UI Structure
+
 - App shell: `src/app/(app)/layout.tsx`, `BottomNavigation`, `SideNavigation`, `navigation-model.ts`
 - Shared layout primitives: `AuthShell`, `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `ShellPage`
 - Shared UI/state primitives: `SectionCard`, `EmptyState`, `LoadingState`, `ListRow`, `ComingSoonCard`, `PageReveal`, `CountdownWidgetTemplate`, `FutureNoteCard`, `TripCardTemplate`, `AlbumCard`
@@ -130,10 +139,12 @@ Use `docs/engineering/route-capability-matrix.md` for the full table.
 New routes should compose these primitives rather than invent new layout systems per page.
 
 ## Shell-Only Rules
+
 - `shell-only` means the route exists to define layout and navigation, not to prove backend support.
 - Do not add server reads, new tables, or background jobs to shell-only routes without updating `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md`.
 
 ## Architecture Guardrails
+
 - Keep authenticated app-data reads server-prefetched and hydrated through TanStack Query.
 - Keep auth gate decisions in `src/lib/server/couple-context.ts`.
 - Keep couple/invite invariants in SQL RPCs.

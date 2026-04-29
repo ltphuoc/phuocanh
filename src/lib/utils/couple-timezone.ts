@@ -1,10 +1,11 @@
-import { TZDate } from "@date-fns/tz";
-import { differenceInCalendarDays, format, parseISO } from "date-fns";
-import { parseDateInputValueAsUtc } from "@/lib/utils/date-input";
+import { TZDate } from '@date-fns/tz';
+import { differenceInCalendarDays, format, parseISO } from 'date-fns';
+
+import { parseDateInputValueAsUtc } from '@/lib/utils/date-input';
 
 const DATE_SEGMENT_COUNT = 3;
 
-export const DEFAULT_COUPLE_TIMEZONE = "Asia/Ho_Chi_Minh" as const;
+export const DEFAULT_COUPLE_TIMEZONE = 'Asia/Ho_Chi_Minh' as const;
 
 interface DateSegments {
   readonly day: number;
@@ -15,11 +16,11 @@ interface DateSegments {
 const isValidDateSegment = (value: number): boolean => Number.isInteger(value) && value > 0;
 
 const resolveSupportedCoupleTimeZones = (): readonly string[] => {
-  if (typeof Intl.supportedValuesOf !== "function") {
+  if (typeof Intl.supportedValuesOf !== 'function') {
     return [DEFAULT_COUPLE_TIMEZONE];
   }
 
-  const supportedTimeZones = Intl.supportedValuesOf("timeZone");
+  const supportedTimeZones = Intl.supportedValuesOf('timeZone');
   if (supportedTimeZones.includes(DEFAULT_COUPLE_TIMEZONE)) {
     return supportedTimeZones;
   }
@@ -31,7 +32,7 @@ const supportedCoupleTimeZones = resolveSupportedCoupleTimeZones();
 const supportedCoupleTimeZoneSet = new Set(supportedCoupleTimeZones);
 
 const parseDateSegments = (dateValue: string): DateSegments => {
-  const segments = dateValue.split("-");
+  const segments = dateValue.split('-');
   if (segments.length !== DATE_SEGMENT_COUNT) {
     throw new Error(`Invalid date input: ${dateValue}`);
   }
@@ -75,18 +76,13 @@ export const toTimeZoneDateEndExclusiveIso = (dateValue: string, timeZone: strin
 export const parseDateInputValueInTimeZone = (dateValue: string, timeZone: string): Date =>
   getTimeZoneDate(dateValue, timeZone);
 
-export const getDateTokenForInstantInTimeZone = (
-  value: Date | string,
-  timeZone: string,
-): string => format(new TZDate(normalizeInstantInput(value), timeZone), "yyyy-MM-dd");
+export const getDateTokenForInstantInTimeZone = (value: Date | string, timeZone: string): string =>
+  format(new TZDate(normalizeInstantInput(value), timeZone), 'yyyy-MM-dd');
 
 export const getCurrentDateTokenInTimeZone = (timeZone: string): string =>
-  format(TZDate.tz(timeZone), "yyyy-MM-dd");
+  format(TZDate.tz(timeZone), 'yyyy-MM-dd');
 
-export const getDaysBetweenDateTokens = (
-  leftDateToken: string,
-  rightDateToken: string,
-): number =>
+export const getDaysBetweenDateTokens = (leftDateToken: string, rightDateToken: string): number =>
   differenceInCalendarDays(
     parseDateInputValueAsUtc(leftDateToken),
     parseDateInputValueAsUtc(rightDateToken),

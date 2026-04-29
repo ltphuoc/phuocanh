@@ -1,12 +1,14 @@
-import { HydrationBoundary } from "@tanstack/react-query";
-import type { Metadata } from "next";
-import type { ReactElement } from "react";
-import { OnThisDayClientPage } from "@/app/[locale]/(app)/on-this-day/on-this-day-client-page";
-import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { dehydrateAppQuery } from "@/lib/query/server-prefetch";
-import { getOnThisDayAppData } from "@/lib/server/app-data";
-import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
+import type { Metadata } from 'next';
+import type { ReactElement } from 'react';
+
+import { HydrationBoundary } from '@tanstack/react-query';
+
+import { OnThisDayClientPage } from '@/app/[locale]/(app)/on-this-day/on-this-day-client-page';
+import { getRouteMetadata, resolveLocaleFromParams } from '@/i18n/server';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { dehydrateAppQuery } from '@/lib/query/server-prefetch';
+import { getOnThisDayAppData } from '@/lib/server/app-data';
+import { getReadyCoupleContextOrRedirect } from '@/lib/server/couple-context';
 
 interface OnThisDayPageProps {
   readonly params: Promise<{
@@ -14,13 +16,10 @@ interface OnThisDayPageProps {
   }>;
 }
 
-export const generateMetadata = async ({
-  params,
-}: OnThisDayPageProps): Promise<Metadata> => getRouteMetadata(params, "onThisDay");
+export const generateMetadata = async ({ params }: OnThisDayPageProps): Promise<Metadata> =>
+  getRouteMetadata(params, 'onThisDay');
 
-export default async function OnThisDayPage({
-  params,
-}: OnThisDayPageProps): Promise<ReactElement> {
+export default async function OnThisDayPage({ params }: OnThisDayPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
   const context = await getReadyCoupleContextOrRedirect(locale);
   const dehydratedState = dehydrateAppQuery(

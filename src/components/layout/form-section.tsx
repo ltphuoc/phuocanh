@@ -1,5 +1,6 @@
-import type { HTMLAttributes, ReactElement, ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
+import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
+
+import { cn } from '@/lib/utils/cn';
 
 interface FormSectionProps extends HTMLAttributes<HTMLDivElement> {
   readonly children: ReactNode;
@@ -20,16 +21,25 @@ export const FormSection = ({
   label,
   ...props
 }: FormSectionProps): ReactElement => (
-  <div className={cn("flex flex-col gap-3", className)} {...props}>
+  <div
+    className={cn('flex flex-col gap-3', className)}
+    {...props}
+  >
     <div className="flex flex-col gap-1">
-      <label className="text-sm font-semibold text-foreground" htmlFor={htmlFor}>
+      <label
+        className="text-sm font-semibold text-foreground"
+        htmlFor={htmlFor}
+      >
         {label}
       </label>
       {description ? <p className="ui-body-sm text-muted-foreground">{description}</p> : null}
     </div>
     {children}
     {errorMessage ? (
-      <p className="text-sm font-medium text-primary" id={errorId}>
+      <p
+        className="text-sm font-medium text-primary"
+        id={errorId}
+      >
         {errorMessage}
       </p>
     ) : null}

@@ -3,6 +3,7 @@
 This file is now the engineering index. Use the focused docs below instead of treating this file as the full system spec.
 
 ## Read In This Order
+
 1. `docs/engineering/system-architecture.md`
 2. `docs/engineering/frontend-architecture.md`
 3. `docs/engineering/api-contracts.md`
@@ -11,6 +12,7 @@ This file is now the engineering index. Use the focused docs below instead of tr
 6. `docs/engineering/development-verification.md`
 
 ## Current Runtime Summary
+
 - Next.js App Router with Server Components by default
 - Public routes for login, first-user onboarding, and invite acceptance
 - Authenticated routes behind one shared app shell
@@ -20,6 +22,7 @@ This file is now the engineering index. Use the focused docs below instead of tr
 - Supabase Storage for private memory media
 
 ## Source Of Truth Reminder
+
 - Business rules: `docs/product/business-rules.md`
 - Schema/security: `supabase/migrations/*.sql`
 - Runtime contracts: `docs/engineering/api-contracts.md`

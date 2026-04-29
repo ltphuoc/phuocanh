@@ -3,12 +3,14 @@
 This file tracks the active Phase 2 delivery sequence against the current repository state.
 
 Status values:
+
 - `done`
 - `partial`
 - `missing`
 - `needs rework`
 
 ## Current Status (2026-04-28)
+
 - Phase 1 runtime remains stable.
 - Phase 2 Slice 1 is implemented for:
   - `/countdowns`
@@ -51,25 +53,28 @@ Status values:
   - local and CI replay now uses a private fallback secret store when Vault is unavailable
 
 ## Checklist
-| Item | Status | Notes |
-|---|---|---|
-| Countdowns | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, live route UI, and day-of reminder email enqueueing are implemented. |
-| Future notes | `done` | Real schema, encrypted body storage, RPC-backed create/read path, unlock-gated reads, unlock reminder enqueueing, and live route UI are implemented. |
-| Trips | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, and live route UI are implemented. |
-| Albums | `done` | Real trip-rooted schema, RPC-backed mutations, signed media reads, `/albums` index, `/albums/[albumId]` detail, and trip-detail album flows are implemented. |
-| Map visited places | `done` | `visited_places`, `getMapPageData(...)`, provider-free atlas UI, and trip-level visited-place create/read flow are implemented. |
+
+| Item                       | Status | Notes                                                                                                                                                           |
+| -------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Countdowns                 | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, live route UI, and day-of reminder email enqueueing are implemented.                     |
+| Future notes               | `done` | Real schema, encrypted body storage, RPC-backed create/read path, unlock-gated reads, unlock reminder enqueueing, and live route UI are implemented.            |
+| Trips                      | `done` | Real schema, RLS, typed Supabase surface, server reads, Server Action, and live route UI are implemented.                                                       |
+| Albums                     | `done` | Real trip-rooted schema, RPC-backed mutations, signed media reads, `/albums` index, `/albums/[albumId]` detail, and trip-detail album flows are implemented.    |
+| Map visited places         | `done` | `visited_places`, `getMapPageData(...)`, provider-free atlas UI, and trip-level visited-place create/read flow are implemented.                                 |
 | Couple timezone foundation | `done` | `couples.timezone`, `update_couple_timezone(...)`, `updateCoupleTimezoneAction`, live `/settings`, and couple-time day-boundary/date rendering are implemented. |
 
 ## Foundational Cleanup Landed In Earlier Slices
-| Item | Status | Notes |
-|---|---|---|
-| Phase 2 route docs sync | `done` | Canonical route, roadmap, product, and engineering docs now reflect the delivered runtime. |
-| Shell accessibility | `done` | Icon-only composer buttons expose labels, mobile `More` toggle exposes expanded state, and atlas stop selection state is exposed. |
-| Lists localization consistency | `done` | `/lists` renders translated wish-category labels like `/home`. |
-| New-form validation UX | `done` | New Phase 2 forms add inline field errors in addition to the shared toast contract. |
-| Couple-time semantics | `done` | Countdowns/future notes now store selected local dates through the shared timezone, and trip/album/on-this-day reads no longer depend on UTC day boundaries. |
+
+| Item                           | Status | Notes                                                                                                                                                        |
+| ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Phase 2 route docs sync        | `done` | Canonical route, roadmap, product, and engineering docs now reflect the delivered runtime.                                                                   |
+| Shell accessibility            | `done` | Icon-only composer buttons expose labels, mobile `More` toggle exposes expanded state, and atlas stop selection state is exposed.                            |
+| Lists localization consistency | `done` | `/lists` renders translated wish-category labels like `/home`.                                                                                               |
+| New-form validation UX         | `done` | New Phase 2 forms add inline field errors in addition to the shared toast contract.                                                                          |
+| Couple-time semantics          | `done` | Countdowns/future notes now store selected local dates through the shared timezone, and trip/album/on-this-day reads no longer depend on UTC day boundaries. |
 
 ## Slice 1 Delivered
+
 1. Added `countdowns`, `future_notes`, and `future_note_contents` schema with RLS.
 2. Regenerated Supabase types and updated schema inventory docs/code.
 3. Added `getCountdownsPageData(...)` and `getFutureNotesPageData(...)` server helpers.
@@ -78,6 +83,7 @@ Status values:
 6. Synced docs/specs to the delivered runtime and fixed small shared accessibility drift.
 
 ## Slice 2 Delivered
+
 1. Added the `trips` schema with date-range constraints and couple-scoped RLS.
 2. Regenerated Supabase types and updated schema inventory docs/code.
 3. Added `getTripsPageData(...)` and `getTripDetailData(...)` server helpers.
@@ -86,6 +92,7 @@ Status values:
 6. Synced docs/specs to the delivered runtime and moved the next slice to album/media grouping.
 
 ## Slice 3 Delivered
+
 1. Added `albums` and `album_items` schema with trip-rooted constraints and couple-scoped RLS.
 2. Added transactional album RPCs `create_album_with_items(...)` and `add_album_items(...)` for multi-row album writes.
 3. Regenerated Supabase types and updated schema inventory docs/code.
@@ -97,6 +104,7 @@ Status values:
 9. Synced docs/specs to the delivered runtime and moved the next slice to map foundation.
 
 ## Slice 4 Delivered
+
 1. Added the `visited_places` schema with trip-linked date-window enforcement and couple-scoped RLS.
 2. Regenerated Supabase types and updated schema inventory docs/code.
 3. Added `getMapPageData(...)` and extended `getTripDetailData(...)` with ordered trip visited places.
@@ -106,6 +114,7 @@ Status values:
 7. Synced docs/specs to the delivered runtime and closed the user-facing Phase 2 travel slice.
 
 ## Phase 2 Closeout Delivered
+
 1. Added encrypted-at-rest future-note body storage behind SQL-owned encrypt/decrypt helpers and RPCs.
 2. Added `reminder_deliveries`, due-reminder enqueueing, claim/retry infrastructure, and cron-driven processing hooks.
 3. Added the `reminder-processor` Edge Function with Resend delivery, summary-only templates, and retry/backoff handling.
@@ -113,6 +122,7 @@ Status values:
 5. Synced runtime copy and docs so reminder automation and encryption are no longer described as deferred.
 
 ## Phase 3 Slice 1 Delivered
+
 1. Added `game_mode`, `game_rounds`, and `game_round_answers` with couple-scoped RLS.
 2. Added gameplay RPCs `ensure_daily_question_round(...)` and `submit_daily_question_answer(...)`.
 3. Updated schema inventory and typed Supabase surfaces for the gameplay tables and RPCs.
@@ -124,6 +134,7 @@ Status values:
 9. Synced docs/specs to the delivered runtime and moved Phase 3 forward to additional gameplay modes rather than the first foundation slice.
 
 ## Phase 3 Slice 2 Delivered
+
 1. Added live `guess_date` gameplay alongside the existing `daily_question` mode.
 2. Added memory-backed guess-date round creation, one locked ISO date guess per active partner, and both-partner reveal behavior.
 3. Replaced `/games/guess-date` with a live mode flow and updated `/games` to show daily-question plus guess-date status.
@@ -132,6 +143,7 @@ Status values:
 6. Synced product and engineering docs for `Phase 3 Slice 2: Live Guess Date`.
 
 ## Phase 3 Slice 3 Delivered
+
 1. Added live `trivia` gameplay alongside the existing `daily_question` and `guess_date` modes.
 2. Added memory-location trivia round creation, stable answer options, one locked option per active partner, and both-partner correctness reveal behavior.
 3. Replaced `/games/trivia` with a live mode flow and updated `/games` to show daily-question, guess-date, and trivia status.
@@ -140,16 +152,19 @@ Status values:
 6. Synced product and engineering docs so `Phase 3 Slice 3: Live Trivia` is the latest implemented backend slice.
 
 ## Recommended Next Order
+
 1. Choose a hardening slice or another explicit live Phase 3 gameplay candidate.
 2. Revisit travel-map depth only after the gameplay and analytics contract is stable.
 3. Deprecated `/chat` scaffolding removal is complete.
 
 ## Risks And Deferred Items
+
 - There is still only one shared timezone per couple; no per-user timezone override exists.
 - Albums currently allow one album per trip only; captions, reordering, removal, and multi-album-per-trip remain deferred.
 - The atlas is provider-free; coordinates, route polylines, and provider-backed geographic tiles remain deferred.
 
 ## Phase 3 Carry-Forward
+
 - Deprecated `/chat` cleanup is complete and was maintenance work, not part of the gameplay slices.
 - `/games/[mode]` is live for `daily-question`, `guess-date`, and `trivia`; other game slugs remain shell-only.
 - Additional gameplay modes, leaderboards, sharing, and similarity scoring remain deferred follow-up work.

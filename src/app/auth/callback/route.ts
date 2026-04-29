@@ -1,28 +1,24 @@
-import type { EmailOtpType } from "@supabase/supabase-js";
-import { hasLocale } from "next-intl";
-import { type NextRequest, NextResponse } from "next/server";
-import { routing, type Locale } from "@/i18n/routing";
-import { normalizeAuthRedirectPath } from "@/lib/auth/redirect-path";
-import { getLocaleFromPathname, toLocalizedPathname } from "@/lib/i18n/pathname";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { NextRequest } from 'next/server';
+import type { Locale } from '@/i18n/routing';
+import type { EmailOtpType } from '@supabase/supabase-js';
+
+import { NextResponse } from 'next/server';
+
+import { hasLocale } from 'next-intl';
+
+import { routing } from '@/i18n/routing';
+import { normalizeAuthRedirectPath } from '@/lib/auth/redirect-path';
+import { getLocaleFromPathname, toLocalizedPathname } from '@/lib/i18n/pathname';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const isSupportedOtpType = (value: string): value is EmailOtpType =>
-  [
-    "email",
-    "recovery",
-    "invite",
-    "email_change",
-    "signup",
-    "magiclink",
-  ].includes(value);
+  ['email', 'recovery', 'invite', 'email_change', 'signup', 'magiclink'].includes(value);
 
-const DEFAULT_LOCALE_COOKIE_NAME = "NEXT_LOCALE";
+const DEFAULT_LOCALE_COOKIE_NAME = 'NEXT_LOCALE';
 
 const resolveFallbackLocale = (request: NextRequest): Locale => {
   const configuredCookieName =
-    typeof routing.localeCookie === "object"
-      ? routing.localeCookie.name
-      : undefined;
+    typeof routing.localeCookie === 'object' ? routing.localeCookie.name : undefined;
   const localeCookieName = configuredCookieName ?? DEFAULT_LOCALE_COOKIE_NAME;
   const localeFromCookie = request.cookies.get(localeCookieName)?.value;
 
@@ -35,14 +31,14 @@ const resolveFallbackLocale = (request: NextRequest): Locale => {
 
 interface PendingCookie {
   readonly name: string;
-  readonly options?: Parameters<NextResponse["cookies"]["set"]>[2];
+  readonly options?: Parameters<NextResponse['cookies']['set']>[2];
   readonly value: string;
 }
 
 const getRedirectOrigin = (request: NextRequest, requestUrl: URL): string => {
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const host = forwardedHost ?? request.headers.get("host");
-  const protocol = request.headers.get("x-forwarded-proto") ?? requestUrl.protocol.replace(":", "");
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const host = forwardedHost ?? request.headers.get('host');
+  const protocol = request.headers.get('x-forwarded-proto') ?? requestUrl.protocol.replace(':', '');
 
   return host ? `${protocol}://${host}` : requestUrl.origin;
 };
@@ -65,16 +61,13 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const requestUrl = new URL(request.url);
   const redirectOrigin = getRedirectOrigin(request, requestUrl);
   const fallbackLocale = resolveFallbackLocale(request);
-  const fallbackPath = toLocalizedPathname(fallbackLocale, "/home");
-  const authCode = requestUrl.searchParams.get("code");
-  const tokenHash = requestUrl.searchParams.get("token_hash");
-  const nextPath = normalizeAuthRedirectPath(
-    requestUrl.searchParams.get("next"),
-    fallbackPath,
-  );
+  const fallbackPath = toLocalizedPathname(fallbackLocale, '/home');
+  const authCode = requestUrl.searchParams.get('code');
+  const tokenHash = requestUrl.searchParams.get('token_hash');
+  const nextPath = normalizeAuthRedirectPath(requestUrl.searchParams.get('next'), fallbackPath);
   const redirectLocale = getLocaleFromPathname(nextPath) ?? fallbackLocale;
-  const loginPath = toLocalizedPathname(redirectLocale, "/login");
-  const otpType = requestUrl.searchParams.get("type");
+  const loginPath = toLocalizedPathname(redirectLocale, '/login');
+  const otpType = requestUrl.searchParams.get('type');
   const pendingCookies: PendingCookie[] = [];
   const supabase = await createSupabaseServerClient({
     cookieOptions: {

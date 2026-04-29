@@ -1,5 +1,6 @@
-import type { ReactElement, ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement, ReactNode } from 'react';
+
+import { cn } from '@/lib/utils/cn';
 
 interface ListRowProps {
   readonly action?: ReactNode;
@@ -18,7 +19,7 @@ export const ListRow = ({
 }: ListRowProps): ReactElement => (
   <div
     className={cn(
-      "flex min-h-16 items-center justify-between gap-3 rounded-[1.4rem] border border-white/66 bg-white/64 px-4 py-3 shadow-whisper backdrop-blur-md",
+      'flex min-h-16 items-center justify-between gap-3 rounded-[1.4rem] border border-white/66 bg-white/64 px-4 py-3 shadow-whisper backdrop-blur-md',
       className,
     )}
   >

@@ -1,15 +1,18 @@
-"use client";
+'use client';
 
-import { parseISO } from "date-fns";
-import { motion, useReducedMotion } from "motion/react";
-import Image from "next/image";
-import { useFormatter, useTranslations } from "next-intl";
-import type { ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement } from 'react';
 
-type MemoryCardVariant = "anniversary" | "compact" | "featured";
+import Image from 'next/image';
+
+import { parseISO } from 'date-fns';
+import { motion, useReducedMotion } from 'motion/react';
+import { useFormatter, useTranslations } from 'next-intl';
+
+import { Badge } from '@/components/ui/badge';
+import { Link } from '@/i18n/navigation';
+import { cn } from '@/lib/utils/cn';
+
+type MemoryCardVariant = 'anniversary' | 'compact' | 'featured';
 
 export interface MemoryCardProps {
   readonly className?: string;
@@ -17,21 +20,21 @@ export interface MemoryCardProps {
   readonly href: string;
   readonly imageUrl?: string | null;
   readonly locationName?: string | null;
-  readonly mediaType?: "image" | "video" | null;
+  readonly mediaType?: 'image' | 'video' | null;
   readonly note?: string | null;
   readonly timeZone: string;
   readonly variant?: MemoryCardVariant;
 }
 
 const getMemoryLabel = (
-  mediaType: "image" | "video" | null | undefined,
-  t: ReturnType<typeof useTranslations<"ui.memoryCard">>,
+  mediaType: 'image' | 'video' | null | undefined,
+  t: ReturnType<typeof useTranslations<'ui.memoryCard'>>,
 ): string | null => {
   switch (mediaType) {
-    case "image":
-      return t("labels.image");
-    case "video":
-      return t("labels.video");
+    case 'image':
+      return t('labels.image');
+    case 'video':
+      return t('labels.video');
     default:
       return null;
   }
@@ -39,16 +42,16 @@ const getMemoryLabel = (
 
 const getMemoryPlaceholder = (
   variant: MemoryCardVariant,
-  t: ReturnType<typeof useTranslations<"ui.memoryCard">>,
+  t: ReturnType<typeof useTranslations<'ui.memoryCard'>>,
 ): string => {
   switch (variant) {
-    case "anniversary":
-      return t("placeholders.anniversary");
-    case "featured":
-      return t("placeholders.featured");
-    case "compact":
+    case 'anniversary':
+      return t('placeholders.anniversary');
+    case 'featured':
+      return t('placeholders.featured');
+    case 'compact':
     default:
-      return t("placeholders.compact");
+      return t('placeholders.compact');
   }
 };
 
@@ -61,26 +64,26 @@ export const MemoryCard = ({
   mediaType,
   note,
   timeZone,
-  variant = "compact",
+  variant = 'compact',
 }: MemoryCardProps): ReactElement => {
   const reduceMotion = useReducedMotion();
   const format = useFormatter();
-  const t = useTranslations("ui.memoryCard");
+  const t = useTranslations('ui.memoryCard');
   const date = parseISO(happenedAt);
   const isValidDate = !Number.isNaN(date.getTime());
   const mediaLabel = getMemoryLabel(mediaType, t);
   const noteText = note?.trim() ? note : getMemoryPlaceholder(variant, t);
   const monthYearLabel = isValidDate
-    ? format.dateTime(date, { month: "long", timeZone, year: "numeric" })
-    : t("fallbackDate");
-  const dayLabel = isValidDate ? format.dateTime(date, { day: "numeric", timeZone }) : "--";
+    ? format.dateTime(date, { month: 'long', timeZone, year: 'numeric' })
+    : t('fallbackDate');
+  const dayLabel = isValidDate ? format.dateTime(date, { day: 'numeric', timeZone }) : '--';
   const weekdayLabel = isValidDate
-    ? format.dateTime(date, { timeZone, weekday: "long" })
-    : t("fallbackDate");
+    ? format.dateTime(date, { timeZone, weekday: 'long' })
+    : t('fallbackDate');
   const fullDateLabel = isValidDate
-    ? format.dateTime(date, { day: "numeric", month: "short", timeZone, year: "numeric" })
-    : t("fallbackDate");
-  const isFeatureVariant = variant !== "compact";
+    ? format.dateTime(date, { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
+    : t('fallbackDate');
+  const isFeatureVariant = variant !== 'compact';
 
   return (
     <motion.article
@@ -89,8 +92,8 @@ export const MemoryCard = ({
     >
       <Link
         className={cn(
-          "group relative block overflow-hidden rounded-[var(--radius-memory)] border border-white/72 bg-[rgba(255,248,241,0.88)] shadow-cloud backdrop-blur-xl",
-          variant === "compact" ? "p-4 md:p-5" : "p-5 md:p-6",
+          'group relative block overflow-hidden rounded-[var(--radius-memory)] border border-white/72 bg-[rgba(255,248,241,0.88)] shadow-cloud backdrop-blur-xl',
+          variant === 'compact' ? 'p-4 md:p-5' : 'p-5 md:p-6',
           className,
         )}
         href={href}
@@ -109,25 +112,25 @@ export const MemoryCard = ({
           </div>
           <div
             className={cn(
-              "overflow-hidden rounded-[1.6rem]",
-              isFeatureVariant ? "aspect-[4/3]" : "aspect-[5/3]",
+              'overflow-hidden rounded-[1.6rem]',
+              isFeatureVariant ? 'aspect-[4/3]' : 'aspect-[5/3]',
             )}
           >
             {imageUrl ? (
               <div className="relative h-full w-full">
                 <Image
-                  alt={t("photoAlt")}
+                  alt={t('photoAlt')}
                   className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   fill
-                  sizes={variant === "compact" ? "(min-width: 1024px) 30vw, 90vw" : "100vw"}
+                  sizes={variant === 'compact' ? '(min-width: 1024px) 30vw, 90vw' : '100vw'}
                   src={imageUrl}
                   unoptimized
                 />
               </div>
             ) : (
               <div className="ui-gradient-memory flex h-full items-end p-4">
-                <div className="rounded-pill border border-white/65 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-                  {mediaLabel ?? t("journalNote")}
+                <div className="rounded-pill border border-white/65 bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+                  {mediaLabel ?? t('journalNote')}
                 </div>
               </div>
             )}
@@ -135,15 +138,15 @@ export const MemoryCard = ({
           <div className="space-y-3">
             <p
               className={cn(
-                "text-foreground",
+                'text-foreground',
                 isFeatureVariant
-                  ? "font-display text-[1.35rem] leading-[1.32] tracking-[-0.02em]"
-                  : "text-sm leading-relaxed",
+                  ? 'font-display text-[1.35rem] leading-[1.32] tracking-[-0.02em]'
+                  : 'text-sm leading-relaxed',
               )}
             >
               {noteText}
             </p>
-            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.08em] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.08em] text-muted-foreground uppercase">
               <span>{fullDateLabel}</span>
               {locationName ? (
                 <>
@@ -160,5 +163,8 @@ export const MemoryCard = ({
 };
 
 export const FeaturedMemoryObject = (props: MemoryCardProps): ReactElement => (
-  <MemoryCard {...props} variant="featured" />
+  <MemoryCard
+    {...props}
+    variant="featured"
+  />
 );

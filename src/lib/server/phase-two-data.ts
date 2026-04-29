@@ -1,23 +1,25 @@
-import { compareAsc, parseISO } from "date-fns";
-import { z } from "zod";
-import type { CoupleContext } from "@/lib/server/couple-context";
-import { signMemoryMediaStorageItems } from "@/lib/server/memory-media";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/database.types";
+import type { CoupleContext } from '@/lib/server/couple-context';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { compareAsc, parseISO } from 'date-fns';
+import { z } from 'zod';
+
+import { signMemoryMediaStorageItems } from '@/lib/server/memory-media';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   getCurrentDateTokenInTimeZone,
   getDateTokenForInstantInTimeZone,
   getDaysBetweenDateTokens,
   toTimeZoneDateEndExclusiveIso,
   toTimeZoneDateStartIso,
-} from "@/lib/utils/couple-timezone";
+} from '@/lib/utils/couple-timezone';
 
-export type TripStatus = "planned" | "active" | "completed";
+export type TripStatus = 'planned' | 'active' | 'completed';
 
 export interface CountdownCard {
   readonly daysFromToday: number;
   readonly id: string;
-  readonly kind: Database["public"]["Enums"]["countdown_kind"];
+  readonly kind: Database['public']['Enums']['countdown_kind'];
   readonly note: string | null;
   readonly targetAt: string;
   readonly title: string;
@@ -30,7 +32,7 @@ export interface CountdownsPageData {
 
 export interface LockedFutureNoteCard {
   readonly id: string;
-  readonly status: "locked";
+  readonly status: 'locked';
   readonly title: string;
   readonly unlockAt: string;
 }
@@ -38,7 +40,7 @@ export interface LockedFutureNoteCard {
 export interface UnlockedFutureNoteCard {
   readonly body: string | null;
   readonly id: string;
-  readonly status: "unlocked";
+  readonly status: 'unlocked';
   readonly title: string;
   readonly unlockAt: string;
 }
@@ -85,7 +87,7 @@ export interface MapPageData {
 }
 
 export interface AlbumSummary {
-  readonly coverMediaType: Database["public"]["Enums"]["media_type"] | null;
+  readonly coverMediaType: Database['public']['Enums']['media_type'] | null;
   readonly coverSignedUrl: string | null;
   readonly description: string | null;
   readonly id: string;
@@ -102,13 +104,13 @@ export interface AlbumMediaCandidate {
   readonly happenedAt: string;
   readonly id: string;
   readonly locationName: string | null;
-  readonly mediaType: Database["public"]["Enums"]["media_type"];
+  readonly mediaType: Database['public']['Enums']['media_type'];
   readonly note: string | null;
   readonly signedUrl: string | null;
 }
 
 export interface TripDetailAlbumSummary {
-  readonly coverMediaType: Database["public"]["Enums"]["media_type"] | null;
+  readonly coverMediaType: Database['public']['Enums']['media_type'] | null;
   readonly coverSignedUrl: string | null;
   readonly description: string | null;
   readonly id: string;
@@ -139,24 +141,20 @@ const compareDateTokensAscending = (left: string, right: string): number =>
 const compareDateTokensDescending = (left: string, right: string): number =>
   compareAsc(parseISO(right), parseISO(left));
 
-const getTripStatus = (
-  startDate: string,
-  endDate: string,
-  todayDateToken: string,
-): TripStatus => {
+const getTripStatus = (startDate: string, endDate: string, todayDateToken: string): TripStatus => {
   if (todayDateToken < startDate) {
-    return "planned";
+    return 'planned';
   }
 
   if (todayDateToken > endDate) {
-    return "completed";
+    return 'completed';
   }
 
-  return "active";
+  return 'active';
 };
 
 const toCountdownCard = (
-  row: Database["public"]["Tables"]["countdowns"]["Row"],
+  row: Database['public']['Tables']['countdowns']['Row'],
   todayDateToken: string,
   timeZone: string,
 ): CountdownCard => {
@@ -173,7 +171,7 @@ const toCountdownCard = (
 };
 
 const toTripCard = (
-  row: Database["public"]["Tables"]["trips"]["Row"],
+  row: Database['public']['Tables']['trips']['Row'],
   todayDateToken: string,
 ): TripCard => ({
   endDate: row.end_date,
@@ -185,10 +183,10 @@ const toTripCard = (
 });
 
 const toAlbumMediaCandidate = (
-  media: Database["public"]["Tables"]["memory_media"]["Row"] & {
+  media: Database['public']['Tables']['memory_media']['Row'] & {
     readonly signedUrl: string | null;
   },
-  memory: Database["public"]["Tables"]["memories"]["Row"],
+  memory: Database['public']['Tables']['memories']['Row'],
 ): AlbumMediaCandidate => ({
   happenedAt: memory.happened_at,
   id: media.id,
@@ -199,7 +197,7 @@ const toAlbumMediaCandidate = (
 });
 
 const toVisitedPlaceCard = (
-  row: Database["public"]["Tables"]["visited_places"]["Row"],
+  row: Database['public']['Tables']['visited_places']['Row'],
 ): VisitedPlaceCard => ({
   id: row.id,
   note: row.note,
@@ -207,29 +205,25 @@ const toVisitedPlaceCard = (
   visitedOn: row.visited_on,
 });
 
-const toVisitedPlaceSummaryCard = (
-  visitedPlace: TripVisitedPlaceCard,
-): VisitedPlaceCard => ({
+const toVisitedPlaceSummaryCard = (visitedPlace: TripVisitedPlaceCard): VisitedPlaceCard => ({
   id: visitedPlace.id,
   note: visitedPlace.note,
   title: visitedPlace.title,
   visitedOn: visitedPlace.visitedOn,
 });
 
-const sortAlbumMediaCandidates = (
-  left: AlbumMediaCandidate,
-  right: AlbumMediaCandidate,
-): number => compareAsc(parseISO(right.happenedAt), parseISO(left.happenedAt));
+const sortAlbumMediaCandidates = (left: AlbumMediaCandidate, right: AlbumMediaCandidate): number =>
+  compareAsc(parseISO(right.happenedAt), parseISO(left.happenedAt));
 
 export const getCountdownsPageData = async (
   context: CoupleContext,
 ): Promise<CountdownsPageData> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("countdowns")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .order("target_at", { ascending: true });
+    .from('countdowns')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .order('target_at', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
@@ -253,24 +247,22 @@ export const getFutureNotesPageData = async (
 ): Promise<FutureNotesPageData> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("future_notes")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .order("unlock_at", { ascending: true });
+    .from('future_notes')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .order('unlock_at', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
   }
 
   const now = new Date();
-  const unlockedMetadata = data.filter(
-    (note) => compareAsc(parseISO(note.unlock_at), now) <= 0,
-  );
+  const unlockedMetadata = data.filter((note) => compareAsc(parseISO(note.unlock_at), now) <= 0);
   const locked = data
     .filter((note) => compareAsc(parseISO(note.unlock_at), now) > 0)
     .map<LockedFutureNoteCard>((note) => ({
       id: note.id,
-      status: "locked",
+      status: 'locked',
       title: note.title,
       unlockAt: note.unlock_at,
     }));
@@ -278,7 +270,7 @@ export const getFutureNotesPageData = async (
   const unlockedIds = unlockedMetadata.map((note) => note.id);
   const unlockedIdSet = new Set(unlockedIds);
   const unlockedContentsQuery = unlockedIds.length
-    ? await supabase.rpc("get_unlocked_future_note_contents", {
+    ? await supabase.rpc('get_unlocked_future_note_contents', {
         target_couple_id: context.coupleId,
       })
     : { data: [], error: null };
@@ -300,7 +292,7 @@ export const getFutureNotesPageData = async (
       .map<UnlockedFutureNoteCard>((note) => ({
         body: bodyByNoteId.get(note.id) ?? null,
         id: note.id,
-        status: "unlocked",
+        status: 'unlocked',
         title: note.title,
         unlockAt: note.unlock_at,
       }))
@@ -308,15 +300,13 @@ export const getFutureNotesPageData = async (
   };
 };
 
-export const getTripsPageData = async (
-  context: CoupleContext,
-): Promise<TripsPageData> => {
+export const getTripsPageData = async (context: CoupleContext): Promise<TripsPageData> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("trips")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .order("start_date", { ascending: true });
+    .from('trips')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .order('start_date', { ascending: true });
 
   if (error) {
     throw new Error(error.message);
@@ -327,28 +317,26 @@ export const getTripsPageData = async (
 
   return {
     active: trips
-      .filter((trip) => trip.status === "active")
+      .filter((trip) => trip.status === 'active')
       .sort((left, right) => compareDateTokensAscending(left.endDate, right.endDate)),
     completed: trips
-      .filter((trip) => trip.status === "completed")
+      .filter((trip) => trip.status === 'completed')
       .sort((left, right) => compareDateTokensDescending(left.endDate, right.endDate)),
     planned: trips
-      .filter((trip) => trip.status === "planned")
+      .filter((trip) => trip.status === 'planned')
       .sort((left, right) => compareDateTokensAscending(left.startDate, right.startDate)),
   };
 };
 
-export const getMapPageData = async (
-  context: CoupleContext,
-): Promise<MapPageData> => {
+export const getMapPageData = async (context: CoupleContext): Promise<MapPageData> => {
   const supabase = await createSupabaseServerClient();
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: visitedPlaceRows, error } = await supabase
-    .from("visited_places")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .order("visited_on", { ascending: false })
-    .order("created_at", { ascending: false });
+    .from('visited_places')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .order('visited_on', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -363,9 +351,9 @@ export const getMapPageData = async (
 
   const tripIds = Array.from(new Set(visitedPlaceRows.map((visitedPlace) => visitedPlace.trip_id)));
   const { data: trips, error: tripsError } = await supabase
-    .from("trips")
-    .select("*")
-    .in("id", tripIds);
+    .from('trips')
+    .select('*')
+    .in('id', tripIds);
 
   if (tripsError) {
     throw new Error(tripsError.message);
@@ -377,7 +365,9 @@ export const getMapPageData = async (
   const visitedPlaces = visitedPlaceRows.map<TripVisitedPlaceCard>((visitedPlace) => {
     const trip = tripById.get(visitedPlace.trip_id);
     if (!trip) {
-      throw new Error(`Trip ${visitedPlace.trip_id} not found for visited place ${visitedPlace.id}.`);
+      throw new Error(
+        `Trip ${visitedPlace.trip_id} not found for visited place ${visitedPlace.id}.`,
+      );
     }
 
     return {
@@ -408,16 +398,14 @@ export const getMapPageData = async (
   };
 };
 
-export const getAlbumsPageData = async (
-  context: CoupleContext,
-): Promise<AlbumsPageData> => {
+export const getAlbumsPageData = async (context: CoupleContext): Promise<AlbumsPageData> => {
   const supabase = await createSupabaseServerClient();
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: albums, error } = await supabase
-    .from("albums")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .order("created_at", { ascending: false });
+    .from('albums')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -433,11 +421,11 @@ export const getAlbumsPageData = async (
   const tripIds = albums.map((album) => album.trip_id);
   const [albumItemsQuery, tripsQuery] = await Promise.all([
     supabase
-      .from("album_items")
-      .select("*")
-      .in("album_id", albumIds)
-      .order("position", { ascending: true }),
-    supabase.from("trips").select("*").in("id", tripIds),
+      .from('album_items')
+      .select('*')
+      .in('album_id', albumIds)
+      .order('position', { ascending: true }),
+    supabase.from('trips').select('*').in('id', tripIds),
   ]);
 
   if (albumItemsQuery.error) {
@@ -448,7 +436,10 @@ export const getAlbumsPageData = async (
     throw new Error(tripsQuery.error.message);
   }
 
-  const firstAlbumItemByAlbumId = new Map<string, Database["public"]["Tables"]["album_items"]["Row"]>();
+  const firstAlbumItemByAlbumId = new Map<
+    string,
+    Database['public']['Tables']['album_items']['Row']
+  >();
   const itemCountByAlbumId = new Map<string, number>();
   albumItemsQuery.data.forEach((item) => {
     if (!firstAlbumItemByAlbumId.has(item.album_id)) {
@@ -462,7 +453,7 @@ export const getAlbumsPageData = async (
     (item) => item.memory_media_id,
   );
   const coverMediaQuery = coverMediaIds.length
-    ? await supabase.from("memory_media").select("*").in("id", coverMediaIds)
+    ? await supabase.from('memory_media').select('*').in('id', coverMediaIds)
     : { data: [], error: null };
 
   if (coverMediaQuery.error) {
@@ -470,9 +461,7 @@ export const getAlbumsPageData = async (
   }
 
   const signedCoverMedia = await signMemoryMediaStorageItems(coverMediaQuery.data);
-  const coverMediaById = new Map(
-    signedCoverMedia.map((media) => [media.id, media] as const),
-  );
+  const coverMediaById = new Map(signedCoverMedia.map((media) => [media.id, media] as const));
   const tripById = new Map(
     tripsQuery.data.map((trip) => [trip.id, toTripCard(trip, todayDateToken)] as const),
   );
@@ -486,7 +475,7 @@ export const getAlbumsPageData = async (
 
       const firstAlbumItem = firstAlbumItemByAlbumId.get(album.id);
       const coverMedia = firstAlbumItem
-        ? coverMediaById.get(firstAlbumItem.memory_media_id) ?? null
+        ? (coverMediaById.get(firstAlbumItem.memory_media_id) ?? null)
         : null;
 
       return {
@@ -514,10 +503,10 @@ export const getTripDetailData = async (
   const supabase = await createSupabaseServerClient();
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: trips, error } = await supabase
-    .from("trips")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .eq("id", parsedTripId.data)
+    .from('trips')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .eq('id', parsedTripId.data)
     .limit(1);
 
   if (error) {
@@ -531,25 +520,25 @@ export const getTripDetailData = async (
 
   const [albumQuery, memoriesQuery, visitedPlacesQuery] = await Promise.all([
     supabase
-      .from("albums")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .eq("trip_id", trip.id)
+      .from('albums')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .eq('trip_id', trip.id)
       .limit(1),
     supabase
-      .from("memories")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .gte("happened_at", toTimeZoneDateStartIso(trip.start_date, context.timezone))
-      .lt("happened_at", toTimeZoneDateEndExclusiveIso(trip.end_date, context.timezone))
-      .order("happened_at", { ascending: false }),
+      .from('memories')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .gte('happened_at', toTimeZoneDateStartIso(trip.start_date, context.timezone))
+      .lt('happened_at', toTimeZoneDateEndExclusiveIso(trip.end_date, context.timezone))
+      .order('happened_at', { ascending: false }),
     supabase
-      .from("visited_places")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .eq("trip_id", trip.id)
-      .order("visited_on", { ascending: true })
-      .order("created_at", { ascending: true }),
+      .from('visited_places')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .eq('trip_id', trip.id)
+      .order('visited_on', { ascending: true })
+      .order('created_at', { ascending: true }),
   ]);
 
   if (albumQuery.error) {
@@ -568,10 +557,10 @@ export const getTripDetailData = async (
   const memoryIds = memoriesQuery.data.map((memory) => memory.id);
   const eligibleMediaQuery = memoryIds.length
     ? await supabase
-        .from("memory_media")
-        .select("*")
-        .in("memory_id", memoryIds)
-        .order("created_at", { ascending: true })
+        .from('memory_media')
+        .select('*')
+        .in('memory_id', memoryIds)
+        .order('created_at', { ascending: true })
     : { data: [], error: null };
 
   if (eligibleMediaQuery.error) {
@@ -580,10 +569,10 @@ export const getTripDetailData = async (
 
   const albumItemsQuery = album
     ? await supabase
-        .from("album_items")
-        .select("*")
-        .eq("album_id", album.id)
-        .order("position", { ascending: true })
+        .from('album_items')
+        .select('*')
+        .eq('album_id', album.id)
+        .order('position', { ascending: true })
     : { data: [], error: null };
 
   if (albumItemsQuery.error) {
@@ -591,9 +580,7 @@ export const getTripDetailData = async (
   }
 
   const signedEligibleMedia = await signMemoryMediaStorageItems(eligibleMediaQuery.data);
-  const eligibleMediaById = new Map(
-    signedEligibleMedia.map((media) => [media.id, media] as const),
-  );
+  const eligibleMediaById = new Map(signedEligibleMedia.map((media) => [media.id, media] as const));
   const memoryById = new Map(memoriesQuery.data.map((memory) => [memory.id, memory] as const));
   const attachedMediaIds = new Set(albumItemsQuery.data.map((item) => item.memory_media_id));
   const availableMedia = signedEligibleMedia
@@ -610,7 +597,7 @@ export const getTripDetailData = async (
 
   const firstAlbumItem = albumItemsQuery.data[0] ?? null;
   const coverMedia = firstAlbumItem
-    ? eligibleMediaById.get(firstAlbumItem.memory_media_id) ?? null
+    ? (eligibleMediaById.get(firstAlbumItem.memory_media_id) ?? null)
     : null;
 
   return {
@@ -642,10 +629,10 @@ export const getAlbumDetailData = async (
   const supabase = await createSupabaseServerClient();
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
   const { data: albums, error } = await supabase
-    .from("albums")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .eq("id", parsedAlbumId.data)
+    .from('albums')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .eq('id', parsedAlbumId.data)
     .limit(1);
 
   if (error) {
@@ -659,16 +646,16 @@ export const getAlbumDetailData = async (
 
   const [tripQuery, albumItemsQuery] = await Promise.all([
     supabase
-      .from("trips")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .eq("id", album.trip_id)
+      .from('trips')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .eq('id', album.trip_id)
       .limit(1),
     supabase
-      .from("album_items")
-      .select("*")
-      .eq("album_id", album.id)
-      .order("position", { ascending: true }),
+      .from('album_items')
+      .select('*')
+      .eq('album_id', album.id)
+      .order('position', { ascending: true }),
   ]);
 
   if (tripQuery.error) {
@@ -686,7 +673,7 @@ export const getAlbumDetailData = async (
 
   const mediaIds = albumItemsQuery.data.map((item) => item.memory_media_id);
   const mediaQuery = mediaIds.length
-    ? await supabase.from("memory_media").select("*").in("id", mediaIds)
+    ? await supabase.from('memory_media').select('*').in('id', mediaIds)
     : { data: [], error: null };
 
   if (mediaQuery.error) {
@@ -695,7 +682,7 @@ export const getAlbumDetailData = async (
 
   const memoryIds = mediaQuery.data.map((media) => media.memory_id);
   const memoriesQuery = memoryIds.length
-    ? await supabase.from("memories").select("*").in("id", memoryIds)
+    ? await supabase.from('memories').select('*').in('id', memoryIds)
     : { data: [], error: null };
 
   if (memoriesQuery.error) {

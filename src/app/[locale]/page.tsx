@@ -1,7 +1,8 @@
-import { redirect } from "@/i18n/navigation";
-import type { ReactElement } from "react";
-import { resolveLocaleFromParams } from "@/i18n/server";
-import { getAuthGateState } from "@/lib/server/couple-context";
+import type { ReactElement } from 'react';
+
+import { redirect } from '@/i18n/navigation';
+import { resolveLocaleFromParams } from '@/i18n/server';
+import { getAuthGateState } from '@/lib/server/couple-context';
 
 interface IndexPageProps {
   readonly params: Promise<{
@@ -9,35 +10,33 @@ interface IndexPageProps {
   }>;
 }
 
-export default async function IndexPage({
-  params,
-}: IndexPageProps): Promise<ReactElement> {
+export default async function IndexPage({ params }: IndexPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
   const state = await getAuthGateState();
 
-  if (state.status === "unauthenticated") {
+  if (state.status === 'unauthenticated') {
     redirect({
-      href: "/login",
+      href: '/login',
       locale,
     });
   }
 
-  if (state.status === "needs_invite") {
+  if (state.status === 'needs_invite') {
     redirect({
-      href: "/accept-invite",
+      href: '/accept-invite',
       locale,
     });
   }
 
-  if (state.status === "needs_onboarding") {
+  if (state.status === 'needs_onboarding') {
     redirect({
-      href: "/onboarding",
+      href: '/onboarding',
       locale,
     });
   }
 
   redirect({
-    href: "/home",
+    href: '/home',
     locale,
   });
 

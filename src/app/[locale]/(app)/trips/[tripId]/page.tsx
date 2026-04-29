@@ -1,13 +1,16 @@
-import { HydrationBoundary } from "@tanstack/react-query";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import type { ReactElement } from "react";
-import { TripDetailClientPage } from "@/app/[locale]/(app)/trips/[tripId]/trip-detail-client-page";
-import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { dehydrateAppQuery } from "@/lib/query/server-prefetch";
-import { getTripDetailAppData } from "@/lib/server/app-data";
-import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
+import type { Metadata } from 'next';
+import type { ReactElement } from 'react';
+
+import { notFound } from 'next/navigation';
+
+import { HydrationBoundary } from '@tanstack/react-query';
+
+import { TripDetailClientPage } from '@/app/[locale]/(app)/trips/[tripId]/trip-detail-client-page';
+import { getRouteMetadata, resolveLocaleFromParams } from '@/i18n/server';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { dehydrateAppQuery } from '@/lib/query/server-prefetch';
+import { getTripDetailAppData } from '@/lib/server/app-data';
+import { getReadyCoupleContextOrRedirect } from '@/lib/server/couple-context';
 
 interface TripDetailPageProps {
   readonly params: Promise<{
@@ -16,9 +19,8 @@ interface TripDetailPageProps {
   }>;
 }
 
-export const generateMetadata = async ({
-  params,
-}: TripDetailPageProps): Promise<Metadata> => getRouteMetadata(params, "tripDetail");
+export const generateMetadata = async ({ params }: TripDetailPageProps): Promise<Metadata> =>
+  getRouteMetadata(params, 'tripDetail');
 
 export default async function TripDetailPage({
   params,

@@ -1,7 +1,8 @@
-import type { ReactElement, ReactNode } from "react";
-import { PageHeader } from "@/components/layout/page-header";
-import { SectionStack } from "@/components/layout/section-stack";
-import { PageReveal } from "@/components/ui/page-reveal";
+import type { ReactElement, ReactNode } from 'react';
+
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionStack } from '@/components/layout/section-stack';
+import { PageReveal } from '@/components/ui/page-reveal';
 
 interface ShellPageProps {
   readonly action?: ReactNode;

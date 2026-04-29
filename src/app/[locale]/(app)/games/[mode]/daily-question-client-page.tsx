@@ -1,48 +1,50 @@
-"use client";
+'use client';
 
-import { Sparkles } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { ReactElement } from "react";
-import { GenerateDailyQuestionForm } from "@/components/forms/generate-daily-question-form";
-import { SubmitDailyQuestionAnswerForm } from "@/components/forms/submit-daily-question-answer-form";
-import { ShellPage } from "@/components/layout/shell-page";
-import { QueryErrorState, QueryLoadingState } from "@/components/query/query-status";
-import { Badge } from "@/components/ui/badge";
-import { PageReveal } from "@/components/ui/page-reveal";
-import { SectionCard } from "@/components/ui/section-card";
-import { Link } from "@/i18n/navigation";
-import { useI18n } from "@/hooks/useI18n";
-import { appQueryFetchers } from "@/lib/query/app-query-fetchers";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
+import type { ReactElement } from 'react';
+
+import { useQuery } from '@tanstack/react-query';
+import { Sparkles } from 'lucide-react';
+
+import { GenerateDailyQuestionForm } from '@/components/forms/generate-daily-question-form';
+import { SubmitDailyQuestionAnswerForm } from '@/components/forms/submit-daily-question-answer-form';
+import { ShellPage } from '@/components/layout/shell-page';
+import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
+import { Badge } from '@/components/ui/badge';
+import { PageReveal } from '@/components/ui/page-reveal';
+import { SectionCard } from '@/components/ui/section-card';
+import { useI18n } from '@/hooks/useI18n';
+import { Link } from '@/i18n/navigation';
+import { appQueryFetchers } from '@/lib/query/app-query-fetchers';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { parseDateInputValueInTimeZone } from '@/lib/utils/couple-timezone';
 
 const statusTranslationKeyByValue = {
-  completed: "status.completed",
-  not_started: "status.not_started",
-  waiting_for_partner: "status.waiting_for_partner",
-  waiting_for_you: "status.waiting_for_you",
+  completed: 'status.completed',
+  not_started: 'status.not_started',
+  waiting_for_partner: 'status.waiting_for_partner',
+  waiting_for_you: 'status.waiting_for_you',
 } as const;
 
 const statusNoteTranslationKeyByValue = {
-  completed: "statusNote.copy.completed",
-  not_started: "statusNote.copy.not_started",
-  waiting_for_partner: "statusNote.copy.waiting_for_partner",
-  waiting_for_you: "statusNote.copy.waiting_for_you",
+  completed: 'statusNote.copy.completed',
+  not_started: 'statusNote.copy.not_started',
+  waiting_for_partner: 'statusNote.copy.waiting_for_partner',
+  waiting_for_you: 'statusNote.copy.waiting_for_you',
 } as const;
 
 const localeTranslationKeyByValue = {
-  en: "locale.en",
-  vi: "locale.vi",
+  en: 'locale.en',
+  vi: 'locale.vi',
 } as const;
 
 const answerAuthorTranslationKeyByValue = {
-  partner: "answers.partner",
-  viewer: "answers.viewer",
+  partner: 'answers.partner',
+  viewer: 'answers.viewer',
 } as const;
 
 export const DailyQuestionClientPage = (): ReactElement => {
-  const { t: commonT } = useI18n("common");
-  const { format, t: dailyQuestionT } = useI18n("dailyQuestion");
+  const { t: commonT } = useI18n('common');
+  const { format, t: dailyQuestionT } = useI18n('dailyQuestion');
   const query = useQuery({
     queryFn: appQueryFetchers.dailyQuestion,
     queryKey: appQueryKeys.dailyQuestion(),
@@ -52,7 +54,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
       className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
       href="/games"
     >
-      {commonT("backToGames")}
+      {commonT('backToGames')}
     </Link>
   );
 
@@ -60,9 +62,9 @@ export const DailyQuestionClientPage = (): ReactElement => {
     return (
       <ShellPage
         action={action}
-        description={dailyQuestionT("header.description")}
-        eyebrow={dailyQuestionT("header.eyebrow")}
-        title={dailyQuestionT("header.title")}
+        description={dailyQuestionT('header.description')}
+        eyebrow={dailyQuestionT('header.eyebrow')}
+        title={dailyQuestionT('header.title')}
       >
         <QueryLoadingState />
       </ShellPage>
@@ -73,9 +75,9 @@ export const DailyQuestionClientPage = (): ReactElement => {
     return (
       <ShellPage
         action={action}
-        description={dailyQuestionT("header.description")}
-        eyebrow={dailyQuestionT("header.eyebrow")}
-        title={dailyQuestionT("header.title")}
+        description={dailyQuestionT('header.description')}
+        eyebrow={dailyQuestionT('header.eyebrow')}
+        title={dailyQuestionT('header.title')}
       >
         <QueryErrorState onRetry={() => void query.refetch()} />
       </ShellPage>
@@ -85,52 +87,64 @@ export const DailyQuestionClientPage = (): ReactElement => {
   const data = query.data;
   const roundDateLabel = data.round
     ? format.dateTime(parseDateInputValueInTimeZone(data.round.roundDate, data.context.timeZone), {
-        day: "numeric",
-        month: "short",
+        day: 'numeric',
+        month: 'short',
         timeZone: data.context.timeZone,
-        year: "numeric",
+        year: 'numeric',
       })
     : data.todayDateToken;
 
   return (
     <ShellPage
       action={action}
-      description={dailyQuestionT("header.description")}
-      eyebrow={dailyQuestionT("header.eyebrow")}
-      title={dailyQuestionT("header.title")}
+      description={dailyQuestionT('header.description')}
+      eyebrow={dailyQuestionT('header.eyebrow')}
+      title={dailyQuestionT('header.title')}
     >
       <PageReveal delay={0.04}>
-        <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="hero">
+        <SectionCard
+          className="flex flex-col gap-5"
+          padding="comfortable"
+          surface="hero"
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-primary-foreground/80">
-                <Sparkles aria-hidden="true" className="size-4" strokeWidth={2.2} />
-                <p className="ui-meta text-primary-foreground/80">{dailyQuestionT("round.eyebrow")}</p>
+                <Sparkles
+                  aria-hidden="true"
+                  className="size-4"
+                  strokeWidth={2.2}
+                />
+                <p className="ui-meta text-primary-foreground/80">
+                  {dailyQuestionT('round.eyebrow')}
+                </p>
               </div>
               <h2 className="font-display text-[2rem] tracking-[-0.03em] text-primary-foreground">
-                {data.round ? dailyQuestionT("round.title") : dailyQuestionT("intro.title")}
+                {data.round ? dailyQuestionT('round.title') : dailyQuestionT('intro.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/82">
                 {data.round
-                  ? dailyQuestionT("round.description")
-                  : dailyQuestionT("intro.description")}
+                  ? dailyQuestionT('round.description')
+                  : dailyQuestionT('intro.description')}
               </p>
             </div>
             <Badge variant="primary">
-              {dailyQuestionT(statusTranslationKeyByValue[data.round?.status ?? "not_started"])}
+              {dailyQuestionT(statusTranslationKeyByValue[data.round?.status ?? 'not_started'])}
             </Badge>
           </div>
 
           {data.round ? (
             <div className="space-y-4 rounded-[1.7rem] border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
-              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.08em] text-primary-foreground/75">
-                <span>{dailyQuestionT("round.date", { date: roundDateLabel })}</span>
+              <div className="flex flex-wrap items-center gap-3 text-xs tracking-[0.08em] text-primary-foreground/75 uppercase">
+                <span>{dailyQuestionT('round.date', { date: roundDateLabel })}</span>
                 <span>
-                  {dailyQuestionT("round.locale", {
+                  {dailyQuestionT('round.locale', {
                     locale: dailyQuestionT(localeTranslationKeyByValue[data.round.promptLocale]),
                   })}
                 </span>
-                <span>{dailyQuestionT("round.answerCount", { count: data.round.answerCount })}</span>
+                <span>
+                  {dailyQuestionT('round.answerCount', { count: data.round.answerCount })}
+                </span>
               </div>
               <p className="font-display text-[2rem] leading-tight tracking-[-0.03em] text-primary-foreground">
                 {data.round.promptText}
@@ -144,14 +158,18 @@ export const DailyQuestionClientPage = (): ReactElement => {
 
       {data.round && !data.round.viewerHasAnswered ? (
         <PageReveal delay={0.08}>
-          <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="glass">
+          <SectionCard
+            className="flex flex-col gap-5"
+            padding="comfortable"
+            surface="glass"
+          >
             <div className="space-y-2">
-              <p className="ui-meta">{dailyQuestionT("composer.eyebrow")}</p>
+              <p className="ui-meta">{dailyQuestionT('composer.eyebrow')}</p>
               <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-                {dailyQuestionT("composer.title")}
+                {dailyQuestionT('composer.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                {dailyQuestionT("composer.description")}
+                {dailyQuestionT('composer.description')}
               </p>
             </div>
             <SubmitDailyQuestionAnswerForm roundId={data.round.id} />
@@ -161,13 +179,17 @@ export const DailyQuestionClientPage = (): ReactElement => {
 
       {data.round && data.round.viewerHasAnswered && !data.round.revealAnswers ? (
         <PageReveal delay={0.12}>
-          <SectionCard className="flex flex-col gap-3" padding="comfortable" surface="paper">
-            <p className="ui-meta">{dailyQuestionT("pending.eyebrow")}</p>
+          <SectionCard
+            className="flex flex-col gap-3"
+            padding="comfortable"
+            surface="paper"
+          >
+            <p className="ui-meta">{dailyQuestionT('pending.eyebrow')}</p>
             <h2 className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-              {dailyQuestionT("pending.title")}
+              {dailyQuestionT('pending.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              {dailyQuestionT("pending.viewerLocked")}
+              {dailyQuestionT('pending.viewerLocked')}
             </p>
           </SectionCard>
         </PageReveal>
@@ -177,12 +199,12 @@ export const DailyQuestionClientPage = (): ReactElement => {
         <PageReveal delay={0.16}>
           <section className="flex flex-col gap-4">
             <div className="space-y-2">
-              <p className="ui-meta">{dailyQuestionT("reveal.eyebrow")}</p>
+              <p className="ui-meta">{dailyQuestionT('reveal.eyebrow')}</p>
               <h2 className="font-display text-[1.9rem] tracking-[-0.03em] text-foreground">
-                {dailyQuestionT("reveal.title")}
+                {dailyQuestionT('reveal.title')}
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                {dailyQuestionT("reveal.description")}
+                {dailyQuestionT('reveal.description')}
               </p>
             </div>
 
@@ -194,7 +216,7 @@ export const DailyQuestionClientPage = (): ReactElement => {
                   surface="paper"
                 >
                   <div className="flex flex-col gap-3">
-                    <Badge variant={answer.author === "viewer" ? "primary" : "neutral"}>
+                    <Badge variant={answer.author === 'viewer' ? 'primary' : 'neutral'}>
                       {dailyQuestionT(answerAuthorTranslationKeyByValue[answer.author])}
                     </Badge>
                     <p className="text-sm leading-relaxed text-foreground">{answer.answerBody}</p>
@@ -207,13 +229,17 @@ export const DailyQuestionClientPage = (): ReactElement => {
       ) : null}
 
       <PageReveal delay={0.2}>
-        <SectionCard className="flex flex-col gap-3" padding="comfortable" surface="petal">
-          <p className="ui-meta">{dailyQuestionT("statusNote.eyebrow")}</p>
+        <SectionCard
+          className="flex flex-col gap-3"
+          padding="comfortable"
+          surface="petal"
+        >
+          <p className="ui-meta">{dailyQuestionT('statusNote.eyebrow')}</p>
           <h2 className="font-display text-[1.7rem] tracking-[-0.03em] text-foreground">
-            {dailyQuestionT("statusNote.title")}
+            {dailyQuestionT('statusNote.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            {dailyQuestionT(statusNoteTranslationKeyByValue[data.round?.status ?? "not_started"])}
+            {dailyQuestionT(statusNoteTranslationKeyByValue[data.round?.status ?? 'not_started'])}
           </p>
         </SectionCard>
       </PageReveal>

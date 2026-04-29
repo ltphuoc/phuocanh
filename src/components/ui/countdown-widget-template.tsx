@@ -1,6 +1,7 @@
-import type { ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
-import { SectionCard } from "@/components/ui/section-card";
+import type { ReactElement } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { SectionCard } from '@/components/ui/section-card';
 
 interface CountdownWidgetTemplateProps {
   readonly daysLeftLabel: string;
@@ -19,12 +20,15 @@ export const CountdownWidgetTemplate = ({
   remainingLabel,
   targetDateLabel,
 }: CountdownWidgetTemplateProps): ReactElement => (
-  <SectionCard className="flex items-start justify-between gap-4" surface="glass">
+  <SectionCard
+    className="flex items-start justify-between gap-4"
+    surface="glass"
+  >
     <div className="min-w-0">
       <p className="truncate font-display text-[1.55rem] tracking-[-0.03em] text-foreground">
         {eventName}
       </p>
-      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="mt-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {eventType}
       </p>
       {targetDateLabel ? (

@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
-import { hasLocale } from "next-intl";
-import { getTranslations } from "next-intl/server";
-import enMessages from "../../messages/en.json";
-import { routing, type Locale } from "@/i18n/routing";
+import type { Metadata } from 'next';
+import type { Locale } from '@/i18n/routing';
+import type enMessages from '../../messages/en.json';
+
+import { hasLocale } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+
+import { routing } from '@/i18n/routing';
 
 interface LocaleRouteParams {
   readonly locale: string;
@@ -21,7 +24,7 @@ export const resolveLocaleFromParams = async (
   }
 
   const resolvedParams = await params;
-  if (!resolvedParams || typeof resolvedParams.locale !== "string") {
+  if (!resolvedParams || typeof resolvedParams.locale !== 'string') {
     return routing.defaultLocale;
   }
 
@@ -35,7 +38,7 @@ export const getRouteMetadata = async (
   const locale = await resolveLocaleFromParams(params);
   const t = await getTranslations({
     locale,
-    namespace: "metadata.routes",
+    namespace: 'metadata.routes',
   });
 
   return {

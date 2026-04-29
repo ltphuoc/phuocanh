@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { parseISO } from "date-fns";
-import Image from "next/image";
-import type { ReactElement } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { addAlbumItemsAction } from "@/app/actions/planning-actions";
-import { FormSection } from "@/components/layout/form-section";
-import { Button } from "@/components/ui/button";
-import { useI18n } from "@/hooks/useI18n";
-import {
-  getActionErrorMessage,
-  useActionMutation,
-} from "@/lib/query/action-mutation";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement } from 'react';
+
+import Image from 'next/image';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { parseISO } from 'date-fns';
+import { useForm, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { addAlbumItemsAction } from '@/app/actions/planning-actions';
+import { FormSection } from '@/components/layout/form-section';
+import { Button } from '@/components/ui/button';
+import { useI18n } from '@/hooks/useI18n';
+import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { cn } from '@/lib/utils/cn';
 
 interface AddAlbumItemsFormProps {
   readonly albumId: string;
@@ -30,14 +30,14 @@ interface AlbumMediaOption {
   readonly happenedAt: string;
   readonly id: string;
   readonly locationName: string | null;
-  readonly mediaType: "image" | "video";
+  readonly mediaType: 'image' | 'video';
   readonly note: string | null;
   readonly signedUrl: string | null;
 }
 
-const buildAddAlbumItemsSchema = (t: ReturnType<typeof useI18n<"forms.album">>["t"]) =>
+const buildAddAlbumItemsSchema = (t: ReturnType<typeof useI18n<'forms.album'>>['t']) =>
   z.object({
-    memoryMediaIds: z.array(z.uuid()).min(1, t("validation.mediaRequired")),
+    memoryMediaIds: z.array(z.uuid()).min(1, t('validation.mediaRequired')),
   });
 
 type AddAlbumItemsValues = z.infer<ReturnType<typeof buildAddAlbumItemsSchema>>;
@@ -47,7 +47,7 @@ const renderMediaPreview = (
   fallbackLabel: string,
   videoLabel: string,
 ): ReactElement => {
-  if (candidate.mediaType === "image" && candidate.signedUrl) {
+  if (candidate.mediaType === 'image' && candidate.signedUrl) {
     return (
       <div className="relative aspect-[4/3] overflow-hidden rounded-[1.3rem] border border-white/70 bg-white/70 shadow-whisper">
         <Image
@@ -62,7 +62,7 @@ const renderMediaPreview = (
     );
   }
 
-  if (candidate.mediaType === "video" && candidate.signedUrl) {
+  if (candidate.mediaType === 'video' && candidate.signedUrl) {
     return (
       <video
         className="aspect-[4/3] w-full rounded-[1.3rem] border border-white/70 bg-black/80 object-cover shadow-whisper"
@@ -76,8 +76,8 @@ const renderMediaPreview = (
 
   return (
     <div className="ui-gradient-memory flex aspect-[4/3] items-end rounded-[1.3rem] border border-white/70 p-4 shadow-whisper">
-      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-        {candidate.mediaType === "video" ? videoLabel : fallbackLabel}
+      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+        {candidate.mediaType === 'video' ? videoLabel : fallbackLabel}
       </div>
     </div>
   );
@@ -89,9 +89,9 @@ export const AddAlbumItemsForm = ({
   timeZone,
   tripId,
 }: AddAlbumItemsFormProps): ReactElement => {
-  const { t: actionsT } = useI18n("actions");
-  const { t: commonT } = useI18n("common");
-  const { format, t: formT } = useI18n("forms.album");
+  const { t: actionsT } = useI18n('actions');
+  const { t: commonT } = useI18n('common');
+  const { format, t: formT } = useI18n('forms.album');
   const queryClient = useQueryClient();
   const mutation = useActionMutation(addAlbumItemsAction);
   const form = useForm<AddAlbumItemsValues>({
@@ -103,22 +103,22 @@ export const AddAlbumItemsForm = ({
   const selectedMediaIds =
     useWatch({
       control: form.control,
-      name: "memoryMediaIds",
+      name: 'memoryMediaIds',
     }) ?? [];
 
   const mediaErrorMessage = form.formState.errors.memoryMediaIds?.message;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
-    payload.set("albumId", albumId);
+    payload.set('albumId', albumId);
     values.memoryMediaIds.forEach((mediaId) => {
-      payload.append("memoryMediaIds", mediaId);
+      payload.append('memoryMediaIds', mediaId);
     });
-    payload.set("tripId", tripId);
+    payload.set('tripId', tripId);
 
     try {
       const nextState = await mutation.mutateAsync(payload);
-      const actionMessageKey = nextState.message || "unexpectedError";
+      const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
       form.reset({
         memoryMediaIds: [],
@@ -129,20 +129,23 @@ export const AddAlbumItemsForm = ({
         queryClient.invalidateQueries({ queryKey: appQueryKeys.trip(tripId) }),
       ]);
     } catch (error: unknown) {
-      console.error("Failed to submit album items form", error);
+      console.error('Failed to submit album items form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
     }
   });
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={onSubmit}
+    >
       <FormSection
-        description={formT("addMediaDescription", {
+        description={formT('addMediaDescription', {
           count: selectedMediaIds.length,
         })}
         errorId="add-album-media-error"
         errorMessage={mediaErrorMessage}
-        label={formT("addMediaLabel")}
+        label={formT('addMediaLabel')}
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {candidates.map((candidate) => {
@@ -152,47 +155,47 @@ export const AddAlbumItemsForm = ({
             const happenedAtLabel = Number.isNaN(happenedAt.getTime())
               ? candidate.happenedAt
               : format.dateTime(happenedAt, {
-                  day: "numeric",
-                  month: "short",
+                  day: 'numeric',
+                  month: 'short',
                   timeZone,
-                  year: "numeric",
+                  year: 'numeric',
                 });
 
             return (
-              <label className="block" htmlFor={inputId} key={candidate.id}>
+              <label
+                className="block"
+                htmlFor={inputId}
+                key={candidate.id}
+              >
                 <input
-                  aria-describedby={mediaErrorMessage ? "add-album-media-error" : undefined}
+                  aria-describedby={mediaErrorMessage ? 'add-album-media-error' : undefined}
                   className="sr-only"
                   id={inputId}
                   type="checkbox"
                   value={candidate.id}
-                  {...form.register("memoryMediaIds")}
+                  {...form.register('memoryMediaIds')}
                 />
                 <div
                   className={cn(
-                    "flex h-full cursor-pointer flex-col gap-3 rounded-[1.6rem] border bg-white/72 p-4 shadow-whisper transition-all",
+                    'flex h-full cursor-pointer flex-col gap-3 rounded-[1.6rem] border bg-white/72 p-4 shadow-whisper transition-all',
                     isSelected
-                      ? "border-primary shadow-cloud ring-2 ring-primary/20"
-                      : "border-white/70 hover:-translate-y-0.5 hover:shadow-cloud",
+                      ? 'border-primary shadow-cloud ring-2 ring-primary/20'
+                      : 'border-white/70 hover:-translate-y-0.5 hover:shadow-cloud',
                   )}
                 >
-                  {renderMediaPreview(
-                    candidate,
-                    formT("mediaFallback"),
-                    formT("videoFallback"),
-                  )}
+                  {renderMediaPreview(candidate, formT('mediaFallback'), formT('videoFallback'))}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <p className="ui-meta">{happenedAtLabel}</p>
-                      <span className="text-xs font-semibold uppercase tracking-[0.08em] text-primary">
-                        {isSelected ? formT("selectedLabel") : formT("selectLabel")}
+                      <span className="text-xs font-semibold tracking-[0.08em] text-primary uppercase">
+                        {isSelected ? formT('selectedLabel') : formT('selectLabel')}
                       </span>
                     </div>
                     <p className="line-clamp-2 text-sm leading-relaxed text-foreground">
-                      {candidate.note?.trim() || formT("mediaNoteFallback")}
+                      {candidate.note?.trim() || formT('mediaNoteFallback')}
                     </p>
                     {candidate.locationName ? (
-                      <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+                      <p className="text-xs tracking-[0.08em] text-muted-foreground uppercase">
                         {candidate.locationName}
                       </p>
                     ) : null}
@@ -205,12 +208,12 @@ export const AddAlbumItemsForm = ({
       </FormSection>
 
       <Button
-        busyLabel={commonT("working")}
+        busyLabel={commonT('working')}
         className="w-full md:w-auto"
         isBusy={mutation.isPending}
         type="submit"
       >
-        {formT("addMediaSubmit")}
+        {formT('addMediaSubmit')}
       </Button>
     </form>
   );

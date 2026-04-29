@@ -1,12 +1,15 @@
-import { hasLocale } from "next-intl";
-import { routing, type Locale } from "@/i18n/routing";
+import type { Locale } from '@/i18n/routing';
+
+import { hasLocale } from 'next-intl';
+
+import { routing } from '@/i18n/routing';
 
 const normalizePathname = (pathname: string): string => {
   if (!pathname) {
-    return "/";
+    return '/';
   }
 
-  return pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return pathname.startsWith('/') ? pathname : `/${pathname}`;
 };
 
 export const toLocalizedPathname = (locale: Locale, pathname: string): string => {
@@ -16,7 +19,7 @@ export const toLocalizedPathname = (locale: Locale, pathname: string): string =>
     return normalizedPathname;
   }
 
-  if (normalizedPathname === "/") {
+  if (normalizedPathname === '/') {
     return `/${locale}`;
   }
 
@@ -25,7 +28,7 @@ export const toLocalizedPathname = (locale: Locale, pathname: string): string =>
 
 export const getLocaleFromPathname = (pathname: string): Locale | null => {
   const normalizedPathname = normalizePathname(pathname);
-  const [segment] = normalizedPathname.slice(1).split("/");
+  const [segment] = normalizedPathname.slice(1).split('/');
 
   if (segment && hasLocale(routing.locales, segment)) {
     return segment;
@@ -44,7 +47,7 @@ export const stripLocalePrefix = (pathname: string): string => {
 
   const localizedPrefix = `/${locale}`;
   if (normalizedPathname === localizedPrefix) {
-    return "/";
+    return '/';
   }
 
   return normalizedPathname.slice(localizedPrefix.length);

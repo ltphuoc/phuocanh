@@ -1,1220 +1,1212 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   graphql_public: {
     Tables: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       graphql: {
         Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       activity_events: {
         Row: {
-          actor_user_id: string
-          couple_id: string
-          created_at: string
-          id: string
-          payload: string | null
-          type: string
-        }
+          actor_user_id: string;
+          couple_id: string;
+          created_at: string;
+          id: string;
+          payload: string | null;
+          type: string;
+        };
         Insert: {
-          actor_user_id: string
-          couple_id: string
-          created_at?: string
-          id?: string
-          payload?: string | null
-          type: string
-        }
+          actor_user_id: string;
+          couple_id: string;
+          created_at?: string;
+          id?: string;
+          payload?: string | null;
+          type: string;
+        };
         Update: {
-          actor_user_id?: string
-          couple_id?: string
-          created_at?: string
-          id?: string
-          payload?: string | null
-          type?: string
-        }
+          actor_user_id?: string;
+          couple_id?: string;
+          created_at?: string;
+          id?: string;
+          payload?: string | null;
+          type?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "activity_events_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'activity_events_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       album_items: {
         Row: {
-          album_id: string
-          created_at: string
-          id: string
-          memory_media_id: string
-          position: number
-        }
+          album_id: string;
+          created_at: string;
+          id: string;
+          memory_media_id: string;
+          position: number;
+        };
         Insert: {
-          album_id: string
-          created_at?: string
-          id?: string
-          memory_media_id: string
-          position: number
-        }
+          album_id: string;
+          created_at?: string;
+          id?: string;
+          memory_media_id: string;
+          position: number;
+        };
         Update: {
-          album_id?: string
-          created_at?: string
-          id?: string
-          memory_media_id?: string
-          position?: number
-        }
+          album_id?: string;
+          created_at?: string;
+          id?: string;
+          memory_media_id?: string;
+          position?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "album_items_album_id_fkey"
-            columns: ["album_id"]
-            isOneToOne: false
-            referencedRelation: "albums"
-            referencedColumns: ["id"]
+            foreignKeyName: 'album_items_album_id_fkey';
+            columns: ['album_id'];
+            isOneToOne: false;
+            referencedRelation: 'albums';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "album_items_memory_media_id_fkey"
-            columns: ["memory_media_id"]
-            isOneToOne: false
-            referencedRelation: "memory_media"
-            referencedColumns: ["id"]
+            foreignKeyName: 'album_items_memory_media_id_fkey';
+            columns: ['memory_media_id'];
+            isOneToOne: false;
+            referencedRelation: 'memory_media';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       albums: {
         Row: {
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          description: string | null
-          id: string
-          title: string
-          trip_id: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          description: string | null;
+          id: string;
+          title: string;
+          trip_id: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          description?: string | null
-          id?: string
-          title: string
-          trip_id: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          description?: string | null;
+          id?: string;
+          title: string;
+          trip_id: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          description?: string | null
-          id?: string
-          title?: string
-          trip_id?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          description?: string | null;
+          id?: string;
+          title?: string;
+          trip_id?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "albums_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'albums_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "albums_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
+            foreignKeyName: 'albums_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: true;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       checklist_items: {
         Row: {
-          checklist_id: string
-          created_at: string
-          done_at: string | null
-          id: string
-          is_done: boolean
-          text: string
-          updated_at: string
-        }
+          checklist_id: string;
+          created_at: string;
+          done_at: string | null;
+          id: string;
+          is_done: boolean;
+          text: string;
+          updated_at: string;
+        };
         Insert: {
-          checklist_id: string
-          created_at?: string
-          done_at?: string | null
-          id?: string
-          is_done?: boolean
-          text: string
-          updated_at?: string
-        }
+          checklist_id: string;
+          created_at?: string;
+          done_at?: string | null;
+          id?: string;
+          is_done?: boolean;
+          text: string;
+          updated_at?: string;
+        };
         Update: {
-          checklist_id?: string
-          created_at?: string
-          done_at?: string | null
-          id?: string
-          is_done?: boolean
-          text?: string
-          updated_at?: string
-        }
+          checklist_id?: string;
+          created_at?: string;
+          done_at?: string | null;
+          id?: string;
+          is_done?: boolean;
+          text?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "checklist_items_checklist_id_fkey"
-            columns: ["checklist_id"]
-            isOneToOne: false
-            referencedRelation: "checklists"
-            referencedColumns: ["id"]
+            foreignKeyName: 'checklist_items_checklist_id_fkey';
+            columns: ['checklist_id'];
+            isOneToOne: false;
+            referencedRelation: 'checklists';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       checklists: {
         Row: {
-          couple_id: string
-          created_at: string
-          id: string
-          title: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          id: string;
+          title: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          id?: string
-          title: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          id?: string;
+          title: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          id?: string
-          title?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "checklists_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'checklists_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       countdowns: {
         Row: {
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          id: string
-          kind: Database["public"]["Enums"]["countdown_kind"]
-          note: string | null
-          target_at: string
-          title: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          id: string;
+          kind: Database['public']['Enums']['countdown_kind'];
+          note: string | null;
+          target_at: string;
+          title: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          id?: string
-          kind?: Database["public"]["Enums"]["countdown_kind"]
-          note?: string | null
-          target_at: string
-          title: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          id?: string;
+          kind?: Database['public']['Enums']['countdown_kind'];
+          note?: string | null;
+          target_at: string;
+          title: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          id?: string
-          kind?: Database["public"]["Enums"]["countdown_kind"]
-          note?: string | null
-          target_at?: string
-          title?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['countdown_kind'];
+          note?: string | null;
+          target_at?: string;
+          title?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "countdowns_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'countdowns_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       couple_invites: {
         Row: {
-          accepted_at: string | null
-          accepted_by_user_id: string | null
-          couple_id: string
-          created_at: string
-          expires_at: string
-          id: string
-          invited_by_user_id: string
-          token: string
-        }
+          accepted_at: string | null;
+          accepted_by_user_id: string | null;
+          couple_id: string;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          invited_by_user_id: string;
+          token: string;
+        };
         Insert: {
-          accepted_at?: string | null
-          accepted_by_user_id?: string | null
-          couple_id: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          invited_by_user_id: string
-          token: string
-        }
+          accepted_at?: string | null;
+          accepted_by_user_id?: string | null;
+          couple_id: string;
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          invited_by_user_id: string;
+          token: string;
+        };
         Update: {
-          accepted_at?: string | null
-          accepted_by_user_id?: string | null
-          couple_id?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          invited_by_user_id?: string
-          token?: string
-        }
+          accepted_at?: string | null;
+          accepted_by_user_id?: string | null;
+          couple_id?: string;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by_user_id?: string;
+          token?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "couple_invites_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'couple_invites_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       couple_memberships: {
         Row: {
-          couple_id: string
-          created_at: string
-          id: string
-          joined_at: string | null
-          role: Database["public"]["Enums"]["membership_role"]
-          status: Database["public"]["Enums"]["membership_status"]
-          updated_at: string
-          user_id: string
-        }
+          couple_id: string;
+          created_at: string;
+          id: string;
+          joined_at: string | null;
+          role: Database['public']['Enums']['membership_role'];
+          status: Database['public']['Enums']['membership_status'];
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          id?: string
-          joined_at?: string | null
-          role: Database["public"]["Enums"]["membership_role"]
-          status?: Database["public"]["Enums"]["membership_status"]
-          updated_at?: string
-          user_id: string
-        }
+          couple_id: string;
+          created_at?: string;
+          id?: string;
+          joined_at?: string | null;
+          role: Database['public']['Enums']['membership_role'];
+          status?: Database['public']['Enums']['membership_status'];
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          id?: string
-          joined_at?: string | null
-          role?: Database["public"]["Enums"]["membership_role"]
-          status?: Database["public"]["Enums"]["membership_status"]
-          updated_at?: string
-          user_id?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          id?: string;
+          joined_at?: string | null;
+          role?: Database['public']['Enums']['membership_role'];
+          status?: Database['public']['Enums']['membership_status'];
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "couple_memberships_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'couple_memberships_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       couples: {
         Row: {
-          created_at: string
-          id: string
-          name: string | null
-          started_at: string
-          timezone: string
-          updated_at: string
-        }
+          created_at: string;
+          id: string;
+          name: string | null;
+          started_at: string;
+          timezone: string;
+          updated_at: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          started_at: string
-          timezone?: string
-          updated_at?: string
-        }
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          started_at: string;
+          timezone?: string;
+          updated_at?: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          started_at?: string
-          timezone?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          started_at?: string;
+          timezone?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       future_note_contents: {
         Row: {
-          body_encrypted: string
-          created_at: string
-          future_note_id: string
-        }
+          body_encrypted: string;
+          created_at: string;
+          future_note_id: string;
+        };
         Insert: {
-          body_encrypted: string
-          created_at?: string
-          future_note_id: string
-        }
+          body_encrypted: string;
+          created_at?: string;
+          future_note_id: string;
+        };
         Update: {
-          body_encrypted?: string
-          created_at?: string
-          future_note_id?: string
-        }
+          body_encrypted?: string;
+          created_at?: string;
+          future_note_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "future_note_contents_future_note_id_fkey"
-            columns: ["future_note_id"]
-            isOneToOne: true
-            referencedRelation: "future_notes"
-            referencedColumns: ["id"]
+            foreignKeyName: 'future_note_contents_future_note_id_fkey';
+            columns: ['future_note_id'];
+            isOneToOne: true;
+            referencedRelation: 'future_notes';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       future_notes: {
         Row: {
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          id: string
-          title: string
-          unlock_at: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          id: string;
+          title: string;
+          unlock_at: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          id?: string
-          title: string
-          unlock_at: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          id?: string;
+          title: string;
+          unlock_at: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          id?: string
-          title?: string
-          unlock_at?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          id?: string;
+          title?: string;
+          unlock_at?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "future_notes_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'future_notes_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       game_round_answers: {
         Row: {
-          answer_body: string
-          id: string
-          round_id: string
-          submitted_at: string
-          user_id: string
-        }
+          answer_body: string;
+          id: string;
+          round_id: string;
+          submitted_at: string;
+          user_id: string;
+        };
         Insert: {
-          answer_body: string
-          id?: string
-          round_id: string
-          submitted_at?: string
-          user_id: string
-        }
+          answer_body: string;
+          id?: string;
+          round_id: string;
+          submitted_at?: string;
+          user_id: string;
+        };
         Update: {
-          answer_body?: string
-          id?: string
-          round_id?: string
-          submitted_at?: string
-          user_id?: string
-        }
+          answer_body?: string;
+          id?: string;
+          round_id?: string;
+          submitted_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "game_round_answers_round_id_fkey"
-            columns: ["round_id"]
-            isOneToOne: false
-            referencedRelation: "game_rounds"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_round_answers_round_id_fkey';
+            columns: ['round_id'];
+            isOneToOne: false;
+            referencedRelation: 'game_rounds';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       game_round_memory_targets: {
         Row: {
-          created_at: string
-          memory_id: string
-          round_id: string
-        }
+          created_at: string;
+          memory_id: string;
+          round_id: string;
+        };
         Insert: {
-          created_at?: string
-          memory_id: string
-          round_id: string
-        }
+          created_at?: string;
+          memory_id: string;
+          round_id: string;
+        };
         Update: {
-          created_at?: string
-          memory_id?: string
-          round_id?: string
-        }
+          created_at?: string;
+          memory_id?: string;
+          round_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "game_round_memory_targets_memory_id_fkey"
-            columns: ["memory_id"]
-            isOneToOne: false
-            referencedRelation: "memories"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_round_memory_targets_memory_id_fkey';
+            columns: ['memory_id'];
+            isOneToOne: false;
+            referencedRelation: 'memories';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "game_round_memory_targets_round_id_fkey"
-            columns: ["round_id"]
-            isOneToOne: true
-            referencedRelation: "game_rounds"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_round_memory_targets_round_id_fkey';
+            columns: ['round_id'];
+            isOneToOne: true;
+            referencedRelation: 'game_rounds';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       game_round_trivia_targets: {
         Row: {
-          answer_options: Json
-          correct_answer: string
-          created_at: string
-          memory_id: string
-          round_id: string
-        }
+          answer_options: Json;
+          correct_answer: string;
+          created_at: string;
+          memory_id: string;
+          round_id: string;
+        };
         Insert: {
-          answer_options: Json
-          correct_answer: string
-          created_at?: string
-          memory_id: string
-          round_id: string
-        }
+          answer_options: Json;
+          correct_answer: string;
+          created_at?: string;
+          memory_id: string;
+          round_id: string;
+        };
         Update: {
-          answer_options?: Json
-          correct_answer?: string
-          created_at?: string
-          memory_id?: string
-          round_id?: string
-        }
+          answer_options?: Json;
+          correct_answer?: string;
+          created_at?: string;
+          memory_id?: string;
+          round_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "game_round_trivia_targets_memory_id_fkey"
-            columns: ["memory_id"]
-            isOneToOne: false
-            referencedRelation: "memories"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_round_trivia_targets_memory_id_fkey';
+            columns: ['memory_id'];
+            isOneToOne: false;
+            referencedRelation: 'memories';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "game_round_trivia_targets_round_id_fkey"
-            columns: ["round_id"]
-            isOneToOne: true
-            referencedRelation: "game_rounds"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_round_trivia_targets_round_id_fkey';
+            columns: ['round_id'];
+            isOneToOne: true;
+            referencedRelation: 'game_rounds';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       game_rounds: {
         Row: {
-          couple_id: string
-          created_at: string
-          id: string
-          mode: Database["public"]["Enums"]["game_mode"]
-          prompt_locale: string
-          prompt_source: string
-          prompt_text: string
-          round_date: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          id: string;
+          mode: Database['public']['Enums']['game_mode'];
+          prompt_locale: string;
+          prompt_source: string;
+          prompt_text: string;
+          round_date: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          id?: string
-          mode: Database["public"]["Enums"]["game_mode"]
-          prompt_locale: string
-          prompt_source: string
-          prompt_text: string
-          round_date: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          id?: string;
+          mode: Database['public']['Enums']['game_mode'];
+          prompt_locale: string;
+          prompt_source: string;
+          prompt_text: string;
+          round_date: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          id?: string
-          mode?: Database["public"]["Enums"]["game_mode"]
-          prompt_locale?: string
-          prompt_source?: string
-          prompt_text?: string
-          round_date?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          id?: string;
+          mode?: Database['public']['Enums']['game_mode'];
+          prompt_locale?: string;
+          prompt_source?: string;
+          prompt_text?: string;
+          round_date?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "game_rounds_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'game_rounds_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       memories: {
         Row: {
-          author_user_id: string
-          couple_id: string
-          created_at: string
-          happened_at: string
-          id: string
-          location_name: string | null
-          note: string | null
-          updated_at: string
-        }
+          author_user_id: string;
+          couple_id: string;
+          created_at: string;
+          happened_at: string;
+          id: string;
+          location_name: string | null;
+          note: string | null;
+          updated_at: string;
+        };
         Insert: {
-          author_user_id: string
-          couple_id: string
-          created_at?: string
-          happened_at: string
-          id?: string
-          location_name?: string | null
-          note?: string | null
-          updated_at?: string
-        }
+          author_user_id: string;
+          couple_id: string;
+          created_at?: string;
+          happened_at: string;
+          id?: string;
+          location_name?: string | null;
+          note?: string | null;
+          updated_at?: string;
+        };
         Update: {
-          author_user_id?: string
-          couple_id?: string
-          created_at?: string
-          happened_at?: string
-          id?: string
-          location_name?: string | null
-          note?: string | null
-          updated_at?: string
-        }
+          author_user_id?: string;
+          couple_id?: string;
+          created_at?: string;
+          happened_at?: string;
+          id?: string;
+          location_name?: string | null;
+          note?: string | null;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "memories_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'memories_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       memory_media: {
         Row: {
-          couple_id: string
-          created_at: string
-          id: string
-          media_type: Database["public"]["Enums"]["media_type"]
-          memory_id: string
-          mime_type: string
-          original_file_name: string | null
-          size_bytes: number
-          storage_path: string
-        }
+          couple_id: string;
+          created_at: string;
+          id: string;
+          media_type: Database['public']['Enums']['media_type'];
+          memory_id: string;
+          mime_type: string;
+          original_file_name: string | null;
+          size_bytes: number;
+          storage_path: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          id?: string
-          media_type: Database["public"]["Enums"]["media_type"]
-          memory_id: string
-          mime_type: string
-          original_file_name?: string | null
-          size_bytes: number
-          storage_path: string
-        }
+          couple_id: string;
+          created_at?: string;
+          id?: string;
+          media_type: Database['public']['Enums']['media_type'];
+          memory_id: string;
+          mime_type: string;
+          original_file_name?: string | null;
+          size_bytes: number;
+          storage_path: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          id?: string
-          media_type?: Database["public"]["Enums"]["media_type"]
-          memory_id?: string
-          mime_type?: string
-          original_file_name?: string | null
-          size_bytes?: number
-          storage_path?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          id?: string;
+          media_type?: Database['public']['Enums']['media_type'];
+          memory_id?: string;
+          mime_type?: string;
+          original_file_name?: string | null;
+          size_bytes?: number;
+          storage_path?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "memory_media_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'memory_media_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "memory_media_memory_id_fkey"
-            columns: ["memory_id"]
-            isOneToOne: false
-            referencedRelation: "memories"
-            referencedColumns: ["id"]
+            foreignKeyName: 'memory_media_memory_id_fkey';
+            columns: ['memory_id'];
+            isOneToOne: false;
+            referencedRelation: 'memories';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       reminder_deliveries: {
         Row: {
-          attempts: number
-          couple_id: string
-          created_at: string
-          due_at: string
-          failed_at: string | null
-          id: string
-          kind: Database["public"]["Enums"]["reminder_kind"]
-          last_error: string | null
-          max_attempts: number
-          not_before: string
-          payload: Json
-          processing_started_at: string | null
-          provider_message_id: string | null
-          recipient_email: string
-          recipient_user_id: string
-          sent_at: string | null
-          source_id: string
-          status: Database["public"]["Enums"]["reminder_delivery_status"]
-          updated_at: string
-        }
+          attempts: number;
+          couple_id: string;
+          created_at: string;
+          due_at: string;
+          failed_at: string | null;
+          id: string;
+          kind: Database['public']['Enums']['reminder_kind'];
+          last_error: string | null;
+          max_attempts: number;
+          not_before: string;
+          payload: Json;
+          processing_started_at: string | null;
+          provider_message_id: string | null;
+          recipient_email: string;
+          recipient_user_id: string;
+          sent_at: string | null;
+          source_id: string;
+          status: Database['public']['Enums']['reminder_delivery_status'];
+          updated_at: string;
+        };
         Insert: {
-          attempts?: number
-          couple_id: string
-          created_at?: string
-          due_at: string
-          failed_at?: string | null
-          id?: string
-          kind: Database["public"]["Enums"]["reminder_kind"]
-          last_error?: string | null
-          max_attempts?: number
-          not_before?: string
-          payload?: Json
-          processing_started_at?: string | null
-          provider_message_id?: string | null
-          recipient_email: string
-          recipient_user_id: string
-          sent_at?: string | null
-          source_id: string
-          status?: Database["public"]["Enums"]["reminder_delivery_status"]
-          updated_at?: string
-        }
+          attempts?: number;
+          couple_id: string;
+          created_at?: string;
+          due_at: string;
+          failed_at?: string | null;
+          id?: string;
+          kind: Database['public']['Enums']['reminder_kind'];
+          last_error?: string | null;
+          max_attempts?: number;
+          not_before?: string;
+          payload?: Json;
+          processing_started_at?: string | null;
+          provider_message_id?: string | null;
+          recipient_email: string;
+          recipient_user_id: string;
+          sent_at?: string | null;
+          source_id: string;
+          status?: Database['public']['Enums']['reminder_delivery_status'];
+          updated_at?: string;
+        };
         Update: {
-          attempts?: number
-          couple_id?: string
-          created_at?: string
-          due_at?: string
-          failed_at?: string | null
-          id?: string
-          kind?: Database["public"]["Enums"]["reminder_kind"]
-          last_error?: string | null
-          max_attempts?: number
-          not_before?: string
-          payload?: Json
-          processing_started_at?: string | null
-          provider_message_id?: string | null
-          recipient_email?: string
-          recipient_user_id?: string
-          sent_at?: string | null
-          source_id?: string
-          status?: Database["public"]["Enums"]["reminder_delivery_status"]
-          updated_at?: string
-        }
+          attempts?: number;
+          couple_id?: string;
+          created_at?: string;
+          due_at?: string;
+          failed_at?: string | null;
+          id?: string;
+          kind?: Database['public']['Enums']['reminder_kind'];
+          last_error?: string | null;
+          max_attempts?: number;
+          not_before?: string;
+          payload?: Json;
+          processing_started_at?: string | null;
+          provider_message_id?: string | null;
+          recipient_email?: string;
+          recipient_user_id?: string;
+          sent_at?: string | null;
+          source_id?: string;
+          status?: Database['public']['Enums']['reminder_delivery_status'];
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "reminder_deliveries_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'reminder_deliveries_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       trips: {
         Row: {
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          end_date: string
-          id: string
-          note: string | null
-          start_date: string
-          title: string
-          updated_at: string
-        }
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          end_date: string;
+          id: string;
+          note: string | null;
+          start_date: string;
+          title: string;
+          updated_at: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          end_date: string
-          id?: string
-          note?: string | null
-          start_date: string
-          title: string
-          updated_at?: string
-        }
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          end_date: string;
+          id?: string;
+          note?: string | null;
+          start_date: string;
+          title: string;
+          updated_at?: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          end_date?: string
-          id?: string
-          note?: string | null
-          start_date?: string
-          title?: string
-          updated_at?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          end_date?: string;
+          id?: string;
+          note?: string | null;
+          start_date?: string;
+          title?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "trips_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'trips_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       visited_places: {
         Row: {
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          id: string
-          note: string | null
-          title: string
-          trip_id: string
-          updated_at: string
-          visited_on: string
-        }
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          id: string;
+          note: string | null;
+          title: string;
+          trip_id: string;
+          updated_at: string;
+          visited_on: string;
+        };
         Insert: {
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          id?: string
-          note?: string | null
-          title: string
-          trip_id: string
-          updated_at?: string
-          visited_on: string
-        }
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          id?: string;
+          note?: string | null;
+          title: string;
+          trip_id: string;
+          updated_at?: string;
+          visited_on: string;
+        };
         Update: {
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          id?: string
-          note?: string | null
-          title?: string
-          trip_id?: string
-          updated_at?: string
-          visited_on?: string
-        }
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          id?: string;
+          note?: string | null;
+          title?: string;
+          trip_id?: string;
+          updated_at?: string;
+          visited_on?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "visited_places_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'visited_places_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
           {
-            foreignKeyName: "visited_places_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
+            foreignKeyName: 'visited_places_trip_id_fkey';
+            columns: ['trip_id'];
+            isOneToOne: false;
+            referencedRelation: 'trips';
+            referencedColumns: ['id'];
           },
-        ]
-      }
+        ];
+      };
       wish_items: {
         Row: {
-          category: Database["public"]["Enums"]["wish_category"]
-          completed_at: string | null
-          couple_id: string
-          created_at: string
-          created_by_user_id: string
-          id: string
-          note: string | null
-          status: Database["public"]["Enums"]["wish_status"]
-          title: string
-          updated_at: string
-        }
+          category: Database['public']['Enums']['wish_category'];
+          completed_at: string | null;
+          couple_id: string;
+          created_at: string;
+          created_by_user_id: string;
+          id: string;
+          note: string | null;
+          status: Database['public']['Enums']['wish_status'];
+          title: string;
+          updated_at: string;
+        };
         Insert: {
-          category: Database["public"]["Enums"]["wish_category"]
-          completed_at?: string | null
-          couple_id: string
-          created_at?: string
-          created_by_user_id: string
-          id?: string
-          note?: string | null
-          status?: Database["public"]["Enums"]["wish_status"]
-          title: string
-          updated_at?: string
-        }
+          category: Database['public']['Enums']['wish_category'];
+          completed_at?: string | null;
+          couple_id: string;
+          created_at?: string;
+          created_by_user_id: string;
+          id?: string;
+          note?: string | null;
+          status?: Database['public']['Enums']['wish_status'];
+          title: string;
+          updated_at?: string;
+        };
         Update: {
-          category?: Database["public"]["Enums"]["wish_category"]
-          completed_at?: string | null
-          couple_id?: string
-          created_at?: string
-          created_by_user_id?: string
-          id?: string
-          note?: string | null
-          status?: Database["public"]["Enums"]["wish_status"]
-          title?: string
-          updated_at?: string
-        }
+          category?: Database['public']['Enums']['wish_category'];
+          completed_at?: string | null;
+          couple_id?: string;
+          created_at?: string;
+          created_by_user_id?: string;
+          id?: string;
+          note?: string | null;
+          status?: Database['public']['Enums']['wish_status'];
+          title?: string;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "wish_items_couple_id_fkey"
-            columns: ["couple_id"]
-            isOneToOne: false
-            referencedRelation: "couples"
-            referencedColumns: ["id"]
+            foreignKeyName: 'wish_items_couple_id_fkey';
+            columns: ['couple_id'];
+            isOneToOne: false;
+            referencedRelation: 'couples';
+            referencedColumns: ['id'];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       accept_couple_invite: {
-        Args: { invite_token: string }
+        Args: { invite_token: string };
         Returns: {
-          couple_id: string
-          role: Database["public"]["Enums"]["membership_role"]
-        }[]
-      }
+          couple_id: string;
+          role: Database['public']['Enums']['membership_role'];
+        }[];
+      };
       add_album_items: {
-        Args: { selected_memory_media_ids: string[]; target_album_id: string }
-        Returns: number
-      }
+        Args: { selected_memory_media_ids: string[]; target_album_id: string };
+        Returns: number;
+      };
       bootstrap_first_couple: {
         Args: {
-          couple_name: string
-          started_date: string
-          target_timezone?: string
-        }
+          couple_name: string;
+          started_date: string;
+          target_timezone?: string;
+        };
         Returns: {
-          couple_id: string
-          name: string
-          role: Database["public"]["Enums"]["membership_role"]
-          started_at: string
-          timezone: string
-        }[]
-      }
+          couple_id: string;
+          name: string;
+          role: Database['public']['Enums']['membership_role'];
+          started_at: string;
+          timezone: string;
+        }[];
+      };
       claim_reminder_deliveries: {
-        Args: { max_batch_size?: number }
+        Args: { max_batch_size?: number };
         Returns: {
-          attempts: number
-          due_at: string
-          id: string
-          kind: Database["public"]["Enums"]["reminder_kind"]
-          max_attempts: number
-          payload: Json
-          recipient_email: string
-        }[]
-      }
-      configure_phase2_reminder_jobs: { Args: never; Returns: undefined }
+          attempts: number;
+          due_at: string;
+          id: string;
+          kind: Database['public']['Enums']['reminder_kind'];
+          max_attempts: number;
+          payload: Json;
+          recipient_email: string;
+        }[];
+      };
+      configure_phase2_reminder_jobs: { Args: never; Returns: undefined };
       create_album_with_items: {
         Args: {
-          album_description: string
-          album_title: string
-          selected_memory_media_ids: string[]
-          target_trip_id: string
-        }
-        Returns: string
-      }
+          album_description: string;
+          album_title: string;
+          selected_memory_media_ids: string[];
+          target_trip_id: string;
+        };
+        Returns: string;
+      };
       create_future_note_with_body: {
-        Args: { note_body: string; note_title: string; note_unlock_at: string }
-        Returns: string
-      }
-      enqueue_due_reminder_deliveries: { Args: never; Returns: number }
+        Args: { note_body: string; note_title: string; note_unlock_at: string };
+        Returns: string;
+      };
+      enqueue_due_reminder_deliveries: { Args: never; Returns: number };
       ensure_daily_question_round: {
         Args: {
-          prompt_locale: string
-          prompt_source: string
-          prompt_text: string
-          target_mode: Database["public"]["Enums"]["game_mode"]
-          target_round_date: string
-        }
-        Returns: string
-      }
+          prompt_locale: string;
+          prompt_source: string;
+          prompt_text: string;
+          target_mode: Database['public']['Enums']['game_mode'];
+          target_round_date: string;
+        };
+        Returns: string;
+      };
       ensure_guess_date_round: {
-        Args: { target_round_date: string }
-        Returns: string
-      }
+        Args: { target_round_date: string };
+        Returns: string;
+      };
       ensure_trivia_round: {
-        Args: { target_round_date: string }
-        Returns: string
-      }
+        Args: { target_round_date: string };
+        Returns: string;
+      };
       get_daily_question_round_state: {
-        Args: { target_round_date: string }
+        Args: { target_round_date: string };
         Returns: {
-          answer_count: number
-          id: string
-          prompt_locale: string
-          prompt_source: string
-          prompt_text: string
-          reveal_answers: boolean
-          revealed_answers: Json
-          round_date: string
-          viewer_has_answered: boolean
-        }[]
-      }
+          answer_count: number;
+          id: string;
+          prompt_locale: string;
+          prompt_source: string;
+          prompt_text: string;
+          reveal_answers: boolean;
+          revealed_answers: Json;
+          round_date: string;
+          viewer_has_answered: boolean;
+        }[];
+      };
       get_daily_question_stats: {
-        Args: { target_history_days?: number }
+        Args: { target_history_days?: number };
         Returns: {
-          current_streak: number
-          recent_history: Json
-          total_completed_rounds: number
-          total_rounds: number
-          viewer_participation_count: number
-          viewer_participation_rate: number
-        }[]
-      }
+          current_streak: number;
+          recent_history: Json;
+          total_completed_rounds: number;
+          total_rounds: number;
+          viewer_participation_count: number;
+          viewer_participation_rate: number;
+        }[];
+      };
       get_guess_date_round_state: {
-        Args: { target_round_date: string }
+        Args: { target_round_date: string };
         Returns: {
-          active_partner_count: number
-          actual_date: string
-          answer_count: number
-          clue_text: string
-          id: string
-          prompt_locale: string
-          prompt_source: string
-          reveal_answers: boolean
-          revealed_guesses: Json
-          round_date: string
-          viewer_has_answered: boolean
-        }[]
-      }
+          active_partner_count: number;
+          actual_date: string;
+          answer_count: number;
+          clue_text: string;
+          id: string;
+          prompt_locale: string;
+          prompt_source: string;
+          reveal_answers: boolean;
+          revealed_guesses: Json;
+          round_date: string;
+          viewer_has_answered: boolean;
+        }[];
+      };
       get_trivia_round_state: {
-        Args: { target_round_date: string }
+        Args: { target_round_date: string };
         Returns: {
-          active_partner_count: number
-          answer_count: number
-          answer_options: Json
-          clue_text: string
-          correct_answer: string
-          id: string
-          prompt_locale: string
-          prompt_source: string
-          reveal_answers: boolean
-          revealed_answers: Json
-          round_date: string
-          viewer_has_answered: boolean
-        }[]
-      }
+          active_partner_count: number;
+          answer_count: number;
+          answer_options: Json;
+          clue_text: string;
+          correct_answer: string;
+          id: string;
+          prompt_locale: string;
+          prompt_source: string;
+          reveal_answers: boolean;
+          revealed_answers: Json;
+          round_date: string;
+          viewer_has_answered: boolean;
+        }[];
+      };
       get_unlocked_future_note_contents: {
-        Args: { target_couple_id: string }
+        Args: { target_couple_id: string };
         Returns: {
-          body: string
-          future_note_id: string
-        }[]
-      }
-      has_any_couple: { Args: never; Returns: boolean }
-      invoke_reminder_processor: { Args: never; Returns: number }
-      is_couple_member: { Args: { target_couple_id: string }; Returns: boolean }
-      is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean }
+          body: string;
+          future_note_id: string;
+        }[];
+      };
+      has_any_couple: { Args: never; Returns: boolean };
+      invoke_reminder_processor: { Args: never; Returns: number };
+      is_couple_member: { Args: { target_couple_id: string }; Returns: boolean };
+      is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean };
       memories_on_this_day: {
-        Args: { target_couple_id: string; target_timezone?: string }
+        Args: { target_couple_id: string; target_timezone?: string };
         Returns: {
-          author_user_id: string
-          couple_id: string
-          created_at: string
-          happened_at: string
-          id: string
-          location_name: string | null
-          note: string | null
-          updated_at: string
-        }[]
+          author_user_id: string;
+          couple_id: string;
+          created_at: string;
+          happened_at: string;
+          id: string;
+          location_name: string | null;
+          note: string | null;
+          updated_at: string;
+        }[];
         SetofOptions: {
-          from: "*"
-          to: "memories"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+          from: '*';
+          to: 'memories';
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       submit_daily_question_answer: {
-        Args: { answer_body: string; target_round_id: string }
-        Returns: string
-      }
+        Args: { answer_body: string; target_round_id: string };
+        Returns: string;
+      };
       submit_guess_date_answer: {
-        Args: { guessed_date: string; target_round_id: string }
-        Returns: string
-      }
+        Args: { guessed_date: string; target_round_id: string };
+        Returns: string;
+      };
       submit_trivia_answer: {
-        Args: { selected_answer: string; target_round_id: string }
-        Returns: string
-      }
+        Args: { selected_answer: string; target_round_id: string };
+        Returns: string;
+      };
       update_couple_timezone: {
-        Args: { target_couple_id: string; target_timezone: string }
+        Args: { target_couple_id: string; target_timezone: string };
         Returns: {
-          couple_id: string
-          timezone: string
-        }[]
-      }
-    }
+          couple_id: string;
+          timezone: string;
+        }[];
+      };
+    };
     Enums: {
-      countdown_kind: "anniversary" | "birthday" | "travel" | "plan" | "custom"
-      game_mode: "daily_question" | "guess_date" | "trivia"
-      media_type: "image" | "video"
-      membership_role: "partner_a" | "partner_b"
-      membership_status: "active" | "inactive"
-      reminder_delivery_status: "pending" | "processing" | "sent" | "failed"
-      reminder_kind: "countdown_day_of" | "future_note_unlock"
-      wish_category: "place" | "food" | "movie"
-      wish_status: "pending" | "done"
-    }
+      countdown_kind: 'anniversary' | 'birthday' | 'travel' | 'plan' | 'custom';
+      game_mode: 'daily_question' | 'guess_date' | 'trivia';
+      media_type: 'image' | 'video';
+      membership_role: 'partner_a' | 'partner_b';
+      membership_status: 'active' | 'inactive';
+      reminder_delivery_status: 'pending' | 'processing' | 'sent' | 'failed';
+      reminder_kind: 'countdown_day_of' | 'future_note_unlock';
+      wish_category: 'place' | 'food' | 'movie';
+      wish_status: 'pending' | 'done';
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I;
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U;
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+    | keyof DefaultSchema['Enums']
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof DefaultSchema['CompositeTypes']
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never;
 
 export const Constants = {
   graphql_public: {
@@ -1222,15 +1214,15 @@ export const Constants = {
   },
   public: {
     Enums: {
-      countdown_kind: ["anniversary", "birthday", "travel", "plan", "custom"],
-      game_mode: ["daily_question", "guess_date", "trivia"],
-      media_type: ["image", "video"],
-      membership_role: ["partner_a", "partner_b"],
-      membership_status: ["active", "inactive"],
-      reminder_delivery_status: ["pending", "processing", "sent", "failed"],
-      reminder_kind: ["countdown_day_of", "future_note_unlock"],
-      wish_category: ["place", "food", "movie"],
-      wish_status: ["pending", "done"],
+      countdown_kind: ['anniversary', 'birthday', 'travel', 'plan', 'custom'],
+      game_mode: ['daily_question', 'guess_date', 'trivia'],
+      media_type: ['image', 'video'],
+      membership_role: ['partner_a', 'partner_b'],
+      membership_status: ['active', 'inactive'],
+      reminder_delivery_status: ['pending', 'processing', 'sent', 'failed'],
+      reminder_kind: ['countdown_day_of', 'future_note_unlock'],
+      wish_category: ['place', 'food', 'movie'],
+      wish_status: ['pending', 'done'],
     },
   },
-} as const
+} as const;

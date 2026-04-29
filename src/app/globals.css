@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   color-scheme: light;
@@ -39,8 +39,11 @@
   --gradient-hero: linear-gradient(135deg, #fff5e4 0%, #ffece7 42%, #ffd1d1 100%);
   --gradient-memory: linear-gradient(160deg, #fff8f1 0%, #ffe3e1 48%, #ffd1d1 100%);
   --gradient-active: linear-gradient(180deg, #ffb1b1 0%, #ff9494 100%);
-  --gradient-map-overlay:
-    linear-gradient(180deg, rgba(255, 245, 228, 0.86) 0%, rgba(255, 227, 225, 0.94) 100%);
+  --gradient-map-overlay: linear-gradient(
+    180deg,
+    rgba(255, 245, 228, 0.86) 0%,
+    rgba(255, 227, 225, 0.94) 100%
+  );
   --radius-control: 1rem;
   --radius-panel: 1.5rem;
   --radius-memory: 2rem;
@@ -78,7 +81,7 @@
   --color-surface-strong: var(--surface-strong);
   --font-sans: var(--font-manrope);
   --font-display: var(--font-fraunces);
-  --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+  --font-mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
   --radius-control: var(--radius-control);
   --radius-panel: var(--radius-panel);
   --radius-memory: var(--radius-memory);
@@ -113,7 +116,7 @@ body {
 }
 
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -121,7 +124,9 @@ body::before {
   background-image:
     radial-gradient(circle at 20% 20%, rgba(75, 55, 66, 0.06) 0.6px, transparent 0.7px),
     radial-gradient(circle at 80% 70%, rgba(121, 99, 110, 0.05) 0.5px, transparent 0.8px);
-  background-size: 18px 18px, 23px 23px;
+  background-size:
+    18px 18px,
+    23px 23px;
   mix-blend-mode: multiply;
 }
 
@@ -234,7 +239,7 @@ select {
 
 .ui-couple-mark::before,
 .ui-couple-mark::after {
-  content: "";
+  content: '';
   display: inline-block;
   border-radius: 999px;
 }

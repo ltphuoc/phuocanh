@@ -1,12 +1,14 @@
-import { HydrationBoundary } from "@tanstack/react-query";
-import type { Metadata } from "next";
-import type { ReactElement } from "react";
-import { AlbumsClientPage } from "@/app/[locale]/(app)/albums/albums-client-page";
-import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { dehydrateAppQuery } from "@/lib/query/server-prefetch";
-import { getAlbumsAppData } from "@/lib/server/app-data";
-import { getReadyCoupleContextOrRedirect } from "@/lib/server/couple-context";
+import type { Metadata } from 'next';
+import type { ReactElement } from 'react';
+
+import { HydrationBoundary } from '@tanstack/react-query';
+
+import { AlbumsClientPage } from '@/app/[locale]/(app)/albums/albums-client-page';
+import { getRouteMetadata, resolveLocaleFromParams } from '@/i18n/server';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { dehydrateAppQuery } from '@/lib/query/server-prefetch';
+import { getAlbumsAppData } from '@/lib/server/app-data';
+import { getReadyCoupleContextOrRedirect } from '@/lib/server/couple-context';
 
 interface AlbumsPageProps {
   readonly params: Promise<{
@@ -14,19 +16,13 @@ interface AlbumsPageProps {
   }>;
 }
 
-export const generateMetadata = async ({
-  params,
-}: AlbumsPageProps): Promise<Metadata> => getRouteMetadata(params, "albums");
+export const generateMetadata = async ({ params }: AlbumsPageProps): Promise<Metadata> =>
+  getRouteMetadata(params, 'albums');
 
-export default async function AlbumsPage({
-  params,
-}: AlbumsPageProps): Promise<ReactElement> {
+export default async function AlbumsPage({ params }: AlbumsPageProps): Promise<ReactElement> {
   const locale = await resolveLocaleFromParams(params);
   const context = await getReadyCoupleContextOrRedirect(locale);
-  const dehydratedState = dehydrateAppQuery(
-    appQueryKeys.albums(),
-    await getAlbumsAppData(context),
-  );
+  const dehydratedState = dehydrateAppQuery(appQueryKeys.albums(), await getAlbumsAppData(context));
 
   return (
     <HydrationBoundary state={dehydratedState}>

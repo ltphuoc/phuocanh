@@ -3,12 +3,14 @@
 This file summarizes the current schema. The authoritative source is always `supabase/migrations/*.sql`.
 
 ## Schema Authority
+
 - Live schema, RLS, triggers, RPCs, and storage policies are owned by SQL migrations.
 - `src/lib/supabase/database.types.ts` is a checked-in TypeScript mirror and must match SQL.
 - `src/lib/db/schema.ts` is baseline inventory only and does not replace SQL.
 - Use `docs/engineering/migration-playbook.md` before making schema changes.
 
 ## Tables Implemented
+
 - `couples`
 - `couple_memberships`
 - `couple_invites`
@@ -32,6 +34,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_round_trivia_targets`
 
 ## Core Relationships
+
 - One `couples` row -> many `couple_memberships`
 - One `couples` row -> many `memories`, `wish_items`, `checklists`, `activity_events`, `countdowns`, `future_notes`, `trips`, and `albums`
 - One `couples` row -> many `reminder_deliveries`
@@ -50,6 +53,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - One `memories` row -> many `game_round_trivia_targets`
 
 ## Critical Constraints
+
 - Global singleton couple space via unique expression index on `couples ((true))`
 - `couples.timezone` must be a valid IANA timezone name
 - Max two active memberships per couple via trigger
@@ -75,6 +79,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_round_trivia_targets.answer_options` must be a JSON array with 2 to 4 options
 
 ## Security Posture
+
 - RLS is enabled across app tables.
 - `is_couple_member(target_couple_id uuid)` is the central access helper.
 - Direct app-layer insert into `couples` and `couple_memberships` is intentionally blocked; membership creation happens through RPCs.
@@ -93,6 +98,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - Gameplay round creation, answer submission, and reveal-safe gameplay reads are owned by SQL RPCs rather than client-only checks.
 
 ## RPCs In Use
+
 - `bootstrap_first_couple(started_date date, couple_name text, target_timezone text)`
 - `accept_couple_invite(invite_token text)`
 - `update_couple_timezone(target_couple_id uuid, target_timezone text)`
@@ -114,6 +120,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `submit_daily_question_answer(target_round_id uuid, answer_body text)`
 
 ## Couple Timezone Foundation
+
 - `couples`
   - now includes a shared `timezone` field
   - defaults to `Asia/Ho_Chi_Minh`
@@ -125,11 +132,13 @@ This file summarizes the current schema. The authoritative source is always `sup
   - preserves visible calendar dates for existing `countdowns.target_at` and `future_notes.unlock_at`
 
 ## Current Drizzle Posture
+
 - `drizzle.config.ts` and `src/lib/db/schema.ts` exist as baseline artifacts only.
 - Current runtime behavior still depends on SQL migrations, not a live Drizzle ORM model.
 - Do not treat older package-install failures as a current repo invariant.
 
 ## Phase 2 Slice 1 Tables
+
 - `countdowns`
   - couple-scoped milestone rows with `kind`, `title`, optional `note`, and `target_at`
   - stored as UTC instants derived from the selected date in the saved couple timezone
@@ -147,12 +156,14 @@ This file summarizes the current schema. The authoritative source is always `sup
   - deduplicates delivery per `(kind, source_id, recipient_user_id)` and tracks retry/failure state
 
 ## Phase 2 Slice 2 Tables
+
 - `trips`
   - couple-scoped travel rows with `title`, optional `note`, `start_date`, and `end_date`
   - writable/readable by active couple members through RLS
   - acts as the dependency root for later album and map entities
 
 ## Phase 2 Slice 3 Tables
+
 - `albums`
   - couple-scoped trip-rooted album rows with `title`, optional `description`, and one linked `trip_id`
   - writable/readable by active couple members through RLS
@@ -162,12 +173,14 @@ This file summarizes the current schema. The authoritative source is always `sup
   - writable/readable by active couple members through RLS and RPC validation
 
 ## Phase 2 Slice 4 Tables
+
 - `visited_places`
   - couple-scoped trip-linked place rows with `title`, optional `note`, and `visited_on`
   - writable/readable by active couple members through RLS
   - acts as the provider-free atlas data source for `/map`
 
 ## Phase 3 Slice 1 Tables
+
 - `game_rounds`
   - couple-scoped gameplay round rows with `mode`, `round_date`, `prompt_locale`, `prompt_text`, and `prompt_source`
   - `game_mode` currently supports `daily_question`, `guess_date`, and `trivia`
@@ -180,6 +193,7 @@ This file summarizes the current schema. The authoritative source is always `sup
   - stores one locked free-text answer per user per round
 
 ## Phase 3 Slice 2 Tables
+
 - `game_round_memory_targets`
   - links one `guess_date` round to the source `memories` row selected by SQL
   - direct member reads/writes are not part of the runtime contract
@@ -189,6 +203,7 @@ This file summarizes the current schema. The authoritative source is always `sup
   - guess bodies remain hidden until all active partners submit
 
 ## Phase 3 Slice 3 Tables
+
 - `game_round_trivia_targets`
   - links one `trivia` round to the source `memories` row selected by SQL
   - stores the correct location answer and stable answer options server-side
@@ -199,9 +214,11 @@ This file summarizes the current schema. The authoritative source is always `sup
   - selected answers and correctness remain hidden until all active partners submit
 
 ## Gameplay Stats Timezone Rule
+
 - `get_daily_question_stats(...)` now derives `today` from the saved `couples.timezone` value, not the database/server timezone.
 - Streak and recent-history output therefore follow the same couple-local day boundary as the live gameplay routes.
 
 ## Remaining Shell-Only Route Impact
+
 - The deprecated `/chat` mock route has been removed and should not be used to justify future schema work.
 - `/games/[mode]` still does not justify additional schema outside the delivered `daily_question`, `guess_date`, and `trivia` modes.

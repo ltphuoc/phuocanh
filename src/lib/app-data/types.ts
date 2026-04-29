@@ -4,7 +4,14 @@ import type {
   MemoryCard,
   MemoryDetailData,
   WishItemCard,
-} from "@/lib/server/phase-one-data";
+} from '@/lib/server/phase-one-data';
+import type {
+  DailyQuestionPageData,
+  GameplayStatsPageData,
+  GamesHubData,
+  GuessDatePageData,
+  TriviaPageData,
+} from '@/lib/server/phase-three-data';
 import type {
   AlbumDetailData,
   AlbumsPageData,
@@ -13,14 +20,7 @@ import type {
   MapPageData,
   TripDetailData,
   TripsPageData,
-} from "@/lib/server/phase-two-data";
-import type {
-  DailyQuestionPageData,
-  GamesHubData,
-  GameplayStatsPageData,
-  GuessDatePageData,
-  TriviaPageData,
-} from "@/lib/server/phase-three-data";
+} from '@/lib/server/phase-two-data';
 
 export interface AppDataContext {
   readonly coupleId: string;
@@ -53,7 +53,7 @@ export interface MemoryDetailAppData {
   readonly context: AppDataContext;
   readonly media: readonly {
     readonly id: string;
-    readonly mediaType: "image" | "video";
+    readonly mediaType: 'image' | 'video';
     readonly mimeType: string;
     readonly signedUrl: string | null;
     readonly storagePath: string;

@@ -1,5 +1,6 @@
-import type { ReactElement, ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement, ReactNode } from 'react';
+
+import { cn } from '@/lib/utils/cn';
 
 interface EmptyStateProps {
   readonly action?: ReactNode;
@@ -18,7 +19,7 @@ export const EmptyState = ({
 }: EmptyStateProps): ReactElement => (
   <div
     className={cn(
-      "flex min-h-36 flex-col items-center justify-center gap-3 rounded-[var(--radius-panel)] border border-dashed border-[#e9c9c3] bg-white/52 px-5 py-7 text-center shadow-whisper backdrop-blur-md",
+      'flex min-h-36 flex-col items-center justify-center gap-3 rounded-[var(--radius-panel)] border border-dashed border-[#e9c9c3] bg-white/52 px-5 py-7 text-center shadow-whisper backdrop-blur-md',
       className,
     )}
   >

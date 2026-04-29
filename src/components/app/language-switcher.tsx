@@ -1,11 +1,15 @@
-"use client";
+'use client';
 
-import { hasLocale, useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useTransition, type ReactElement } from "react";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { localeDisplayNames, routing } from "@/i18n/routing";
-import { cn } from "@/lib/utils/cn";
+import type { ReactElement } from 'react';
+
+import { useTransition } from 'react';
+import { useSearchParams } from 'next/navigation';
+
+import { hasLocale, useLocale, useTranslations } from 'next-intl';
+
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { localeDisplayNames, routing } from '@/i18n/routing';
+import { cn } from '@/lib/utils/cn';
 
 interface LanguageSwitcherProps {
   readonly className?: string;
@@ -18,21 +22,26 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps): ReactEle
   const [isPending, startTransition] = useTransition();
   const rawLocale = useLocale();
   const locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
-  const t = useTranslations("languageSwitcher");
+  const t = useTranslations('languageSwitcher');
 
   return (
-    <div className={cn("inline-flex items-center gap-1 rounded-pill border border-white/72 bg-white/72 p-1 shadow-whisper", className)}>
-      <span className="sr-only">{t("label")}</span>
+    <div
+      className={cn(
+        'inline-flex items-center gap-1 rounded-pill border border-white/72 bg-white/72 p-1 shadow-whisper',
+        className,
+      )}
+    >
+      <span className="sr-only">{t('label')}</span>
       {routing.locales.map((targetLocale) => {
         const isActive = locale === targetLocale;
 
         return (
           <button
             className={cn(
-              "rounded-pill px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors",
+              'rounded-pill px-3 py-1.5 text-[11px] font-semibold tracking-[0.08em] uppercase transition-colors',
               isActive
-                ? "ui-gradient-active text-primary-foreground"
-                : "text-muted-foreground hover:bg-white/70",
+                ? 'ui-gradient-active text-primary-foreground'
+                : 'text-muted-foreground hover:bg-white/70',
             )}
             disabled={isPending || isActive}
             key={targetLocale}

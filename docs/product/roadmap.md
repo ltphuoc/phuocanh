@@ -1,6 +1,7 @@
 # Product Roadmap
 
 ## Phase 1 (MVP) - Status: implemented
+
 - Private auth + couple membership bootstrap/invite
 - Memories CRUD (create + view detail) with optional media upload
 - Timeline feed and On This Day
@@ -12,6 +13,7 @@
 - Responsive editorial redesign complete for Phase 1 routes: story-first home, floating dock + rail shell, Fraunces + Manrope typography, and premium light-only surfaces.
 
 ## Phase 2 (Enhancements) - Status: implemented
+
 - Implemented in Slice 1:
   - Countdowns
   - Future notes (metadata + locked body model)
@@ -57,6 +59,7 @@
 - See `docs/product/phase-2-status.md` for the living status tracker.
 
 ## Phase 3 (Advanced) - Status: first three slices implemented
+
 - Implemented in Slice 1:
   - game kernel for `daily_question`
   - live daily-question route with prompt generation, locked answers, and reveal
@@ -74,10 +77,12 @@
 - `/chat` is not part of the Phase 3 feature roadmap; the deprecated mock route has been removed as maintenance.
 
 ## Next Move
+
 - Primary: choose the next gameplay hardening slice or another explicit live gameplay candidate from this now-green production-flow browser baseline.
 - Secondary maintenance: deprecated `/chat` mock route removal is complete.
 - Current planning source: use `docs/product/active-plan.md` for the latest operating plan; this roadmap remains the phase-level history and direction.
 
 ## Phase 4 (Advanced+) - Status: planned
+
 - AI retrieval search with embeddings
 - Remaining game modes and polish

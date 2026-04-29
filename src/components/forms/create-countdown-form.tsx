@@ -1,63 +1,54 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { addDays } from "date-fns";
-import type { ReactElement } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { createCountdownAction } from "@/app/actions/planning-actions";
-import { FormSection } from "@/components/layout/form-section";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useI18n } from "@/hooks/useI18n";
-import {
-  getActionErrorMessage,
-  useActionMutation,
-} from "@/lib/query/action-mutation";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
-import { formatDateInputValue } from "@/lib/utils/date-input";
+import type { ReactElement } from 'react';
 
-const buildCreateCountdownSchema = (
-  t: ReturnType<typeof useI18n<"forms.countdown">>["t"],
-) =>
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
+import { addDays } from 'date-fns';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+import { createCountdownAction } from '@/app/actions/planning-actions';
+import { FormSection } from '@/components/layout/form-section';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useI18n } from '@/hooks/useI18n';
+import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
+import { formatDateInputValue } from '@/lib/utils/date-input';
+
+const buildCreateCountdownSchema = (t: ReturnType<typeof useI18n<'forms.countdown'>>['t']) =>
   z.object({
-    kind: z.enum(["anniversary", "birthday", "travel", "plan", "custom"]),
-    note: z.string().max(280, t("validation.noteMax")).optional(),
-    targetDate: z.string().min(1, t("validation.targetDateRequired")),
+    kind: z.enum(['anniversary', 'birthday', 'travel', 'plan', 'custom']),
+    note: z.string().max(280, t('validation.noteMax')).optional(),
+    targetDate: z.string().min(1, t('validation.targetDateRequired')),
     title: z
       .string()
       .trim()
-      .min(1, t("validation.titleRequired"))
-      .max(120, t("validation.titleMax")),
+      .min(1, t('validation.titleRequired'))
+      .max(120, t('validation.titleMax')),
   });
 
 type CreateCountdownValues = z.infer<ReturnType<typeof buildCreateCountdownSchema>>;
 
-const COUNTDOWN_KIND_OPTIONS = [
-  "anniversary",
-  "birthday",
-  "travel",
-  "plan",
-  "custom",
-] as const;
+const COUNTDOWN_KIND_OPTIONS = ['anniversary', 'birthday', 'travel', 'plan', 'custom'] as const;
 
 export const CreateCountdownForm = (): ReactElement => {
-  const { t: actionsT } = useI18n("actions");
-  const { t: commonT } = useI18n("common");
-  const { t: countdownsT } = useI18n("countdowns");
-  const { t: formT } = useI18n("forms.countdown");
+  const { t: actionsT } = useI18n('actions');
+  const { t: commonT } = useI18n('common');
+  const { t: countdownsT } = useI18n('countdowns');
+  const { t: formT } = useI18n('forms.countdown');
   const queryClient = useQueryClient();
   const mutation = useActionMutation(createCountdownAction);
   const form = useForm<CreateCountdownValues>({
     defaultValues: {
-      kind: "anniversary",
-      note: "",
+      kind: 'anniversary',
+      note: '',
       targetDate: formatDateInputValue(addDays(new Date(), 7)),
-      title: "",
+      title: '',
     },
     resolver: zodResolver(buildCreateCountdownSchema(formT)),
   });
@@ -69,44 +60,47 @@ export const CreateCountdownForm = (): ReactElement => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
-    payload.set("kind", values.kind);
-    payload.set("note", values.note ?? "");
-    payload.set("targetDate", values.targetDate);
-    payload.set("title", values.title);
+    payload.set('kind', values.kind);
+    payload.set('note', values.note ?? '');
+    payload.set('targetDate', values.targetDate);
+    payload.set('title', values.title);
 
     try {
       const nextState = await mutation.mutateAsync(payload);
-      const actionMessageKey = nextState.message || "unexpectedError";
+      const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
       form.reset({
-        kind: "anniversary",
-        note: "",
+        kind: 'anniversary',
+        note: '',
         targetDate: formatDateInputValue(addDays(new Date(), 7)),
-        title: "",
+        title: '',
       });
       await queryClient.invalidateQueries({ queryKey: appQueryKeys.countdowns() });
     } catch (error: unknown) {
-      console.error("Failed to submit countdown form", error);
+      console.error('Failed to submit countdown form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
     }
   });
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={onSubmit}
+    >
       <div className="grid gap-4 md:grid-cols-2">
         <FormSection
           errorId="countdown-title-error"
           errorMessage={titleErrorMessage}
           htmlFor="countdownTitle"
-          label={formT("titleLabel")}
+          label={formT('titleLabel')}
         >
           <Input
-            aria-describedby={titleErrorMessage ? "countdown-title-error" : undefined}
+            aria-describedby={titleErrorMessage ? 'countdown-title-error' : undefined}
             aria-invalid={Boolean(titleErrorMessage)}
             id="countdownTitle"
-            placeholder={formT("titlePlaceholder")}
+            placeholder={formT('titlePlaceholder')}
             type="text"
-            {...form.register("title")}
+            {...form.register('title')}
           />
         </FormSection>
 
@@ -114,16 +108,19 @@ export const CreateCountdownForm = (): ReactElement => {
           errorId="countdown-kind-error"
           errorMessage={kindErrorMessage}
           htmlFor="countdownKind"
-          label={formT("kindLabel")}
+          label={formT('kindLabel')}
         >
           <Select
-            aria-describedby={kindErrorMessage ? "countdown-kind-error" : undefined}
+            aria-describedby={kindErrorMessage ? 'countdown-kind-error' : undefined}
             aria-invalid={Boolean(kindErrorMessage)}
             id="countdownKind"
-            {...form.register("kind")}
+            {...form.register('kind')}
           >
             {COUNTDOWN_KIND_OPTIONS.map((kind) => (
-              <option key={kind} value={kind}>
+              <option
+                key={kind}
+                value={kind}
+              >
                 {countdownsT(`kind.${kind}`)}
               </option>
             ))}
@@ -133,46 +130,46 @@ export const CreateCountdownForm = (): ReactElement => {
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <FormSection
-          description={formT("targetDateDescription")}
+          description={formT('targetDateDescription')}
           errorId="countdown-target-date-error"
           errorMessage={targetDateErrorMessage}
           htmlFor="countdownTargetDate"
-          label={formT("targetDateLabel")}
+          label={formT('targetDateLabel')}
         >
           <Input
-            aria-describedby={targetDateErrorMessage ? "countdown-target-date-error" : undefined}
+            aria-describedby={targetDateErrorMessage ? 'countdown-target-date-error' : undefined}
             aria-invalid={Boolean(targetDateErrorMessage)}
             id="countdownTargetDate"
             type="date"
-            {...form.register("targetDate")}
+            {...form.register('targetDate')}
           />
         </FormSection>
 
         <FormSection
-          description={formT("noteDescription")}
+          description={formT('noteDescription')}
           errorId="countdown-note-error"
           errorMessage={noteErrorMessage}
           htmlFor="countdownNote"
-          label={formT("noteLabel")}
+          label={formT('noteLabel')}
         >
           <Textarea
-            aria-describedby={noteErrorMessage ? "countdown-note-error" : undefined}
+            aria-describedby={noteErrorMessage ? 'countdown-note-error' : undefined}
             aria-invalid={Boolean(noteErrorMessage)}
             id="countdownNote"
-            placeholder={formT("notePlaceholder")}
+            placeholder={formT('notePlaceholder')}
             rows={4}
-            {...form.register("note")}
+            {...form.register('note')}
           />
         </FormSection>
       </div>
 
       <Button
-        busyLabel={commonT("working")}
+        busyLabel={commonT('working')}
         className="w-full md:w-auto"
         isBusy={mutation.isPending}
         type="submit"
       >
-        {formT("submit")}
+        {formT('submit')}
       </Button>
     </form>
   );

@@ -1,7 +1,11 @@
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
-import { env } from "@/lib/env";
-import type { Database } from "@/lib/supabase/database.types";
+import type { NextRequest } from 'next/server';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { NextResponse } from 'next/server';
+
+import { createServerClient } from '@supabase/ssr';
+
+import { env } from '@/lib/env';
 
 export const updateSession = async (request: NextRequest): Promise<NextResponse> => {
   let response = NextResponse.next({

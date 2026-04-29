@@ -1,20 +1,17 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
-import { glob } from "node:fs/promises";
+import { glob, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
 
 const workspaceRoot = process.cwd();
-const strictMode = process.argv.includes("--strict");
+const strictMode = process.argv.includes('--strict');
 
-const includeGlobs = ["src/app/**/*.tsx", "src/components/**/*.tsx"];
+const includeGlobs = ['src/app/**/*.tsx', 'src/components/**/*.tsx'];
 
-const allowList = new Set([
-  "PhuocAnh",
-]);
+const allowList = new Set(['PhuocAnh']);
 
 const textNodeRegex = />\s*([^\n<>{}=;()]+?)\s*</gu;
 
-const normalizeText = (text) => text.replace(/\s+/gu, " ").trim();
+const normalizeText = (text) => text.replace(/\s+/gu, ' ').trim();
 
 const isAllowedText = (value) => {
   if (!value) {
@@ -42,11 +39,11 @@ const run = async () => {
   for (const includeGlob of includeGlobs) {
     for await (const filePath of glob(includeGlob)) {
       const absolutePath = path.resolve(workspaceRoot, filePath);
-      const source = await readFile(absolutePath, "utf8");
+      const source = await readFile(absolutePath, 'utf8');
 
       let match = textNodeRegex.exec(source);
       while (match) {
-        const text = normalizeText(match[1] ?? "");
+        const text = normalizeText(match[1] ?? '');
         if (!/[A-Za-z]/u.test(text)) {
           match = textNodeRegex.exec(source);
           continue;
@@ -65,7 +62,7 @@ const run = async () => {
   }
 
   if (findings.length === 0) {
-    console.log("Hardcoded UI text audit passed.");
+    console.log('Hardcoded UI text audit passed.');
     return;
   }
 
@@ -84,6 +81,6 @@ const run = async () => {
 };
 
 run().catch((error) => {
-  console.error("Hardcoded UI text audit failed.", error);
+  console.error('Hardcoded UI text audit failed.', error);
   process.exitCode = 1;
 });

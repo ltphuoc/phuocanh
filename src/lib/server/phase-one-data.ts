@@ -1,24 +1,26 @@
-import { differenceInCalendarDays } from "date-fns";
-import { z } from "zod";
-import type { CoupleContext } from "@/lib/server/couple-context";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/database.types";
+import type { CoupleContext } from '@/lib/server/couple-context';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { differenceInCalendarDays } from 'date-fns';
+import { z } from 'zod';
+
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   getCurrentDateTokenInTimeZone,
   parseDateInputValueInTimeZone,
-} from "@/lib/utils/couple-timezone";
+} from '@/lib/utils/couple-timezone';
 
 export interface MemoryCard {
   readonly happenedAt: string;
   readonly id: string;
   readonly locationName: string | null;
-  readonly mediaType: Database["public"]["Enums"]["media_type"] | null;
+  readonly mediaType: Database['public']['Enums']['media_type'] | null;
   readonly note: string | null;
   readonly storagePath: string | null;
 }
 
 export interface WishItemCard {
-  readonly category: Database["public"]["Enums"]["wish_category"];
+  readonly category: Database['public']['Enums']['wish_category'];
   readonly id: string;
   readonly note: string | null;
   readonly title: string;
@@ -51,7 +53,7 @@ export interface MemoryDetailData {
   readonly locationName: string | null;
   readonly media: {
     readonly id: string;
-    readonly mediaType: Database["public"]["Enums"]["media_type"];
+    readonly mediaType: Database['public']['Enums']['media_type'];
     readonly mimeType: string;
     readonly storagePath: string;
   }[];
@@ -61,8 +63,8 @@ export interface MemoryDetailData {
 const memoryIdSchema = z.uuid();
 
 const toMemoryCard = (
-  memory: Database["public"]["Tables"]["memories"]["Row"],
-  mediaRows: Database["public"]["Tables"]["memory_media"]["Row"][],
+  memory: Database['public']['Tables']['memories']['Row'],
+  mediaRows: Database['public']['Tables']['memory_media']['Row'][],
 ): MemoryCard => {
   const media = mediaRows.find((item) => item.memory_id === memory.id);
   return {
@@ -75,30 +77,28 @@ const toMemoryCard = (
   };
 };
 
-export const getHomePageData = async (
-  context: CoupleContext,
-): Promise<HomePageData> => {
+export const getHomePageData = async (context: CoupleContext): Promise<HomePageData> => {
   const supabase = await createSupabaseServerClient();
 
   const [memoryQuery, wishQuery, checklistQuery] = await Promise.all([
     supabase
-      .from("memories")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .order("happened_at", { ascending: false })
+      .from('memories')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .order('happened_at', { ascending: false })
       .limit(20),
     supabase
-      .from("wish_items")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
+      .from('wish_items')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
       .limit(30),
     supabase
-      .from("checklists")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .order("created_at", { ascending: false }),
+      .from('checklists')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (memoryQuery.error) {
@@ -115,7 +115,7 @@ export const getHomePageData = async (
   const checklistIds = checklistQuery.data.map((checklist) => checklist.id);
 
   const mediaQuery = memoryIds.length
-    ? await supabase.from("memory_media").select("*").in("memory_id", memoryIds)
+    ? await supabase.from('memory_media').select('*').in('memory_id', memoryIds)
     : { data: [], error: null };
 
   if (mediaQuery.error) {
@@ -124,10 +124,10 @@ export const getHomePageData = async (
 
   const checklistItemsQuery = checklistIds.length
     ? await supabase
-        .from("checklist_items")
-        .select("*")
-        .in("checklist_id", checklistIds)
-        .order("created_at", { ascending: true })
+        .from('checklist_items')
+        .select('*')
+        .in('checklist_id', checklistIds)
+        .order('created_at', { ascending: true })
     : { data: [], error: null };
 
   if (checklistItemsQuery.error) {
@@ -172,24 +172,22 @@ export interface ListsPageData {
   readonly wishItems: WishItemCard[];
 }
 
-export const getListsPageData = async (
-  context: CoupleContext,
-): Promise<ListsPageData> => {
+export const getListsPageData = async (context: CoupleContext): Promise<ListsPageData> => {
   const supabase = await createSupabaseServerClient();
 
   const [wishQuery, checklistQuery] = await Promise.all([
     supabase
-      .from("wish_items")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
+      .from('wish_items')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
       .limit(30),
     supabase
-      .from("checklists")
-      .select("*")
-      .eq("couple_id", context.coupleId)
-      .order("created_at", { ascending: false }),
+      .from('checklists')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (wishQuery.error) {
@@ -202,10 +200,10 @@ export const getListsPageData = async (
   const checklistIds = checklistQuery.data.map((checklist) => checklist.id);
   const checklistItemsQuery = checklistIds.length
     ? await supabase
-        .from("checklist_items")
-        .select("*")
-        .in("checklist_id", checklistIds)
-        .order("created_at", { ascending: true })
+        .from('checklist_items')
+        .select('*')
+        .in('checklist_id', checklistIds)
+        .order('created_at', { ascending: true })
     : { data: [], error: null };
 
   if (checklistItemsQuery.error) {
@@ -235,11 +233,9 @@ export const getListsPageData = async (
   };
 };
 
-export const getOnThisDayData = async (
-  context: CoupleContext,
-): Promise<MemoryCard[]> => {
+export const getOnThisDayData = async (context: CoupleContext): Promise<MemoryCard[]> => {
   const supabase = await createSupabaseServerClient();
-  const { data: memories, error } = await supabase.rpc("memories_on_this_day", {
+  const { data: memories, error } = await supabase.rpc('memories_on_this_day', {
     target_couple_id: context.coupleId,
     target_timezone: context.timezone,
   });
@@ -251,7 +247,7 @@ export const getOnThisDayData = async (
   const matchedMemories = memories ?? [];
   const memoryIds = matchedMemories.map((memory) => memory.id);
   const mediaQuery = memoryIds.length
-    ? await supabase.from("memory_media").select("*").in("memory_id", memoryIds)
+    ? await supabase.from('memory_media').select('*').in('memory_id', memoryIds)
     : { data: [], error: null };
 
   if (mediaQuery.error) {
@@ -272,10 +268,10 @@ export const getMemoryDetailData = async (
 
   const supabase = await createSupabaseServerClient();
   const { data: memories, error } = await supabase
-    .from("memories")
-    .select("*")
-    .eq("couple_id", context.coupleId)
-    .eq("id", parsedMemoryId.data)
+    .from('memories')
+    .select('*')
+    .eq('couple_id', context.coupleId)
+    .eq('id', parsedMemoryId.data)
     .limit(1);
 
   if (error) {
@@ -288,10 +284,10 @@ export const getMemoryDetailData = async (
   }
 
   const { data: mediaRows, error: mediaError } = await supabase
-    .from("memory_media")
-    .select("*")
-    .eq("memory_id", parsedMemoryId.data)
-    .order("created_at", { ascending: true });
+    .from('memory_media')
+    .select('*')
+    .eq('memory_id', parsedMemoryId.data)
+    .order('created_at', { ascending: true });
 
   if (mediaError) {
     throw new Error(mediaError.message);

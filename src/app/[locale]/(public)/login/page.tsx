@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import type { ReactElement } from "react";
-import { LoginForm } from "@/components/forms/login-form";
-import { AuthShell } from "@/components/layout/auth-shell";
-import { getRouteMetadata, resolveLocaleFromParams } from "@/i18n/server";
+import type { Metadata } from 'next';
+import type { ReactElement } from 'react';
+
+import { getTranslations } from 'next-intl/server';
+
+import { LoginForm } from '@/components/forms/login-form';
+import { AuthShell } from '@/components/layout/auth-shell';
+import { Link } from '@/i18n/navigation';
+import { getRouteMetadata, resolveLocaleFromParams } from '@/i18n/server';
 
 interface LoginPageProps {
   readonly params: Promise<{
@@ -15,9 +17,8 @@ interface LoginPageProps {
   }>;
 }
 
-export const generateMetadata = async ({
-  params,
-}: LoginPageProps): Promise<Metadata> => getRouteMetadata(params, "login");
+export const generateMetadata = async ({ params }: LoginPageProps): Promise<Metadata> =>
+  getRouteMetadata(params, 'login');
 
 export default async function LoginPage({
   params,
@@ -27,19 +28,19 @@ export default async function LoginPage({
   const { next } = await searchParams;
   const t = await getTranslations({
     locale,
-    namespace: "auth.login",
+    namespace: 'auth.login',
   });
 
   return (
     <main>
       <AuthShell
-        helper={t("helper")}
-        helperTitle={t("helperTitle")}
-        title={t("title")}
+        helper={t('helper')}
+        helperTitle={t('helperTitle')}
+        title={t('title')}
       >
         <LoginForm initialNextPath={next} />
         <p className="text-xs text-muted-foreground">
-          {t.rich("inviteHint", {
+          {t.rich('inviteHint', {
             link: (chunks) => (
               <Link
                 className="font-semibold underline decoration-primary/70 underline-offset-2"

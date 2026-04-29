@@ -1097,8 +1097,7 @@
         "active": "Active trip",
         "completed": "Completed trip",
         "planned": "Planned trip"
-      }
-      ,
+      },
       "tripWindow": "{start} to {end}",
       "visitedOn": "Visited {date}"
     },

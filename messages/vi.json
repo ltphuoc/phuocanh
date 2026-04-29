@@ -1097,8 +1097,7 @@
         "active": "Chuyến đi đang diễn ra",
         "completed": "Chuyến đi đã hoàn thành",
         "planned": "Chuyến đi đã lên kế hoạch"
-      }
-      ,
+      },
       "tripWindow": "{start} đến {end}",
       "visitedOn": "Đã ghé vào {date}"
     },

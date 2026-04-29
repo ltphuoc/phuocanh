@@ -1,37 +1,40 @@
-"use client";
+'use client';
 
-import { ClipboardList, Flower2, Heart, Sparkles } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { ReactElement } from "react";
-import { ChecklistItemForm } from "@/components/forms/checklist-item-form";
-import { ChecklistToggleForm } from "@/components/forms/checklist-toggle-form";
-import { CreateChecklistForm } from "@/components/forms/create-checklist-form";
-import { InviteLinkForm } from "@/components/forms/invite-link-form";
-import { WishItemForm } from "@/components/forms/wish-item-form";
-import { PageHeader } from "@/components/layout/page-header";
-import { SectionStack } from "@/components/layout/section-stack";
-import { AnniversarySpotlight } from "@/components/ui/anniversary-spotlight";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ListRow } from "@/components/ui/list-row";
-import { PageReveal } from "@/components/ui/page-reveal";
-import { SectionCard } from "@/components/ui/section-card";
-import { TimelineRibbon, type TimelineRibbonItem } from "@/components/ui/timeline-ribbon";
-import { QueryErrorState, QueryLoadingState } from "@/components/query/query-status";
-import { Link } from "@/i18n/navigation";
-import { useI18n } from "@/hooks/useI18n";
-import { appQueryFetchers } from "@/lib/query/app-query-fetchers";
-import { appQueryKeys } from "@/lib/query/app-query-keys";
+import type { ReactElement } from 'react';
+import type { TimelineRibbonItem } from '@/components/ui/timeline-ribbon';
+
+import { useQuery } from '@tanstack/react-query';
+import { ClipboardList, Flower2, Heart, Sparkles } from 'lucide-react';
+
+import { ChecklistItemForm } from '@/components/forms/checklist-item-form';
+import { ChecklistToggleForm } from '@/components/forms/checklist-toggle-form';
+import { CreateChecklistForm } from '@/components/forms/create-checklist-form';
+import { InviteLinkForm } from '@/components/forms/invite-link-form';
+import { WishItemForm } from '@/components/forms/wish-item-form';
+import { PageHeader } from '@/components/layout/page-header';
+import { SectionStack } from '@/components/layout/section-stack';
+import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
+import { AnniversarySpotlight } from '@/components/ui/anniversary-spotlight';
+import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ListRow } from '@/components/ui/list-row';
+import { PageReveal } from '@/components/ui/page-reveal';
+import { SectionCard } from '@/components/ui/section-card';
+import { TimelineRibbon } from '@/components/ui/timeline-ribbon';
+import { useI18n } from '@/hooks/useI18n';
+import { Link } from '@/i18n/navigation';
+import { appQueryFetchers } from '@/lib/query/app-query-fetchers';
+import { appQueryKeys } from '@/lib/query/app-query-keys';
 
 const categoryTranslationKeyByValue = {
-  food: "category.food",
-  movie: "category.movie",
-  place: "category.place",
+  food: 'category.food',
+  movie: 'category.movie',
+  place: 'category.place',
 } as const;
 
 export const HomeClientPage = (): ReactElement => {
-  const { t: homeT } = useI18n("home");
-  const { t: wishItemFormT } = useI18n("forms.wishItem");
+  const { t: homeT } = useI18n('home');
+  const { t: wishItemFormT } = useI18n('forms.wishItem');
   const query = useQuery({
     queryFn: appQueryFetchers.home,
     queryKey: appQueryKeys.home(),
@@ -101,24 +104,33 @@ export const HomeClientPage = (): ReactElement => {
                       className="ui-gradient-active inline-flex items-center rounded-pill px-5 py-3 text-sm font-semibold text-primary-foreground shadow-cloud"
                       href="/memories/new"
                     >
-                      {homeT("addMemory")}
+                      {homeT('addMemory')}
                     </Link>
                     <InviteLinkForm />
                   </div>
                 }
-                description={homeT("header.description")}
-                eyebrow={homeT("header.eyebrow")}
-                quote={homeT("header.quote")}
+                description={homeT('header.description')}
+                eyebrow={homeT('header.eyebrow')}
+                quote={homeT('header.quote')}
                 surface="paper"
-                title={homeT("header.title")}
+                title={homeT('header.title')}
               />
               {timelineItems.length ? (
-                <TimelineRibbon items={timelineItems} timeZone={data.context.timeZone} />
+                <TimelineRibbon
+                  items={timelineItems}
+                  timeZone={data.context.timeZone}
+                />
               ) : (
                 <EmptyState
-                  description={homeT("timelineEmpty.description")}
-                  icon={<Flower2 aria-hidden="true" className="size-4" strokeWidth={2.2} />}
-                  title={homeT("timelineEmpty.title")}
+                  description={homeT('timelineEmpty.description')}
+                  icon={
+                    <Flower2
+                      aria-hidden="true"
+                      className="size-4"
+                      strokeWidth={2.2}
+                    />
+                  }
+                  title={homeT('timelineEmpty.title')}
                 />
               )}
             </section>
@@ -126,15 +138,23 @@ export const HomeClientPage = (): ReactElement => {
 
           <div className="flex flex-col gap-6">
             <PageReveal delay={0.1}>
-              <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="glass">
+              <SectionCard
+                className="flex flex-col gap-5"
+                padding="comfortable"
+                surface="glass"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="ui-meta ui-couple-mark">{homeT("wishlist.eyebrow")}</p>
+                    <p className="ui-meta ui-couple-mark">{homeT('wishlist.eyebrow')}</p>
                     <h2 className="mt-2 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-                      {homeT("wishlist.title")}
+                      {homeT('wishlist.title')}
                     </h2>
                   </div>
-                  <Sparkles aria-hidden="true" className="size-5 text-primary" strokeWidth={2.2} />
+                  <Sparkles
+                    aria-hidden="true"
+                    className="size-5 text-primary"
+                    strokeWidth={2.2}
+                  />
                 </div>
                 <WishItemForm />
                 <div className="flex flex-col gap-3">
@@ -142,16 +162,26 @@ export const HomeClientPage = (): ReactElement => {
                     data.wishItems.map((item) => (
                       <ListRow
                         key={item.id}
-                        meta={<Badge>{wishItemFormT(categoryTranslationKeyByValue[item.category])}</Badge>}
+                        meta={
+                          <Badge>
+                            {wishItemFormT(categoryTranslationKeyByValue[item.category])}
+                          </Badge>
+                        }
                         subtitle={item.note}
                         title={item.title}
                       />
                     ))
                   ) : (
                     <EmptyState
-                      description={homeT("wishlist.empty.description")}
-                      icon={<Heart aria-hidden="true" className="size-4" strokeWidth={2.2} />}
-                      title={homeT("wishlist.empty.title")}
+                      description={homeT('wishlist.empty.description')}
+                      icon={
+                        <Heart
+                          aria-hidden="true"
+                          className="size-4"
+                          strokeWidth={2.2}
+                        />
+                      }
+                      title={homeT('wishlist.empty.title')}
                     />
                   )}
                 </div>
@@ -159,15 +189,23 @@ export const HomeClientPage = (): ReactElement => {
             </PageReveal>
 
             <PageReveal delay={0.15}>
-              <SectionCard className="flex flex-col gap-5" padding="comfortable" surface="petal">
+              <SectionCard
+                className="flex flex-col gap-5"
+                padding="comfortable"
+                surface="petal"
+              >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="ui-meta ui-couple-mark">{homeT("checklists.eyebrow")}</p>
+                    <p className="ui-meta ui-couple-mark">{homeT('checklists.eyebrow')}</p>
                     <h2 className="mt-2 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-                      {homeT("checklists.title")}
+                      {homeT('checklists.title')}
                     </h2>
                   </div>
-                  <ClipboardList aria-hidden="true" className="size-5 text-primary" strokeWidth={2.2} />
+                  <ClipboardList
+                    aria-hidden="true"
+                    className="size-5 text-primary"
+                    strokeWidth={2.2}
+                  />
                 </div>
                 <CreateChecklistForm />
                 <div className="flex flex-col gap-4">
@@ -181,7 +219,7 @@ export const HomeClientPage = (): ReactElement => {
                         surface="paper"
                       >
                         <div>
-                          <p className="ui-meta">{homeT("checklists.sectionLabel")}</p>
+                          <p className="ui-meta">{homeT('checklists.sectionLabel')}</p>
                           <h3 className="mt-2 font-display text-[1.45rem] tracking-[-0.02em] text-foreground">
                             {checklist.title}
                           </h3>
@@ -189,9 +227,18 @@ export const HomeClientPage = (): ReactElement => {
                         <div className="flex flex-col gap-3">
                           {checklist.items.map((item) => (
                             <ListRow
-                              action={<ChecklistToggleForm checklistItemId={item.id} isDone={item.isDone} />}
+                              action={
+                                <ChecklistToggleForm
+                                  checklistItemId={item.id}
+                                  isDone={item.isDone}
+                                />
+                              }
                               key={item.id}
-                              subtitle={item.isDone ? homeT("checklists.completed") : homeT("checklists.pending")}
+                              subtitle={
+                                item.isDone
+                                  ? homeT('checklists.completed')
+                                  : homeT('checklists.pending')
+                              }
                               title={item.text}
                             />
                           ))}
@@ -201,9 +248,15 @@ export const HomeClientPage = (): ReactElement => {
                     ))
                   ) : (
                     <EmptyState
-                      description={homeT("checklists.empty.description")}
-                      icon={<ClipboardList aria-hidden="true" className="size-4" strokeWidth={2.2} />}
-                      title={homeT("checklists.empty.title")}
+                      description={homeT('checklists.empty.description')}
+                      icon={
+                        <ClipboardList
+                          aria-hidden="true"
+                          className="size-4"
+                          strokeWidth={2.2}
+                        />
+                      }
+                      title={homeT('checklists.empty.title')}
                     />
                   )}
                 </div>

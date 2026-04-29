@@ -1,10 +1,11 @@
-import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'npm:@supabase/supabase-js@2'
-import { Resend } from 'npm:resend'
-import { z } from 'npm:zod@4.3.6'
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
-const CLAIM_BATCH_SIZE = 25
-const MAX_BACKOFF_MINUTES = 6 * 60
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { Resend } from 'npm:resend';
+import { z } from 'npm:zod@4.3.6';
+
+const CLAIM_BATCH_SIZE = 25;
+const MAX_BACKOFF_MINUTES = 6 * 60;
 
 const envSchema = z.object({
   REMINDER_APP_BASE_URL: z.url().default('http://localhost:3000'),
@@ -14,13 +15,13 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().trim().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().trim().min(1),
   SUPABASE_URL: z.url(),
-})
+});
 
 const reminderPayloadSchema = z.object({
   dateToken: z.string().trim().min(1),
   routePath: z.string().trim().startsWith('/'),
   title: z.string().trim().min(1),
-})
+});
 
 const claimedReminderDeliverySchema = z.object({
   attempts: z.number().int().nonnegative(),
@@ -30,12 +31,12 @@ const claimedReminderDeliverySchema = z.object({
   max_attempts: z.number().int().positive(),
   payload: reminderPayloadSchema,
   recipient_email: z.email(),
-})
+});
 
-const claimedReminderDeliveriesSchema = z.array(claimedReminderDeliverySchema)
+const claimedReminderDeliveriesSchema = z.array(claimedReminderDeliverySchema);
 
 const buildReminderUrl = (appBaseUrl: string, locale: string, routePath: string): string =>
-  new URL(`/${locale}${routePath}`, appBaseUrl).toString()
+  new URL(`/${locale}${routePath}`, appBaseUrl).toString();
 
 const escapeHtml = (value: string): string =>
   value
@@ -43,43 +44,53 @@ const escapeHtml = (value: string): string =>
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+    .replaceAll("'", '&#39;');
 
-const getReminderIdempotencyKey = (reminderId: string): string => `reminder-delivery/${reminderId}`
+const getReminderIdempotencyKey = (reminderId: string): string => `reminder-delivery/${reminderId}`;
 
-const buildReminderSubject = (kind: z.infer<typeof claimedReminderDeliverySchema>['kind'], title: string): string =>
-  kind === 'countdown_day_of' ? `${title} is today` : `Future note unlocked: ${title}`
+const buildReminderSubject = (
+  kind: z.infer<typeof claimedReminderDeliverySchema>['kind'],
+  title: string,
+): string => (kind === 'countdown_day_of' ? `${title} is today` : `Future note unlocked: ${title}`);
 
-const buildReminderText = (reminder: z.infer<typeof claimedReminderDeliverySchema>, reminderUrl: string): string => {
+const buildReminderText = (
+  reminder: z.infer<typeof claimedReminderDeliverySchema>,
+  reminderUrl: string,
+): string => {
   const intro =
     reminder.kind === 'countdown_day_of'
       ? `Your countdown is due today: ${reminder.payload.title}.`
-      : `Your future note is unlocked today: ${reminder.payload.title}.`
+      : `Your future note is unlocked today: ${reminder.payload.title}.`;
 
-  return `${intro}\n\nDate: ${reminder.payload.dateToken}\nOpen in app: ${reminderUrl}`
-}
+  return `${intro}\n\nDate: ${reminder.payload.dateToken}\nOpen in app: ${reminderUrl}`;
+};
 
-const buildReminderHtml = (reminder: z.infer<typeof claimedReminderDeliverySchema>, reminderUrl: string): string => {
+const buildReminderHtml = (
+  reminder: z.infer<typeof claimedReminderDeliverySchema>,
+  reminderUrl: string,
+): string => {
   const intro =
-    reminder.kind === 'countdown_day_of' ? 'Your countdown is due today.' : 'Your future note is unlocked today.'
-  const escapedIntro = escapeHtml(intro)
-  const escapedTitle = escapeHtml(reminder.payload.title)
-  const escapedDateToken = escapeHtml(reminder.payload.dateToken)
-  const escapedReminderUrl = escapeHtml(reminderUrl)
+    reminder.kind === 'countdown_day_of'
+      ? 'Your countdown is due today.'
+      : 'Your future note is unlocked today.';
+  const escapedIntro = escapeHtml(intro);
+  const escapedTitle = escapeHtml(reminder.payload.title);
+  const escapedDateToken = escapeHtml(reminder.payload.dateToken);
+  const escapedReminderUrl = escapeHtml(reminderUrl);
 
   return [
     `<p>${escapedIntro}</p>`,
     `<p><strong>${escapedTitle}</strong></p>`,
     `<p>Date: ${escapedDateToken}</p>`,
     `<p><a href="${escapedReminderUrl}">Open in app</a></p>`,
-  ].join('')
-}
+  ].join('');
+};
 
 const getRetryDelayMinutes = (attempts: number): number => {
-  const exponentialDelay = Math.min(2 ** Math.max(attempts - 1, 0) * 15, MAX_BACKOFF_MINUTES)
+  const exponentialDelay = Math.min(2 ** Math.max(attempts - 1, 0) * 15, MAX_BACKOFF_MINUTES);
 
-  return exponentialDelay
-}
+  return exponentialDelay;
+};
 
 const env = envSchema.parse({
   REMINDER_APP_BASE_URL: Deno.env.get('REMINDER_APP_BASE_URL'),
@@ -89,12 +100,15 @@ const env = envSchema.parse({
   RESEND_API_KEY: Deno.env.get('RESEND_API_KEY'),
   SUPABASE_SERVICE_ROLE_KEY: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
   SUPABASE_URL: Deno.env.get('SUPABASE_URL'),
-})
+});
 
-const resend = new Resend(env.RESEND_API_KEY)
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+const resend = new Resend(env.RESEND_API_KEY);
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
-const markReminderSent = async (reminderId: string, providerMessageId: string | null): Promise<void> => {
+const markReminderSent = async (
+  reminderId: string,
+  providerMessageId: string | null,
+): Promise<void> => {
   const { error } = await supabase
     .from('reminder_deliveries')
     .update({
@@ -106,22 +120,22 @@ const markReminderSent = async (reminderId: string, providerMessageId: string | 
       sent_at: new Date().toISOString(),
       status: 'sent',
     })
-    .eq('id', reminderId)
+    .eq('id', reminderId);
 
   if (error) {
-    throw new Error(`Failed to mark reminder ${reminderId} as sent: ${error.message}`)
+    throw new Error(`Failed to mark reminder ${reminderId} as sent: ${error.message}`);
   }
-}
+};
 
 const markReminderFailure = async (
   reminder: z.infer<typeof claimedReminderDeliverySchema>,
   errorMessage: string,
 ): Promise<void> => {
-  const now = new Date()
-  const hasAttemptsRemaining = reminder.attempts < reminder.max_attempts
+  const now = new Date();
+  const hasAttemptsRemaining = reminder.attempts < reminder.max_attempts;
   const nextAttemptAt = hasAttemptsRemaining
     ? new Date(now.getTime() + getRetryDelayMinutes(reminder.attempts) * 60_000).toISOString()
-    : now.toISOString()
+    : now.toISOString();
 
   const { error } = await supabase
     .from('reminder_deliveries')
@@ -132,36 +146,42 @@ const markReminderFailure = async (
       processing_started_at: null,
       status: hasAttemptsRemaining ? 'pending' : 'failed',
     })
-    .eq('id', reminder.id)
+    .eq('id', reminder.id);
 
   if (error) {
-    throw new Error(`Failed to mark reminder ${reminder.id} as failed: ${error.message}`)
+    throw new Error(`Failed to mark reminder ${reminder.id} as failed: ${error.message}`);
   }
-}
+};
 
-const claimReminderDeliveries = async (): Promise<readonly z.infer<typeof claimedReminderDeliverySchema>[]> => {
+const claimReminderDeliveries = async (): Promise<
+  readonly z.infer<typeof claimedReminderDeliverySchema>[]
+> => {
   const { data, error } = await supabase.rpc('claim_reminder_deliveries', {
     max_batch_size: CLAIM_BATCH_SIZE,
-  })
+  });
 
   if (error) {
-    throw new Error(`Failed to claim reminder deliveries: ${error.message}`)
+    throw new Error(`Failed to claim reminder deliveries: ${error.message}`);
   }
 
-  return claimedReminderDeliveriesSchema.parse(data ?? [])
-}
+  return claimedReminderDeliveriesSchema.parse(data ?? []);
+};
 
 Deno.serve(async (request: Request): Promise<Response> => {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+    return new Response('Method not allowed', { status: 405 });
   }
 
-  const reminders = await claimReminderDeliveries()
-  const results: Array<{ id: string; status: 'sent' | 'failed' }> = []
+  const reminders = await claimReminderDeliveries();
+  const results: Array<{ id: string; status: 'sent' | 'failed' }> = [];
 
   for (const reminder of reminders) {
-    const reminderUrl = buildReminderUrl(env.REMINDER_APP_BASE_URL, env.REMINDER_LOCALE, reminder.payload.routePath)
-    const idempotencyKey = getReminderIdempotencyKey(reminder.id)
+    const reminderUrl = buildReminderUrl(
+      env.REMINDER_APP_BASE_URL,
+      env.REMINDER_LOCALE,
+      reminder.payload.routePath,
+    );
+    const idempotencyKey = getReminderIdempotencyKey(reminder.id);
 
     try {
       const { data, error } = await resend.emails.send(
@@ -175,23 +195,24 @@ Deno.serve(async (request: Request): Promise<Response> => {
         {
           idempotencyKey,
         },
-      )
+      );
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error(error.message);
       }
 
-      await markReminderSent(reminder.id, data?.id ?? null)
-      results.push({ id: reminder.id, status: 'sent' })
+      await markReminderSent(reminder.id, data?.id ?? null);
+      results.push({ id: reminder.id, status: 'sent' });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown reminder delivery failure'
-      await markReminderFailure(reminder, errorMessage)
-      results.push({ id: reminder.id, status: 'failed' })
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown reminder delivery failure';
+      await markReminderFailure(reminder, errorMessage);
+      results.push({ id: reminder.id, status: 'failed' });
     }
   }
 
   return Response.json({
     processed: reminders.length,
     results,
-  })
-})
+  });
+});

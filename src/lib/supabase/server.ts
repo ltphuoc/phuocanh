@@ -1,21 +1,24 @@
-import { createServerClient } from "@supabase/ssr";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
-import { env } from "@/lib/env";
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database } from '@/lib/supabase/database.types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+import { cookies } from 'next/headers';
+
+import { createServerClient } from '@supabase/ssr';
+
+import { env } from '@/lib/env';
 
 export type AppSupabaseClient = SupabaseClient<Database>;
 
 type CookieStore = Awaited<ReturnType<typeof cookies>>;
 type CookieMutation = {
   name: string;
-  options: Parameters<CookieStore["set"]>[2];
+  options: Parameters<CookieStore['set']>[2];
   value: string;
 };
 
 interface ServerClientOptions {
   readonly cookieOptions?: {
-    readonly getAll: () => ReturnType<CookieStore["getAll"]>;
+    readonly getAll: () => ReturnType<CookieStore['getAll']>;
     readonly setAll: (cookiesToSet: CookieMutation[]) => void;
   };
 }
@@ -40,16 +43,12 @@ const buildServerClient = async (
       });
     });
 
-  return createServerClient<Database>(
-    supabaseUrl,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll,
-        setAll,
-      },
+  return createServerClient<Database>(supabaseUrl, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll,
+      setAll,
     },
-  );
+  });
 };
 
 export const createSupabaseServerClient = async (

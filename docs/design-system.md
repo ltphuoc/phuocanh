@@ -1,11 +1,13 @@
 # Design System
 
 ## Visual Direction
+
 - Tone: editorial romance, soft, emotional, playful but elegant, and highly memorable.
 - Theme policy: light mode only.
 - Product intent: one cohesive visual language across mobile, tablet, and desktop with a keepsake-like emotional center.
 
 ## Core Palette
+
 - `--bg-canvas`: `#FFF5E4`
 - `--bg-soft`: `#FFF9F2`
 - `--surface`: `#FFE3E1`
@@ -13,6 +15,7 @@
 - `--brand-rose`: `#FF9494`
 
 ## Semantic Color Mapping
+
 - Layout surfaces:
 - `--background`, `--background-elevated`, `--card`, `--panel`, `--panel-strong`
 - Interactive colors:
@@ -30,11 +33,13 @@
 - Status tones remain conservative and palette-adjacent. No unrelated neon or saturated dashboard hues are introduced.
 
 ## Light-Mode Rules
+
 - Global `color-scheme` is fixed to `light`.
 - No dark tokens or dark media-query branches are allowed in app styles.
 - Components must consume semantic tokens only, not route-level hardcoded colors.
 
 ## Typography
+
 - Display font: `Fraunces`
 - Body font: `Manrope`
 - `Fraunces` is reserved for page titles, section titles, memory objects, milestone numbers, and short quotes.
@@ -50,6 +55,7 @@
 - Typography should come from the shared CSS utilities in `globals.css`, not route-local ad hoc scales.
 
 ## Spacing
+
 - Vertical rhythm: `SectionStack`.
 - Grid rhythm: `ResponsiveGrid`.
 - Form rhythm: `FormSection`.
@@ -60,6 +66,7 @@
 - reading/detail pages around `760px`
 
 ## Radius and Elevation
+
 - Control radius: `--radius-control`
 - Panel radius: `--radius-panel`
 - Memory object radius: `--radius-memory`
@@ -71,6 +78,7 @@
 - `--shadow-glow` for focused interactive emphasis only
 
 ## Component Principles
+
 - Compose from shared primitives:
 - Layout: `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `AuthShell`, `ShellPage`.
 - UI controls: `Button`, `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`.
@@ -79,6 +87,7 @@
 - Template widgets remain available for shell-only Phase 2+/3 routes.
 
 ## Interaction Patterns
+
 - Motion is present but restrained:
 - shared layout emphasis for active navigation states
 - gentle lift/tilt on collectible surfaces
@@ -89,6 +98,7 @@
 - `motion` is the current animation layer for dock, rail, reveal, and shell transitions.
 
 ## Guardrails
+
 - Do not reintroduce dark-mode support.
 - Do not add non-semantic hardcoded color utilities in pages.
 - Do not duplicate component styling per route when a shared primitive exists.

@@ -1,32 +1,36 @@
-import { createServerClient } from "@supabase/ssr";
-import createIntlMiddleware from "next-intl/middleware";
-import { type NextRequest, NextResponse } from "next/server";
-import { routing } from "@/i18n/routing";
-import { env } from "@/lib/env";
-import { getLocaleFromPathname, stripLocalePrefix, toLocalizedPathname } from "@/lib/i18n/pathname";
-import type { Database } from "@/lib/supabase/database.types";
+import type { NextRequest } from 'next/server';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { NextResponse } from 'next/server';
+
+import { createServerClient } from '@supabase/ssr';
+import createIntlMiddleware from 'next-intl/middleware';
+
+import { routing } from '@/i18n/routing';
+import { env } from '@/lib/env';
+import { getLocaleFromPathname, stripLocalePrefix, toLocalizedPathname } from '@/lib/i18n/pathname';
 
 const handleI18nRouting = createIntlMiddleware(routing);
 
 interface AuthenticatedLookup {
-  readonly status: "authenticated";
+  readonly status: 'authenticated';
 }
 
 interface UnauthenticatedLookup {
-  readonly status: "unauthenticated";
+  readonly status: 'unauthenticated';
 }
 
 interface UnavailableLookup {
   readonly error: unknown;
-  readonly status: "unavailable";
+  readonly status: 'unavailable';
 }
 
 type AuthLookupResult = AuthenticatedLookup | UnauthenticatedLookup | UnavailableLookup;
 
 const isPublicPath = (pathname: string): boolean =>
-  pathname.startsWith("/login") || pathname.startsWith("/accept-invite");
+  pathname.startsWith('/login') || pathname.startsWith('/accept-invite');
 
-const isAuthCallbackPath = (pathname: string): boolean => pathname.startsWith("/auth/callback");
+const isAuthCallbackPath = (pathname: string): boolean => pathname.startsWith('/auth/callback');
 
 const getAuthLookupResult = async (
   request: NextRequest,
@@ -68,7 +72,7 @@ const getAuthLookupResult = async (
       return {
         response: mutableResponse,
         result: {
-          status: "unauthenticated",
+          status: 'unauthenticated',
         },
       };
     }
@@ -76,25 +80,23 @@ const getAuthLookupResult = async (
     return {
       response: mutableResponse,
       result: {
-        status: "authenticated",
+        status: 'authenticated',
       },
     };
   } catch (error: unknown) {
-    console.error("Failed to resolve middleware auth state", error);
+    console.error('Failed to resolve middleware auth state', error);
 
     return {
       response: mutableResponse,
       result: {
         error,
-        status: "unavailable",
+        status: 'unavailable',
       },
     };
   }
 };
 
-export const middleware = async (
-  request: NextRequest,
-): Promise<NextResponse> => {
+export const middleware = async (request: NextRequest): Promise<NextResponse> => {
   if (isAuthCallbackPath(request.nextUrl.pathname)) {
     return NextResponse.next({
       request,
@@ -102,7 +104,7 @@ export const middleware = async (
   }
 
   const i18nResponse = handleI18nRouting(request);
-  if (i18nResponse.headers.get("location")) {
+  if (i18nResponse.headers.get('location')) {
     return i18nResponse;
   }
 
@@ -114,20 +116,19 @@ export const middleware = async (
   const normalizedPathname = stripLocalePrefix(request.nextUrl.pathname);
   const authLookup = await getAuthLookupResult(request, i18nResponse);
 
-  if (
-    authLookup.result.status !== "authenticated" &&
-    !isPublicPath(normalizedPathname)
-  ) {
-    return NextResponse.redirect(new URL(toLocalizedPathname(locale, "/login"), request.url));
+  if (authLookup.result.status !== 'authenticated' && !isPublicPath(normalizedPathname)) {
+    return NextResponse.redirect(new URL(toLocalizedPathname(locale, '/login'), request.url));
   }
 
-  if (authLookup.result.status === "authenticated" && normalizedPathname === "/login") {
-    return NextResponse.redirect(new URL(toLocalizedPathname(locale, "/home"), request.url));
+  if (authLookup.result.status === 'authenticated' && normalizedPathname === '/login') {
+    return NextResponse.redirect(new URL(toLocalizedPathname(locale, '/home'), request.url));
   }
 
   return authLookup.response;
 };
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

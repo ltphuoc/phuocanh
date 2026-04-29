@@ -1,15 +1,11 @@
-"use client";
+'use client';
 
-import {
-  hasLocale,
-  useFormatter,
-  useLocale,
-  useTranslations,
-  type Messages,
-  type NamespaceKeys,
-  type NestedKeyOf,
-} from "next-intl";
-import { routing, type Locale } from "@/i18n/routing";
+import type { Locale } from '@/i18n/routing';
+import type { Messages, NamespaceKeys, NestedKeyOf } from 'next-intl';
+
+import { hasLocale, useFormatter, useLocale, useTranslations } from 'next-intl';
+
+import { routing } from '@/i18n/routing';
 
 type TranslationNamespace = NamespaceKeys<Messages, NestedKeyOf<Messages>>;
 type Translator<TNamespace extends TranslationNamespace = never> = ReturnType<
@@ -24,8 +20,8 @@ interface UseI18nResult<TNamespace extends TranslationNamespace = never> {
 }
 
 const defaultCurrencyByLocale: Record<Locale, string> = {
-  en: "USD",
-  vi: "VND",
+  en: 'USD',
+  vi: 'VND',
 };
 
 export const useI18n = <TNamespace extends TranslationNamespace = never>(
@@ -41,7 +37,7 @@ export const useI18n = <TNamespace extends TranslationNamespace = never>(
     formatCurrency: (value: number, currency?: string): string =>
       format.number(value, {
         currency: currency ?? defaultCurrencyByLocale[locale],
-        style: "currency",
+        style: 'currency',
       }),
     locale,
     t,

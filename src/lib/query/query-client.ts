@@ -1,7 +1,4 @@
-import {
-  isServer,
-  QueryClient,
-} from "@tanstack/react-query";
+import { isServer, QueryClient } from '@tanstack/react-query';
 
 export const APP_QUERY_STALE_TIME_MS = 60_000;
 

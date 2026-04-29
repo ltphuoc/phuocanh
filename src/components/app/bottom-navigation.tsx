@@ -1,17 +1,21 @@
-"use client";
+'use client';
 
-import { LayoutGroup, motion } from "motion/react";
-import { useTranslations } from "next-intl";
-import { useState, type ReactElement } from "react";
+import type { ReactElement } from 'react';
+
+import { useState } from 'react';
+
+import { LayoutGroup, motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
+
+import { MoreNavigationSheet } from '@/components/app/more-navigation-sheet';
 import {
   appMemoryActionItem,
   appMobileNavigationItems,
   appMoreNavigationItem,
   isAppNavigationItemActive,
-} from "@/components/app/navigation-model";
-import { MoreNavigationSheet } from "@/components/app/more-navigation-sheet";
-import { Link, usePathname } from "@/i18n/navigation";
-import { cn } from "@/lib/utils/cn";
+} from '@/components/app/navigation-model';
+import { Link, usePathname } from '@/i18n/navigation';
+import { cn } from '@/lib/utils/cn';
 
 interface MoreSheetState {
   readonly open: boolean;
@@ -26,8 +30,7 @@ export const BottomNavigation = (): ReactElement => {
     pathname,
   });
   const MemoryActionIcon = appMemoryActionItem.icon;
-  const isMoreOpen =
-    moreSheetState.pathname === pathname ? moreSheetState.open : false;
+  const isMoreOpen = moreSheetState.pathname === pathname ? moreSheetState.open : false;
 
   return (
     <>
@@ -39,7 +42,11 @@ export const BottomNavigation = (): ReactElement => {
                 className="ui-gradient-active inline-flex size-[72px] items-center justify-center rounded-full border border-white/70 text-primary-foreground shadow-cloud"
                 href={appMemoryActionItem.href}
               >
-                <MemoryActionIcon aria-hidden="true" className="size-7" strokeWidth={2.1} />
+                <MemoryActionIcon
+                  aria-hidden="true"
+                  className="size-7"
+                  strokeWidth={2.1}
+                />
               </Link>
             </div>
             <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-[rgba(255,249,242,0.74)] px-3 py-3 shadow-cloud backdrop-blur-xl">
@@ -47,7 +54,7 @@ export const BottomNavigation = (): ReactElement => {
                 const active = isAppNavigationItemActive(pathname, item);
                 const Icon = item.icon;
                 const isMoreItem = item.href === appMoreNavigationItem.href;
-                const columnClass = index >= 2 ? "col-start-[4]" : "";
+                const columnClass = index >= 2 ? 'col-start-[4]' : '';
                 const content = (
                   <>
                     {active ? (
@@ -57,27 +64,32 @@ export const BottomNavigation = (): ReactElement => {
                         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                       />
                     ) : null}
-                      <span className="relative flex flex-col items-center gap-1">
-                        <Icon aria-hidden="true" className="size-[18px]" strokeWidth={2.2} />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
-                        </span>
+                    <span className="relative flex flex-col items-center gap-1">
+                      <Icon
+                        aria-hidden="true"
+                        className="size-[18px]"
+                        strokeWidth={2.2}
+                      />
+                      <span className="text-[10px] font-semibold tracking-[0.08em] uppercase">
+                        {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
                       </span>
-                    </>
+                    </span>
+                  </>
                 );
 
                 return (
-                  <div className={cn(columnClass, "flex justify-center")} key={item.href}>
+                  <div
+                    className={cn(columnClass, 'flex justify-center')}
+                    key={item.href}
+                  >
                     {isMoreItem ? (
                       <button
                         aria-controls="mobile-more-navigation-sheet"
                         aria-expanded={isMoreOpen}
                         aria-haspopup="dialog"
                         className={cn(
-                          "relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5",
-                          active || isMoreOpen
-                            ? "text-foreground"
-                            : "text-muted-foreground",
+                          'relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5',
+                          active || isMoreOpen ? 'text-foreground' : 'text-muted-foreground',
                         )}
                         onClick={() =>
                           setMoreSheetState({
@@ -92,8 +104,8 @@ export const BottomNavigation = (): ReactElement => {
                     ) : (
                       <Link
                         className={cn(
-                          "relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5",
-                          active ? "text-foreground" : "text-muted-foreground",
+                          'relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5',
+                          active ? 'text-foreground' : 'text-muted-foreground',
                         )}
                         href={item.href}
                       >
@@ -105,7 +117,7 @@ export const BottomNavigation = (): ReactElement => {
               })}
             </div>
             <div className="pointer-events-none mt-3 text-center text-[11px] font-medium text-muted-foreground">
-              {t("nav.bottom.captureMoment")}
+              {t('nav.bottom.captureMoment')}
             </div>
           </div>
         </LayoutGroup>

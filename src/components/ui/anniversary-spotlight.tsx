@@ -1,19 +1,22 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useFormatter, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import type { ReactElement } from "react";
-import { FeaturedMemoryObject } from "@/components/ui/memory-card";
-import { SectionCard } from "@/components/ui/section-card";
-import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
+import type { ReactElement } from 'react';
+
+import Image from 'next/image';
+
+import { useFormatter, useTranslations } from 'next-intl';
+
+import { FeaturedMemoryObject } from '@/components/ui/memory-card';
+import { SectionCard } from '@/components/ui/section-card';
+import { Link } from '@/i18n/navigation';
+import { parseDateInputValueInTimeZone } from '@/lib/utils/couple-timezone';
 
 interface AnniversarySpotlightMemory {
   readonly happenedAt: string;
   readonly href: string;
   readonly imageUrl?: string | null;
   readonly locationName?: string | null;
-  readonly mediaType?: "image" | "video" | null;
+  readonly mediaType?: 'image' | 'video' | null;
   readonly note?: string | null;
 }
 
@@ -24,10 +27,8 @@ interface AnniversarySpotlightProps {
   readonly timeZone: string;
 }
 
-const getQuote = (
-  note: string | null | undefined,
-  fallback: string,
-): string => (note?.trim() ? note.trim().slice(0, 120) : fallback);
+const getQuote = (note: string | null | undefined, fallback: string): string =>
+  note?.trim() ? note.trim().slice(0, 120) : fallback;
 
 export const AnniversarySpotlight = ({
   coupleStartedAt,
@@ -35,16 +36,16 @@ export const AnniversarySpotlight = ({
   relationshipDays,
   timeZone,
 }: AnniversarySpotlightProps): ReactElement => {
-  const t = useTranslations("ui.anniversarySpotlight");
+  const t = useTranslations('ui.anniversarySpotlight');
   const format = useFormatter();
   const startedAtDate = parseDateInputValueInTimeZone(coupleStartedAt, timeZone);
   const sinceDateLabel = Number.isNaN(startedAtDate.getTime())
     ? coupleStartedAt
     : format.dateTime(startedAtDate, {
-        day: "numeric",
-        month: "long",
+        day: 'numeric',
+        month: 'long',
         timeZone,
-        year: "numeric",
+        year: 'numeric',
       });
 
   return (
@@ -69,35 +70,35 @@ export const AnniversarySpotlight = ({
       </div>
       <div className="relative z-10 flex flex-col gap-6">
         <div className="space-y-3">
-          <p className="ui-meta ui-couple-mark">{t("eyebrow")}</p>
+          <p className="ui-meta ui-couple-mark">{t('eyebrow')}</p>
           <div className="space-y-2">
             <p className="ui-display">
-              {t("dayCount", {
+              {t('dayCount', {
                 count: Math.max(1, relationshipDays + 1),
               })}
             </p>
             <p className="ui-page-description ui-copy-lg max-w-2xl">
-              {t("since", {
+              {t('since', {
                 date: sinceDateLabel,
               })}
             </p>
           </div>
         </div>
         <p className="ui-quote max-w-xl text-foreground/90">
-          &ldquo;{getQuote(featuredMemory?.note, t("quoteFallback"))}&rdquo;
+          &ldquo;{getQuote(featuredMemory?.note, t('quoteFallback'))}&rdquo;
         </p>
         <div className="flex flex-wrap gap-3">
           <Link
             className="ui-gradient-active inline-flex items-center rounded-pill px-5 py-3 text-sm font-semibold text-primary-foreground shadow-cloud"
-            href={featuredMemory?.href ?? "/memories/new"}
+            href={featuredMemory?.href ?? '/memories/new'}
           >
-            {featuredMemory ? t("openLatest") : t("addFirst")}
+            {featuredMemory ? t('openLatest') : t('addFirst')}
           </Link>
           <Link
             className="inline-flex items-center rounded-pill border border-white/70 bg-white/68 px-5 py-3 text-sm font-semibold text-foreground shadow-whisper"
             href="/on-this-day"
           >
-            {t("revisit")}
+            {t('revisit')}
           </Link>
         </div>
       </div>
@@ -114,12 +115,12 @@ export const AnniversarySpotlight = ({
           />
         ) : (
           <div className="rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,255,255,0.72)] p-6 shadow-cloud backdrop-blur-md">
-            <p className="ui-meta">{t("empty.eyebrow")}</p>
+            <p className="ui-meta">{t('empty.eyebrow')}</p>
             <p className="mt-3 font-display text-[2rem] tracking-[-0.03em] text-foreground">
-              {t("empty.title")}
+              {t('empty.title')}
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {t("empty.description")}
+              {t('empty.description')}
             </p>
           </div>
         )}

@@ -3,6 +3,7 @@
 This guide is the compact setup and validation reference for day-to-day development. It complements the deeper product and engineering docs; it does not replace SQL migrations or runtime code as source of truth.
 
 ## Local Environment
+
 - Copy `.env.example` to `.env.local`.
 - Required app values:
   - `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331`
@@ -14,6 +15,7 @@ This guide is the compact setup and validation reference for day-to-day developm
 - Reminder delivery uses Edge Function secrets: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM_EMAIL`, plus optional reminder display/link values.
 
 ## Local Services
+
 - Start Supabase with `supabase start`.
 - Apply migrations with `supabase db reset --local`, or use `supabase db push --local` only when preserving local data matters.
 - Local ports are project-specific:
@@ -24,12 +26,14 @@ This guide is the compact setup and validation reference for day-to-day developm
 - Local Supabase Edge Runtime is disabled in `supabase/config.toml`; hosted `reminder-processor` behavior remains part of the runtime contract.
 
 ## App Startup
+
 - Install with the pinned package manager from `package.json`: `pnpm@10.29.2`.
 - Run the app with `pnpm dev`.
 - Next.js 16 uses Turbopack by default for `next dev` and `next build` in this repo.
 - The app is locale-prefixed for user-facing routes (`/vi/*`, `/en/*`), with `/` acting as a redirect-only entry.
 
 ## Verification Commands
+
 - Baseline:
   - `pnpm lint`
   - `pnpm typecheck`
@@ -42,12 +46,14 @@ This guide is the compact setup and validation reference for day-to-day developm
 - Schema changes also need local migration application and synced Supabase TypeScript types as described in `docs/engineering/migration-playbook.md`.
 
 ## E2E Harness
+
 - Run production-flow browser coverage with `pnpm test:e2e`.
 - Use `pnpm test:e2e:headed` only when interactive browser debugging is needed.
 - The harness starts a dedicated production server at `http://127.0.0.1:3100` by default, resets the local database, enables the loopback-only OTP helper, and stubs daily-question prompt generation.
 - The suite intentionally excludes shell-only game modes other than `daily-question` and `guess-date`.
 
 ## Docs Update Rules
+
 - Update `docs/engineering/route-capability-matrix.md` whenever route status changes.
 - Update `docs/product/business-rules.md` and `docs/engineering/api-contracts.md` when behavior, validation, RPCs, or mutation contracts change.
 - Keep `docs/changelog/implementation-log.md` historical; add a new entry for new work instead of rewriting old entries.

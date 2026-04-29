@@ -3,11 +3,14 @@
 This file describes the current runtime flows. It is intended to answer “what actually happens” before an agent reads code.
 
 ## Flow 1: Login With Magic Link
+
 Preconditions:
+
 - User is not authenticated.
 - User knows the email tied to the couple space.
 
 Steps:
+
 1. User opens `/login`.
 2. `sendMagicLinkAction` validates the email and requests a Supabase magic link.
 3. The action builds `emailRedirectTo=/auth/callback?next=...`, defaulting to localized `/home` and preserving a valid internal `next` path when login started from another route.
@@ -17,21 +20,26 @@ Steps:
 7. Callback redirects to a normalized internal `next` path, default `/home`.
 
 Redirects:
+
 - `/` redirects unauthenticated users to `/login`.
 - `/auth/callback` falls back to `/login` on invalid or failed callback exchange.
 
 User-visible errors:
+
 - Invalid email
 - Supabase Auth not reachable
 - Generic auth callback failure returns to login
 
 ## Flow 2: First User Onboarding And Explicit Confirmation
+
 Preconditions:
+
 - User is authenticated.
 - No active membership exists for that user.
 - No couple space exists yet.
 
 Steps:
+
 1. Authenticated route or `/` calls `getAuthGateState()`.
 2. App checks for an active `couple_memberships` row for the user.
 3. Since no couple exists yet, auth gate resolves to `needs_onboarding`.
@@ -43,39 +51,49 @@ Steps:
 9. User is redirected to `/home`.
 
 Redirects:
+
 - `/` redirects to `/onboarding` when first-user onboarding is required.
 - `/onboarding` redirects to `/home` after successful confirmation.
 
 User-visible errors:
+
 - Missing schema surfaces the setup-recovery UI.
 - Invalid onboarding submission.
 - `COUPLE_EXISTS` race path redirects user to invite flow.
 - Unexpected RPC failure surfaces as generic error.
 
 ## Flow 3: Authenticated User Needs Invite
+
 Preconditions:
+
 - User is authenticated.
 - No active membership exists for that user.
 - A couple space already exists.
 
 Steps:
+
 1. `getAuthGateState()` checks membership.
 2. App checks whether any couple already exists.
 3. Because a couple exists and this user is not a member, auth gate resolves to `needs_invite`.
 4. Authenticated app routes redirect the user to `/accept-invite`.
 
 Redirects:
+
 - `/` redirects to `/accept-invite`.
 - Authenticated app layout redirects to `/accept-invite`.
 
 User-visible errors:
+
 - None in the redirect itself; user must provide a valid invite token next.
 
 ## Flow 4: Generate Invite For The Second User
+
 Preconditions:
+
 - Current user is an active member of the couple.
 
 Steps:
+
 1. User triggers `createInviteAction`.
 2. Action creates a UUID token and expiry 14 days in the future.
 3. Action inserts a `couple_invites` row for the current couple.
@@ -83,18 +101,23 @@ Steps:
 5. UI allows copying the invite URL to the clipboard.
 
 Redirects:
+
 - None.
 
 User-visible errors:
+
 - Insert failure from Supabase
 
 ## Flow 5: Accept Invite As The Second User
+
 Preconditions:
+
 - User is authenticated.
 - User has the full invite URL or token.
 - User is not already fully blocked by `COUPLE_FULL`.
 
 Steps:
+
 1. User opens `/accept-invite?token=...`.
 2. Page requires authentication; unauthenticated users are redirected to `/login?next=/accept-invite?token=...`.
 3. `AcceptInviteForm` submits the token to `acceptInviteAction`.
@@ -104,21 +127,26 @@ Steps:
 7. UI redirects the user to `/home`.
 
 Redirects:
+
 - Unauthenticated user on `/accept-invite?token=...` -> `/login?next=/accept-invite?token=...`
 - Already-ready couple member on `/accept-invite` -> `/home`
 - Successful acceptance -> `/home`
 
 User-visible errors:
+
 - Invite invalid or already used
 - Invite expired
 - Couple already full
 - User must sign in first
 
 ## Flow 6: Create Memory
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/memories/new`.
 2. Client form validates `happenedAtLocal`, `locationName`, and `note`.
 3. Form builds `FormData` with ISO `happenedAt`, trimmed text fields, and an optional file.
@@ -133,9 +161,11 @@ Steps:
 12. Client redirects to `/home` on success.
 
 Redirects:
+
 - Success -> `/home`
 
 User-visible errors:
+
 - No note and no media
 - File too large
 - Unsupported file type
@@ -144,40 +174,52 @@ User-visible errors:
 - Later DB/storage error
 
 ## Flow 7: Add Wish Item
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User submits category, title, and optional note.
 2. `addWishItemAction` validates and inserts a couple-scoped `wish_items` row.
 3. Action revalidates `/home` and `/lists`.
 
 User-visible errors:
+
 - Validation failure
 - Insert failure
 
 ## Flow 8: Create Checklist, Add Item, Toggle Item
+
 Preconditions:
+
 - User is a couple member.
 
 Steps:
+
 1. `createChecklistAction` creates a couple-scoped checklist and revalidates `/home` and `/lists`.
 2. `addChecklistItemAction` adds an item to a checklist by `checklistId`.
 3. `toggleChecklistItemAction` updates `is_done` and `done_at` by checklist item ID.
 4. Checklist item authorization is enforced in SQL through the parent checklist relationship.
 
 Redirects:
+
 - None.
 
 User-visible errors:
+
 - Validation failure
 - Insert/update failure
 
 ## Flow 9: Create Countdown
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/countdowns`.
 2. `CreateCountdownForm` validates `title`, `kind`, `targetDate`, and optional `note`.
 3. Form submits the selected date as a date-only value in `FormData`.
@@ -190,18 +232,23 @@ Steps:
 10. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
+
 - None.
 
 User-visible errors:
+
 - Missing or invalid title/date/kind
 - Missing active couple membership
 - Unexpected database write failure
 
 ## Flow 10: Create Future Note
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/future-notes`.
 2. `CreateFutureNoteForm` validates `title`, `unlockDate`, and `body`.
 3. Form submits the selected unlock date as a date-only value in `FormData`.
@@ -215,18 +262,23 @@ Steps:
 11. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
+
 - None.
 
 User-visible errors:
+
 - Missing or invalid title/body/unlock date
 - Missing active couple membership
 - Metadata or content write failure
 
 ## Flow 11: Read Locked And Unlocked Future Notes
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/future-notes`.
 2. Server route resolves couple context and calls `getFutureNotesPageData(...)`.
 3. The helper reads couple-scoped `future_notes` metadata ordered by `unlock_at`.
@@ -236,16 +288,21 @@ Steps:
 7. UI renders locked notes without bodies and unlocked notes with bodies.
 
 Redirects:
+
 - Invalid auth/couple state follows the normal app auth gate redirect rules.
 
 User-visible errors:
+
 - Generic route failure if metadata or unlocked-content reads fail unexpectedly
 
 ## Flow 12: Create Trip
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/trips`.
 2. `CreateTripForm` validates `title`, `startDate`, `endDate`, and optional `note`.
 3. Form submits date-only values through `FormData`.
@@ -256,22 +313,27 @@ Steps:
 8. UI stays on the page and surfaces success through the shared `ActionState` + toast pattern.
 
 Redirects:
+
 - None.
 
 User-visible errors:
+
 - Missing or invalid title/date range
 - End date before start date
 - Missing active couple membership
 - Unexpected database write failure
 
 ## Flow 13: Create Album From Trip Detail
+
 Preconditions:
+
 - User is in `ready` couple context.
 - User opens a real trip detail route: `/trips/[tripId]`.
 - The trip has no linked album yet.
 - The trip has eligible `memory_media` whose parent memory `happened_at` falls inside the trip window.
 
 Steps:
+
 1. Server route resolves couple context and calls `getTripDetailData(...)`.
 2. The helper reads the trip, checks for an existing album, reads in-range memories, reads eligible `memory_media`, signs media URLs, and returns remaining candidates.
 3. `CreateAlbumForm` validates `title`, optional `description`, and selected `memoryMediaIds`.
@@ -288,9 +350,11 @@ Steps:
 9. Trip detail re-renders into the linked-album state.
 
 Redirects:
+
 - Invalid or foreign trip IDs return `notFound()` before the form is available.
 
 User-visible errors:
+
 - Missing title
 - No media selected
 - Duplicate or invalid media selection
@@ -299,13 +363,16 @@ User-visible errors:
 - Unexpected RPC/database failure
 
 ## Flow 14: Add More Media To An Existing Album
+
 Preconditions:
+
 - User is in `ready` couple context.
 - User opens a real trip detail route: `/trips/[tripId]`.
 - The trip already has a linked album.
 - Remaining eligible media still exists for that album/trip window.
 
 Steps:
+
 1. Server route resolves couple context and calls `getTripDetailData(...)`.
 2. The helper returns the linked album summary plus only the eligible media not already attached.
 3. `AddAlbumItemsForm` validates the selected `memoryMediaIds`.
@@ -323,20 +390,25 @@ Steps:
 9. Trip detail and album detail re-render with the new media set.
 
 Redirects:
+
 - Invalid or foreign trip IDs return `notFound()` before the add form is available.
 
 User-visible errors:
+
 - No media selected
 - Duplicate or invalid media selection
 - Album not found
 - Unexpected RPC/database failure
 
 ## Flow 15: Create Visited Place From Trip Detail
+
 Preconditions:
+
 - User is in `ready` couple context.
 - User opens a real trip detail route: `/trips/[tripId]`.
 
 Steps:
+
 1. Server route resolves couple context and calls `getTripDetailData(...)`.
 2. The helper reads the trip and its existing `visited_places` rows ordered by `visited_on`, then `created_at`.
 3. `CreateVisitedPlaceForm` validates `title`, `visitedOn`, and optional `note`.
@@ -348,19 +420,24 @@ Steps:
 9. Trip detail and `/map` re-render with the new place.
 
 Redirects:
+
 - Invalid or foreign trip IDs return `notFound()` before the form is available.
 
 User-visible errors:
+
 - Missing or invalid title/date
 - Trip not found
 - `visitedOn` outside the trip window
 - Unexpected database write failure
 
 ## Flow 16: Read Provider-Free Atlas Map
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/map`.
 2. Server route resolves couple context and calls `getMapPageData(...)`.
 3. The helper reads couple-scoped `visited_places` ordered by newest `visited_on`, then `created_at`.
@@ -371,16 +448,21 @@ Steps:
    - empty state when there are no visited places yet
 
 Redirects:
+
 - Invalid auth/couple state follows the normal app auth gate redirect rules.
 
 User-visible errors:
+
 - Generic route failure if the map read fails unexpectedly
 
 ## Flow 17: Update Couple Timezone
+
 Preconditions:
+
 - User is in `ready` couple context.
 
 Steps:
+
 1. User opens `/settings`.
 2. Server route resolves couple context and renders the current `couples.timezone` value.
 3. `UpdateCoupleTimezoneForm` validates `timeZone` against the supported IANA timezone list.
@@ -393,20 +475,25 @@ Steps:
 10. The affected routes re-render against the new couple timezone.
 
 Redirects:
+
 - Invalid auth/couple state follows the normal app auth gate redirect rules.
 
 User-visible errors:
+
 - Missing or invalid timezone
 - Missing active couple membership
 - Unexpected RPC/database failure
 
 ## Flow 18: Automated Reminder Delivery
+
 Preconditions:
+
 - Countdown or future-note rows exist for a couple with active members and email addresses.
 - Hosted: Vault contains `project_url` and `anon_key` for cron-driven function invocation. Local/CI without Vault: the private fallback store contains those same secret names.
 - The `reminder-processor` Edge Function has its runtime secrets configured, including Resend and Supabase service-role access.
 
 Steps:
+
 1. `pg_cron` runs `enqueue_due_reminder_deliveries()` on a fixed interval.
 2. The function finds countdowns whose local saved date is today in the couple timezone.
 3. The function finds future notes whose local unlock date is today in the couple timezone.
@@ -419,10 +506,12 @@ Steps:
 10. Failed sends are re-queued with backoff until `max_attempts` is reached, then marked `failed`.
 
 User-visible errors:
+
 - Reminder emails may arrive late or not at all if Edge Function secrets, Resend, or cron delivery infrastructure are misconfigured.
 - Failures do not block app reads or writes; they remain isolated to `reminder_deliveries` retry state.
 
 ## Route Entry Flow
+
 - `/` is a pure redirect route.
 - Unauthenticated -> `/login`
 - Authenticated but not invited/bootstrap-ready -> `/accept-invite`

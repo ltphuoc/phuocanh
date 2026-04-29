@@ -1,25 +1,29 @@
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { env } from "@/lib/env";
-import type { Database } from "@/lib/supabase/database.types";
+import type { NextRequest } from 'next/server';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { NextResponse } from 'next/server';
+
+import { createServerClient } from '@supabase/ssr';
+import { z } from 'zod';
+
+import { env } from '@/lib/env';
 
 const verifyEmailOtpRequestSchema = z.object({
   email: z.email(),
-  otpCode: z.string().trim().regex(/^\d{6}$/),
+  otpCode: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/),
 });
 
 const isLoopbackHostname = (hostname: string): boolean =>
-  hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+  hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '::1';
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
-  if (
-    !env.E2E_ENABLE_EMAIL_OTP_HELPER ||
-    !isLoopbackHostname(request.nextUrl.hostname)
-  ) {
+  if (!env.E2E_ENABLE_EMAIL_OTP_HELPER || !isLoopbackHostname(request.nextUrl.hostname)) {
     return NextResponse.json(
       {
-        error: "Not found.",
+        error: 'Not found.',
       },
       {
         status: 404,
@@ -49,7 +53,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const { error } = await supabase.auth.verifyOtp({
       email: requestBody.email,
       token: requestBody.otpCode,
-      type: "email",
+      type: 'email',
     });
 
     if (error) {
@@ -68,7 +72,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
-          error: "Invalid OTP verification request.",
+          error: 'Invalid OTP verification request.',
         },
         {
           status: 400,
@@ -76,10 +80,10 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       );
     }
 
-    console.error("Failed to verify email OTP in E2E auth route", error);
+    console.error('Failed to verify email OTP in E2E auth route', error);
     return NextResponse.json(
       {
-        error: "Unexpected error.",
+        error: 'Unexpected error.',
       },
       {
         status: 500,

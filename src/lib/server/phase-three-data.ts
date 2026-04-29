@@ -1,29 +1,33 @@
-import "server-only";
-import { z } from "zod";
-import { routing, type Locale } from "@/i18n/routing";
-import type { CoupleContext } from "@/lib/server/couple-context";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/database.types";
-import { getCurrentDateTokenInTimeZone } from "@/lib/utils/couple-timezone";
+import 'server-only';
 
-const DAILY_QUESTION_MODE: Database["public"]["Enums"]["game_mode"] = "daily_question";
-const GUESS_DATE_MODE: Database["public"]["Enums"]["game_mode"] = "guess_date";
-const TRIVIA_MODE: Database["public"]["Enums"]["game_mode"] = "trivia";
+import type { Locale } from '@/i18n/routing';
+import type { CoupleContext } from '@/lib/server/couple-context';
+import type { Database } from '@/lib/supabase/database.types';
+
+import { z } from 'zod';
+
+import { routing } from '@/i18n/routing';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getCurrentDateTokenInTimeZone } from '@/lib/utils/couple-timezone';
+
+const DAILY_QUESTION_MODE: Database['public']['Enums']['game_mode'] = 'daily_question';
+const GUESS_DATE_MODE: Database['public']['Enums']['game_mode'] = 'guess_date';
+const TRIVIA_MODE: Database['public']['Enums']['game_mode'] = 'trivia';
 const EXPECTED_DAILY_QUESTION_ANSWER_COUNT = 2;
 const RECENT_HISTORY_DAYS = 14;
 
 const gameRoundIdSchema = z.uuid();
 const promptLocaleSchema = z.enum(routing.locales);
 const dailyQuestionStatusSchema = z.enum([
-  "completed",
-  "not_started",
-  "waiting_for_partner",
-  "waiting_for_you",
+  'completed',
+  'not_started',
+  'waiting_for_partner',
+  'waiting_for_you',
 ]);
 
 const dailyQuestionRevealedAnswerSchema = z.object({
   answerBody: z.string().trim().min(1).max(800),
-  author: z.enum(["partner", "viewer"]),
+  author: z.enum(['partner', 'viewer']),
   submittedAt: z.string().trim().min(1),
 });
 
@@ -40,7 +44,7 @@ const dailyQuestionRoundStateRpcRowSchema = z.object({
 });
 
 const guessDateRevealedGuessSchema = z.object({
-  author: z.enum(["partner", "viewer"]),
+  author: z.enum(['partner', 'viewer']),
   guessedDate: z.string().trim().min(1),
   submittedAt: z.string().trim().min(1),
 });
@@ -52,7 +56,7 @@ const guessDateRoundStateRpcRowSchema = z.object({
   clue_text: z.string().trim().min(1).max(240),
   id: z.uuid(),
   prompt_locale: promptLocaleSchema,
-  prompt_source: z.literal("memory"),
+  prompt_source: z.literal('memory'),
   reveal_answers: z.boolean(),
   revealed_guesses: z.array(guessDateRevealedGuessSchema),
   round_date: z.string().trim().min(1),
@@ -60,7 +64,7 @@ const guessDateRoundStateRpcRowSchema = z.object({
 });
 
 const triviaRevealedAnswerSchema = z.object({
-  author: z.enum(["partner", "viewer"]),
+  author: z.enum(['partner', 'viewer']),
   isCorrect: z.boolean(),
   selectedAnswer: z.string().trim().min(1).max(240),
   submittedAt: z.string().trim().min(1),
@@ -74,7 +78,7 @@ const triviaRoundStateRpcRowSchema = z.object({
   correct_answer: z.string().trim().min(1).max(240).nullable(),
   id: z.uuid(),
   prompt_locale: promptLocaleSchema,
-  prompt_source: z.literal("memory"),
+  prompt_source: z.literal('memory'),
   reveal_answers: z.boolean(),
   revealed_answers: z.array(triviaRevealedAnswerSchema),
   round_date: z.string().trim().min(1),
@@ -95,21 +99,21 @@ const gameplayStatsRpcRowSchema = z.object({
   viewer_participation_rate: z.number().int().min(0).max(100),
 });
 
-type GameRoundRow = Database["public"]["Tables"]["game_rounds"]["Row"];
-type GameRoundIdLookupRow = Pick<GameRoundRow, "id">;
+type GameRoundRow = Database['public']['Tables']['game_rounds']['Row'];
+type GameRoundIdLookupRow = Pick<GameRoundRow, 'id'>;
 type DailyQuestionRoundStateRpcRow = z.infer<typeof dailyQuestionRoundStateRpcRowSchema>;
 type GuessDateRoundStateRpcRow = z.infer<typeof guessDateRoundStateRpcRowSchema>;
 type TriviaRoundStateRpcRow = z.infer<typeof triviaRoundStateRpcRowSchema>;
 
 export type DailyQuestionStatus =
-  | "completed"
-  | "not_started"
-  | "waiting_for_partner"
-  | "waiting_for_you";
+  | 'completed'
+  | 'not_started'
+  | 'waiting_for_partner'
+  | 'waiting_for_you';
 
 export interface DailyQuestionRevealedAnswer {
   readonly answerBody: string;
-  readonly author: "partner" | "viewer";
+  readonly author: 'partner' | 'viewer';
   readonly submittedAt: string;
 }
 
@@ -129,7 +133,7 @@ export interface DailyQuestionRoundState {
 export type GuessDateStatus = DailyQuestionStatus;
 
 export interface GuessDateRevealedGuess {
-  readonly author: "partner" | "viewer";
+  readonly author: 'partner' | 'viewer';
   readonly guessedDate: string;
   readonly submittedAt: string;
 }
@@ -141,7 +145,7 @@ export interface GuessDateRoundState {
   readonly clueText: string;
   readonly id: string;
   readonly promptLocale: Locale;
-  readonly promptSource: "memory";
+  readonly promptSource: 'memory';
   readonly revealAnswers: boolean;
   readonly revealedGuesses: readonly GuessDateRevealedGuess[];
   readonly roundDate: string;
@@ -152,7 +156,7 @@ export interface GuessDateRoundState {
 export type TriviaStatus = DailyQuestionStatus;
 
 export interface TriviaRevealedAnswer {
-  readonly author: "partner" | "viewer";
+  readonly author: 'partner' | 'viewer';
   readonly isCorrect: boolean;
   readonly selectedAnswer: string;
   readonly submittedAt: string;
@@ -166,7 +170,7 @@ export interface TriviaRoundState {
   readonly correctAnswer: string | null;
   readonly id: string;
   readonly promptLocale: Locale;
-  readonly promptSource: "memory";
+  readonly promptSource: 'memory';
   readonly revealAnswers: boolean;
   readonly revealedAnswers: readonly TriviaRevealedAnswer[];
   readonly roundDate: string;
@@ -215,23 +219,21 @@ const getDailyQuestionStatus = (
   viewerHasAnswered: boolean,
 ): DailyQuestionStatus => {
   if (answerCount >= EXPECTED_DAILY_QUESTION_ANSWER_COUNT) {
-    return "completed";
+    return 'completed';
   }
 
   if (viewerHasAnswered) {
-    return "waiting_for_partner";
+    return 'waiting_for_partner';
   }
 
   if (answerCount > 0) {
-    return "waiting_for_you";
+    return 'waiting_for_you';
   }
 
-  return "not_started";
+  return 'not_started';
 };
 
-const buildRoundStateFromRpcRow = (
-  row: DailyQuestionRoundStateRpcRow,
-): DailyQuestionRoundState => {
+const buildRoundStateFromRpcRow = (row: DailyQuestionRoundStateRpcRow): DailyQuestionRoundState => {
   const status = getDailyQuestionStatus(row.answer_count, row.viewer_has_answered);
   return {
     answerCount: row.answer_count,
@@ -251,10 +253,11 @@ const getGuessDateStatus = (
   answerCount: number,
   viewerHasAnswered: boolean,
   activePartnerCount: number,
-): GuessDateStatus => getDailyQuestionStatus(
-  answerCount >= activePartnerCount ? EXPECTED_DAILY_QUESTION_ANSWER_COUNT : answerCount,
-  viewerHasAnswered,
-);
+): GuessDateStatus =>
+  getDailyQuestionStatus(
+    answerCount >= activePartnerCount ? EXPECTED_DAILY_QUESTION_ANSWER_COUNT : answerCount,
+    viewerHasAnswered,
+  );
 
 const buildGuessDateRoundStateFromRpcRow = (
   row: GuessDateRoundStateRpcRow,
@@ -285,14 +288,13 @@ const getTriviaStatus = (
   answerCount: number,
   viewerHasAnswered: boolean,
   activePartnerCount: number,
-): TriviaStatus => getDailyQuestionStatus(
-  answerCount >= activePartnerCount ? EXPECTED_DAILY_QUESTION_ANSWER_COUNT : answerCount,
-  viewerHasAnswered,
-);
+): TriviaStatus =>
+  getDailyQuestionStatus(
+    answerCount >= activePartnerCount ? EXPECTED_DAILY_QUESTION_ANSWER_COUNT : answerCount,
+    viewerHasAnswered,
+  );
 
-const buildTriviaRoundStateFromRpcRow = (
-  row: TriviaRoundStateRpcRow,
-): TriviaRoundState => {
+const buildTriviaRoundStateFromRpcRow = (row: TriviaRoundStateRpcRow): TriviaRoundState => {
   const status = getTriviaStatus(
     row.answer_count,
     row.viewer_has_answered,
@@ -320,7 +322,7 @@ const getDailyQuestionRoundState = async (
   roundDate: string,
 ): Promise<DailyQuestionRoundState | null> => {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_daily_question_round_state", {
+  const { data, error } = await supabase.rpc('get_daily_question_round_state', {
     target_round_date: roundDate,
   });
 
@@ -334,17 +336,15 @@ const getDailyQuestionRoundState = async (
       return null;
     }
 
-    throw new Error("Invalid daily question round state payload.");
+    throw new Error('Invalid daily question round state payload.');
   }
 
   return buildRoundStateFromRpcRow(parsedRow.data);
 };
 
-const getGuessDateRoundState = async (
-  roundDate: string,
-): Promise<GuessDateRoundState | null> => {
+const getGuessDateRoundState = async (roundDate: string): Promise<GuessDateRoundState | null> => {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_guess_date_round_state", {
+  const { data, error } = await supabase.rpc('get_guess_date_round_state', {
     target_round_date: roundDate,
   });
 
@@ -358,17 +358,15 @@ const getGuessDateRoundState = async (
       return null;
     }
 
-    throw new Error("Invalid guess date round state payload.");
+    throw new Error('Invalid guess date round state payload.');
   }
 
   return buildGuessDateRoundStateFromRpcRow(parsedRow.data);
 };
 
-const getTriviaRoundState = async (
-  roundDate: string,
-): Promise<TriviaRoundState | null> => {
+const getTriviaRoundState = async (roundDate: string): Promise<TriviaRoundState | null> => {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_trivia_round_state", {
+  const { data, error } = await supabase.rpc('get_trivia_round_state', {
     target_round_date: roundDate,
   });
 
@@ -382,7 +380,7 @@ const getTriviaRoundState = async (
       return null;
     }
 
-    throw new Error("Invalid trivia round state payload.");
+    throw new Error('Invalid trivia round state payload.');
   }
 
   return buildTriviaRoundStateFromRpcRow(parsedRow.data);
@@ -394,11 +392,11 @@ export const getTodayDailyQuestionRoundId = async (
 ): Promise<string | null> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("game_rounds")
-    .select("id")
-    .eq("couple_id", context.coupleId)
-    .eq("mode", DAILY_QUESTION_MODE)
-    .eq("round_date", roundDate)
+    .from('game_rounds')
+    .select('id')
+    .eq('couple_id', context.coupleId)
+    .eq('mode', DAILY_QUESTION_MODE)
+    .eq('round_date', roundDate)
     .limit(1);
 
   if (error) {
@@ -415,11 +413,11 @@ export const getTodayGuessDateRoundId = async (
 ): Promise<string | null> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("game_rounds")
-    .select("id")
-    .eq("couple_id", context.coupleId)
-    .eq("mode", GUESS_DATE_MODE)
-    .eq("round_date", roundDate)
+    .from('game_rounds')
+    .select('id')
+    .eq('couple_id', context.coupleId)
+    .eq('mode', GUESS_DATE_MODE)
+    .eq('round_date', roundDate)
     .limit(1);
 
   if (error) {
@@ -436,11 +434,11 @@ export const getTodayTriviaRoundId = async (
 ): Promise<string | null> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from("game_rounds")
-    .select("id")
-    .eq("couple_id", context.coupleId)
-    .eq("mode", TRIVIA_MODE)
-    .eq("round_date", roundDate)
+    .from('game_rounds')
+    .select('id')
+    .eq('couple_id', context.coupleId)
+    .eq('mode', TRIVIA_MODE)
+    .eq('round_date', roundDate)
     .limit(1);
 
   if (error) {
@@ -451,9 +449,7 @@ export const getTodayTriviaRoundId = async (
   return round?.id ?? null;
 };
 
-export const getGamesHubData = async (
-  context: CoupleContext,
-): Promise<GamesHubData> => {
+export const getGamesHubData = async (context: CoupleContext): Promise<GamesHubData> => {
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
 
   return {
@@ -502,9 +498,7 @@ export const getDailyQuestionPageData = async (
   };
 };
 
-export const getGuessDatePageData = async (
-  context: CoupleContext,
-): Promise<GuessDatePageData> => {
+export const getGuessDatePageData = async (context: CoupleContext): Promise<GuessDatePageData> => {
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
 
   return {
@@ -513,9 +507,7 @@ export const getGuessDatePageData = async (
   };
 };
 
-export const getTriviaPageData = async (
-  context: CoupleContext,
-): Promise<TriviaPageData> => {
+export const getTriviaPageData = async (context: CoupleContext): Promise<TriviaPageData> => {
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
 
   return {
@@ -529,7 +521,7 @@ export const getGameplayStatsPageData = async (
 ): Promise<GameplayStatsPageData> => {
   void context;
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("get_daily_question_stats", {
+  const { data, error } = await supabase.rpc('get_daily_question_stats', {
     target_history_days: RECENT_HISTORY_DAYS,
   });
 

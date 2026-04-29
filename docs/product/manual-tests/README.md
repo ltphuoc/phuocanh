@@ -3,6 +3,7 @@
 This folder holds the repo-native manual smoke pack for implemented user-facing features.
 
 ## Conventions
+
 - Use one run-specific debug token format in any editable text field that accepts free text:
   - `DBG-<FEATURE>-<YYYYMMDD>-<INITIALS>-<NN>`
 - Example:
@@ -11,6 +12,7 @@ This folder holds the repo-native manual smoke pack for implemented user-facing 
 - Keep smoke execution focused on the listed core cases only. Shell-only, mock-only, and planned features are intentionally excluded from this pack.
 
 ## Files
+
 - [auth.md](./auth.md)
 - [home.md](./home.md)
 - [memories.md](./memories.md)

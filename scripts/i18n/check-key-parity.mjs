@@ -1,19 +1,19 @@
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
 
-const messagesDirectory = path.resolve(process.cwd(), "messages");
-const canonicalLocale = "en";
+const messagesDirectory = path.resolve(process.cwd(), 'messages');
+const canonicalLocale = 'en';
 
 const readJsonFile = async (filePath) => {
-  const fileContent = await readFile(filePath, "utf8");
+  const fileContent = await readFile(filePath, 'utf8');
   return JSON.parse(fileContent);
 };
 
 const isObjectRecord = (value) =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+  typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const flattenMessageKeys = (value, prefix = "") => {
+const flattenMessageKeys = (value, prefix = '') => {
   if (!isObjectRecord(value)) {
     return prefix ? [prefix] : [];
   }
@@ -25,7 +25,7 @@ const flattenMessageKeys = (value, prefix = "") => {
       return flattenMessageKeys(nestedValue, nextPrefix);
     }
 
-    if (typeof nestedValue === "string") {
+    if (typeof nestedValue === 'string') {
       return [nextPrefix];
     }
 
@@ -36,10 +36,10 @@ const flattenMessageKeys = (value, prefix = "") => {
 const run = async () => {
   const files = await readdir(messagesDirectory);
   const localeFiles = files
-    .filter((fileName) => fileName.endsWith(".json"))
+    .filter((fileName) => fileName.endsWith('.json'))
     .map((fileName) => ({
       fileName,
-      locale: fileName.replace(/\.json$/u, ""),
+      locale: fileName.replace(/\.json$/u, ''),
       path: path.join(messagesDirectory, fileName),
     }));
 
@@ -78,7 +78,9 @@ const run = async () => {
 
   console.log(`Canonical locale: ${canonicalLocale} (${canonicalKeys.size} keys)`);
   for (const item of report) {
-    console.log(`Locale ${item.locale}: ${item.missingKeyCount} missing keys, ${item.unknownKeys.length} unknown keys`);
+    console.log(
+      `Locale ${item.locale}: ${item.missingKeyCount} missing keys, ${item.unknownKeys.length} unknown keys`,
+    );
     item.unknownKeys.forEach((key) => {
       console.log(`  Unknown: ${key}`);
     });
@@ -89,10 +91,10 @@ const run = async () => {
     return;
   }
 
-  console.log("Key parity check passed (no unknown locale keys).");
+  console.log('Key parity check passed (no unknown locale keys).');
 };
 
 run().catch((error) => {
-  console.error("Key parity check failed.", error);
+  console.error('Key parity check failed.', error);
   process.exitCode = 1;
 });

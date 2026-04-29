@@ -1,18 +1,17 @@
-"use client";
+'use client';
 
-import { MapPinned, Route } from "lucide-react";
-import { motion } from "motion/react";
-import type { ReactElement } from "react";
-import { useState } from "react";
-import { useI18n } from "@/hooks/useI18n";
-import type {
-  MapTripGroup,
-  TripCard,
-  VisitedPlaceCard,
-} from "@/lib/server/phase-two-data";
-import { parseDateInputValueInTimeZone } from "@/lib/utils/couple-timezone";
-import { cn } from "@/lib/utils/cn";
-import { SectionCard } from "@/components/ui/section-card";
+import type { ReactElement } from 'react';
+import type { MapTripGroup, TripCard, VisitedPlaceCard } from '@/lib/server/phase-two-data';
+
+import { useState } from 'react';
+
+import { MapPinned, Route } from 'lucide-react';
+import { motion } from 'motion/react';
+
+import { SectionCard } from '@/components/ui/section-card';
+import { useI18n } from '@/hooks/useI18n';
+import { cn } from '@/lib/utils/cn';
+import { parseDateInputValueInTimeZone } from '@/lib/utils/couple-timezone';
 
 interface TravelAtlasShellProps {
   readonly groups: readonly MapTripGroup[];
@@ -24,20 +23,20 @@ interface AtlasPlace extends VisitedPlaceCard {
 }
 
 const atlasTripStatusTranslationKeyByValue = {
-  active: "tripStatus.active",
-  completed: "tripStatus.completed",
-  planned: "tripStatus.planned",
+  active: 'tripStatus.active',
+  completed: 'tripStatus.completed',
+  planned: 'tripStatus.planned',
 } as const;
 
 const ATLAS_POINT_POSITION_CLASS_NAMES = [
-  "left-[18%] top-[25%]",
-  "left-[36%] top-[54%]",
-  "left-[58%] top-[36%]",
-  "left-[74%] top-[62%]",
-  "left-[48%] top-[22%]",
-  "left-[28%] top-[70%]",
-  "left-[66%] top-[18%]",
-  "left-[80%] top-[40%]",
+  'left-[18%] top-[25%]',
+  'left-[36%] top-[54%]',
+  'left-[58%] top-[36%]',
+  'left-[74%] top-[62%]',
+  'left-[48%] top-[22%]',
+  'left-[28%] top-[70%]',
+  'left-[66%] top-[18%]',
+  'left-[80%] top-[40%]',
 ] as const;
 
 const getAtlasPlaces = (groups: readonly MapTripGroup[]): readonly AtlasPlace[] =>
@@ -48,27 +47,27 @@ const getAtlasPlaces = (groups: readonly MapTripGroup[]): readonly AtlasPlace[] 
     })),
   );
 
-export const TravelAtlasShell = ({
-  groups,
-  timeZone,
-}: TravelAtlasShellProps): ReactElement => {
-  const { format, t } = useI18n("ui.travelAtlas");
+export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): ReactElement => {
+  const { format, t } = useI18n('ui.travelAtlas');
   const atlasPlaces = getAtlasPlaces(groups);
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string>(atlasPlaces[0]?.id ?? "");
-  const selectedPlace = atlasPlaces.find((visitedPlace) => visitedPlace.id === selectedPlaceId)
-    ?? atlasPlaces[0];
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string>(atlasPlaces[0]?.id ?? '');
+  const selectedPlace =
+    atlasPlaces.find((visitedPlace) => visitedPlace.id === selectedPlaceId) ?? atlasPlaces[0];
   const formatDateLabel = (value: string): string =>
     format.dateTime(parseDateInputValueInTimeZone(value, timeZone), {
-      day: "numeric",
-      month: "short",
+      day: 'numeric',
+      month: 'short',
       timeZone,
-      year: "numeric",
+      year: 'numeric',
     });
   const renderTripGroup = (group: MapTripGroup): ReactElement => (
-    <section className="flex flex-col gap-3" key={group.trip.id}>
+    <section
+      className="flex flex-col gap-3"
+      key={group.trip.id}
+    >
       <div className="rounded-[1.4rem] border border-white/70 bg-[rgba(255,249,242,0.72)] px-4 py-3 shadow-whisper backdrop-blur-xl">
         <p className="ui-meta">
-          {t("tripWindow", {
+          {t('tripWindow', {
             end: formatDateLabel(group.trip.endDate),
             start: formatDateLabel(group.trip.startDate),
           })}
@@ -78,12 +77,12 @@ export const TravelAtlasShell = ({
             <p className="font-display text-[1.35rem] tracking-[-0.03em] text-foreground">
               {group.trip.title}
             </p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <p className="mt-1 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
               {t(atlasTripStatusTranslationKeyByValue[group.trip.status])}
             </p>
           </div>
-          <span className="rounded-pill border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-            {t("tripCount", { count: group.visitedPlaces.length })}
+          <span className="rounded-pill border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+            {t('tripCount', { count: group.visitedPlaces.length })}
           </span>
         </div>
       </div>
@@ -95,23 +94,21 @@ export const TravelAtlasShell = ({
           return (
             <button
               className={cn(
-                "w-full rounded-[1.3rem] border px-4 py-3 text-left shadow-whisper transition-transform hover:-translate-y-0.5",
-                isSelected
-                  ? "border-primary/22 bg-primary/14"
-                  : "border-white/72 bg-white/72",
+                'w-full rounded-[1.3rem] border px-4 py-3 text-left shadow-whisper transition-transform hover:-translate-y-0.5',
+                isSelected ? 'border-primary/22 bg-primary/14' : 'border-white/72 bg-white/72',
               )}
               key={visitedPlace.id}
               onClick={() => setSelectedPlaceId(visitedPlace.id)}
               type="button"
             >
               <p className="ui-meta">
-                {t("visitedOn", {
+                {t('visitedOn', {
                   date: formatDateLabel(visitedPlace.visitedOn),
                 })}
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">{visitedPlace.title}</p>
               <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                {visitedPlace.note?.trim() || t("noteFallback")}
+                {visitedPlace.note?.trim() || t('noteFallback')}
               </p>
             </button>
           );
@@ -151,16 +148,16 @@ export const TravelAtlasShell = ({
           </svg>
 
           <div className="absolute inset-x-4 top-4 rounded-[1.4rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-4 py-3 shadow-whisper backdrop-blur-xl md:inset-x-6">
-            <p className="ui-meta ui-couple-mark">{t("header.eyebrow")}</p>
+            <p className="ui-meta ui-couple-mark">{t('header.eyebrow')}</p>
             <div className="mt-2 flex items-center justify-between gap-3">
               <div>
                 <p className="font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-                  {t("header.title")}
+                  {t('header.title')}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">{t("header.description")}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('header.description')}</p>
               </div>
-              <div className="rounded-pill border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-                {t("header.badge", { count: atlasPlaces.length })}
+              <div className="rounded-pill border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+                {t('header.badge', { count: atlasPlaces.length })}
               </div>
             </div>
           </div>
@@ -174,7 +171,7 @@ export const TravelAtlasShell = ({
               <button
                 aria-label={visitedPlace.title}
                 aria-pressed={isSelected}
-                className={cn("absolute", positionClassName)}
+                className={cn('absolute', positionClassName)}
                 key={visitedPlace.id}
                 onClick={() => setSelectedPlaceId(visitedPlace.id)}
                 type="button"
@@ -182,18 +179,18 @@ export const TravelAtlasShell = ({
                 <motion.span
                   animate={{ scale: isSelected ? 1.06 : 1 }}
                   className={cn(
-                    "relative inline-flex flex-col items-center gap-2",
-                    isSelected ? "text-foreground" : "text-muted-foreground",
+                    'relative inline-flex flex-col items-center gap-2',
+                    isSelected ? 'text-foreground' : 'text-muted-foreground',
                   )}
                   transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <span
                     className={cn(
-                      "inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_12px_rgba(255,148,148,0.14)]",
-                      isSelected ? "bg-primary" : "bg-[rgba(255,227,225,0.88)]",
+                      'inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_12px_rgba(255,148,148,0.14)]',
+                      isSelected ? 'bg-primary' : 'bg-[rgba(255,227,225,0.88)]',
                     )}
                   />
-                  <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold uppercase tracking-[0.08em] shadow-whisper backdrop-blur-lg">
+                  <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold tracking-[0.08em] uppercase shadow-whisper backdrop-blur-lg">
                     {visitedPlace.title}
                   </span>
                 </motion.span>
@@ -204,9 +201,13 @@ export const TravelAtlasShell = ({
           {selectedPlace ? (
             <div className="absolute inset-x-4 bottom-4 rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.88)] px-4 py-4 shadow-cloud backdrop-blur-xl md:inset-x-6">
               <div className="flex items-center gap-2 text-primary">
-                <MapPinned aria-hidden="true" className="size-4" strokeWidth={2.1} />
+                <MapPinned
+                  aria-hidden="true"
+                  className="size-4"
+                  strokeWidth={2.1}
+                />
                 <p className="ui-meta">
-                  {t("visitedOn", {
+                  {t('visitedOn', {
                     date: formatDateLabel(selectedPlace.visitedOn),
                   })}
                 </p>
@@ -218,13 +219,13 @@ export const TravelAtlasShell = ({
                 {selectedPlace.trip.title}
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {selectedPlace.note?.trim() || t("noteFallback")}
+                {selectedPlace.note?.trim() || t('noteFallback')}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 <span>{t(atlasTripStatusTranslationKeyByValue[selectedPlace.trip.status])}</span>
                 <span>&bull;</span>
                 <span>
-                  {t("tripWindow", {
+                  {t('tripWindow', {
                     end: formatDateLabel(selectedPlace.trip.endDate),
                     start: formatDateLabel(selectedPlace.trip.startDate),
                   })}
@@ -237,33 +238,39 @@ export const TravelAtlasShell = ({
         <div className="hidden flex-col gap-4 xl:flex">
           <div className="rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
             <div className="flex items-center gap-2 text-primary">
-              <Route aria-hidden="true" className="size-4" strokeWidth={2.2} />
-              <p className="ui-meta">{t("side.eyebrow")}</p>
+              <Route
+                aria-hidden="true"
+                className="size-4"
+                strokeWidth={2.2}
+              />
+              <p className="ui-meta">{t('side.eyebrow')}</p>
             </div>
             <p className="mt-2 font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-              {t("side.title")}
+              {t('side.title')}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t("side.description")}
+              {t('side.description')}
             </p>
           </div>
-          <div className="space-y-4">
-            {groups.map((group) => renderTripGroup(group))}
-          </div>
+          <div className="space-y-4">{groups.map((group) => renderTripGroup(group))}</div>
         </div>
       </div>
 
       <div className="space-y-4 xl:hidden">
         <div className="rounded-[1.6rem] border border-white/70 bg-[rgba(255,249,242,0.78)] px-5 py-4 shadow-whisper backdrop-blur-xl">
           <div className="flex items-center gap-2 text-primary">
-            <Route aria-hidden="true" className="size-4" strokeWidth={2.2} />
-            <p className="ui-meta">{t("side.eyebrow")}</p>
+            <Route
+              aria-hidden="true"
+              className="size-4"
+              strokeWidth={2.2}
+            />
+            <p className="ui-meta">{t('side.eyebrow')}</p>
           </div>
           <p className="mt-2 font-display text-[1.8rem] tracking-[-0.03em] text-foreground">
-            {t("side.title")}
+            {t('side.title')}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            {t("side.description")}
+            {t('side.description')}
           </p>
         </div>
         {groups.map((group) => renderTripGroup(group))}

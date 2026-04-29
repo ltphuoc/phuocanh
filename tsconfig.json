@@ -13,6 +13,12 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "noErrorTruncation": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
     "plugins": [
       {
         "name": "next"

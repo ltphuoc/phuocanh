@@ -1,23 +1,17 @@
-"use server";
+'use server';
 
-import { z } from "zod";
-import {
-  createErrorState,
-  createSuccessState,
-  type ActionState,
-} from "@/lib/actions/action-state";
-import { revalidateLocalizedPath } from "@/lib/i18n/revalidate";
-import { requireReadyCoupleContext } from "@/lib/server/couple-context";
-import {
-  createSupabaseServerClient,
-} from "@/lib/supabase/server";
-import {
-  isSupportedCoupleTimeZone,
-  toTimeZoneDateStartIso,
-} from "@/lib/utils/couple-timezone";
+import type { ActionState } from '@/lib/actions/action-state';
+
+import { z } from 'zod';
+
+import { createErrorState, createSuccessState } from '@/lib/actions/action-state';
+import { revalidateLocalizedPath } from '@/lib/i18n/revalidate';
+import { requireReadyCoupleContext } from '@/lib/server/couple-context';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { isSupportedCoupleTimeZone, toTimeZoneDateStartIso } from '@/lib/utils/couple-timezone';
 
 const createCountdownSchema = z.object({
-  kind: z.enum(["anniversary", "birthday", "travel", "plan", "custom"]),
+  kind: z.enum(['anniversary', 'birthday', 'travel', 'plan', 'custom']),
   note: z.string().trim().max(280).optional(),
   targetDate: z.iso.date(),
   title: z.string().trim().min(1).max(120),
@@ -37,8 +31,8 @@ const createTripSchema = z
     title: z.string().trim().min(1).max(120),
   })
   .refine(({ endDate, startDate }) => endDate >= startDate, {
-    path: ["endDate"],
-    message: "Trip end date must not be before the start date.",
+    path: ['endDate'],
+    message: 'Trip end date must not be before the start date.',
   });
 
 const createAlbumSchema = z.object({
@@ -66,21 +60,21 @@ const updateCoupleTimezoneSchema = z.object({
 });
 
 const ALBUM_MUTATION_ERROR_MESSAGES = new Set([
-  "ALBUM_ITEMS_REQUIRED",
-  "ALBUM_NOT_FOUND",
-  "DUPLICATE_ALBUM_MEDIA",
-  "INVALID_ALBUM_MEDIA_SELECTION",
-  "TRIP_ALBUM_ALREADY_EXISTS",
-  "TRIP_NOT_FOUND",
+  'ALBUM_ITEMS_REQUIRED',
+  'ALBUM_NOT_FOUND',
+  'DUPLICATE_ALBUM_MEDIA',
+  'INVALID_ALBUM_MEDIA_SELECTION',
+  'TRIP_ALBUM_ALREADY_EXISTS',
+  'TRIP_NOT_FOUND',
 ]);
 
 const INVALID_FUTURE_NOTE_RPC_MESSAGES = new Set([
-  "INVALID_FUTURE_NOTE_BODY",
-  "INVALID_FUTURE_NOTE_TITLE",
-  "INVALID_FUTURE_NOTE_UNLOCK_AT",
+  'INVALID_FUTURE_NOTE_BODY',
+  'INVALID_FUTURE_NOTE_TITLE',
+  'INVALID_FUTURE_NOTE_UNLOCK_AT',
 ]);
-const INVALID_VISITED_PLACE_ERROR_CODES = new Set(["23503", "23514", "42501"]);
-const INVALID_TIMEZONE_RPC_MESSAGES = new Set(["INVALID_TIMEZONE"]);
+const INVALID_VISITED_PLACE_ERROR_CODES = new Set(['23503', '23514', '42501']);
+const INVALID_TIMEZONE_RPC_MESSAGES = new Set(['INVALID_TIMEZONE']);
 
 export const createCountdownAction = async (
   _previousState: ActionState,
@@ -89,14 +83,14 @@ export const createCountdownAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = createCountdownSchema.parse({
-      kind: formData.get("kind"),
-      note: formData.get("note"),
-      targetDate: formData.get("targetDate"),
-      title: formData.get("title"),
+      kind: formData.get('kind'),
+      note: formData.get('note'),
+      targetDate: formData.get('targetDate'),
+      title: formData.get('title'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.from("countdowns").insert({
+    const { error } = await supabase.from('countdowns').insert({
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
       kind: parsed.kind,
@@ -106,19 +100,19 @@ export const createCountdownAction = async (
     });
 
     if (error) {
-      console.error("Failed to create countdown", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to create countdown', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/countdowns");
-    return createSuccessState("countdown.created");
+    revalidateLocalizedPath('/countdowns');
+    return createSuccessState('countdown.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("countdown.invalidSubmission");
+      return createErrorState('countdown.invalidSubmission');
     }
 
-    console.error("Failed to create countdown", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to create countdown', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -129,14 +123,14 @@ export const createFutureNoteAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = createFutureNoteSchema.parse({
-      body: formData.get("body"),
-      title: formData.get("title"),
-      unlockDate: formData.get("unlockDate"),
+      body: formData.get('body'),
+      title: formData.get('title'),
+      unlockDate: formData.get('unlockDate'),
     });
 
     const supabase = await createSupabaseServerClient();
     const { data: createdFutureNoteId, error: futureNoteError } = await supabase.rpc(
-      "create_future_note_with_body",
+      'create_future_note_with_body',
       {
         note_body: parsed.body,
         note_title: parsed.title,
@@ -146,26 +140,26 @@ export const createFutureNoteAction = async (
 
     if (futureNoteError) {
       if (INVALID_FUTURE_NOTE_RPC_MESSAGES.has(futureNoteError.message)) {
-        return createErrorState("futureNote.invalidSubmission");
+        return createErrorState('futureNote.invalidSubmission');
       }
 
-      console.error("Failed to create future note", futureNoteError);
-      return createErrorState("unexpectedError");
+      console.error('Failed to create future note', futureNoteError);
+      return createErrorState('unexpectedError');
     }
 
     if (!createdFutureNoteId) {
-      return createErrorState("unexpectedError");
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/future-notes");
-    return createSuccessState("futureNote.created");
+    revalidateLocalizedPath('/future-notes');
+    return createSuccessState('futureNote.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("futureNote.invalidSubmission");
+      return createErrorState('futureNote.invalidSubmission');
     }
 
-    console.error("Failed to create future note", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to create future note', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -176,14 +170,14 @@ export const createTripAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = createTripSchema.parse({
-      endDate: formData.get("endDate"),
-      note: formData.get("note"),
-      startDate: formData.get("startDate"),
-      title: formData.get("title"),
+      endDate: formData.get('endDate'),
+      note: formData.get('note'),
+      startDate: formData.get('startDate'),
+      title: formData.get('title'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.from("trips").insert({
+    const { error } = await supabase.from('trips').insert({
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
       end_date: parsed.endDate,
@@ -193,19 +187,19 @@ export const createTripAction = async (
     });
 
     if (error) {
-      console.error("Failed to create trip", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to create trip', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/trips");
-    return createSuccessState("trip.created");
+    revalidateLocalizedPath('/trips');
+    return createSuccessState('trip.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("trip.invalidSubmission");
+      return createErrorState('trip.invalidSubmission');
     }
 
-    console.error("Failed to create trip", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to create trip', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -216,15 +210,15 @@ export const createAlbumAction = async (
   try {
     await requireReadyCoupleContext();
     const parsed = createAlbumSchema.parse({
-      description: formData.get("description"),
-      memoryMediaIds: formData.getAll("memoryMediaIds"),
-      title: formData.get("title"),
-      tripId: formData.get("tripId"),
+      description: formData.get('description'),
+      memoryMediaIds: formData.getAll('memoryMediaIds'),
+      title: formData.get('title'),
+      tripId: formData.get('tripId'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.rpc("create_album_with_items", {
-      album_description: parsed.description || "",
+    const { error } = await supabase.rpc('create_album_with_items', {
+      album_description: parsed.description || '',
       album_title: parsed.title,
       selected_memory_media_ids: parsed.memoryMediaIds,
       target_trip_id: parsed.tripId,
@@ -232,23 +226,23 @@ export const createAlbumAction = async (
 
     if (error) {
       if (ALBUM_MUTATION_ERROR_MESSAGES.has(error.message)) {
-        return createErrorState("album.invalidSubmission");
+        return createErrorState('album.invalidSubmission');
       }
 
-      console.error("Failed to create album", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to create album', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/albums");
+    revalidateLocalizedPath('/albums');
     revalidateLocalizedPath(`/trips/${parsed.tripId}`);
-    return createSuccessState("album.created");
+    return createSuccessState('album.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("album.invalidSubmission");
+      return createErrorState('album.invalidSubmission');
     }
 
-    console.error("Failed to create album", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to create album', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -259,37 +253,37 @@ export const addAlbumItemsAction = async (
   try {
     await requireReadyCoupleContext();
     const parsed = addAlbumItemsSchema.parse({
-      albumId: formData.get("albumId"),
-      memoryMediaIds: formData.getAll("memoryMediaIds"),
-      tripId: formData.get("tripId"),
+      albumId: formData.get('albumId'),
+      memoryMediaIds: formData.getAll('memoryMediaIds'),
+      tripId: formData.get('tripId'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.rpc("add_album_items", {
+    const { error } = await supabase.rpc('add_album_items', {
       selected_memory_media_ids: parsed.memoryMediaIds,
       target_album_id: parsed.albumId,
     });
 
     if (error) {
       if (ALBUM_MUTATION_ERROR_MESSAGES.has(error.message)) {
-        return createErrorState("album.invalidSubmission");
+        return createErrorState('album.invalidSubmission');
       }
 
-      console.error("Failed to add album items", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to add album items', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/albums");
+    revalidateLocalizedPath('/albums');
     revalidateLocalizedPath(`/albums/${parsed.albumId}`);
     revalidateLocalizedPath(`/trips/${parsed.tripId}`);
-    return createSuccessState("album.updated");
+    return createSuccessState('album.updated');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("album.invalidSubmission");
+      return createErrorState('album.invalidSubmission');
     }
 
-    console.error("Failed to add album items", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to add album items', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -300,35 +294,35 @@ export const createVisitedPlaceAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = createVisitedPlaceSchema.parse({
-      note: formData.get("note"),
-      title: formData.get("title"),
-      tripId: formData.get("tripId"),
-      visitedOn: formData.get("visitedOn"),
+      note: formData.get('note'),
+      title: formData.get('title'),
+      tripId: formData.get('tripId'),
+      visitedOn: formData.get('visitedOn'),
     });
 
     const supabase = await createSupabaseServerClient();
     const { data: trips, error: tripError } = await supabase
-      .from("trips")
-      .select("id, start_date, end_date")
-      .eq("couple_id", context.coupleId)
-      .eq("id", parsed.tripId)
+      .from('trips')
+      .select('id, start_date, end_date')
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.tripId)
       .limit(1);
 
     if (tripError) {
-      console.error("Failed to validate visited place trip", tripError);
-      return createErrorState("unexpectedError");
+      console.error('Failed to validate visited place trip', tripError);
+      return createErrorState('unexpectedError');
     }
 
     const trip = trips[0];
     if (!trip) {
-      return createErrorState("visitedPlace.invalidSubmission");
+      return createErrorState('visitedPlace.invalidSubmission');
     }
 
     if (parsed.visitedOn < trip.start_date || parsed.visitedOn > trip.end_date) {
-      return createErrorState("visitedPlace.invalidSubmission");
+      return createErrorState('visitedPlace.invalidSubmission');
     }
 
-    const { error } = await supabase.from("visited_places").insert({
+    const { error } = await supabase.from('visited_places').insert({
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
       note: parsed.note || null,
@@ -339,23 +333,23 @@ export const createVisitedPlaceAction = async (
 
     if (error) {
       if (error.code && INVALID_VISITED_PLACE_ERROR_CODES.has(error.code)) {
-        return createErrorState("visitedPlace.invalidSubmission");
+        return createErrorState('visitedPlace.invalidSubmission');
       }
 
-      console.error("Failed to create visited place", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to create visited place', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/map");
+    revalidateLocalizedPath('/map');
     revalidateLocalizedPath(`/trips/${parsed.tripId}`);
-    return createSuccessState("visitedPlace.created");
+    return createSuccessState('visitedPlace.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("visitedPlace.invalidSubmission");
+      return createErrorState('visitedPlace.invalidSubmission');
     }
 
-    console.error("Failed to create visited place", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to create visited place', error);
+    return createErrorState('unexpectedError');
   }
 };
 
@@ -366,40 +360,40 @@ export const updateCoupleTimezoneAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = updateCoupleTimezoneSchema.parse({
-      timeZone: formData.get("timeZone"),
+      timeZone: formData.get('timeZone'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.rpc("update_couple_timezone", {
+    const { error } = await supabase.rpc('update_couple_timezone', {
       target_couple_id: context.coupleId,
       target_timezone: parsed.timeZone,
     });
 
     if (error) {
       if (INVALID_TIMEZONE_RPC_MESSAGES.has(error.message)) {
-        return createErrorState("settings.timezone.invalidSubmission");
+        return createErrorState('settings.timezone.invalidSubmission');
       }
 
-      console.error("Failed to update couple timezone", error);
-      return createErrorState("unexpectedError");
+      console.error('Failed to update couple timezone', error);
+      return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath("/settings");
-    revalidateLocalizedPath("/home");
-    revalidateLocalizedPath("/on-this-day");
-    revalidateLocalizedPath("/countdowns");
-    revalidateLocalizedPath("/future-notes");
-    revalidateLocalizedPath("/trips");
-    revalidateLocalizedPath("/albums");
-    revalidateLocalizedPath("/map");
+    revalidateLocalizedPath('/settings');
+    revalidateLocalizedPath('/home');
+    revalidateLocalizedPath('/on-this-day');
+    revalidateLocalizedPath('/countdowns');
+    revalidateLocalizedPath('/future-notes');
+    revalidateLocalizedPath('/trips');
+    revalidateLocalizedPath('/albums');
+    revalidateLocalizedPath('/map');
 
-    return createSuccessState("settings.timezone.updated");
+    return createSuccessState('settings.timezone.updated');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return createErrorState("settings.timezone.invalidSubmission");
+      return createErrorState('settings.timezone.invalidSubmission');
     }
 
-    console.error("Failed to update couple timezone", error);
-    return createErrorState("unexpectedError");
+    console.error('Failed to update couple timezone', error);
+    return createErrorState('unexpectedError');
   }
 };

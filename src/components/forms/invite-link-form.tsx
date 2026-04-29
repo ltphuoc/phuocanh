@@ -1,14 +1,16 @@
-"use client";
+'use client';
 
-import { startTransition, useActionState, useEffect, type ReactElement } from "react";
-import { toast } from "sonner";
-import { createInviteAction } from "@/app/actions/auth-actions";
-import { Button } from "@/components/ui/button";
-import { useI18n } from "@/hooks/useI18n";
-import {
-  initialActionState,
-  type ActionStateWithData,
-} from "@/lib/actions/action-state";
+import type { ReactElement } from 'react';
+import type { ActionStateWithData } from '@/lib/actions/action-state';
+
+import { startTransition, useActionState, useEffect } from 'react';
+
+import { toast } from 'sonner';
+
+import { createInviteAction } from '@/app/actions/auth-actions';
+import { Button } from '@/components/ui/button';
+import { useI18n } from '@/hooks/useI18n';
+import { initialActionState } from '@/lib/actions/action-state';
 
 interface InviteData {
   readonly inviteUrl: string;
@@ -21,22 +23,19 @@ const initialInviteState: ActionStateWithData<InviteData> = {
 
 export const InviteLinkForm = (): ReactElement => {
   const { locale } = useI18n();
-  const { t: actionsT } = useI18n("actions");
-  const { t: commonT } = useI18n("common");
-  const { t: formT } = useI18n("forms.invite");
-  const [state, submitAction, isPending] = useActionState(
-    createInviteAction,
-    initialInviteState,
-  );
+  const { t: actionsT } = useI18n('actions');
+  const { t: commonT } = useI18n('common');
+  const { t: formT } = useI18n('forms.invite');
+  const [state, submitAction, isPending] = useActionState(createInviteAction, initialInviteState);
 
   useEffect(() => {
-    const actionMessageKey = state.message || "unexpectedError";
+    const actionMessageKey = state.message || 'unexpectedError';
 
-    if (state.status === "success" && state.data?.inviteUrl) {
+    if (state.status === 'success' && state.data?.inviteUrl) {
       toast.success(actionsT(actionMessageKey));
     }
 
-    if (state.status === "error") {
+    if (state.status === 'error') {
       toast.error(actionsT(actionMessageKey));
     }
   }, [actionsT, state.data?.inviteUrl, state.message, state.status]);
@@ -48,27 +47,27 @@ export const InviteLinkForm = (): ReactElement => {
           event.preventDefault();
           startTransition(() => {
             const payload = new FormData();
-            payload.set("locale", locale);
+            payload.set('locale', locale);
             submitAction(payload);
           });
         }}
       >
         <Button
-          busyLabel={commonT("working")}
+          busyLabel={commonT('working')}
           className="w-full md:w-auto"
           isBusy={isPending}
           type="submit"
           variant="outline"
         >
-          {formT("submit")}
+          {formT('submit')}
         </Button>
       </form>
       {state.data?.inviteUrl ? (
         <button
           className="rounded-2xl border border-border bg-muted-soft px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-muted"
           onClick={async () => {
-            await navigator.clipboard.writeText(state.data?.inviteUrl ?? "");
-            toast.success(formT("copySuccess"));
+            await navigator.clipboard.writeText(state.data?.inviteUrl ?? '');
+            toast.success(formT('copySuccess'));
           }}
           type="button"
         >

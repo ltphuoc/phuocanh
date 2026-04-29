@@ -1,11 +1,13 @@
-import Image from "next/image";
-import type { ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
-import { SectionCard } from "@/components/ui/section-card";
-import { Link } from "@/i18n/navigation";
+import type { ReactElement } from 'react';
+
+import Image from 'next/image';
+
+import { Badge } from '@/components/ui/badge';
+import { SectionCard } from '@/components/ui/section-card';
+import { Link } from '@/i18n/navigation';
 
 interface AlbumCardProps {
-  readonly coverMediaType: "image" | "video" | null;
+  readonly coverMediaType: 'image' | 'video' | null;
   readonly coverSignedUrl: string | null;
   readonly description: string | null;
   readonly href?: string;
@@ -28,9 +30,12 @@ export const AlbumCard = ({
   videoCoverLabel,
 }: AlbumCardProps): ReactElement => {
   const content = (
-    <SectionCard className="flex h-full flex-col gap-4" surface="glass">
+    <SectionCard
+      className="flex h-full flex-col gap-4"
+      surface="glass"
+    >
       <div className="overflow-hidden rounded-[1.6rem] border border-white/70 bg-white/70 shadow-whisper">
-        {coverMediaType === "image" && coverSignedUrl ? (
+        {coverMediaType === 'image' && coverSignedUrl ? (
           <div className="relative aspect-[4/3]">
             <Image
               alt={title}
@@ -43,8 +48,8 @@ export const AlbumCard = ({
           </div>
         ) : (
           <div className="ui-gradient-memory flex aspect-[4/3] items-end p-4">
-            <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground shadow-whisper">
-              {coverMediaType === "video" ? videoCoverLabel : itemCountLabel}
+            <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase shadow-whisper">
+              {coverMediaType === 'video' ? videoCoverLabel : itemCountLabel}
             </div>
           </div>
         )}
@@ -77,7 +82,7 @@ export const AlbumCard = ({
 
   return (
     <Link
-      className="block rounded-[var(--radius-panel)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+      className="block rounded-[var(--radius-panel)] focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
       href={href}
     >
       {content}
