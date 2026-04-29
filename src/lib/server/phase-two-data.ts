@@ -15,6 +15,8 @@ import {
 } from '@/lib/utils/couple-timezone';
 
 export type TripStatus = 'planned' | 'active' | 'completed';
+type AlbumItemRow = Database['public']['Tables']['album_items']['Row'];
+type MemoryMediaRow = Database['public']['Tables']['memory_media']['Row'];
 
 export interface CountdownCard {
   readonly daysFromToday: number;
@@ -555,25 +557,26 @@ export const getTripDetailData = async (
 
   const album = albumQuery.data[0] ?? null;
   const memoryIds = memoriesQuery.data.map((memory) => memory.id);
-  const eligibleMediaQuery = memoryIds.length
-    ? await supabase
-        .from('memory_media')
-        .select('*')
-        .in('memory_id', memoryIds)
-        .order('created_at', { ascending: true })
-    : { data: [], error: null };
+  const [eligibleMediaQuery, albumItemsQuery] = await Promise.all([
+    memoryIds.length
+      ? supabase
+          .from('memory_media')
+          .select('*')
+          .in('memory_id', memoryIds)
+          .order('created_at', { ascending: true })
+      : Promise.resolve({ data: [] as MemoryMediaRow[], error: null }),
+    album
+      ? supabase
+          .from('album_items')
+          .select('*')
+          .eq('album_id', album.id)
+          .order('position', { ascending: true })
+      : Promise.resolve({ data: [] as AlbumItemRow[], error: null }),
+  ]);
 
   if (eligibleMediaQuery.error) {
     throw new Error(eligibleMediaQuery.error.message);
   }
-
-  const albumItemsQuery = album
-    ? await supabase
-        .from('album_items')
-        .select('*')
-        .eq('album_id', album.id)
-        .order('position', { ascending: true })
-    : { data: [], error: null };
 
   if (albumItemsQuery.error) {
     throw new Error(albumItemsQuery.error.message);

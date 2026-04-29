@@ -451,11 +451,16 @@ export const getTodayTriviaRoundId = async (
 
 export const getGamesHubData = async (context: CoupleContext): Promise<GamesHubData> => {
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
+  const [dailyQuestion, guessDate, trivia] = await Promise.all([
+    getDailyQuestionRoundState(todayDateToken),
+    getGuessDateRoundState(todayDateToken),
+    getTriviaRoundState(todayDateToken),
+  ]);
 
   return {
-    dailyQuestion: await getDailyQuestionRoundState(todayDateToken),
-    guessDate: await getGuessDateRoundState(todayDateToken),
-    trivia: await getTriviaRoundState(todayDateToken),
+    dailyQuestion,
+    guessDate,
+    trivia,
     todayDateToken,
   };
 };

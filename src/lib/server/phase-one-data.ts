@@ -61,12 +61,54 @@ export interface MemoryDetailData {
 }
 
 const memoryIdSchema = z.uuid();
+type MemoryMediaRow = Database['public']['Tables']['memory_media']['Row'];
+type ChecklistItemRow = Database['public']['Tables']['checklist_items']['Row'];
+
+const buildFirstMediaByMemoryId = (
+  mediaRows: readonly MemoryMediaRow[],
+): Map<string, MemoryMediaRow> => {
+  const mediaByMemoryId = new Map<string, MemoryMediaRow>();
+
+  mediaRows.forEach((media) => {
+    if (!mediaByMemoryId.has(media.memory_id)) {
+      mediaByMemoryId.set(media.memory_id, media);
+    }
+  });
+
+  return mediaByMemoryId;
+};
+
+const toChecklistItemCard = (item: ChecklistItemRow): ChecklistItemCard => ({
+  checklistId: item.checklist_id,
+  doneAt: item.done_at,
+  id: item.id,
+  isDone: item.is_done,
+  text: item.text,
+});
+
+const groupChecklistItemsByChecklistId = (
+  checklistItems: readonly ChecklistItemCard[],
+): Map<string, ChecklistItemCard[]> => {
+  const itemsByChecklistId = new Map<string, ChecklistItemCard[]>();
+
+  checklistItems.forEach((item) => {
+    const items = itemsByChecklistId.get(item.checklistId);
+    if (items) {
+      items.push(item);
+      return;
+    }
+
+    itemsByChecklistId.set(item.checklistId, [item]);
+  });
+
+  return itemsByChecklistId;
+};
 
 const toMemoryCard = (
   memory: Database['public']['Tables']['memories']['Row'],
-  mediaRows: Database['public']['Tables']['memory_media']['Row'][],
+  mediaByMemoryId: ReadonlyMap<string, MemoryMediaRow>,
 ): MemoryCard => {
-  const media = mediaRows.find((item) => item.memory_id === memory.id);
+  const media = mediaByMemoryId.get(memory.id);
   return {
     happenedAt: memory.happened_at,
     id: memory.id,
@@ -114,37 +156,35 @@ export const getHomePageData = async (context: CoupleContext): Promise<HomePageD
   const memoryIds = memoryQuery.data.map((memory) => memory.id);
   const checklistIds = checklistQuery.data.map((checklist) => checklist.id);
 
-  const mediaQuery = memoryIds.length
-    ? await supabase.from('memory_media').select('*').in('memory_id', memoryIds)
-    : { data: [], error: null };
+  const [mediaQuery, checklistItemsQuery] = await Promise.all([
+    memoryIds.length
+      ? supabase.from('memory_media').select('*').in('memory_id', memoryIds)
+      : Promise.resolve({ data: [] as MemoryMediaRow[], error: null }),
+    checklistIds.length
+      ? supabase
+          .from('checklist_items')
+          .select('*')
+          .in('checklist_id', checklistIds)
+          .order('created_at', { ascending: true })
+      : Promise.resolve({ data: [] as ChecklistItemRow[], error: null }),
+  ]);
 
   if (mediaQuery.error) {
     throw new Error(mediaQuery.error.message);
   }
 
-  const checklistItemsQuery = checklistIds.length
-    ? await supabase
-        .from('checklist_items')
-        .select('*')
-        .in('checklist_id', checklistIds)
-        .order('created_at', { ascending: true })
-    : { data: [], error: null };
-
   if (checklistItemsQuery.error) {
     throw new Error(checklistItemsQuery.error.message);
   }
 
-  const checklistItems = checklistItemsQuery.data.map((item) => ({
-    checklistId: item.checklist_id,
-    doneAt: item.done_at,
-    id: item.id,
-    isDone: item.is_done,
-    text: item.text,
-  }));
+  const mediaByMemoryId = buildFirstMediaByMemoryId(mediaQuery.data);
+  const itemsByChecklistId = groupChecklistItemsByChecklistId(
+    checklistItemsQuery.data.map((item) => toChecklistItemCard(item)),
+  );
 
   const checklists = checklistQuery.data.map((checklist) => ({
     id: checklist.id,
-    items: checklistItems.filter((item) => item.checklistId === checklist.id),
+    items: itemsByChecklistId.get(checklist.id) ?? [],
     title: checklist.title,
   }));
 
@@ -156,7 +196,7 @@ export const getHomePageData = async (context: CoupleContext): Promise<HomePageD
 
   return {
     checklists,
-    memories: memoryQuery.data.map((memory) => toMemoryCard(memory, mediaQuery.data)),
+    memories: memoryQuery.data.map((memory) => toMemoryCard(memory, mediaByMemoryId)),
     relationshipDays,
     wishItems: wishQuery.data.map((item) => ({
       category: item.category,
@@ -210,18 +250,14 @@ export const getListsPageData = async (context: CoupleContext): Promise<ListsPag
     throw new Error(checklistItemsQuery.error.message);
   }
 
-  const checklistItems = checklistItemsQuery.data.map((item) => ({
-    checklistId: item.checklist_id,
-    doneAt: item.done_at,
-    id: item.id,
-    isDone: item.is_done,
-    text: item.text,
-  }));
+  const itemsByChecklistId = groupChecklistItemsByChecklistId(
+    checklistItemsQuery.data.map((item) => toChecklistItemCard(item)),
+  );
 
   return {
     checklists: checklistQuery.data.map((checklist) => ({
       id: checklist.id,
-      items: checklistItems.filter((item) => item.checklistId === checklist.id),
+      items: itemsByChecklistId.get(checklist.id) ?? [],
       title: checklist.title,
     })),
     wishItems: wishQuery.data.map((item) => ({
@@ -254,7 +290,9 @@ export const getOnThisDayData = async (context: CoupleContext): Promise<MemoryCa
     throw new Error(mediaQuery.error.message);
   }
 
-  return matchedMemories.map((memory) => toMemoryCard(memory, mediaQuery.data));
+  const mediaByMemoryId = buildFirstMediaByMemoryId(mediaQuery.data);
+
+  return matchedMemories.map((memory) => toMemoryCard(memory, mediaByMemoryId));
 };
 
 export const getMemoryDetailData = async (
