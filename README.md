@@ -1,245 +1,137 @@
 # PhuocAnh Couple App
 
-Private couple memory web app built with Next.js App Router + Supabase.
+Private couple memory web app for exactly two users in one shared space.
 
-## Current Product State
+The app is built with Next.js App Router, Supabase Auth/Postgres/Storage, Server Actions,
+TanStack Query hydration, and a light-only editorial UI system.
 
-- `implemented`: `/`, `/login`, `/onboarding`, `/accept-invite`, `/auth/callback`, `/home`, `/lists`, `/memories/new`, `/memories/[memoryId]`, `/on-this-day`, `/countdowns`, `/future-notes`, `/trips`, `/trips/[tripId]`, `/albums`, `/albums/[albumId]`, `/map`, `/games`, `/games/daily-question`, `/games/guess-date`, `/games/trivia`, `/stats`, `/settings`
-- `shell-only`: game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]`
-- internal-only route handlers also exist at `/auth/callback/verify-email-otp` for local Playwright auth bootstrap when explicitly enabled from a loopback host
+## Current State
 
-Use `docs/engineering/route-capability-matrix.md` as the canonical current-state route map.
+Use [docs/engineering/route-capability-matrix.md](docs/engineering/route-capability-matrix.md) as
+the canonical route map. Implemented areas include auth/onboarding, memories, lists, countdowns,
+future notes, trips, trip albums, visited places, map, daily-question, guess-date, trivia, gameplay
+stats, and shared timezone settings.
+
+Game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]` are not
+live backend features.
+
+## Tech Stack
+
+- Next.js `16.2.x`, React `19`, TypeScript, App Router, Server Components by default
+- `next-intl` with locale-prefixed routes; `vi` is default, `en` is supported
+- Supabase Auth, Postgres, RLS, SQL RPCs, Storage, Edge Functions for reminders
+- TanStack Query for hydrated authenticated app data and same-session freshness
+- React Hook Form, Zod, Sonner, Tailwind CSS v4, shadcn-style local components, Lucide icons
+- Vitest for unit tests, Playwright for production-flow browser coverage
+
+## Start Here
+
+- Agent rules: [AGENTS.md](AGENTS.md) and [docs/agent/agent-handbook.md](docs/agent/agent-handbook.md)
+- Setup and commands:
+  [docs/engineering/development-verification.md](docs/engineering/development-verification.md)
+- Deployment: [docs/engineering/deployment.md](docs/engineering/deployment.md)
+- Business rules: [docs/product/business-rules.md](docs/product/business-rules.md)
+- System architecture: [docs/engineering/system-architecture.md](docs/engineering/system-architecture.md)
+- Frontend architecture:
+  [docs/engineering/frontend-architecture.md](docs/engineering/frontend-architecture.md)
+- API/action contracts: [docs/engineering/api-contracts.md](docs/engineering/api-contracts.md)
+- Data model: [docs/engineering/data-model.md](docs/engineering/data-model.md)
+- Migration rules: [docs/engineering/migration-playbook.md](docs/engineering/migration-playbook.md)
 
 ## Source Of Truth
 
 1. Business rules: `docs/product/business-rules.md`
-2. Schema and security: `supabase/migrations/*.sql`
+2. Schema, RLS, triggers, RPCs, and storage policy: `supabase/migrations/*.sql`
 3. Runtime mutation/API contract: `src/app/actions/*` and `docs/engineering/api-contracts.md`
-4. UI behavior and route status: `docs/engineering/frontend-architecture.md` and `docs/engineering/route-capability-matrix.md`
+4. UI behavior and route status:
+   `docs/engineering/frontend-architecture.md` and
+   `docs/engineering/route-capability-matrix.md`
 5. Historical logs: context only unless explicitly marked current
 
-If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL.
+If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL and update the docs.
 
-## Start Here
-
-- Agent handbook: `docs/agent/agent-handbook.md`
-- Business rules: `docs/product/business-rules.md`
-- User flows: `docs/product/flows.md`
-- System architecture: `docs/engineering/system-architecture.md`
-- Frontend architecture: `docs/engineering/frontend-architecture.md`
-- Development and verification: `docs/engineering/development-verification.md`
-- Migration rules: `docs/engineering/migration-playbook.md`
-- Route capability matrix: `docs/engineering/route-capability-matrix.md`
-
-## Getting Started
-
-1. Copy `.env.example` to `.env.local`.
-2. Fill the required values:
-
-| Variable                        | Required now | Purpose                                                                                                                                                     |
-| ------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | yes          | Supabase project URL                                                                                                                                        |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes          | Browser/server anon key for current runtime                                                                                                                 |
-| `DATABASE_URL`                  | yes          | Local SQL tooling and schema parity work                                                                                                                    |
-| `NEXT_PUBLIC_SITE_URL`          | yes          | Fallback site URL when forwarded headers are absent                                                                                                         |
-| `OPENAI_API_KEY`                | conditional  | Required to generate daily-question prompts in `/games/daily-question`                                                                                      |
-| `OPENAI_DAILY_QUESTION_MODEL`   | optional     | Prompt-generation model override; defaults to `gpt-4o-mini`                                                                                                 |
-| `SUPABASE_SERVICE_ROLE_KEY`     | optional     | Enables the admin-backed auth-gate fast path for existing-couple detection; when unset, the main app falls back to the authenticated `has_any_couple()` RPC |
-
-Phase 2 reminder delivery also needs Edge Function secrets when you deploy or serve `supabase/functions/reminder-processor`:
-
-| Secret                      | Required now | Purpose                                                           |
-| --------------------------- | ------------ | ----------------------------------------------------------------- |
-| `SUPABASE_URL`              | yes          | Supabase project URL inside the Edge Function runtime             |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes          | Claims and updates `reminder_deliveries` inside the Edge Function |
-| `RESEND_API_KEY`            | yes          | Outbound reminder email provider                                  |
-| `REMINDER_FROM_EMAIL`       | yes          | Sender address for reminder emails                                |
-| `REMINDER_FROM_NAME`        | optional     | Sender display name, defaults to `PhuocAnh`                       |
-| `REMINDER_APP_BASE_URL`     | optional     | Public app base URL used for reminder deep links                  |
-| `REMINDER_LOCALE`           | optional     | Locale prefix used in reminder deep links, defaults to `vi`       |
-
-In hosted environments, Phase 2 reminder delivery also needs these Supabase Vault secrets for cron-triggered Edge Function invocation:
-
-| Vault secret  | Required now | Purpose                                                              |
-| ------------- | ------------ | -------------------------------------------------------------------- |
-| `project_url` | yes          | Base project URL used by `pg_net` to call the reminder Edge Function |
-| `anon_key`    | yes          | Supabase anon key used as the scheduled invoke bearer token          |
-
-For local Supabase Docker setup, use:
+## Quick Start
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54330/postgres
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
-Keep your browser URL consistent with auth redirect config. This repo supports both:
-
-- `http://localhost:3000`
-- `http://127.0.0.1:3000`
-
-3. Start local Supabase:
-
-```bash
+cp .env.example .env.local
+pnpm install
 supabase start
-```
-
-This repo currently disables local Supabase Edge Runtime by default because the
-current Supabase CLI local relay imports `jsr:@panva/jose@6`, and `jsr.io`
-returns a `403` challenge in this environment during boot. The hosted
-`reminder-processor` Edge Function remains part of the runtime contract; only
-local auto-boot is disabled for now.
-
-Local Supabase service endpoints for this repo:
-
-| Service      | URL                                                       |
-| ------------ | --------------------------------------------------------- |
-| Project URL  | `http://127.0.0.1:54331`                                  |
-| Studio       | `http://127.0.0.1:54332`                                  |
-| Mailpit      | `http://127.0.0.1:54333`                                  |
-| MCP          | `http://127.0.0.1:54331/mcp`                              |
-| REST         | `http://127.0.0.1:54331/rest/v1`                          |
-| GraphQL      | `http://127.0.0.1:54331/graphql/v1`                       |
-| Database URL | `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
-
-`NEXT_PUBLIC_SUPABASE_URL` must point to `http://127.0.0.1:54331`.
-
-These local ports are intentionally different from the default Supabase ports to avoid conflicts with another local stack already using `54321`, `54322`, `54323`, `54324`, and `54327`.
-
-4. Apply local database migrations:
-
-```bash
 supabase db reset --local
-```
-
-If you need to preserve local data, use:
-
-```bash
-supabase db push --local
-```
-
-5. Run the app:
-
-```bash
 pnpm dev
 ```
 
-## Validation
+Open `http://localhost:3000` or `http://127.0.0.1:3000`. Keep the browser host aligned with
+Supabase auth redirect config.
 
-Run all of these before opening a PR:
+Local Supabase ports are project-specific:
 
-```bash
-pnpm test:unit
-pnpm lint
-pnpm typecheck
-pnpm typecheck:functions
-pnpm build
-```
+| Service           | URL                                                       |
+| ----------------- | --------------------------------------------------------- |
+| API / Project URL | `http://127.0.0.1:54331`                                  |
+| Studio            | `http://127.0.0.1:54332`                                  |
+| Mailpit           | `http://127.0.0.1:54333`                                  |
+| Database          | `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
 
-## E2E Validation
+The local Supabase Edge Runtime is disabled in `supabase/config.toml`; hosted reminder processing
+still remains part of the runtime contract.
 
-Production-flow browser coverage now lives in Playwright and runs against `next build` + `next start` on the local Supabase stack.
+## Environment
 
-Prerequisites:
+Copy `.env.example` and fill at least:
 
-- Docker Desktop is installed and the Docker daemon is running
-- local Supabase is installed and available on your `PATH`
-- `.env.local` contains the local Supabase URL/keys and site URL values above
-- local auth email capture is available through Mailpit on `http://127.0.0.1:54333`
-- no other process is required to own the E2E app port; the harness starts its own dedicated server at `http://127.0.0.1:3100` by default
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `DATABASE_URL`
+- `NEXT_PUBLIC_SITE_URL`
+- `OPENAI_API_KEY`, unless using `OPENAI_DAILY_QUESTION_STUB_RESPONSE` for local/E2E testing
 
-Commands:
+See [docs/engineering/development-verification.md](docs/engineering/development-verification.md)
+for the full local/E2E/reminder environment matrix.
 
-```bash
-pnpm test:e2e
-pnpm test:e2e:headed
-```
+## Common Commands
 
-What `pnpm test:e2e` does:
+| Command                     | Purpose                                                    |
+| --------------------------- | ---------------------------------------------------------- |
+| `pnpm dev`                  | Start the Next.js dev server                               |
+| `pnpm lint`                 | ESLint with zero warnings                                  |
+| `pnpm typecheck`            | TypeScript check                                           |
+| `pnpm typecheck:functions`  | Deno check for the reminder Edge Function                  |
+| `pnpm test:unit`            | Vitest unit tests                                          |
+| `pnpm test:e2e`             | Production-flow Playwright harness against local Supabase  |
+| `pnpm i18n:check`           | Translation key parity and fallback checks                 |
+| `pnpm i18n:audit-hardcoded` | Hardcoded UI copy audit                                    |
+| `pnpm build`                | Production Next.js build                                   |
+| `pnpm validate`             | Lint, format check, typecheck, build, and whitespace check |
 
-- starts local Supabase if needed
-- resets the local database with migrations and the baseline seed file
-- builds the Next.js app
-- runs Playwright serially against `E2E_BASE_URL`, which defaults to `http://127.0.0.1:3100`
+Before PRs, run the baseline listed in
+[docs/engineering/development-verification.md](docs/engineering/development-verification.md). Do
+not report a fresh E2E result unless `pnpm test:e2e` ran in the current change.
 
-Local E2E note:
+## Folder Map
 
-- `supabase start` intentionally skips local Edge Runtime right now, so the
-  local stack used by Playwright covers DB, Auth, Storage, Studio, Mailpit, and
-  the app runtime, but not `/functions/v1`.
+| Path                        | Purpose                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `src/app/[locale]/(public)` | Login, first-user onboarding, invite acceptance                 |
+| `src/app/[locale]/(app)`    | Authenticated app shell and user-facing routes                  |
+| `src/app/actions`           | Server Actions for app-layer mutations                          |
+| `src/lib/server`            | Couple context, auth gate, app-data reads, service helpers      |
+| `src/lib/query`             | TanStack Query keys, fetchers, hydration, cache updates         |
+| `src/lib/supabase`          | Typed Supabase clients and middleware                           |
+| `src/components`            | Shared layout, UI, forms, and app navigation                    |
+| `messages`                  | `next-intl` message files                                       |
+| `supabase/migrations`       | Authoritative SQL schema, RLS, triggers, RPCs, storage policies |
+| `supabase/functions`        | Reminder Edge Function                                          |
+| `tests/unit`                | Vitest tests                                                    |
+| `tests/e2e`                 | Playwright production-flow tests                                |
+| `docs`                      | Product, engineering, agent, and manual-test documentation      |
 
-E2E-specific runtime notes:
+## Safe Change Rules
 
-- `E2E_ENABLE_EMAIL_OTP_HELPER` explicitly enables the internal `POST /auth/callback/verify-email-otp` helper used by local Playwright auth bootstrap. The route still returns `404` unless the request also comes through `127.0.0.1`, `localhost`, or another loopback host.
-- `OPENAI_DAILY_QUESTION_STUB_RESPONSE` is a test-only override for `/games/daily-question` prompt generation. When unset, the app uses the normal OpenAI Responses API path.
-- `scripts/e2e/run.sh` defaults `E2E_BASE_URL=http://127.0.0.1:3100`, aligns `NEXT_PUBLIC_SITE_URL` to that URL, and also sets `E2E_ENABLE_EMAIL_OTP_HELPER`, `OPENAI_DAILY_QUESTION_STUB_RESPONSE`, and `TZ=Asia/Ho_Chi_Minh`.
-- Playwright auth state files are written under `playwright/.auth/` and are gitignored.
-- The suite intentionally excludes shell-only game modes other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]`.
-- Latest focused gameplay hardening verification on 2026-04-29: `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `./scripts/e2e/run.sh tests/e2e/gameplay.spec.ts` passed; Playwright finished `6 passed (34.2s)`.
-- Historical verified local result from the post-Phase 3 Slice 1 E2E hardening wave: `pnpm lint`, `pnpm typecheck`, `pnpm typecheck:functions`, `pnpm build`, `pnpm test:e2e`, and `git diff --check` all passed; Playwright finished `7 passed (2.8m)`.
-
-## Reminder Setup Verification
-
-After deploying the migration and the `reminder-processor` Edge Function, verify:
-
-1. Hosted: Vault contains `project_url` and `anon_key`. Local/CI without Vault: seed the fallback store instead:
-   `select private.upsert_secret_fallback('project_url', '<API_URL>', 'Local functions base URL');`
-   `select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');`
-   Use `supabase status -o env` to get `API_URL` and `ANON_KEY`.
-2. Cron contains `phase2-reminder-enqueue` and `phase2-reminder-processor`.
-3. `select public.invoke_reminder_processor();` returns a request ID.
-4. Due reminders appear in `public.reminder_deliveries` and advance to `sent` or retry state.
-
-## Internationalization (next-intl)
-
-- Locales: `vi` (default), `en`
-- Locale routes: all user-facing pages are locale-prefixed (`/vi/*`, `/en/*`)
-- Locale selection priority: `NEXT_LOCALE` cookie -> browser `Accept-Language` -> `vi`
-- Message files:
-  - `messages/en.json` (canonical key set)
-  - `messages/vi.json` (localized overrides)
-- Runtime fallback: missing locale keys fall back to English via deep merge in `src/i18n/request.ts`
-
-### Add a new language
-
-1. Add locale to `src/i18n/routing.ts` in `locales`.
-2. Create `messages/<locale>.json`.
-3. Start from `messages/en.json` keys and translate values.
-4. Add locale display label in `src/i18n/routing.ts` (`localeDisplayNames`).
-5. Run:
-
-```bash
-pnpm i18n:check
-pnpm i18n:audit-hardcoded
-pnpm typecheck
-```
-
-### Add a new translation key
-
-1. Add the key to `messages/en.json` first (canonical source).
-2. Add translated value to `messages/vi.json` (or rely on temporary English fallback).
-3. Use nested reusable keys (e.g. `auth.login.title`, `forms.memory.submit`, `actions.memory.created`).
-4. Reference keys via scoped translators (`useI18n(\"forms.memory\")`, `getTranslations({namespace: \"home\"})`).
-5. Re-run `pnpm i18n:check` and `pnpm typecheck`.
-
-### Naming conventions
-
-- Use feature-first namespaces: `auth.*`, `forms.*`, `actions.*`, `nav.*`, `ui.*`.
-- Prefer stable reusable keys over route-specific one-offs.
-- Use ICU messages for counts/plurals (example: `ui.countdown.daysLeft`).
-- Keep action/toast keys under `actions.*`; UI should render keys, not raw backend messages.
-
-## Notes
-
-- Current UI direction is editorial-romance, light-mode only, with `Fraunces` + `Manrope` and a floating dock / rail shell.
-- The deprecated `/chat` mock route has been removed; do not reintroduce live chat without a new product plan.
-- Shell-only routes are intentionally not evidence of backend/domain support.
-- Current runtime uses the OpenAI Responses API for `/games/daily-question` prompt generation and has live memory-backed `/games/guess-date` and `/games/trivia` modes. It has no live Mapbox integration.
-- `/map` is now backed by real trip-linked `visited_places` data, but it remains provider-free and does not render geographic tiles or coordinates yet.
-- `/settings` now owns the shared couple timezone, which drives countdown, future-note, trip-status, album-eligibility, and other couple-level day boundaries.
-- Gameplay writes are RPC-only and raw `game_round_answers` rows are not directly browser-readable; reveal state flows through secure server read helpers.
-- Phase 2 reminder automation is now part of the runtime contract. Database cron jobs enqueue reminder rows, and the `reminder-processor` Edge Function delivers summary-only emails through Resend.
-
-## Deploy On Vercel
-
-The repo does not currently define project-specific deployment automation. If deployment work is requested, document the exact environment and rollout steps in the same PR.
+- Keep docs-only tasks docs-only.
+- Do not write directly to `public.couples` or `public.couple_memberships` from app code.
+- Do not replace `bootstrap_first_couple(...)` or `accept_couple_invite(...)` with direct table
+  writes.
+- Do not edit `src/lib/supabase/database.types.ts` or `src/lib/db/schema.ts` without a real SQL
+  migration when schema changes are needed.
+- Keep gameplay writes behind Server Actions and SQL RPCs.
+- Update the route matrix, business rules, contracts, and migration docs when behavior changes.

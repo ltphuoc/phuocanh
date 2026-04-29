@@ -1,105 +1,100 @@
 # Design System
 
+This is the visual and component guidance for the current light-only editorial app shell.
+
 ## Visual Direction
 
-- Tone: editorial romance, soft, emotional, playful but elegant, and highly memorable.
+- Tone: editorial romance, soft, emotional, playful but elegant.
 - Theme policy: light mode only.
-- Product intent: one cohesive visual language across mobile, tablet, and desktop with a keepsake-like emotional center.
+- Product intent: one cohesive visual language across mobile, tablet, and desktop with a
+  keepsake-like center.
 
 ## Core Palette
 
-- `--bg-canvas`: `#FFF5E4`
-- `--bg-soft`: `#FFF9F2`
-- `--surface`: `#FFE3E1`
-- `--surface-tint`: `#FFD1D1`
-- `--brand-rose`: `#FF9494`
+| Token            | Value     |
+| ---------------- | --------- |
+| `--bg-canvas`    | `#FFF5E4` |
+| `--bg-soft`      | `#FFF9F2` |
+| `--surface`      | `#FFE3E1` |
+| `--surface-tint` | `#FFD1D1` |
+| `--brand-rose`   | `#FF9494` |
 
-## Semantic Color Mapping
+Use semantic tokens from `src/app/globals.css` in components. Avoid route-local hardcoded palette
+values.
 
-- Layout surfaces:
-- `--background`, `--background-elevated`, `--card`, `--panel`, `--panel-strong`
-- Interactive colors:
-- `--primary`, `--primary-hover`, `--secondary`, `--accent`
-- Text:
-- `--foreground` uses deep plum-ink contrast
-- `--foreground-muted` / `--muted-foreground` use softened plum neutrals
-- Structure and depth:
-- `--border`, `--ring`, `--glow-rose`, `--glow-blush`
-- Gradients:
-- `--gradient-hero`
-- `--gradient-memory`
-- `--gradient-active`
-- `--gradient-map-overlay`
-- Status tones remain conservative and palette-adjacent. No unrelated neon or saturated dashboard hues are introduced.
+## Semantic Tokens
 
-## Light-Mode Rules
+- Layout surfaces: `--background`, `--background-elevated`, `--card`, `--panel`,
+  `--panel-strong`
+- Interactive colors: `--primary`, `--primary-hover`, `--secondary`, `--accent`
+- Text: `--foreground`, `--foreground-muted`, `--muted-foreground`
+- Structure and focus: `--border`, `--ring`, `--glow-rose`, `--glow-blush`
+- Gradients: `--gradient-hero`, `--gradient-memory`, `--gradient-active`,
+  `--gradient-map-overlay`
 
-- Global `color-scheme` is fixed to `light`.
-- No dark tokens or dark media-query branches are allowed in app styles.
-- Components must consume semantic tokens only, not route-level hardcoded colors.
+Status tones should stay conservative and palette-adjacent.
 
 ## Typography
 
 - Display font: `Fraunces`
-- Body font: `Manrope`
-- `Fraunces` is reserved for page titles, section titles, memory objects, milestone numbers, and short quotes.
-- `Manrope` is used for repeated UI, controls, forms, navigation, and utility copy.
-- Shared text primitives:
-- `ui-display`
-- `ui-page-title`
-- `ui-heading-xl`
-- `ui-heading-lg`
-- `ui-page-description`
-- `ui-meta`
-- `ui-quote`
-- Typography should come from the shared CSS utilities in `globals.css`, not route-local ad hoc scales.
+- Body/control font: `Manrope`
+- Use `Fraunces` for page titles, section titles, memory objects, milestone numbers, and short
+  quotes.
+- Use `Manrope` for repeated UI, controls, forms, navigation, and utility copy.
+- Prefer shared CSS text utilities from `globals.css` over route-local ad hoc scales.
 
-## Spacing
+Shared text utilities include `ui-display`, `ui-page-title`, `ui-heading-xl`, `ui-heading-lg`,
+`ui-page-description`, `ui-meta`, and `ui-quote`.
 
-- Vertical rhythm: `SectionStack`.
-- Grid rhythm: `ResponsiveGrid`.
-- Form rhythm: `FormSection`.
-- Page-level gutters and max widths must come from shared layout primitives only.
-- Current container intent:
-- immersive shell around `1320px`
-- standard content around `1180px`
-- reading/detail pages around `760px`
+## Spacing And Layout
 
-## Radius and Elevation
+- Vertical rhythm: `SectionStack`
+- Repeated collection grids: `ResponsiveGrid`
+- Form grouping: `FormSection`
+- Public/global pages: `PageContainer`
+- Auth pages: `AuthShell`
+- Authenticated pages: shared `(app)` shell layout
+
+Container intent:
+
+| Surface              | Approximate max width |
+| -------------------- | --------------------- |
+| Immersive app shell  | `1320px`              |
+| Standard content     | `1180px`              |
+| Reading/detail pages | `760px`               |
+
+## Radius And Elevation
 
 - Control radius: `--radius-control`
 - Panel radius: `--radius-panel`
 - Memory object radius: `--radius-memory`
 - Hero/editorial radius: `--radius-hero`
 - Pill/tag radius: `--radius-pill`
-- Elevation:
-- `--shadow-whisper` for standard elevated surfaces
-- `--shadow-cloud` for editorial emphasis and floating navigation
-- `--shadow-glow` for focused interactive emphasis only
+- Standard elevation: `--shadow-whisper`
+- Editorial/floating elevation: `--shadow-cloud`
+- Focus/emphasis glow: `--shadow-glow`
 
 ## Component Principles
 
-- Compose from shared primitives:
-- Layout: `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `AuthShell`, `ShellPage`.
-- UI controls: `Button`, `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`.
-- Shared state UI: `EmptyState`, `LoadingState`, `ListRow`, `MemoryCard`, `ComingSoonCard`, `PageReveal`.
-- Story surfaces: `AnniversarySpotlight`, `TimelineRibbon`, `FeaturedMemoryObject`, `TravelAtlasShell`.
-- Template widgets remain available for shell-only Phase 2+/3 routes.
+- Compose from shared primitives before adding route-local markup.
+- Use Lucide icons for core navigation and decorative state markers.
+- Keep touch targets comfortable on mobile and tablet.
+- Keep focus-visible rings on interactive controls.
+- Use `motion` for restrained dock, rail, drawer, reveal, and state transitions.
+- Avoid generic dashboard-card mosaics when a page has a stronger narrative composition.
 
-## Interaction Patterns
+## Responsive Behavior
 
-- Motion is present but restrained:
-- shared layout emphasis for active navigation states
-- gentle lift/tilt on collectible surfaces
-- short color/focus transitions for controls
-- spring-based drawers/sheets
-- Focus-visible states must use the semantic ring token.
-- Touch targets stay comfortable on mobile and tablet.
-- `motion` is the current animation layer for dock, rail, reveal, and shell transitions.
+- Mobile (`<md`): floating dock, centered memory action, `More` sheet.
+- Tablet/desktop (`md+`): slim rail, expandable drawer, right content canvas.
+- Forms stack on mobile and may use two columns from `md` for parallel fields.
+- List rows keep stable action slots and minimum height.
+- Template widgets should share the same spacing and tone.
 
 ## Guardrails
 
-- Do not reintroduce dark-mode support.
+- Do not reintroduce dark-mode branches.
 - Do not add non-semantic hardcoded color utilities in pages.
 - Do not duplicate component styling per route when a shared primitive exists.
-- Avoid generic dashboard-card layouts as the default composition.
+- Do not describe or implement the current shell as a simple sidebar plus bottom-nav pattern; it is
+  dock plus rail/drawer.

@@ -1,6 +1,7 @@
 # Engineering Architecture
 
-This file is now the engineering index. Use the focused docs below instead of treating this file as the full system spec.
+This is the engineering index. Use the focused docs below instead of treating this file as the full
+system spec.
 
 ## Read In This Order
 
@@ -10,6 +11,7 @@ This file is now the engineering index. Use the focused docs below instead of tr
 4. `docs/engineering/data-model.md`
 5. `docs/engineering/migration-playbook.md`
 6. `docs/engineering/development-verification.md`
+7. `docs/engineering/deployment.md`
 
 ## Current Runtime Summary
 
@@ -17,13 +19,20 @@ This file is now the engineering index. Use the focused docs below instead of tr
 - Public routes for login, first-user onboarding, and invite acceptance
 - Authenticated routes behind one shared app shell
 - Server Actions for app-layer mutations
+- TanStack Query hydration for authenticated app data
 - Supabase Auth for identity
 - Supabase Postgres for schema, RLS, triggers, and RPCs
 - Supabase Storage for private memory media
+- Supabase Edge Function plus cron/RPC queue for reminders
+- OpenAI Responses API for daily-question prompt generation
 
 ## Source Of Truth Reminder
 
 - Business rules: `docs/product/business-rules.md`
 - Schema/security: `supabase/migrations/*.sql`
 - Runtime contracts: `docs/engineering/api-contracts.md`
-- UI/route behavior: `docs/engineering/frontend-architecture.md` and `docs/engineering/route-capability-matrix.md`
+- UI/route behavior:
+  `docs/engineering/frontend-architecture.md` and
+  `docs/engineering/route-capability-matrix.md`
+- Setup/testing: `docs/engineering/development-verification.md`
+- Deployment: `docs/engineering/deployment.md`

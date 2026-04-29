@@ -61,7 +61,7 @@
 - Finalized typography stack: `Fraunces` for headings/quotes and `Manrope` for body, navigation, and forms.
 - Finalized mobile navigation shell: floating dock above the safe area with a centered memory action orb.
 - Finalized desktop navigation shell: slim rail plus expandable grouped drawer instead of a full sidebar.
-- Confirmed `/chat` remains only as a temporary mock artifact and is no longer a planned product feature.
+- Confirmed `/chat` remains only as a temporary mock artifact and is no longer a planned product feature. `SUPERSEDED BY route removal.`
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
 - Confirmed visited-place atlas v1: ship trip-linked `visited_places` and a provider-free atlas first; coordinates and Mapbox-backed tiles remain deferred.
 

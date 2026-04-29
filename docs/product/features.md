@@ -1,142 +1,42 @@
 # Features
 
-Status values: `implemented`, `shell-only`, `planned`, `removed`.
+This file is the product feature summary. Use
+[docs/engineering/route-capability-matrix.md](../engineering/route-capability-matrix.md) for
+route-by-route runtime status.
 
-Use `docs/engineering/route-capability-matrix.md` as the canonical route-by-route current-state reference. This file tracks product features, not just routes.
+## Implemented
 
-| #   | Feature                                             | Phase | Status      |
-| --- | --------------------------------------------------- | ----- | ----------- |
-| 1   | Timeline kỷ niệm                                    | 1     | implemented |
-| 2   | Upload ảnh/video/ngắn note                          | 1     | implemented |
-| 3   | On this day                                         | 1     | implemented |
-| 4   | Counter yêu nhau bao lâu                            | 1     | implemented |
-| 5   | Danh sách nơi muốn đi / món muốn ăn / phim muốn xem | 1     | implemented |
-| 6   | Checklist hoàn thành                                | 1     | implemented |
-| 7   | Map các nơi đã đi cùng nhau                         | 2     | implemented |
-| 8   | Album theo từng chuyến đi                           | 2     | implemented |
-| 9   | Countdown sinh nhật / anniversary / chuyến đi       | 2     | implemented |
-| 10  | Quiz ai nhớ rõ hơn                                  | 3     | implemented |
-| 11  | Guess the date                                      | 3     | implemented |
-| 12  | This or that                                        | 4     | planned     |
-| 13  | Memory cards từ ảnh thật                            | 4     | planned     |
-| 14  | Daily question                                      | 3     | implemented |
-| 15  | Điểm số / streak                                    | 3     | implemented |
-| 16  | Future notes mở vào ngày định sẵn                   | 2     | implemented |
-| 17  | Couple AI Memory Search                             | 4     | planned     |
-| 18  | Các stats vui                                       | 3     | implemented |
-| 19  | Trips foundation                                    | 2     | implemented |
-| 20  | Shared couple timezone + date boundaries            | 2     | implemented |
+| Area                 | Current capability                                                                            |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| Auth and membership  | Magic-link login, explicit first-user onboarding, invite acceptance, singleton couple space   |
+| Memories             | Create memory, optional image/video upload, signed media reads, memory detail                 |
+| Home and recap       | Story-first home, relationship-day spotlight, timeline feed, on-this-day                      |
+| Lists                | Wish items, checklists, checklist item add/toggle                                             |
+| Planning             | Countdowns and future notes                                                                   |
+| Reminders            | Countdown day-of and future-note unlock email queue with retry processing                     |
+| Travel               | Trips, trip detail, trip albums, visited places, provider-free map                            |
+| Gameplay             | Daily question, guess date, trivia, locked partner answers, reveal after both partners submit |
+| Stats                | Daily-question participation and streak history                                               |
+| Settings             | Shared couple timezone and date-boundary behavior                                             |
+| Internationalization | Locale-prefixed `vi` and `en` routes                                                          |
 
-## Phase 1 Notes
+## Deferred
 
-- Implemented authentication with magic-link + invite acceptance flow.
-- Implemented explicit first-user onboarding with confirmation-backed couple bootstrap, plus invite flow for second user.
-- Implemented core memories flow with optional image/video upload to private storage.
+- Additional game modes beyond `daily_question`, `guess_date`, and `trivia`
+- Gameplay scoring, winners, leaderboards, sharing, similarity matching, answer edits, answer deletes,
+  and backfill UI
+- General analytics beyond daily-question gameplay stats
+- AI retrieval memory search
+- Mapbox, coordinates, geocoding, provider-backed tiles, route polylines, and deeper travel-map
+  behavior
+- Per-user timezone overrides
+- Album captions, reordering, removal, delete flow, and multi-album-per-trip behavior
+- Public sharing, native mobile app, and multi-couple workspaces
 
-## Phase 1 Hardening (Stage A)
+## Current Non-Contracts
 
-- `implemented`: invite acceptance is now atomic via `accept_couple_invite` RPC (no direct client-side invite row reads/writes).
-- `implemented`: first-space bootstrap is now atomic via `bootstrap_first_couple` RPC with advisory lock and singleton enforcement.
-- `implemented`: auth callback redirect now normalizes and rejects protocol-relative or malformed `next` paths.
-- `implemented`: memory create flow now validates file constraints before insert and rolls back DB/storage on upload metadata failures.
-- `implemented`: on-this-day now queries by calendar day in SQL, removing capped in-app filtering.
-
-## Runtime Stabilization (2026-03-28)
-
-- `implemented`: missing-schema runtime failures now surface actionable local setup recovery steps in UI.
-- `implemented`: memory upload transport limit is aligned with feature contract (25MB) via Next.js server action body-size config.
-
-## Editorial UI Redesign (2026-03-29)
-
-- `implemented`: the app now uses a story-first editorial shell instead of a generic dashboard composition.
-- `implemented`: home begins with an anniversary/relationship-day spotlight and a memory-first feed.
-- `implemented`: typography now uses `Fraunces` for editorial display moments and `Manrope` for body and controls.
-- `implemented`: the light-only token system now includes semantic surfaces, gradients, radii, and layered shadows for premium depth.
-- `implemented`: mobile navigation is now a floating dock with a centered memory action orb and a separate `More` sheet.
-- `implemented`: tablet/desktop navigation is now a slim rail with an expandable secondary drawer instead of the older grouped sidebar.
-- `implemented`: timeline cards were replaced with collectible “memory object” surfaces and a story ribbon presentation.
-- `removed`: the deprecated `/chat` mock route is no longer part of the app.
-- `implemented`: `/games` is now a real gameplay hub backed by today’s live daily-question, guess-date, and trivia state.
-- `implemented`: `/games/daily-question` is the first live gameplay route with on-demand prompt generation, one-answer-per-user locking, and both-answer reveal.
-- `implemented`: `/stats` now renders gameplay-only aggregates from real daily-question history.
-- `shell-only`: `/games/[mode]` remains shell-only for game slugs other than `daily-question`, `guess-date`, and `trivia`.
-
-## Phase 2 Slice 1 (2026-03-29)
-
-- `implemented`: `/countdowns` now reads and writes live Phase 2 countdown rows.
-- `implemented`: `/future-notes` now reads and writes live metadata plus secure note bodies gated by unlock date.
-- `implemented`: shared accessibility and consistency fixes landed alongside the slice (`/lists` label parity, icon-button labels, mobile `More` semantics).
-
-## Phase 2 Slice 2 (2026-03-29)
-
-- `implemented`: `/trips` now reads and writes live trip rows through the `trips` schema and `createTripAction`.
-- `implemented`: `/trips/[tripId]` now resolves real couple-scoped trip detail and returns `notFound()` for invalid or foreign IDs.
-- `implemented`: trip UI now uses real date-range and duration metadata instead of fake memory/album counts.
-
-## Phase 2 Slice 3 (2026-03-29)
-
-- `implemented`: albums now exist as real trip-rooted entities backed by `albums` and `album_items`.
-- `implemented`: `/albums` now lists real albums with linked trip context, cover media, and item counts.
-- `implemented`: `/albums/[albumId]` now renders real signed album media and linked trip data.
-- `implemented`: `/trips/[tripId]` now supports creating the trip album and adding remaining eligible media later.
-- `implemented`: album grouping reuses existing `memory_media`; no second upload pipeline was introduced.
-
-## Phase 2 Slice 4 (2026-03-29)
-
-- `implemented`: visited places now exist as real trip-linked entities backed by `visited_places`.
-- `implemented`: `/map` now renders a real provider-free atlas grouped by trip and backed by live visited-place rows.
-- `implemented`: `/trips/[tripId]` now supports creating visited places and reading the ordered trip place log.
-- `implemented`: the atlas slice keeps the travel contract rooted in trips and does not add Mapbox or coordinate fields yet.
-- `deferred`: coordinates, route polylines, and provider-backed geographic tiles remain follow-up travel work rather than part of this slice.
-
-## Couple Timezone Foundation (2026-03-29)
-
-- `implemented`: `/settings` now owns the shared couple timezone instead of acting as a shell-only More hub.
-- `implemented`: countdown and future-note forms now submit date-only values and the server derives stored instants from the saved couple timezone.
-- `implemented`: relationship-day math, on-this-day, trip status, album media eligibility, album detail dates, trip dates, and map dates now use the saved couple timezone.
-- `implemented`: changing the couple timezone preserves visible countdown and future-note calendar dates instead of shifting them unexpectedly.
-- `deferred`: per-user timezone overrides remain out of scope.
-
-## Phase 2 Closeout (2026-04-01)
-
-- `implemented`: countdowns now enqueue one day-of reminder email per active partner based on the saved couple timezone.
-- `implemented`: future notes now store encrypted bodies at rest and only decrypt through unlock-gated RPC reads.
-- `implemented`: future-note creation now runs through a transactional SQL RPC instead of a two-step app write plus rollback.
-- `implemented`: unlock reminder emails are summary-only and do not include the future-note body.
-- `implemented`: reminder delivery now uses durable queue rows plus claim/retry processing in the reminder Edge Function.
-- `implemented`: the product scope for Phase 2 is complete, with Vault-backed reminder secrets in hosted environments and a private fallback secret store for local/CI replay when Vault is unavailable.
-
-## Phase 3 Slice 1 (2026-04-02)
-
-- `implemented`: added couple-scoped gameplay schema with `game_rounds`, `game_round_answers`, and `game_mode`.
-- `implemented`: `/games` now reads real live status for the current couple-local day.
-- `implemented`: `/games/daily-question` now generates one canonical OpenAI-backed prompt per local day, stores the first successful opener locale, locks one answer per user, and reveals both answers only after both submit.
-- `implemented`: `/stats` now renders gameplay-only streak, participation, completed-round counts, and 14-day status history.
-- `shell-only`: game modes other than `daily-question`, `guess-date`, and `trivia` remain presentational shells.
-
-## Phase 3 Slice 2 (2026-04-28)
-
-- `implemented`: `/games` now shows live status for both `daily_question` and `guess_date`.
-- `implemented`: `/games/guess-date` now opens one canonical memory-backed round per couple-local day.
-- `implemented`: guess-date source memories are selected in SQL, one date guess is locked per partner, and the actual memory date plus guesses reveal only after both active partners submit.
-- `deferred`: scoring, winners, leaderboards, sharing, answer edits/deletes, OpenAI generation, and stats expansion remain out of scope.
-
-## Phase 3 Slice 3 (2026-04-28)
-
-- `implemented`: `/games` now shows live status for `daily_question`, `guess_date`, and `trivia`.
-- `implemented`: `/games/trivia` now opens one canonical memory-location quiz round per couple-local day.
-- `implemented`: trivia source memories and stable answer options are selected in SQL, one option is locked per partner, and the correct answer plus correctness reveal only after both active partners submit.
-- `implemented`: `/stats` remains daily-question-only and is not expanded by trivia.
-- `deferred`: scoring, winners, leaderboards, sharing, answer edits/deletes, OpenAI generation, and stats expansion remain out of scope.
-
-## Phase 3 Gameplay Freshness Hardening (2026-04-29)
-
-- `implemented`: `/games/daily-question` now conditionally refreshes the waiting first-partner session after the second partner submits, so both answers reveal without a manual reload.
-- `implemented`: the daily-question client invalidates the hub and stats query caches after reveal so same-browser navigation sees completed state.
-- `implemented`: `/games/guess-date` and `/games/trivia` now apply the same waiting-session refresh pattern and invalidate the hub query cache after reveal.
-
-## Phase 3 Carry-Forward
-
-- `removed`: `/chat` route removal landed as maintenance work and is not part of the next gameplay slice.
-- `implemented`: `Phase 3 Slice 3: Live Trivia` and cross-session reveal hardening for all three live gameplay modes are now landed.
-- `planned`: additional game modes, leaderboards, sharing, similarity scoring, and travel-map depth remain outside the delivered Phase 3 slices.
+- Shell polish is not proof of backend support.
+- `/games/[mode]` is live only for `daily-question`, `guess-date`, and `trivia`.
+- `/map` is a provider-free atlas over `visited_places`, not a geographic tile integration.
+- `/stats` is gameplay-only and currently sourced from daily-question history.
+- Future-note email reminders are summary-only and must not include decrypted note bodies.

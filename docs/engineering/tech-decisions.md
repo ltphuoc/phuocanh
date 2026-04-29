@@ -52,7 +52,7 @@
 - Chosen typography strategy: move from Geist to `Fraunces` for display moments and `Manrope` for UI/body copy via `next/font/google`.
 - Chosen motion layer: adopt `motion` for shared-layout transitions, dock state animation, and gentle reveal choreography.
 - Chosen responsive shell pattern: floating mobile dock with centered memory action orb, plus slim desktop rail with expandable grouped drawer.
-- Chosen `/chat` cleanup posture: leave the presentational conversation shell only as a temporary deprecated artifact until navigation/route cleanup lands.
+- Chosen `/chat` cleanup posture at the time: leave the presentational conversation shell as a temporary deprecated artifact. `SUPERSEDED BY route removal.`
 - Confirmed trip-rooted album v1: one album per trip, reusing existing `memory_media` rather than a second upload pipeline.
 
 ## 2026-03-29 (Visited-Place Atlas Foundation)

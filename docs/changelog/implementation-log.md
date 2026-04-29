@@ -76,7 +76,7 @@
 - Expanded root `AGENTS.md` outside the Next-managed block with project source-of-truth order, verification expectations, and repo safety boundaries.
 - Updated `docs/agent/agent-handbook.md` with Next.js 16.2 agent guidance, MCP/runtime inspection expectations, locale-aware repo paths, and validation rules.
 - Added `docs/engineering/development-verification.md` as the compact local setup, app startup, E2E, env, and docs-update guide.
-- Synced roadmap/status wording so `Phase 3 Slice 1: Live Daily Question + Gameplay Stats` is the latest documented slice.
+- Synced roadmap/status wording for `Phase 3 Slice 1: Live Daily Question + Gameplay Stats`.
 - Marked prior E2E suite results as historical instead of fresh current-run verification.
 - Replaced machine-specific manual-test index links with repo-relative links.
 
@@ -539,7 +539,7 @@
 - Refactored form composition with `FormSection` for consistent label/field hierarchy and responsive rhythm.
 - Added required UI specification docs:
 - `docs/design-system.md`
-- `docs/responsive-guidelines.md`
+- responsive guidance that has since been folded into `docs/engineering/frontend-architecture.md` and `docs/design-system.md`
 
 ### Verification
 

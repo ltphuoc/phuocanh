@@ -23,32 +23,16 @@ This file is the canonical “what exists today” route map.
 | `/albums/[albumId]`               | implemented                                                                                             | `getAlbumDetailData(...)`                                                                                                                                           | Route param is a real album UUID; invalid or foreign IDs must not resolve                                                                                 |
 | `/map`                            | implemented                                                                                             | `getMapPageData(...)` + `visited_places`                                                                                                                            | Atlas is provider-free and trip-linked; no coordinates, tiles, or route polylines exist yet                                                               |
 | `/games`                          | implemented                                                                                             | `getGamesHubData(...)`                                                                                                                                              | Live hub for today’s `daily_question`, `guess_date`, and `trivia` status; non-live modes still render as shell-only entry points                          |
-| `/games/[mode]`                   | implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; shell-only otherwise | `getDailyQuestionPageData(...)` / `getGuessDatePageData(...)` / `getTriviaPageData(...)` + gameplay Server Actions for live modes; route param only for other slugs | Only `/games/daily-question`, `/games/guess-date`, and `/games/trivia` have live creation, answer capture, and reveal behavior in this slice              |
+| `/games/[mode]`                   | implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`; shell-only otherwise | `getDailyQuestionPageData(...)` / `getGuessDatePageData(...)` / `getTriviaPageData(...)` + gameplay Server Actions for live modes; route param only for other slugs | Only `/games/daily-question`, `/games/guess-date`, and `/games/trivia` currently have live creation, answer capture, and reveal behavior                  |
 | `/stats`                          | implemented                                                                                             | `getGameplayStatsPageData(...)`                                                                                                                                     | Gameplay-only metrics sourced from `daily_question` history; this is not a general analytics pipeline                                                     |
 | `/settings`                       | implemented                                                                                             | `getReadyCoupleContextOrRedirect()` + `updateCoupleTimezoneAction`                                                                                                  | Owns the shared couple timezone only; account/privacy/per-user settings are still deferred                                                                |
 
-## Latest Documented Backend Slice
-
-- `Phase 3 Slice 3: Live Trivia` is now the latest implemented slice after the Phase 3 Slice 1 gameplay foundation and Slice 2 guess-date mode.
-- Delivered route capability in this slice:
-  - `/games` is a real backend-backed hub with live status and entry links for `daily-question`, `guess-date`, and `trivia`
-  - `/games/[mode]` is live for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`
-  - `/games/trivia` creates one canonical memory-location round per couple-local day, locks one selected option per active partner, and reveals correctness only after all active partners submit
-  - `/stats` remains daily-question-only and is not expanded by guess-date or trivia
-- Deprecated `/chat` cleanup has been completed as maintenance work and is not part of the gameplay roadmap.
-
-## Latest Documented Hardening
-
-- `/games/daily-question`, `/games/guess-date`, and `/games/trivia` now refresh waiting first-partner sessions after the second partner submits without requiring a manual reload.
-- After daily-question reveal, the current browser context invalidates the `/games` and `/stats` app-data caches so hub and stats navigation sees completed state.
-- After guess-date or trivia reveal, the current browser context invalidates the `/games` app-data cache so hub navigation sees completed state.
-- Next move: choose the next live gameplay mode or another explicit hardening slice.
-
-## Engineering Follow-Up Note
+## Current Follow-Up Notes
 
 - Reminder cron/invoke uses Vault-backed secrets in hosted environments.
 - Local and CI replay uses a private fallback secret store when Vault is unavailable, so this is no longer a route-capability blocker.
 - Existing-couple auth-gate branching no longer depends on service-role access alone; the runtime now falls back to the authenticated `has_any_couple()` RPC when `SUPABASE_SERVICE_ROLE_KEY` is unset.
+- Cross-session reveal freshness is implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`.
 
 ## Status Definitions
 
