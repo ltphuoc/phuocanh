@@ -63,6 +63,10 @@ pnpm dev
 Open `http://localhost:3000` or `http://127.0.0.1:3000`. Keep the browser host aligned with
 Supabase auth redirect config.
 
+For normal local development, keep `.env.local` pointed at the local Supabase stack. Use deployed
+Supabase values in Vercel/provider environment variables, or only in `.env.local` for an intentional
+smoke test against the hosted project.
+
 Local Supabase ports are project-specific:
 
 | Service           | URL                                                       |
@@ -84,6 +88,9 @@ Copy `.env.example` and fill at least:
 - `DATABASE_URL`
 - `NEXT_PUBLIC_SITE_URL`
 - `OPENAI_API_KEY`, unless using `OPENAI_DAILY_QUESTION_STUB_RESPONSE` for local/E2E testing
+
+Do not run local reset, push, or E2E workflows against the deployed database. `pnpm test:e2e` is
+designed to reset and seed local Supabase.
 
 See [docs/engineering/development-verification.md](docs/engineering/development-verification.md)
 for the full local/E2E/reminder environment matrix.

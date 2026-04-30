@@ -12,9 +12,14 @@ complements source-of-truth SQL migrations and runtime code; it does not replace
 
 ## Local Environment
 
-Copy `.env.example` to `.env.local`. Next.js loads env files from the repo root. Values prefixed
-with `NEXT_PUBLIC_` are exposed to browser code and are evaluated at build time for production
-bundles, so set hosted values before running `pnpm build`.
+Copy `.env.example` to `.env.local` for normal local development. Next.js loads env files from the
+repo root. Values prefixed with `NEXT_PUBLIC_` are exposed to browser code and are evaluated at
+build time.
+
+Default `.env.local` values should point at the local Supabase stack. Use hosted Supabase values in
+Vercel/provider environment variables, or only in `.env.local` for an intentional local smoke test
+against the deployed project. Do not run local reset, migration-push, or E2E workflows against a
+deployed database.
 
 | Variable                              | Required    | Used by                   | Notes                                                                  |
 | ------------------------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------- |
@@ -71,8 +76,8 @@ Use `supabase db push --local` only when preserving local data matters.
 | Mailpit         | `http://127.0.0.1:54333`                                  |
 | Database        | `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
 
-`NEXT_PUBLIC_SUPABASE_URL` must point to `http://127.0.0.1:54331`. The ports intentionally avoid
-the default Supabase local ports.
+For normal local development, `NEXT_PUBLIC_SUPABASE_URL` must point to
+`http://127.0.0.1:54331`. The ports intentionally avoid the default Supabase local ports.
 
 Local Supabase Edge Runtime is disabled in `supabase/config.toml` because the current local relay
 can fail before booting in this environment. Hosted `reminder-processor` behavior remains part of

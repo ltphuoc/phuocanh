@@ -49,6 +49,11 @@ URLs, screenshots, or client bundles.
 `DATABASE_URL` is only needed for tooling in this repo unless future app code directly opens a
 Postgres connection. The current app runtime uses Supabase clients instead.
 
+Keep `.env.local` local-first for day-to-day development and E2E runs. Hosted Supabase values belong
+in Vercel/provider environment variables. Pointing `.env.local` at the hosted project is acceptable
+only for an intentional smoke test, and local reset/seed/migration workflows must not be run in that
+mode.
+
 ## Deploy Supabase
 
 Run Supabase deployment before Vercel so hosted app builds point at a migrated backend.
