@@ -2,6 +2,8 @@
 
 import type { ReactElement } from 'react';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -9,6 +11,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { createVisitedPlaceAction } from '@/app/actions/planning-actions';
+import { LocationPicker } from '@/components/forms/location-picker';
 import { FormSection } from '@/components/layout/form-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,6 +73,7 @@ export const CreateVisitedPlaceForm = ({
   const queryClient = useQueryClient();
   const mutation = useActionMutation(createVisitedPlaceAction);
   const defaultVisitedOn = getDefaultVisitedOn(startDate, endDate);
+  const [locationPickerResetKey, setLocationPickerResetKey] = useState(0);
   const form = useForm<CreateVisitedPlaceValues>({
     defaultValues: {
       note: '',
@@ -89,6 +93,24 @@ export const CreateVisitedPlaceForm = ({
     payload.set('title', values.title);
     payload.set('tripId', tripId);
     payload.set('visitedOn', values.visitedOn);
+    const formElement = document.getElementById(
+      'create-visited-place-form',
+    ) as HTMLFormElement | null;
+    if (formElement) {
+      const formData = new FormData(formElement);
+      [
+        'locationAddress',
+        'locationLatitude',
+        'locationLongitude',
+        'locationProvider',
+        'locationProviderId',
+      ].forEach((key) => {
+        const value = formData.get(key);
+        if (typeof value === 'string') {
+          payload.set(key, value);
+        }
+      });
+    }
 
     try {
       const nextState = await mutation.mutateAsync(payload);
@@ -99,6 +121,7 @@ export const CreateVisitedPlaceForm = ({
         title: '',
         visitedOn: defaultVisitedOn,
       });
+      setLocationPickerResetKey((key) => key + 1);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: appQueryKeys.map() }),
         queryClient.invalidateQueries({ queryKey: appQueryKeys.trip(tripId) }),
@@ -111,6 +134,7 @@ export const CreateVisitedPlaceForm = ({
 
   return (
     <form
+      id="create-visited-place-form"
       className="flex flex-col gap-4"
       noValidate
       onSubmit={onSubmit}
@@ -150,6 +174,19 @@ export const CreateVisitedPlaceForm = ({
           />
         </FormSection>
       </div>
+
+      <FormSection
+        description={formT('locationDescription')}
+        htmlFor="visitedPlaceLocation"
+        label={formT('locationLabel')}
+      >
+        <LocationPicker
+          inputId="visitedPlaceLocation"
+          key={locationPickerResetKey}
+          placeholder={formT('locationPlaceholder')}
+          searchingLabel={formT('locationSearching')}
+        />
+      </FormSection>
 
       <FormSection
         description={formT('noteDescription')}

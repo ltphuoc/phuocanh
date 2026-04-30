@@ -242,18 +242,31 @@
       "done": "Xong",
       "undo": "Hoàn tác"
     },
+    "locationSearch": {
+      "noResults": "Không tìm thấy địa điểm. Bạn vẫn có thể lưu tên đã nhập.",
+      "rateLimited": "Tìm kiếm địa điểm đang tạm chờ. Thử lại sau giây lát.",
+      "submit": "Tìm",
+      "unavailable": "Tìm kiếm địa điểm đang không khả dụng. Bạn vẫn có thể lưu tên đã nhập."
+    },
     "memory": {
       "happenedAtDescription": "Dùng thời gian địa phương cho kỷ niệm này.",
       "happenedAtLabel": "Thời điểm xảy ra",
       "locationDescription": "Địa điểm tùy chọn của khoảnh khắc này.",
       "locationLabel": "Địa điểm",
       "locationPlaceholder": "Đà Nẵng…",
+      "locationSearching": "Đang tìm địa điểm…",
+      "existingMediaLabel": "Media hiện có",
       "mediaDescription": "Ảnh hoặc video tối đa 25MB.",
       "mediaLabel": "Media",
+      "mediaSelected": "{count, plural, one {Đã chọn # tệp} other {Đã chọn # tệp}}",
       "noteDescription": "Một câu chuyện ngắn giúp tìm kiếm và xem lại tốt hơn.",
       "noteLabel": "Ghi chú",
       "notePlaceholder": "Đã xảy ra chuyện gì?…",
-      "submit": "Lưu kỷ niệm"
+      "removeMedia": "Gỡ",
+      "submit": "Lưu kỷ niệm",
+      "updateSubmit": "Cập nhật kỷ niệm",
+      "deleteConfirm": "Tôi hiểu thao tác này sẽ xoá kỷ niệm này và media đính kèm.",
+      "deleteSubmit": "Xoá kỷ niệm"
     },
     "countdown": {
       "kindLabel": "Loại",
@@ -329,6 +342,10 @@
     "trip": {
       "endDateDescription": "Hiện tại chuyến đi dùng khoảng ngày, chưa dùng thời gian cụ thể.",
       "endDateLabel": "Ngày kết thúc",
+      "locationDescription": "Chọn địa điểm trên bản đồ cho chuyến đi này nếu có.",
+      "locationLabel": "Địa điểm chuyến đi",
+      "locationPlaceholder": "Hội An, Việt Nam…",
+      "locationSearching": "Đang tìm địa điểm…",
       "noteDescription": "Ngữ cảnh tuỳ chọn cho kế hoạch, cảm xúc hoặc lý do của chuyến đi này.",
       "noteLabel": "Ghi chú chuyến đi (tuỳ chọn)",
       "notePlaceholder": "Đi bộ dưới đèn lồng, ăn cả chiều và một buổi sáng thật chậm…",
@@ -337,6 +354,9 @@
       "submit": "Lưu chuyến đi",
       "titleLabel": "Tên chuyến đi",
       "titlePlaceholder": "Cuối tuần dài ở Hội An…",
+      "updateSubmit": "Cập nhật chuyến đi",
+      "deleteConfirm": "Tôi hiểu thao tác này sẽ xoá chuyến đi, các điểm dừng và album của chuyến đi.",
+      "deleteSubmit": "Xoá chuyến đi",
       "validation": {
         "dateRangeInvalid": "Ngày kết thúc phải cùng ngày hoặc sau ngày bắt đầu.",
         "endDateRequired": "Chọn ngày kết thúc.",
@@ -372,6 +392,10 @@
     },
     "visitedPlace": {
       "noteDescription": "Ngữ cảnh tuỳ chọn cho lý do nơi này đáng nhớ.",
+      "locationDescription": "Tìm địa điểm trên bản đồ khớp với điểm dừng này.",
+      "locationLabel": "Địa điểm trên bản đồ",
+      "locationPlaceholder": "Biển An Bàng…",
+      "locationSearching": "Đang tìm địa điểm…",
       "noteLabel": "Ghi chú địa điểm (tuỳ chọn)",
       "notePlaceholder": "Đèn lồng phía trên đầu, hai ly cà phê đá và một khoảng lặng tụi mình muốn giữ lại…",
       "submit": "Lưu địa điểm đã ghé",
@@ -423,9 +447,13 @@
     "memory": {
       "created": "Đã lưu kỷ niệm.",
       "createFailed": "Không thể tạo kỷ niệm.",
+      "deleted": "Đã xoá kỷ niệm.",
       "fileTooLarge": "Tệp quá lớn. Kích thước tối đa là 25MB.",
+      "invalidSubmission": "Thông tin kỷ niệm không hợp lệ.",
       "missingContent": "Hãy thêm ghi chú hoặc ít nhất một tệp media.",
-      "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video."
+      "notFound": "Không tìm thấy kỷ niệm.",
+      "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video.",
+      "updated": "Đã cập nhật kỷ niệm."
     },
     "gameplay": {
       "dailyQuestion": {
@@ -461,7 +489,10 @@
     },
     "trip": {
       "created": "Đã lưu chuyến đi.",
-      "invalidSubmission": "Thông tin chuyến đi không hợp lệ."
+      "deleted": "Đã xoá chuyến đi.",
+      "invalidDateRangeWithStops": "Hãy chuyển hoặc xoá các điểm dừng nằm ngoài khoảng ngày mới trước khi cập nhật chuyến đi.",
+      "invalidSubmission": "Thông tin chuyến đi không hợp lệ.",
+      "updated": "Đã cập nhật chuyến đi."
     },
     "album": {
       "created": "Đã tạo album.",
@@ -591,6 +622,10 @@
       "noneTitle": "Chưa có media",
       "title": "Kỷ vật hình ảnh"
     },
+    "manage": {
+      "label": "Quản lý kỷ niệm",
+      "title": "Sửa hoặc xoá kỷ niệm này"
+    },
     "mediaAlt": "Media kỷ niệm"
   },
   "map": {
@@ -633,8 +668,8 @@
       "title": "Chưa có chuyến đi nào"
     },
     "deferred": {
-      "description": "Chuyến đi, album và atlas đều đã chạy dữ liệu thật. Tọa độ, tuyến đường và lớp bản đồ theo provider vẫn còn được hoãn lại.",
-      "title": "Lớp địa lý vẫn đến sau"
+      "description": "Chuyến đi, album và địa điểm trên bản đồ giờ dùng dữ liệu vị trí đã lưu.",
+      "title": "Dữ liệu bản đồ đã hoạt động"
     }
   },
   "tripDetail": {
@@ -658,6 +693,11 @@
     "albumComposerDescription": "Chuyến đi này đã có kỷ niệm hợp lệ. Hãy nhóm chúng thành một album ngay tại đây; luồng tải lên vẫn nằm ở phần lưu kỷ niệm.",
     "albumEmptyTitle": "Chưa có media hợp lệ",
     "albumEmptyDescription": "Hãy thêm các kỷ niệm có ngày xảy ra nằm trong khung ngày của chuyến đi này, rồi tạo album từ đây.",
+    "mediaComposerEyebrow": "Media chuyến đi",
+    "mediaComposerTitle": "Thêm media thông qua kỷ niệm",
+    "mediaComposerDescription": "Lưu ảnh hoặc video như kỷ niệm có ngày nằm trong khung chuyến đi. Chúng sẽ tự đủ điều kiện vào album chuyến đi.",
+    "manageEyebrow": "Quản lý chuyến đi",
+    "manageTitle": "Sửa hoặc xoá chuyến đi này",
     "placesComposerDescription": "Thêm những nơi hai bạn thật sự đã ghé trong chuyến đi này. Mỗi địa điểm đã lưu sẽ xuất hiện ở đây và trong atlas chung.",
     "placesComposerEyebrow": "Thêm điểm dừng",
     "placesComposerTitle": "Lưu một địa điểm đã ghé thật",
@@ -1098,9 +1138,13 @@
     "travelAtlas": {
       "header": {
         "badge": "{count, plural, one {# địa điểm đã lưu} other {# địa điểm đã lưu}}",
-        "description": "Các điểm dừng thật giờ được gom vào một atlas không phụ thuộc provider, theo từng chương chuyến đi của hai bạn.",
+        "description": "Điểm dừng, địa điểm chuyến đi và nơi gắn với kỷ niệm giờ được gom vào một atlas có bản đồ.",
         "eyebrow": "Bản đồ hành trình",
         "title": "Những nơi đã thay đổi câu chuyện"
+      },
+      "mapFallback": {
+        "description": "Nhà cung cấp bản đồ đang không khả dụng, nên các địa điểm đã lưu vẫn hiển thị trong danh sách chuyến đi bên dưới.",
+        "title": "Chưa có bản đồ"
       },
       "noteFallback": "Chưa có ghi chú nào cho điểm dừng này.",
       "side": {

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { parseISO } from 'date-fns';
 
+import { MemoryManagementForms } from '@/components/forms/memory-management-forms';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { SectionStack } from '@/components/layout/section-stack';
@@ -57,7 +58,8 @@ export const MemoryDetailClientPage = ({ memoryId }: MemoryDetailClientPageProps
     );
   }
 
-  const { context, media, memory } = query.data;
+  const data = query.data;
+  const { context, media, memory } = data;
   const firstLine = memory.note?.trim().split('\n')[0] ?? t('header.quoteFallback');
   const happenedAtDate = parseISO(memory.happenedAt);
   const happenedAtLabel = Number.isNaN(happenedAtDate.getTime())
@@ -168,6 +170,20 @@ export const MemoryDetailClientPage = ({ memoryId }: MemoryDetailClientPageProps
                 />
               )}
             </div>
+          </SectionCard>
+        </PageReveal>
+
+        <PageReveal delay={0.14}>
+          <SectionCard
+            className="flex flex-col gap-5"
+            padding="comfortable"
+            surface="paper"
+          >
+            <div>
+              <p className="ui-meta">{t('manage.label')}</p>
+              <h2 className="mt-2 font-display text-[2rem] text-foreground">{t('manage.title')}</h2>
+            </div>
+            <MemoryManagementForms data={data} />
           </SectionCard>
         </PageReveal>
       </SectionStack>

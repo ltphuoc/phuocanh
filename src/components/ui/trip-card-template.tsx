@@ -9,6 +9,7 @@ interface TripCardTemplateProps {
   readonly dateRangeLabel: string;
   readonly eyebrowLabel: string;
   readonly href?: string;
+  readonly locationName?: string | null;
   readonly metaLabel: string;
   readonly note?: string | null;
   readonly title: string;
@@ -19,6 +20,7 @@ export const TripCardTemplate = ({
   dateRangeLabel,
   eyebrowLabel,
   href,
+  locationName,
   metaLabel,
   note,
   title,
@@ -36,6 +38,9 @@ export const TripCardTemplate = ({
         <Badge variant="primary">{badgeLabel}</Badge>
       </div>
       <p className="text-sm font-medium text-foreground/86">{dateRangeLabel}</p>
+      {locationName ? (
+        <p className="text-sm font-medium break-words text-foreground/76">{locationName}</p>
+      ) : null}
       <p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {metaLabel}
       </p>

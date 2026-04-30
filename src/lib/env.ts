@@ -12,11 +12,6 @@ const emptyStringToUndefined = (value: unknown): unknown => {
   return value.trim().length === 0 ? undefined : value;
 };
 
-const optionalNonEmptyString = z.preprocess(
-  emptyStringToUndefined,
-  z.string().trim().min(1).optional(),
-);
-
 const defaultedNonEmptyString = (defaultValue: string) =>
   z.preprocess(emptyStringToUndefined, z.string().trim().min(1).default(defaultValue));
 
@@ -44,11 +39,16 @@ const defaultedBoolean = (defaultValue: boolean) =>
 
 const serverEnvSchema = z.object({
   E2E_ENABLE_EMAIL_OTP_HELPER: defaultedBoolean(false),
-  OPENAI_API_KEY: optionalNonEmptyString,
+  OPENAI_API_KEY: z.preprocess(emptyStringToUndefined, z.string().trim().min(1).optional()),
   OPENAI_DAILY_QUESTION_MODEL: defaultedNonEmptyString('gpt-4o-mini'),
-  OPENAI_DAILY_QUESTION_STUB_RESPONSE: optionalNonEmptyString,
-  SUPABASE_SERVICE_ROLE_KEY: optionalNonEmptyString,
-  // NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
+  OPENAI_DAILY_QUESTION_STUB_RESPONSE: z.preprocess(
+    emptyStringToUndefined,
+    z.string().trim().min(1).optional(),
+  ),
+  SUPABASE_SERVICE_ROLE_KEY: z.preprocess(
+    emptyStringToUndefined,
+    z.string().trim().min(1).optional(),
+  ),
 });
 
 export type AppEnv = PublicEnv & z.infer<typeof serverEnvSchema>;
@@ -61,6 +61,5 @@ export const env: AppEnv = {
     OPENAI_DAILY_QUESTION_MODEL: process.env.OPENAI_DAILY_QUESTION_MODEL,
     OPENAI_DAILY_QUESTION_STUB_RESPONSE: process.env.OPENAI_DAILY_QUESTION_STUB_RESPONSE,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    // NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
   }),
 };

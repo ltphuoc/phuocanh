@@ -16,51 +16,52 @@ const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
 const MEMORY_UPLOAD_PATH_PATTERN =
   /^couples\/([0-9a-f-]{36})\/memories\/([0-9a-f-]{36})\/([0-9]+)-([A-Za-z0-9._-]+)$/i;
 
-const createMemorySchema = z
-  .object({
-    happenedAt: z.iso.datetime(),
-    locationName: z.string().max(180).optional(),
-    mimeType: z.string().trim().min(1).optional(),
-    note: z.string().max(800).optional(),
-    originalFileName: z.string().trim().min(1).max(255).optional(),
-    sizeBytes: z.coerce.number().int().positive().max(MAX_UPLOAD_BYTES).optional(),
-    storagePath: z.string().trim().min(1).optional(),
-  })
-  .superRefine((value, context) => {
-    const hasUploadMetadata =
-      value.storagePath !== undefined ||
-      value.mimeType !== undefined ||
-      value.originalFileName !== undefined ||
-      value.sizeBytes !== undefined;
+const optionalTrimmedString = (maxLength: number) =>
+  z
+    .string()
+    .trim()
+    .max(maxLength)
+    .optional()
+    .transform((value) => value || null);
 
-    if (!hasUploadMetadata) {
-      return;
-    }
+const optionalCoordinate = z
+  .union([z.literal(''), z.coerce.number().finite()])
+  .optional()
+  .transform((value) => (typeof value === 'number' ? value : null));
 
-    if (!value.storagePath) {
-      context.addIssue({
-        code: 'custom',
-        message: 'Storage path is required when media metadata is provided.',
-        path: ['storagePath'],
-      });
-    }
+const locationSchema = {
+  locationAddress: optionalTrimmedString(280),
+  locationLatitude: optionalCoordinate,
+  locationLongitude: optionalCoordinate,
+  locationName: optionalTrimmedString(180),
+  locationProvider: optionalTrimmedString(40),
+  locationProviderId: optionalTrimmedString(255),
+};
 
-    if (!value.mimeType) {
-      context.addIssue({
-        code: 'custom',
-        message: 'Mime type is required when media metadata is provided.',
-        path: ['mimeType'],
-      });
-    }
+const baseMemorySchema = z.object({
+  happenedAt: z.iso.datetime(),
+  memoryId: z.uuid(),
+  note: optionalTrimmedString(800),
+  ...locationSchema,
+});
 
-    if (value.sizeBytes === undefined) {
-      context.addIssue({
-        code: 'custom',
-        message: 'Size is required when media metadata is provided.',
-        path: ['sizeBytes'],
-      });
-    }
-  });
+const createMemorySchema = baseMemorySchema;
+
+const updateMemorySchema = baseMemorySchema.extend({
+  removedMediaIds: z.array(z.uuid()).default([]),
+});
+
+const deleteMemorySchema = z.object({
+  confirmation: z.literal('delete'),
+  memoryId: z.uuid(),
+});
+
+interface UploadedMediaInput {
+  readonly mimeType: string;
+  readonly originalFileName: string | null;
+  readonly sizeBytes: number;
+  readonly storagePath: string;
+}
 
 const isAllowedMediaMimeType = (mimeType: string): boolean =>
   ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
@@ -70,22 +71,54 @@ const getOptionalFormDataValue = (formData: FormData, key: string): string | und
   return typeof value === 'string' ? value : undefined;
 };
 
-const removeUploadedStorageObject = async (
+const getUploadedMediaInputs = (formData: FormData): UploadedMediaInput[] => {
+  const storagePaths = formData.getAll('storagePath').filter((value): value is string => {
+    return typeof value === 'string' && value.trim().length > 0;
+  });
+  const mimeTypes = formData.getAll('mimeType').filter((value): value is string => {
+    return typeof value === 'string' && value.trim().length > 0;
+  });
+  const originalFileNames = formData
+    .getAll('originalFileName')
+    .map((value) => (typeof value === 'string' && value.trim().length > 0 ? value.trim() : null));
+  const sizeBytes = formData.getAll('sizeBytes').map((value) => Number(value));
+
+  if (
+    storagePaths.length !== mimeTypes.length ||
+    storagePaths.length !== originalFileNames.length ||
+    storagePaths.length !== sizeBytes.length
+  ) {
+    throw new Error('Invalid media metadata shape.');
+  }
+
+  return storagePaths.map((storagePath, index) => ({
+    mimeType: mimeTypes[index] ?? '',
+    originalFileName: originalFileNames[index] ?? null,
+    sizeBytes: sizeBytes[index] ?? Number.NaN,
+    storagePath,
+  }));
+};
+
+const removeUploadedStorageObjects = async (
   supabase: AppSupabaseClient,
-  uploadedStoragePath: string | null,
+  uploadedStoragePaths: readonly string[],
 ): Promise<string | null> => {
-  if (!uploadedStoragePath) {
+  if (!uploadedStoragePaths.length) {
     return null;
   }
 
-  const { error } = await supabase.storage.from('memory-media').remove([uploadedStoragePath]);
+  const { error } = await supabase.storage.from('memory-media').remove([...uploadedStoragePaths]);
 
   return error ? error.message : null;
 };
 
-const isValidMemoryUploadPath = (storagePath: string, coupleId: string): boolean => {
+const isValidMemoryUploadPath = (
+  storagePath: string,
+  coupleId: string,
+  memoryId: string,
+): boolean => {
   const match = MEMORY_UPLOAD_PATH_PATTERN.exec(storagePath);
-  return match?.[1] === coupleId;
+  return match?.[1] === coupleId && match[2] === memoryId;
 };
 
 const detectMediaType = (mimeType: string): Database['public']['Enums']['media_type'] => {
@@ -96,33 +129,115 @@ const detectMediaType = (mimeType: string): Database['public']['Enums']['media_t
   return 'image';
 };
 
-const rollbackMemoryMutation = async (
-  supabase: AppSupabaseClient,
+const validateUploadedMedia = (
+  mediaInputs: readonly UploadedMediaInput[],
+  coupleId: string,
   memoryId: string,
-  uploadedStoragePath: string | null,
-): Promise<string | null> => {
-  const cleanupErrors: string[] = [];
+): ActionState | null => {
+  for (const media of mediaInputs) {
+    if (
+      !Number.isInteger(media.sizeBytes) ||
+      media.sizeBytes <= 0 ||
+      media.sizeBytes > MAX_UPLOAD_BYTES
+    ) {
+      return createErrorState('memory.fileTooLarge');
+    }
 
-  if (uploadedStoragePath) {
-    const { error: removeObjectError } = await supabase.storage
-      .from('memory-media')
-      .remove([uploadedStoragePath]);
-    if (removeObjectError) {
-      cleanupErrors.push(removeObjectError.message);
+    if (!isAllowedMediaMimeType(media.mimeType)) {
+      return createErrorState('memory.unsupportedType');
+    }
+
+    if (!isValidMemoryUploadPath(media.storagePath, coupleId, memoryId)) {
+      console.error('Memory upload storage path did not match the active memory context', {
+        coupleId,
+        memoryId,
+        storagePath: media.storagePath,
+      });
+      return createErrorState('unexpectedError');
     }
   }
 
-  const { error: deleteMemoryError } = await supabase.from('memories').delete().eq('id', memoryId);
+  return null;
+};
 
-  if (deleteMemoryError) {
-    cleanupErrors.push(deleteMemoryError.message);
+const toMediaRows = (
+  mediaInputs: readonly UploadedMediaInput[],
+  coupleId: string,
+  memoryId: string,
+): Database['public']['Tables']['memory_media']['Insert'][] =>
+  mediaInputs.map((media) => ({
+    couple_id: coupleId,
+    media_type: detectMediaType(media.mimeType),
+    memory_id: memoryId,
+    mime_type: media.mimeType,
+    original_file_name: media.originalFileName,
+    size_bytes: media.sizeBytes,
+    storage_path: media.storagePath,
+  }));
+
+const deleteEmptyAlbums = async (
+  supabase: AppSupabaseClient,
+  albumIds: readonly string[],
+): Promise<void> => {
+  if (!albumIds.length) {
+    return;
   }
 
-  if (!cleanupErrors.length) {
-    return null;
+  const { data: remainingItems, error: remainingItemsError } = await supabase
+    .from('album_items')
+    .select('album_id')
+    .in('album_id', [...albumIds]);
+
+  if (remainingItemsError) {
+    console.error('Failed to check album items after media deletion', remainingItemsError);
+    return;
   }
 
-  return cleanupErrors.join('; ');
+  const nonEmptyAlbumIds = new Set(remainingItems.map((item) => item.album_id));
+  const emptyAlbumIds = albumIds.filter((albumId) => !nonEmptyAlbumIds.has(albumId));
+  if (!emptyAlbumIds.length) {
+    return;
+  }
+
+  const { error: albumDeleteError } = await supabase
+    .from('albums')
+    .delete()
+    .in('id', emptyAlbumIds);
+  if (albumDeleteError) {
+    console.error('Failed to delete empty albums after media deletion', albumDeleteError);
+  }
+};
+
+const getAffectedAlbumIds = async (
+  supabase: AppSupabaseClient,
+  mediaIds: readonly string[],
+): Promise<string[]> => {
+  if (!mediaIds.length) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('album_items')
+    .select('album_id')
+    .in('memory_media_id', [...mediaIds]);
+
+  if (error) {
+    console.error('Failed to load affected albums for media deletion', error);
+    return [];
+  }
+
+  return Array.from(new Set(data.map((item) => item.album_id)));
+};
+
+const revalidateMemoryPaths = (memoryId?: string): void => {
+  revalidateLocalizedPath('/home');
+  revalidateLocalizedPath('/on-this-day');
+  revalidateLocalizedPath('/lists');
+  revalidateLocalizedPath('/albums');
+  revalidateLocalizedPath('/map');
+  if (memoryId) {
+    revalidateLocalizedPath(`/memories/${memoryId}`);
+  }
 };
 
 export const createMemoryAction = async (
@@ -130,37 +245,36 @@ export const createMemoryAction = async (
   formData: FormData,
 ): Promise<ActionState> => {
   try {
+    const uploadedMedia = getUploadedMediaInputs(formData);
     const context = await requireReadyCoupleContext();
     const parsed = createMemorySchema.parse({
       happenedAt: formData.get('happenedAt'),
+      locationAddress: getOptionalFormDataValue(formData, 'locationAddress'),
+      locationLatitude: getOptionalFormDataValue(formData, 'locationLatitude'),
+      locationLongitude: getOptionalFormDataValue(formData, 'locationLongitude'),
       locationName: getOptionalFormDataValue(formData, 'locationName'),
-      mimeType: getOptionalFormDataValue(formData, 'mimeType'),
+      locationProvider: getOptionalFormDataValue(formData, 'locationProvider'),
+      locationProviderId: getOptionalFormDataValue(formData, 'locationProviderId'),
+      memoryId: formData.get('memoryId'),
       note: getOptionalFormDataValue(formData, 'note'),
-      originalFileName: getOptionalFormDataValue(formData, 'originalFileName'),
-      sizeBytes: getOptionalFormDataValue(formData, 'sizeBytes'),
-      storagePath: getOptionalFormDataValue(formData, 'storagePath'),
     });
 
     const supabase = await createSupabaseServerClient();
-    const trimmedNote = parsed.note?.trim() ?? '';
-    const hasFile = parsed.storagePath !== undefined;
-    const uploadedStoragePath = parsed.storagePath ?? null;
+    const mediaValidationState = validateUploadedMedia(
+      uploadedMedia,
+      context.coupleId,
+      parsed.memoryId,
+    );
+    if (mediaValidationState) {
+      await removeUploadedStorageObjects(
+        supabase,
+        uploadedMedia.map((media) => media.storagePath),
+      );
+      return mediaValidationState;
+    }
 
-    if (!hasFile && !trimmedNote) {
+    if (!uploadedMedia.length && !parsed.note) {
       return createErrorState('memory.missingContent');
-    }
-
-    if (parsed.mimeType && !isAllowedMediaMimeType(parsed.mimeType)) {
-      return createErrorState('memory.unsupportedType');
-    }
-
-    if (uploadedStoragePath && !isValidMemoryUploadPath(uploadedStoragePath, context.coupleId)) {
-      console.error('Memory upload storage path did not match the active couple context', {
-        coupleId: context.coupleId,
-        storagePath: uploadedStoragePath,
-      });
-      await removeUploadedStorageObject(supabase, uploadedStoragePath);
-      return createErrorState('unexpectedError');
     }
 
     const { data: insertedMemories, error: memoryError } = await supabase
@@ -169,14 +283,23 @@ export const createMemoryAction = async (
         author_user_id: context.userId,
         couple_id: context.coupleId,
         happened_at: parsed.happenedAt,
-        location_name: parsed.locationName?.trim() || null,
-        note: trimmedNote || null,
+        id: parsed.memoryId,
+        location_address: parsed.locationAddress,
+        location_latitude: parsed.locationLatitude,
+        location_longitude: parsed.locationLongitude,
+        location_name: parsed.locationName,
+        location_provider: parsed.locationProvider,
+        location_provider_id: parsed.locationProviderId,
+        note: parsed.note,
       })
       .select('*')
       .limit(1);
 
     if (memoryError) {
-      const cleanupError = await removeUploadedStorageObject(supabase, uploadedStoragePath);
+      const cleanupError = await removeUploadedStorageObjects(
+        supabase,
+        uploadedMedia.map((media) => media.storagePath),
+      );
       if (cleanupError) {
         console.error('Memory upload cleanup failed after memory row error', cleanupError);
       }
@@ -186,31 +309,33 @@ export const createMemoryAction = async (
 
     const memory = insertedMemories[0];
     if (!memory) {
-      const cleanupError = await removeUploadedStorageObject(supabase, uploadedStoragePath);
-      if (cleanupError) {
-        console.error(
-          'Memory upload cleanup failed after empty memory insert result',
-          cleanupError,
-        );
-      }
+      await removeUploadedStorageObjects(
+        supabase,
+        uploadedMedia.map((media) => media.storagePath),
+      );
       return createErrorState('memory.createFailed');
     }
 
-    if (uploadedStoragePath && parsed.mimeType && parsed.sizeBytes !== undefined) {
-      const { error: mediaError } = await supabase.from('memory_media').insert({
-        couple_id: context.coupleId,
-        media_type: detectMediaType(parsed.mimeType),
-        memory_id: memory.id,
-        mime_type: parsed.mimeType,
-        original_file_name: parsed.originalFileName?.trim() || null,
-        size_bytes: parsed.sizeBytes,
-        storage_path: uploadedStoragePath,
-      });
+    if (uploadedMedia.length) {
+      const { error: mediaError } = await supabase
+        .from('memory_media')
+        .insert(toMediaRows(uploadedMedia, context.coupleId, memory.id));
 
       if (mediaError) {
-        const cleanupError = await rollbackMemoryMutation(supabase, memory.id, uploadedStoragePath);
+        const cleanupError = await removeUploadedStorageObjects(
+          supabase,
+          uploadedMedia.map((media) => media.storagePath),
+        );
         if (cleanupError) {
-          console.error('Media save rollback failed', cleanupError);
+          console.error('Media save rollback storage cleanup failed', cleanupError);
+        }
+
+        const { error: deleteMemoryError } = await supabase
+          .from('memories')
+          .delete()
+          .eq('id', memory.id);
+        if (deleteMemoryError) {
+          console.error('Media save rollback memory cleanup failed', deleteMemoryError);
         }
 
         console.error('Failed to store media metadata', mediaError);
@@ -229,13 +354,224 @@ export const createMemoryAction = async (
       console.error('Failed to create activity event', eventError);
     }
 
-    revalidateLocalizedPath('/home');
-    revalidateLocalizedPath('/on-this-day');
-    revalidateLocalizedPath('/lists');
-
+    revalidateMemoryPaths(memory.id);
     return createSuccessState('memory.created');
   } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState('memory.invalidSubmission');
+    }
+
     console.error('Failed to create memory', error);
+    return createErrorState('unexpectedError');
+  }
+};
+
+export const updateMemoryAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const uploadedMedia = getUploadedMediaInputs(formData);
+    const context = await requireReadyCoupleContext();
+    const parsed = updateMemorySchema.parse({
+      happenedAt: formData.get('happenedAt'),
+      locationAddress: getOptionalFormDataValue(formData, 'locationAddress'),
+      locationLatitude: getOptionalFormDataValue(formData, 'locationLatitude'),
+      locationLongitude: getOptionalFormDataValue(formData, 'locationLongitude'),
+      locationName: getOptionalFormDataValue(formData, 'locationName'),
+      locationProvider: getOptionalFormDataValue(formData, 'locationProvider'),
+      locationProviderId: getOptionalFormDataValue(formData, 'locationProviderId'),
+      memoryId: formData.get('memoryId'),
+      note: getOptionalFormDataValue(formData, 'note'),
+      removedMediaIds: formData.getAll('removedMediaIds'),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { data: memories, error: memoryLoadError } = await supabase
+      .from('memories')
+      .select('id')
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.memoryId)
+      .limit(1);
+
+    if (memoryLoadError) {
+      console.error('Failed to load memory before update', memoryLoadError);
+      return createErrorState('unexpectedError');
+    }
+
+    if (!memories[0]) {
+      return createErrorState('memory.notFound');
+    }
+
+    const mediaValidationState = validateUploadedMedia(
+      uploadedMedia,
+      context.coupleId,
+      parsed.memoryId,
+    );
+    if (mediaValidationState) {
+      await removeUploadedStorageObjects(
+        supabase,
+        uploadedMedia.map((media) => media.storagePath),
+      );
+      return mediaValidationState;
+    }
+
+    const existingMediaQuery = await supabase
+      .from('memory_media')
+      .select('id, storage_path')
+      .eq('memory_id', parsed.memoryId);
+
+    if (existingMediaQuery.error) {
+      console.error('Failed to load memory media before update', existingMediaQuery.error);
+      return createErrorState('unexpectedError');
+    }
+
+    const removedMediaIdSet = new Set(parsed.removedMediaIds);
+    const remainingExistingMediaCount = existingMediaQuery.data.filter(
+      (media) => !removedMediaIdSet.has(media.id),
+    ).length;
+
+    if (!remainingExistingMediaCount && !uploadedMedia.length && !parsed.note) {
+      return createErrorState('memory.missingContent');
+    }
+
+    const { error: updateError } = await supabase
+      .from('memories')
+      .update({
+        happened_at: parsed.happenedAt,
+        location_address: parsed.locationAddress,
+        location_latitude: parsed.locationLatitude,
+        location_longitude: parsed.locationLongitude,
+        location_name: parsed.locationName,
+        location_provider: parsed.locationProvider,
+        location_provider_id: parsed.locationProviderId,
+        note: parsed.note,
+      })
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.memoryId);
+
+    if (updateError) {
+      console.error('Failed to update memory', updateError);
+      return createErrorState('unexpectedError');
+    }
+
+    if (parsed.removedMediaIds.length) {
+      const mediaToRemove = existingMediaQuery.data.filter((media) =>
+        removedMediaIdSet.has(media.id),
+      );
+      if (!mediaToRemove.length) {
+        return createErrorState('memory.invalidSubmission');
+      }
+      const affectedAlbumIds = await getAffectedAlbumIds(
+        supabase,
+        mediaToRemove.map((media) => media.id),
+      );
+      const { error: removeMediaError } = await supabase
+        .from('memory_media')
+        .delete()
+        .in(
+          'id',
+          mediaToRemove.map((media) => media.id),
+        )
+        .eq('memory_id', parsed.memoryId);
+
+      if (removeMediaError) {
+        console.error('Failed to remove memory media rows', removeMediaError);
+        return createErrorState('unexpectedError');
+      }
+
+      await deleteEmptyAlbums(supabase, affectedAlbumIds);
+      const cleanupError = await removeUploadedStorageObjects(
+        supabase,
+        mediaToRemove.map((media) => media.storage_path),
+      );
+      if (cleanupError) {
+        console.error('Failed to remove memory media storage objects', cleanupError);
+      }
+    }
+
+    if (uploadedMedia.length) {
+      const { error: mediaError } = await supabase
+        .from('memory_media')
+        .insert(toMediaRows(uploadedMedia, context.coupleId, parsed.memoryId));
+
+      if (mediaError) {
+        await removeUploadedStorageObjects(
+          supabase,
+          uploadedMedia.map((media) => media.storagePath),
+        );
+        console.error('Failed to store added memory media metadata', mediaError);
+        return createErrorState('unexpectedError');
+      }
+    }
+
+    revalidateMemoryPaths(parsed.memoryId);
+    return createSuccessState('memory.updated');
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState('memory.invalidSubmission');
+    }
+
+    console.error('Failed to update memory', error);
+    return createErrorState('unexpectedError');
+  }
+};
+
+export const deleteMemoryAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const context = await requireReadyCoupleContext();
+    const parsed = deleteMemorySchema.parse({
+      confirmation: formData.get('confirmation'),
+      memoryId: formData.get('memoryId'),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { data: mediaRows, error: mediaLoadError } = await supabase
+      .from('memory_media')
+      .select('id, storage_path')
+      .eq('couple_id', context.coupleId)
+      .eq('memory_id', parsed.memoryId);
+
+    if (mediaLoadError) {
+      console.error('Failed to load memory media before delete', mediaLoadError);
+      return createErrorState('unexpectedError');
+    }
+
+    const affectedAlbumIds = await getAffectedAlbumIds(
+      supabase,
+      mediaRows.map((media) => media.id),
+    );
+    const { error: deleteError } = await supabase
+      .from('memories')
+      .delete()
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.memoryId);
+
+    if (deleteError) {
+      console.error('Failed to delete memory', deleteError);
+      return createErrorState('unexpectedError');
+    }
+
+    await deleteEmptyAlbums(supabase, affectedAlbumIds);
+    const cleanupError = await removeUploadedStorageObjects(
+      supabase,
+      mediaRows.map((media) => media.storage_path),
+    );
+    if (cleanupError) {
+      console.error('Failed to remove memory storage objects after delete', cleanupError);
+    }
+
+    revalidateMemoryPaths(parsed.memoryId);
+    return createSuccessState('memory.deleted');
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState('memory.invalidSubmission');
+    }
+
+    console.error('Failed to delete memory', error);
     return createErrorState('unexpectedError');
   }
 };

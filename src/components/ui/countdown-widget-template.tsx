@@ -21,11 +21,13 @@ export const CountdownWidgetTemplate = ({
   targetDateLabel,
 }: CountdownWidgetTemplateProps): ReactElement => (
   <SectionCard
-    className="flex items-start justify-between gap-4"
+    className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
     surface="glass"
   >
     <div className="min-w-0">
-      <p className="truncate font-display text-[1.55rem] text-foreground">{eventName}</p>
+      <p className="font-display text-[1.35rem] leading-tight break-words text-foreground sm:text-[1.55rem]">
+        {eventName}
+      </p>
       <p className="mt-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
         {eventType}
       </p>
@@ -36,9 +38,14 @@ export const CountdownWidgetTemplate = ({
         <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{note}</p>
       ) : null}
     </div>
-    <div className="flex shrink-0 flex-col items-end gap-1 text-right">
-      <Badge variant="primary">{daysLeftLabel}</Badge>
-      <span className="text-xs text-muted-foreground">{remainingLabel}</span>
+    <div className="flex min-w-0 shrink-0 flex-row items-center gap-2 text-left sm:flex-col sm:items-end sm:text-right">
+      <Badge
+        className="max-w-full text-center leading-snug whitespace-normal"
+        variant="primary"
+      >
+        {daysLeftLabel}
+      </Badge>
+      <span className="text-xs break-words text-muted-foreground">{remainingLabel}</span>
     </div>
   </SectionCard>
 );

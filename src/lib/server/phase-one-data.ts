@@ -1,3 +1,4 @@
+import type { StoredLocation } from '@/lib/location/types';
 import type { CoupleContext } from '@/lib/server/couple-context';
 import type { Database } from '@/lib/supabase/database.types';
 
@@ -13,6 +14,7 @@ import {
 export interface MemoryCard {
   readonly happenedAt: string;
   readonly id: string;
+  readonly location: StoredLocation;
   readonly locationName: string | null;
   readonly mediaType: Database['public']['Enums']['media_type'] | null;
   readonly note: string | null;
@@ -50,6 +52,7 @@ export interface HomePageData {
 export interface MemoryDetailData {
   readonly happenedAt: string;
   readonly id: string;
+  readonly location: StoredLocation;
   readonly locationName: string | null;
   readonly media: {
     readonly id: string;
@@ -112,6 +115,14 @@ const toMemoryCard = (
   return {
     happenedAt: memory.happened_at,
     id: memory.id,
+    location: {
+      address: memory.location_address,
+      latitude: memory.location_latitude,
+      longitude: memory.location_longitude,
+      name: memory.location_name,
+      provider: memory.location_provider,
+      providerId: memory.location_provider_id,
+    },
     locationName: memory.location_name,
     mediaType: media?.media_type ?? null,
     note: memory.note,
@@ -282,17 +293,33 @@ export const getOnThisDayData = async (context: CoupleContext): Promise<MemoryCa
 
   const matchedMemories = memories ?? [];
   const memoryIds = matchedMemories.map((memory) => memory.id);
-  const mediaQuery = memoryIds.length
-    ? await supabase.from('memory_media').select('*').in('memory_id', memoryIds)
-    : { data: [], error: null };
+  const [mediaQuery, fullMemoryQuery] = await Promise.all([
+    memoryIds.length
+      ? supabase.from('memory_media').select('*').in('memory_id', memoryIds)
+      : Promise.resolve({ data: [] as MemoryMediaRow[], error: null }),
+    memoryIds.length
+      ? supabase.from('memories').select('*').in('id', memoryIds)
+      : Promise.resolve({
+          data: [] as Database['public']['Tables']['memories']['Row'][],
+          error: null,
+        }),
+  ]);
 
   if (mediaQuery.error) {
     throw new Error(mediaQuery.error.message);
   }
 
-  const mediaByMemoryId = buildFirstMediaByMemoryId(mediaQuery.data);
+  if (fullMemoryQuery.error) {
+    throw new Error(fullMemoryQuery.error.message);
+  }
 
-  return matchedMemories.map((memory) => toMemoryCard(memory, mediaByMemoryId));
+  const mediaByMemoryId = buildFirstMediaByMemoryId(mediaQuery.data);
+  const fullMemoryById = new Map(fullMemoryQuery.data.map((memory) => [memory.id, memory]));
+
+  return matchedMemories.flatMap((memory) => {
+    const fullMemory = fullMemoryById.get(memory.id);
+    return fullMemory ? [toMemoryCard(fullMemory, mediaByMemoryId)] : [];
+  });
 };
 
 export const getMemoryDetailData = async (
@@ -334,6 +361,14 @@ export const getMemoryDetailData = async (
   return {
     happenedAt: memory.happened_at,
     id: memory.id,
+    location: {
+      address: memory.location_address,
+      latitude: memory.location_latitude,
+      longitude: memory.location_longitude,
+      name: memory.location_name,
+      provider: memory.location_provider,
+      providerId: memory.location_provider_id,
+    },
     locationName: memory.location_name,
     media: mediaRows.map((media) => ({
       id: media.id,

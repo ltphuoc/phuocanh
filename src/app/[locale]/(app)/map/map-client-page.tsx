@@ -69,10 +69,12 @@ export const MapClientPage = (): ReactElement => {
       title={mapT('header.title')}
     >
       <PageReveal>
-        {data.visitedPlaces.length ? (
+        {data.visitedPlaces.length || data.tripLocations.length || data.memories.length ? (
           <TravelAtlasShell
             groups={data.trips}
+            memories={data.memories}
             timeZone={data.context.timeZone}
+            tripLocations={data.tripLocations}
           />
         ) : (
           <EmptyState

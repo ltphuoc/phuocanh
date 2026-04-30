@@ -62,11 +62,11 @@ slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mod
 | ---------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | `completeOnboardingAction`   | `/`, `/home`                                                                                      | not migrated                                                             |
 | `acceptInviteAction`         | `/home`                                                                                           | not migrated                                                             |
-| `createMemoryAction`         | `/home`, `/on-this-day`, `/lists`                                                                 | invalidate `home`, `onThisDay`, `lists`, `tripDetails`                   |
+| Memory actions               | `/home`, `/on-this-day`, `/lists`, `/memories/[memoryId]`, `/albums`, `/map`                      | invalidate `home`, `onThisDay`, `lists`, memory/trip/album/map keys      |
 | List/checklist actions       | `/home`, `/lists`                                                                                 | invalidate or optimistically update `home`, `lists`                      |
 | `createCountdownAction`      | `/countdowns`                                                                                     | invalidate `countdowns`                                                  |
 | `createFutureNoteAction`     | `/future-notes`                                                                                   | invalidate `futureNotes`                                                 |
-| `createTripAction`           | `/trips`                                                                                          | invalidate `trips`                                                       |
+| Trip actions                 | `/trips`, `/trips/[tripId]`, `/albums`, `/map`                                                    | invalidate `trips`, affected trip, `albums`, `map`                       |
 | `createVisitedPlaceAction`   | `/map`, `/trips/[tripId]`                                                                         | invalidate `map`, `trip(tripId)`                                         |
 | Album actions                | `/albums`, `/albums/[albumId]`, `/trips/[tripId]`                                                 | invalidate affected album/trip keys                                      |
 | Daily-question actions       | `/games`, `/games/daily-question`, `/stats`                                                       | update safe answered state, invalidate `games`, `dailyQuestion`, `stats` |
@@ -127,8 +127,8 @@ slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mod
 - Keep auth gate decisions in `src/lib/server/couple-context.ts`.
 - Keep couple/invite invariants in SQL RPCs.
 - Keep couple-level day-boundary logic rooted in `couples.timezone`.
-- Keep album grouping rooted in `trips` and existing `memory_media`.
-- Keep visited places rooted in `trips`.
+- Keep album grouping rooted in `trips` and existing `memory_media`; trip media upload is still memory upload dated inside the trip window.
+- Keep visited places rooted in `trips`; mapped place metadata is optional location enrichment, not a separate travel hierarchy.
 - Keep gameplay reads server-first and reveal-safe.
 - Do not introduce additional client state/query systems opportunistically.
 - Do not add server reads, tables, jobs, or RPCs to shell-only routes without updating business

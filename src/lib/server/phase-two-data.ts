@@ -1,3 +1,4 @@
+import type { StoredLocation } from '@/lib/location/types';
 import type { CoupleContext } from '@/lib/server/couple-context';
 import type { Database } from '@/lib/supabase/database.types';
 
@@ -55,6 +56,8 @@ export interface FutureNotesPageData {
 export interface TripCard {
   readonly endDate: string;
   readonly id: string;
+  readonly location: StoredLocation;
+  readonly locationName: string | null;
   readonly note: string | null;
   readonly startDate: string;
   readonly status: TripStatus;
@@ -69,6 +72,7 @@ export interface TripsPageData {
 
 export interface VisitedPlaceCard {
   readonly id: string;
+  readonly location: StoredLocation;
   readonly note: string | null;
   readonly title: string;
   readonly visitedOn: string;
@@ -84,8 +88,17 @@ export interface MapTripGroup {
 }
 
 export interface MapPageData {
+  readonly memories: readonly MapMemoryPlace[];
+  readonly tripLocations: readonly TripCard[];
   readonly trips: readonly MapTripGroup[];
   readonly visitedPlaces: readonly TripVisitedPlaceCard[];
+}
+
+export interface MapMemoryPlace {
+  readonly happenedAt: string;
+  readonly id: string;
+  readonly location: StoredLocation;
+  readonly note: string | null;
 }
 
 export interface AlbumSummary {
@@ -105,6 +118,7 @@ export interface AlbumsPageData {
 export interface AlbumMediaCandidate {
   readonly happenedAt: string;
   readonly id: string;
+  readonly location: StoredLocation;
   readonly locationName: string | null;
   readonly mediaType: Database['public']['Enums']['media_type'];
   readonly note: string | null;
@@ -178,6 +192,15 @@ const toTripCard = (
 ): TripCard => ({
   endDate: row.end_date,
   id: row.id,
+  location: {
+    address: row.location_address,
+    latitude: row.location_latitude,
+    longitude: row.location_longitude,
+    name: row.location_name,
+    provider: row.location_provider,
+    providerId: row.location_provider_id,
+  },
+  locationName: row.location_name,
   note: row.note,
   startDate: row.start_date,
   status: getTripStatus(row.start_date, row.end_date, todayDateToken),
@@ -192,6 +215,14 @@ const toAlbumMediaCandidate = (
 ): AlbumMediaCandidate => ({
   happenedAt: memory.happened_at,
   id: media.id,
+  location: {
+    address: memory.location_address,
+    latitude: memory.location_latitude,
+    longitude: memory.location_longitude,
+    name: memory.location_name,
+    provider: memory.location_provider,
+    providerId: memory.location_provider_id,
+  },
   locationName: memory.location_name,
   mediaType: media.media_type,
   note: memory.note,
@@ -202,6 +233,14 @@ const toVisitedPlaceCard = (
   row: Database['public']['Tables']['visited_places']['Row'],
 ): VisitedPlaceCard => ({
   id: row.id,
+  location: {
+    address: row.location_address,
+    latitude: row.location_latitude,
+    longitude: row.location_longitude,
+    name: row.title,
+    provider: row.location_provider,
+    providerId: row.location_provider_id,
+  },
   note: row.note,
   title: row.title,
   visitedOn: row.visited_on,
@@ -209,6 +248,7 @@ const toVisitedPlaceCard = (
 
 const toVisitedPlaceSummaryCard = (visitedPlace: TripVisitedPlaceCard): VisitedPlaceCard => ({
   id: visitedPlace.id,
+  location: visitedPlace.location,
   note: visitedPlace.note,
   title: visitedPlace.title,
   visitedOn: visitedPlace.visitedOn,
@@ -345,7 +385,46 @@ export const getMapPageData = async (context: CoupleContext): Promise<MapPageDat
   }
 
   if (!visitedPlaceRows.length) {
+    const [memoryQuery, tripQuery] = await Promise.all([
+      supabase
+        .from('memories')
+        .select('*')
+        .eq('couple_id', context.coupleId)
+        .not('location_latitude', 'is', null)
+        .not('location_longitude', 'is', null)
+        .order('happened_at', { ascending: false }),
+      supabase
+        .from('trips')
+        .select('*')
+        .eq('couple_id', context.coupleId)
+        .not('location_latitude', 'is', null)
+        .not('location_longitude', 'is', null)
+        .order('start_date', { ascending: false }),
+    ]);
+
+    if (memoryQuery.error) {
+      throw new Error(memoryQuery.error.message);
+    }
+
+    if (tripQuery.error) {
+      throw new Error(tripQuery.error.message);
+    }
+
     return {
+      memories: memoryQuery.data.map((memory) => ({
+        happenedAt: memory.happened_at,
+        id: memory.id,
+        location: {
+          address: memory.location_address,
+          latitude: memory.location_latitude,
+          longitude: memory.location_longitude,
+          name: memory.location_name,
+          provider: memory.location_provider,
+          providerId: memory.location_provider_id,
+        },
+        note: memory.note,
+      })),
+      tripLocations: tripQuery.data.map((trip) => toTripCard(trip, todayDateToken)),
       trips: [],
       visitedPlaces: [],
     };
@@ -394,7 +473,46 @@ export const getMapPageData = async (context: CoupleContext): Promise<MapPageDat
     });
   });
 
+  const [memoryQuery, locatedTripsQuery] = await Promise.all([
+    supabase
+      .from('memories')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .not('location_latitude', 'is', null)
+      .not('location_longitude', 'is', null)
+      .order('happened_at', { ascending: false }),
+    supabase
+      .from('trips')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .not('location_latitude', 'is', null)
+      .not('location_longitude', 'is', null)
+      .order('start_date', { ascending: false }),
+  ]);
+
+  if (memoryQuery.error) {
+    throw new Error(memoryQuery.error.message);
+  }
+
+  if (locatedTripsQuery.error) {
+    throw new Error(locatedTripsQuery.error.message);
+  }
+
   return {
+    memories: memoryQuery.data.map((memory) => ({
+      happenedAt: memory.happened_at,
+      id: memory.id,
+      location: {
+        address: memory.location_address,
+        latitude: memory.location_latitude,
+        longitude: memory.location_longitude,
+        name: memory.location_name,
+        provider: memory.location_provider,
+        providerId: memory.location_provider_id,
+      },
+      note: memory.note,
+    })),
+    tripLocations: locatedTripsQuery.data.map((trip) => toTripCard(trip, todayDateToken)),
     trips: Array.from(tripsById.values()),
     visitedPlaces,
   };

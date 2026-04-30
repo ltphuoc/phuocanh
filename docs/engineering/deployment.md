@@ -49,6 +49,13 @@ URLs, screenshots, or client bundles.
 `DATABASE_URL` is only needed for tooling in this repo unless future app code directly opens a
 Postgres connection. The current app runtime uses Supabase clients instead.
 
+Map rendering uses MapLibre GL JS with the OpenFreeMap Liberty style. No Mapbox token or public map
+token is required, but hosted environments must allow outbound browser access to
+`https://tiles.openfreemap.org/styles/liberty` and its referenced tile/font/sprite assets.
+Place search uses the server-side `/api/geo/search` proxy to Nominatim with submit-driven searches,
+per-process caching, and basic rate limiting. Hosted server environments must allow outbound HTTPS
+requests to Nominatim; clients must not call Nominatim directly.
+
 Keep `.env.local` local-first for day-to-day development and E2E runs. Hosted Supabase values belong
 in Vercel/provider environment variables. Pointing `.env.local` at the hosted project is acceptable
 only for an intentional smoke test, and local reset/seed/migration workflows must not be run in that
@@ -234,7 +241,9 @@ Use [docs/engineering/migration-playbook.md](migration-playbook.md) for schema-c
 ## Known Constraints
 
 - The product currently enforces one global couple space, not general multi-tenant SaaS behavior.
-- `/map` is provider-free; there is no Mapbox, tile, coordinate, or route-polyline deployment setup.
+- `/map` uses MapLibre with the OpenFreeMap Liberty style and no public map token; route polylines are not implemented.
+- Place search depends on the server-side Nominatim proxy. If OpenFreeMap or Nominatim is
+  unavailable, the UI falls back to saved list/atlas data and manual typed place names.
 - `/stats` is daily-question gameplay history only.
 - Game slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mode]` are not
   live backend features.

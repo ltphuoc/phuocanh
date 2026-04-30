@@ -84,10 +84,29 @@ export const getListsAppData = async (context: CoupleContext): Promise<ListsAppD
   context: toAppDataContext(context),
 });
 
-export const getOnThisDayAppData = async (context: CoupleContext): Promise<OnThisDayAppData> => ({
-  context: toAppDataContext(context),
-  memories: await getOnThisDayData(context),
-});
+export const getOnThisDayAppData = async (context: CoupleContext): Promise<OnThisDayAppData> => {
+  const memories = await getOnThisDayData(context);
+  const signedMemoryPreviews = await signMemoryMediaStorageItems(
+    memories.map((memory) => ({
+      id: memory.id,
+      mediaType: memory.mediaType,
+      storagePath: memory.storagePath,
+    })),
+  );
+  const imageUrlByMemoryId = new Map(
+    signedMemoryPreviews.map(
+      (memory) => [memory.id, memory.mediaType === 'image' ? memory.signedUrl : null] as const,
+    ),
+  );
+
+  return {
+    context: toAppDataContext(context),
+    memories: memories.map((memory) => ({
+      ...memory,
+      imageUrl: imageUrlByMemoryId.get(memory.id) ?? null,
+    })),
+  };
+};
 
 export const getMemoryDetailAppData = async (
   context: CoupleContext,

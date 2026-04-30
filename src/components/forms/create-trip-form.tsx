@@ -2,6 +2,8 @@
 
 import type { ReactElement } from 'react';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { addDays } from 'date-fns';
@@ -10,6 +12,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { createTripAction } from '@/app/actions/planning-actions';
+import { LocationPicker } from '@/components/forms/location-picker';
 import { FormSection } from '@/components/layout/form-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,6 +47,7 @@ export const CreateTripForm = (): ReactElement => {
   const { t: formT } = useI18n('forms.trip');
   const queryClient = useQueryClient();
   const mutation = useActionMutation(createTripAction);
+  const [locationPickerResetKey, setLocationPickerResetKey] = useState(0);
   const form = useForm<CreateTripValues>({
     defaultValues: {
       endDate: formatDateInputValue(addDays(new Date(), 17)),
@@ -69,6 +73,23 @@ export const CreateTripForm = (): ReactElement => {
     payload.set('note', values.note ?? '');
     payload.set('startDate', values.startDate);
     payload.set('title', values.title);
+    const formElement = document.getElementById('create-trip-form') as HTMLFormElement | null;
+    if (formElement) {
+      const formData = new FormData(formElement);
+      [
+        'locationName',
+        'locationAddress',
+        'locationLatitude',
+        'locationLongitude',
+        'locationProvider',
+        'locationProviderId',
+      ].forEach((key) => {
+        const value = formData.get(key);
+        if (typeof value === 'string') {
+          payload.set(key, value);
+        }
+      });
+    }
 
     try {
       const nextState = await mutation.mutateAsync(payload);
@@ -80,6 +101,7 @@ export const CreateTripForm = (): ReactElement => {
         startDate: formatDateInputValue(addDays(new Date(), 14)),
         title: '',
       });
+      setLocationPickerResetKey((key) => key + 1);
       await queryClient.invalidateQueries({ queryKey: appQueryKeys.trips() });
     } catch (error: unknown) {
       console.error('Failed to submit trip form', error);
@@ -89,6 +111,7 @@ export const CreateTripForm = (): ReactElement => {
 
   return (
     <form
+      id="create-trip-form"
       className="flex flex-col gap-4"
       noValidate
       onSubmit={onSubmit}
@@ -143,6 +166,19 @@ export const CreateTripForm = (): ReactElement => {
           />
         </FormSection>
       </div>
+
+      <FormSection
+        description={formT('locationDescription')}
+        htmlFor="tripLocation"
+        label={formT('locationLabel')}
+      >
+        <LocationPicker
+          inputId="tripLocation"
+          key={locationPickerResetKey}
+          placeholder={formT('locationPlaceholder')}
+          searchingLabel={formT('locationSearching')}
+        />
+      </FormSection>
 
       <FormSection
         description={formT('noteDescription')}

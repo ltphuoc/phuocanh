@@ -60,12 +60,14 @@ This file is the canonical business-rule reference for the current app. If this 
 - A memory currently requires either:
   - a non-empty note, or
   - one uploaded media file
-- The current UI supports at most one uploaded file per memory submission, even though the data model allows multiple media rows per memory.
+- The current UI supports multiple uploaded files per memory submission.
 - Supported media types are images and videos only.
 - The app-level upload limit is `25MB`.
 - Memory media is stored in the private `memory-media` bucket.
 - Storage object names must follow the contract `couples/{coupleId}/memories/{memoryId}/{timestamp}-{safeFileName}`.
 - If media upload or media metadata insert fails, the app attempts rollback so partial storage/database state is not left behind.
+- Memory locations may store a provider source ID, address, and coordinates alongside the display name.
+- Memory edits can update note, date, location, and media. Deleting media or memories removes private storage objects on a best-effort basis.
 
 ## Lists And Checklists
 
@@ -101,7 +103,9 @@ This file is the canonical business-rule reference for the current app. If this 
 - Trip dates are stored as date-only fields (`start_date`, `end_date`), not timestamps.
 - Trip status is derived in app code as `planned`, `active`, or `completed` from the saved couple timezone day token and the stored date range.
 - The database enforces `end_date >= start_date`.
-- This slice has no edit/delete flow.
+- Trips may store a provider source ID, address, and coordinates alongside the trip location display name.
+- Trip edits can update title, date range, notes, and location. Date-range edits are rejected when existing stops would fall outside the new range.
+- Trip delete removes the trip plus trip-rooted stops, albums, and album items through database cascades. Independent memories and their media are not deleted.
 
 ## Albums
 
@@ -121,8 +125,11 @@ This file is the canonical business-rule reference for the current app. If this 
 - Visited places are rooted in `trips`, not in a separate travel hierarchy.
 - Visited-place creation records the creating member in `created_by_user_id` and is authorized by RLS.
 - `visited_on` is stored as a date-only field and must stay within the parent trip’s `start_date..end_date` window.
-- The current atlas is provider-free: it stores no coordinates, route polylines, or tile-provider metadata.
-- This slice has no edit/delete flow, geocoding flow, or memory-location auto-derivation.
+- Visited places may store a provider source ID, address, and coordinates alongside the display name.
+- `visited_places` has no `location_name` column. The row `title` is the display name, while
+  provider metadata stores address, coordinates, and source ID when the user selects a search result.
+- The atlas can render MapLibre/OpenFreeMap markers for trips, visited places, and memories with stored coordinates. Route polylines are not part of the current contract.
+- This slice has no memory-location auto-derivation.
 
 ## Gameplay
 
@@ -172,6 +179,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Storage objects in `memory-media` whose path does not begin with `couples/{uuid}/...`
 - Future-note body visibility before the parent note unlock date
 - Trip row whose `end_date` is before `start_date`
+- Trip date-range edit that leaves existing visited places outside the new range
 - More than one album for the same trip in the current contract
 - Album row committed without at least one `album_items` row
 - Duplicate `album_items` rows for the same `(album_id, memory_media_id)` pair

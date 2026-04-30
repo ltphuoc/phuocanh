@@ -6,12 +6,13 @@ import { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { createMemoryAction } from '@/app/actions/memory-actions';
+import { LocationPicker } from '@/components/forms/location-picker';
 import { FormSection } from '@/components/layout/form-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +25,6 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const createMemorySchema = z.object({
   happenedAtLocal: z.string().min(1),
-  locationName: z.string().max(180).optional(),
   note: z.string().max(800).optional(),
 });
 
@@ -32,6 +32,8 @@ type CreateMemoryValues = z.infer<typeof createMemorySchema>;
 
 interface CreateMemoryFormProps {
   readonly coupleId: string;
+  readonly defaultHappenedAt?: string;
+  readonly redirectHref?: '/home' | `/trips/${string}`;
 }
 
 const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
@@ -43,11 +45,10 @@ const isAllowedMediaMimeType = (mimeType: string): boolean =>
 const sanitizeFileName = (fileName: string): string =>
   fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, '_');
 
-const buildStoragePath = (coupleId: string, fileName: string): string => {
-  const clientUploadId = crypto.randomUUID();
+const buildStoragePath = (coupleId: string, memoryId: string, fileName: string): string => {
   const safeName = sanitizeFileName(fileName || 'upload');
 
-  return `couples/${coupleId}/memories/${clientUploadId}/${Date.now()}-${safeName}`;
+  return `couples/${coupleId}/memories/${memoryId}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
 };
 
 const cleanupUploadedMemoryMedia = async (
@@ -61,7 +62,11 @@ const cleanupUploadedMemoryMedia = async (
   }
 };
 
-export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElement => {
+export const CreateMemoryForm = ({
+  coupleId,
+  defaultHappenedAt,
+  redirectHref = '/home',
+}: CreateMemoryFormProps): ReactElement => {
   const { t: actionsT } = useI18n('actions');
   const { t: commonT } = useI18n('common');
   const { t: formT } = useI18n('forms.memory');
@@ -70,11 +75,11 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
   const mutation = useActionMutation(createMemoryAction);
   const [supabase] = useState(createSupabaseBrowserClient);
   const [isUploading, setIsUploading] = useState(false);
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const defaultDate = defaultHappenedAt ? parseISO(defaultHappenedAt) : new Date();
   const form = useForm<CreateMemoryValues>({
     defaultValues: {
-      happenedAtLocal: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      locationName: '',
+      happenedAtLocal: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
       note: '',
     },
     resolver: zodResolver(createMemorySchema),
@@ -82,13 +87,35 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
+    const memoryId = crypto.randomUUID();
     payload.set('happenedAt', new Date(values.happenedAtLocal).toISOString());
-    payload.set('locationName', values.locationName ?? '');
+    payload.set('memoryId', memoryId);
     payload.set('note', values.note ?? '');
-    let uploadedStoragePath: string | null = null;
+    const formElement = document.getElementById('create-memory-form') as HTMLFormElement | null;
+    if (formElement) {
+      const formData = new FormData(formElement);
+      [
+        'locationName',
+        'locationAddress',
+        'locationLatitude',
+        'locationLongitude',
+        'locationProvider',
+        'locationProviderId',
+      ].forEach((key) => {
+        const value = formData.get(key);
+        if (typeof value === 'string') {
+          payload.set(key, value);
+        }
+      });
+    }
+    const uploadedStoragePaths: string[] = [];
 
     try {
-      if (mediaFile) {
+      if (mediaFiles.length) {
+        setIsUploading(true);
+      }
+
+      for (const mediaFile of mediaFiles) {
         if (mediaFile.size > MAX_UPLOAD_BYTES) {
           toast.error(actionsT('memory.fileTooLarge'));
           return;
@@ -99,8 +126,7 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
           return;
         }
 
-        const storagePath = buildStoragePath(coupleId, mediaFile.name);
-        setIsUploading(true);
+        const storagePath = buildStoragePath(coupleId, memoryId, mediaFile.name);
 
         const { error } = await supabase.storage
           .from('memory-media')
@@ -115,23 +141,23 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
           return;
         }
 
-        uploadedStoragePath = storagePath;
-        payload.set('mimeType', mediaFile.type);
-        payload.set('originalFileName', mediaFile.name);
-        payload.set('sizeBytes', String(mediaFile.size));
-        payload.set('storagePath', storagePath);
+        uploadedStoragePaths.push(storagePath);
+        payload.append('mimeType', mediaFile.type);
+        payload.append('originalFileName', mediaFile.name);
+        payload.append('sizeBytes', String(mediaFile.size));
+        payload.append('storagePath', storagePath);
       }
 
       const nextState = await mutation.mutateAsync(payload);
       const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
       await invalidateMemoryCreated(queryClient);
-      router.replace('/home');
+      router.replace(redirectHref);
     } catch (error: unknown) {
       console.error('Failed to submit memory form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
 
-      if (uploadedStoragePath) {
+      for (const uploadedStoragePath of uploadedStoragePaths) {
         await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
       }
     } finally {
@@ -141,6 +167,7 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
 
   return (
     <form
+      id="create-memory-form"
       className="flex flex-col gap-4"
       onSubmit={onSubmit}
     >
@@ -162,11 +189,10 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
           htmlFor="locationName"
           label={formT('locationLabel')}
         >
-          <Input
-            id="locationName"
+          <LocationPicker
+            inputId="locationName"
             placeholder={formT('locationPlaceholder')}
-            type="text"
-            {...form.register('locationName')}
+            searchingLabel={formT('locationSearching')}
           />
         </FormSection>
       </div>
@@ -192,9 +218,16 @@ export const CreateMemoryForm = ({ coupleId }: CreateMemoryFormProps): ReactElem
         <Input
           id="media"
           name="media"
-          onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
+          accept="image/*,video/*"
+          multiple
+          onChange={(event) => setMediaFiles(Array.from(event.target.files ?? []))}
           type="file"
         />
+        {mediaFiles.length ? (
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
+            {formT('mediaSelected', { count: mediaFiles.length })}
+          </p>
+        ) : null}
       </FormSection>
 
       <Button

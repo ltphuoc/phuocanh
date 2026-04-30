@@ -58,7 +58,7 @@
 ## 2026-03-29 (Visited-Place Atlas Foundation)
 
 - Chosen visited-place contract: add manual trip-linked `visited_places` rows rather than auto-deriving stops from `memories.location_name`.
-- Chosen map delivery strategy: ship a provider-free atlas UI first, grouped by trip, without introducing Mapbox, coordinates, or new environment requirements.
+- Chosen map delivery strategy: ship a provider-free atlas UI first, grouped by trip, without introducing Mapbox, coordinates, or new environment requirements. `SUPERSEDED BY 2026-04-30 (OpenFreeMap/MapLibre/Nominatim MVP map stack.)`
 - Chosen travel hierarchy rule: keep visited places rooted in `trips` alongside albums rather than inventing a parallel place hierarchy.
 
 ## 2026-03-30 (Onboarding Safety Hardening)
@@ -88,3 +88,14 @@
 - Chosen freshness mechanism for live gameplay reveal: conditional TanStack Query polling while the viewer has submitted and answers are still hidden.
 - Chosen scope: no realtime subscription, schema change, new route handler, or background job for this hardening slice.
 - Chosen cache follow-up: once answers reveal, invalidate `games` in the current browser context; invalidate `stats` only for daily-question because stats remain daily-question-only.
+
+## 2026-04-30 (OpenFreeMap/MapLibre/Nominatim MVP Map Stack)
+
+- Chosen map renderer: MapLibre GL JS with the OpenFreeMap Liberty style URL
+  `https://tiles.openfreemap.org/styles/liberty`, visible attribution, and no Mapbox token.
+- Chosen geocoding boundary: browser clients use only `/api/geo/search`; Nominatim is called
+  server-side after auth and ready-couple checks.
+- Chosen MVP protection: per-process query cache, per-user rate limit, and global upstream
+  throttling instead of a distributed Redis/DB-backed limiter.
+- Chosen storage compatibility: keep historical `mapbox` provider strings readable/editable while
+  all new provider selections use `nominatim`.

@@ -46,7 +46,7 @@ export interface ListsAppData extends ListsPageData {
 
 export interface OnThisDayAppData {
   readonly context: AppDataContext;
-  readonly memories: MemoryCard[];
+  readonly memories: HomeMemoryCard[];
 }
 
 export interface MemoryDetailAppData {

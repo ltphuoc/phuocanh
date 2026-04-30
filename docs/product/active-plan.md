@@ -18,7 +18,7 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 ## Deferred
 
 - AI retrieval memory search remains Phase 4 work.
-- Mapbox, coordinates, provider-backed tiles, route polylines, and deeper travel-map behavior remain deferred.
+- Route polylines and deeper travel-map behavior remain deferred.
 - Additional gameplay modes beyond the currently implemented `daily_question`, `guess_date`, and `trivia` modes remain deferred.
 - Leaderboards, sharing, scoring, similarity matching, answer edits, answer deletes, and gameplay backfill UI remain out of scope until separately decided.
 

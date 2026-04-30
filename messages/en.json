@@ -242,18 +242,31 @@
       "done": "Done",
       "undo": "Undo"
     },
+    "locationSearch": {
+      "noResults": "No places found. You can still save the typed place name.",
+      "rateLimited": "Place search is cooling down. Try again in a moment.",
+      "submit": "Search",
+      "unavailable": "Place search is unavailable. You can still save the typed place name."
+    },
     "memory": {
       "happenedAtDescription": "Use local time for this memory.",
       "happenedAtLabel": "Happened at",
       "locationDescription": "Optional place where this happened.",
       "locationLabel": "Location",
       "locationPlaceholder": "Da Nang…",
+      "locationSearching": "Searching places…",
+      "existingMediaLabel": "Existing media",
       "mediaDescription": "Image or video up to 25MB.",
       "mediaLabel": "Media",
+      "mediaSelected": "{count, plural, one {# file selected} other {# files selected}}",
       "noteDescription": "A short story helps future search and recap.",
       "noteLabel": "Note",
       "notePlaceholder": "What happened?…",
-      "submit": "Save memory"
+      "removeMedia": "Remove",
+      "submit": "Save memory",
+      "updateSubmit": "Update memory",
+      "deleteConfirm": "I understand this will delete this memory and its attached media.",
+      "deleteSubmit": "Delete memory"
     },
     "countdown": {
       "kindLabel": "Type",
@@ -329,6 +342,10 @@
     "trip": {
       "endDateDescription": "Trips use date-only ranges for now.",
       "endDateLabel": "End date",
+      "locationDescription": "Choose a mapped place for this trip when one applies.",
+      "locationLabel": "Trip location",
+      "locationPlaceholder": "Hoi An, Vietnam…",
+      "locationSearching": "Searching places…",
       "noteDescription": "Optional context for the plan, mood, or reason behind this trip.",
       "noteLabel": "Trip note (optional)",
       "notePlaceholder": "Lantern walk, food crawl, and one very slow morning…",
@@ -337,6 +354,9 @@
       "submit": "Save trip",
       "titleLabel": "Trip title",
       "titlePlaceholder": "Hoi An long weekend…",
+      "updateSubmit": "Update trip",
+      "deleteConfirm": "I understand this will delete this trip, its stops, and its trip album.",
+      "deleteSubmit": "Delete trip",
       "validation": {
         "dateRangeInvalid": "End date must be on or after the start date.",
         "endDateRequired": "Choose an end date.",
@@ -372,6 +392,10 @@
     },
     "visitedPlace": {
       "noteDescription": "Optional context for why this stop mattered.",
+      "locationDescription": "Search for the mapped place that matches this stop.",
+      "locationLabel": "Mapped place",
+      "locationPlaceholder": "An Bang beach…",
+      "locationSearching": "Searching places…",
       "noteLabel": "Place note (optional)",
       "notePlaceholder": "Lanterns overhead, two iced coffees, and the kind of quiet we wanted to keep…",
       "submit": "Save visited place",
@@ -423,9 +447,13 @@
     "memory": {
       "created": "Memory saved.",
       "createFailed": "Could not create memory.",
+      "deleted": "Memory deleted.",
       "fileTooLarge": "File is too large. Max size is 25MB.",
+      "invalidSubmission": "Memory submission is invalid.",
       "missingContent": "Add a note or at least one media file.",
-      "unsupportedType": "Only image and video files are supported."
+      "notFound": "Memory was not found.",
+      "unsupportedType": "Only image and video files are supported.",
+      "updated": "Memory updated."
     },
     "gameplay": {
       "dailyQuestion": {
@@ -461,7 +489,10 @@
     },
     "trip": {
       "created": "Trip saved.",
-      "invalidSubmission": "Trip submission is invalid."
+      "deleted": "Trip deleted.",
+      "invalidDateRangeWithStops": "Move or remove stops outside the new date range before updating this trip.",
+      "invalidSubmission": "Trip submission is invalid.",
+      "updated": "Trip updated."
     },
     "album": {
       "created": "Album created.",
@@ -591,6 +622,10 @@
       "noneTitle": "No media yet",
       "title": "Visual keepsakes"
     },
+    "manage": {
+      "label": "Manage memory",
+      "title": "Edit or delete this memory"
+    },
     "mediaAlt": "Memory media"
   },
   "map": {
@@ -633,8 +668,8 @@
       "title": "No trips yet"
     },
     "deferred": {
-      "description": "Trips, albums, and the atlas are live now. Coordinates, routes, and provider-backed geographic tiles remain deferred.",
-      "title": "Geographic layers still come later"
+      "description": "Trips, albums, and mapped places now use saved location data on the map.",
+      "title": "Mapped travel data is live"
     }
   },
   "tripDetail": {
@@ -658,6 +693,11 @@
     "albumComposerDescription": "This trip already has eligible memories. Group them into one album now; uploads still stay in the memory flow.",
     "albumEmptyTitle": "No eligible media yet",
     "albumEmptyDescription": "Add memories whose happened-at date falls inside this trip window, then create the album from here.",
+    "mediaComposerEyebrow": "Trip media",
+    "mediaComposerTitle": "Add media through a memory",
+    "mediaComposerDescription": "Save images or videos as memories dated inside this trip window. They become eligible for the trip album automatically.",
+    "manageEyebrow": "Manage trip",
+    "manageTitle": "Edit or delete this trip",
     "placesComposerDescription": "Add the stops you actually visited during this trip. Each saved place appears here and in the shared atlas.",
     "placesComposerEyebrow": "Add a stop",
     "placesComposerTitle": "Save a real visited place",
@@ -1098,9 +1138,13 @@
     "travelAtlas": {
       "header": {
         "badge": "{count, plural, one {# saved place} other {# saved places}}",
-        "description": "Real stops now collect into one provider-free atlas, grouped by the trip chapter they belong to.",
+        "description": "Real stops, trip locations, and memory places now collect into one mapped atlas.",
         "eyebrow": "Travel atlas",
         "title": "Places that changed the story"
+      },
+      "mapFallback": {
+        "description": "The map provider is unavailable, so saved places remain available in the trip list below.",
+        "title": "Map unavailable"
       },
       "noteFallback": "No place note was added for this stop yet.",
       "side": {

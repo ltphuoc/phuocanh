@@ -23,17 +23,49 @@ const createFutureNoteSchema = z.object({
   unlockDate: z.iso.date(),
 });
 
+const optionalTrimmedString = (maxLength: number) =>
+  z
+    .string()
+    .trim()
+    .max(maxLength)
+    .optional()
+    .transform((value) => value || null);
+
+const optionalCoordinate = z
+  .union([z.literal(''), z.coerce.number().finite()])
+  .optional()
+  .transform((value) => (typeof value === 'number' ? value : null));
+
+const locationSchema = {
+  locationAddress: optionalTrimmedString(280),
+  locationLatitude: optionalCoordinate,
+  locationLongitude: optionalCoordinate,
+  locationName: optionalTrimmedString(180),
+  locationProvider: optionalTrimmedString(40),
+  locationProviderId: optionalTrimmedString(255),
+};
+
 const createTripSchema = z
   .object({
     endDate: z.iso.date(),
-    note: z.string().trim().max(2000).optional(),
+    note: optionalTrimmedString(2000),
     startDate: z.iso.date(),
     title: z.string().trim().min(1).max(120),
+    ...locationSchema,
   })
   .refine(({ endDate, startDate }) => endDate >= startDate, {
     path: ['endDate'],
     message: 'Trip end date must not be before the start date.',
   });
+
+const updateTripSchema = createTripSchema.extend({
+  tripId: z.uuid(),
+});
+
+const deleteTripSchema = z.object({
+  confirmation: z.literal('delete'),
+  tripId: z.uuid(),
+});
 
 const createAlbumSchema = z.object({
   description: z.string().trim().max(800).optional(),
@@ -49,10 +81,15 @@ const addAlbumItemsSchema = z.object({
 });
 
 const createVisitedPlaceSchema = z.object({
-  note: z.string().trim().max(800).optional(),
+  note: optionalTrimmedString(800),
   title: z.string().trim().min(1).max(120),
   tripId: z.uuid(),
   visitedOn: z.iso.date(),
+  locationAddress: optionalTrimmedString(280),
+  locationLatitude: optionalCoordinate,
+  locationLongitude: optionalCoordinate,
+  locationProvider: optionalTrimmedString(40),
+  locationProviderId: optionalTrimmedString(255),
 });
 
 const updateCoupleTimezoneSchema = z.object({
@@ -75,6 +112,20 @@ const INVALID_FUTURE_NOTE_RPC_MESSAGES = new Set([
 ]);
 const INVALID_VISITED_PLACE_ERROR_CODES = new Set(['23503', '23514', '42501']);
 const INVALID_TIMEZONE_RPC_MESSAGES = new Set(['INVALID_TIMEZONE']);
+
+const getOptionalFormDataValue = (formData: FormData, key: string): string | undefined => {
+  const value = formData.get(key);
+  return typeof value === 'string' ? value : undefined;
+};
+
+const revalidateTripPaths = (tripId?: string): void => {
+  revalidateLocalizedPath('/trips');
+  revalidateLocalizedPath('/albums');
+  revalidateLocalizedPath('/map');
+  if (tripId) {
+    revalidateLocalizedPath(`/trips/${tripId}`);
+  }
+};
 
 export const createCountdownAction = async (
   _previousState: ActionState,
@@ -171,7 +222,13 @@ export const createTripAction = async (
     const context = await requireReadyCoupleContext();
     const parsed = createTripSchema.parse({
       endDate: formData.get('endDate'),
-      note: formData.get('note'),
+      locationAddress: getOptionalFormDataValue(formData, 'locationAddress'),
+      locationLatitude: getOptionalFormDataValue(formData, 'locationLatitude'),
+      locationLongitude: getOptionalFormDataValue(formData, 'locationLongitude'),
+      locationName: getOptionalFormDataValue(formData, 'locationName'),
+      locationProvider: getOptionalFormDataValue(formData, 'locationProvider'),
+      locationProviderId: getOptionalFormDataValue(formData, 'locationProviderId'),
+      note: getOptionalFormDataValue(formData, 'note'),
       startDate: formData.get('startDate'),
       title: formData.get('title'),
     });
@@ -181,7 +238,13 @@ export const createTripAction = async (
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
       end_date: parsed.endDate,
-      note: parsed.note || null,
+      location_address: parsed.locationAddress,
+      location_latitude: parsed.locationLatitude,
+      location_longitude: parsed.locationLongitude,
+      location_name: parsed.locationName,
+      location_provider: parsed.locationProvider,
+      location_provider_id: parsed.locationProviderId,
+      note: parsed.note,
       start_date: parsed.startDate,
       title: parsed.title,
     });
@@ -191,7 +254,7 @@ export const createTripAction = async (
       return createErrorState('unexpectedError');
     }
 
-    revalidateLocalizedPath('/trips');
+    revalidateTripPaths();
     return createSuccessState('trip.created');
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
@@ -199,6 +262,109 @@ export const createTripAction = async (
     }
 
     console.error('Failed to create trip', error);
+    return createErrorState('unexpectedError');
+  }
+};
+
+export const updateTripAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const context = await requireReadyCoupleContext();
+    const parsed = updateTripSchema.parse({
+      endDate: formData.get('endDate'),
+      locationAddress: getOptionalFormDataValue(formData, 'locationAddress'),
+      locationLatitude: getOptionalFormDataValue(formData, 'locationLatitude'),
+      locationLongitude: getOptionalFormDataValue(formData, 'locationLongitude'),
+      locationName: getOptionalFormDataValue(formData, 'locationName'),
+      locationProvider: getOptionalFormDataValue(formData, 'locationProvider'),
+      locationProviderId: getOptionalFormDataValue(formData, 'locationProviderId'),
+      note: getOptionalFormDataValue(formData, 'note'),
+      startDate: formData.get('startDate'),
+      title: formData.get('title'),
+      tripId: formData.get('tripId'),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { data: outsidePlaces, error: outsidePlacesError } = await supabase
+      .from('visited_places')
+      .select('id')
+      .eq('couple_id', context.coupleId)
+      .eq('trip_id', parsed.tripId)
+      .or(`visited_on.lt.${parsed.startDate},visited_on.gt.${parsed.endDate}`)
+      .limit(1);
+
+    if (outsidePlacesError) {
+      console.error('Failed to validate trip stops before update', outsidePlacesError);
+      return createErrorState('unexpectedError');
+    }
+
+    if (outsidePlaces.length) {
+      return createErrorState('trip.invalidDateRangeWithStops');
+    }
+
+    const { error } = await supabase
+      .from('trips')
+      .update({
+        end_date: parsed.endDate,
+        location_address: parsed.locationAddress,
+        location_latitude: parsed.locationLatitude,
+        location_longitude: parsed.locationLongitude,
+        location_name: parsed.locationName,
+        location_provider: parsed.locationProvider,
+        location_provider_id: parsed.locationProviderId,
+        note: parsed.note,
+        start_date: parsed.startDate,
+        title: parsed.title,
+      })
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.tripId);
+
+    if (error) {
+      console.error('Failed to update trip', error);
+      return createErrorState('unexpectedError');
+    }
+
+    revalidateTripPaths(parsed.tripId);
+    return createSuccessState('trip.updated');
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return createErrorState('trip.invalidSubmission');
+    }
+
+    console.error('Failed to update trip', error);
+    return createErrorState('unexpectedError');
+  }
+};
+
+export const deleteTripAction = async (
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> => {
+  try {
+    const context = await requireReadyCoupleContext();
+    const parsed = deleteTripSchema.parse({
+      confirmation: formData.get('confirmation'),
+      tripId: formData.get('tripId'),
+    });
+
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from('trips')
+      .delete()
+      .eq('couple_id', context.coupleId)
+      .eq('id', parsed.tripId);
+
+    if (error) {
+      console.error('Failed to delete trip', error);
+      return createErrorState('unexpectedError');
+    }
+
+    revalidateTripPaths(parsed.tripId);
+    return createSuccessState('trip.deleted');
+  } catch (error: unknown) {
+    console.error('Failed to delete trip', error);
     return createErrorState('unexpectedError');
   }
 };
@@ -294,7 +460,12 @@ export const createVisitedPlaceAction = async (
   try {
     const context = await requireReadyCoupleContext();
     const parsed = createVisitedPlaceSchema.parse({
-      note: formData.get('note'),
+      locationAddress: getOptionalFormDataValue(formData, 'locationAddress'),
+      locationLatitude: getOptionalFormDataValue(formData, 'locationLatitude'),
+      locationLongitude: getOptionalFormDataValue(formData, 'locationLongitude'),
+      locationProvider: getOptionalFormDataValue(formData, 'locationProvider'),
+      locationProviderId: getOptionalFormDataValue(formData, 'locationProviderId'),
+      note: getOptionalFormDataValue(formData, 'note'),
       title: formData.get('title'),
       tripId: formData.get('tripId'),
       visitedOn: formData.get('visitedOn'),
@@ -325,7 +496,12 @@ export const createVisitedPlaceAction = async (
     const { error } = await supabase.from('visited_places').insert({
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
-      note: parsed.note || null,
+      location_address: parsed.locationAddress,
+      location_latitude: parsed.locationLatitude,
+      location_longitude: parsed.locationLongitude,
+      location_provider: parsed.locationProvider,
+      location_provider_id: parsed.locationProviderId,
+      note: parsed.note,
       title: parsed.title,
       trip_id: parsed.tripId,
       visited_on: parsed.visitedOn,

@@ -94,6 +94,7 @@ export const OnThisDayClientPage = (): ReactElement => {
                       <MemoryCard
                         happenedAt={memory.happenedAt}
                         href={`/memories/${memory.id}`}
+                        imageUrl={memory.imageUrl}
                         locationName={memory.locationName}
                         mediaType={memory.mediaType}
                         note={memory.note}
@@ -108,6 +109,7 @@ export const OnThisDayClientPage = (): ReactElement => {
                     <MemoryCard
                       happenedAt={memory.happenedAt}
                       href={`/memories/${memory.id}`}
+                      imageUrl={memory.imageUrl}
                       key={memory.id}
                       locationName={memory.locationName}
                       mediaType={memory.mediaType}

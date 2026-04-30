@@ -82,6 +82,8 @@ flowchart LR
 - Supabase Postgres
 - Supabase Storage
 - OpenAI Responses API
+- OpenFreeMap and MapLibre GL JS for map display
+- Nominatim through the server-side `/api/geo/search` proxy for place search
 
 There is no live Mapbox integration in the current runtime.
 

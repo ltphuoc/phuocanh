@@ -13,6 +13,31 @@ import {
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const stubGeoSearch = async (page: Page): Promise<() => number> => {
+  let requestCount = 0;
+
+  await page.route('**/api/geo/search**', async (route) => {
+    requestCount += 1;
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        locations: [
+          {
+            address: 'Hoi An, Quang Nam, Vietnam',
+            latitude: 15.8801,
+            longitude: 108.338,
+            name: 'Hoi An',
+            provider: 'nominatim',
+            providerId: 'relation:12345',
+          },
+        ],
+      },
+    });
+  });
+
+  return () => requestCount;
+};
+
 const replaceInputValue = async (input: Locator, value: string): Promise<void> => {
   await input.fill(value);
   await input.press('Tab');
@@ -56,8 +81,12 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   page,
 }) => {
   test.slow();
+  await stubGeoSearch(page);
 
-  const countdownTitle = buildUniqueText('Countdown', 'E2E-COUNT-001');
+  const countdownTitle = buildUniqueText(
+    'Countdown with a very long milestone title that should wrap on mobile',
+    'E2E-COUNT-001',
+  );
   const countdownNote = buildUniqueText('Countdown note', 'E2E-COUNT-001');
   const lockedFutureNoteTitle = buildUniqueText('Locked note', 'E2E-FNOTE-001');
   const lockedFutureNoteBody = buildUniqueText('Locked note body', 'E2E-FNOTE-001');
@@ -89,6 +118,11 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   const countdownCard = getSectionByText(page, countdownTitle);
   await expect(countdownCard.getByText(countdownNote)).toBeVisible();
   await expect(countdownCard.getByText(countdownDateLabel)).toBeVisible();
+  await page.setViewportSize({ height: 900, width: 390 });
+  const countdownCardBox = await countdownCard.boundingBox();
+  expect(countdownCardBox?.x ?? 0).toBeGreaterThanOrEqual(0);
+  expect((countdownCardBox?.x ?? 0) + (countdownCardBox?.width ?? 0)).toBeLessThanOrEqual(390);
+  await page.setViewportSize({ height: 900, width: 1280 });
 
   await page.goto('/en/future-notes');
   await page.getByLabel('Title').fill(lockedFutureNoteTitle);
@@ -148,6 +182,7 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   page,
 }) => {
   test.slow();
+  const getGeoSearchCount = await stubGeoSearch(page);
 
   const tripTitle = buildUniqueText('Trip', 'E2E-TRIP-001');
   const tripNote = buildUniqueText('Trip note', 'E2E-TRIP-001');
@@ -167,6 +202,11 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
 
   await page.goto('/en/trips');
   await page.getByLabel('Trip title').fill(tripTitle);
+  await page.getByLabel('Trip location').fill('Hoi An');
+  await page.waitForTimeout(350);
+  expect(getGeoSearchCount()).toBe(0);
+  await page.getByLabel('Trip location').press('Enter');
+  await page.getByRole('button', { name: 'Hoi An Hoi An, Quang Nam, Vietnam' }).click();
   await page.getByLabel('Start date').fill(createOffsetDateInput(-2));
   await page.getByLabel('End date').fill(createOffsetDateInput(2));
   await page.getByLabel('Trip note (optional)').fill(tripNote);
@@ -185,6 +225,9 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await expect(page.getByText('Choose a date inside this trip window.')).toBeVisible();
 
   await page.getByLabel('Place title').fill(visitedPlaceTitle);
+  await page.getByLabel('Mapped place').fill('Hoi An');
+  await page.getByLabel('Mapped place').press('Enter');
+  await page.getByRole('button', { name: 'Hoi An Hoi An, Quang Nam, Vietnam' }).click();
   await page.getByLabel('Visited on').fill(createTodayDateInput());
   await page.getByLabel('Place note (optional)').fill(visitedPlaceNote);
   await page.getByRole('button', { name: 'Save visited place' }).click();
@@ -271,6 +314,20 @@ test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums
   await page.goto('/en/albums');
   await expect(page.getByRole('heading', { name: 'Albums' })).toBeVisible();
   await expect(page.getByRole('link', { name: new RegExp(albumTitle) })).toBeVisible();
+
+  const updatedTripNote = buildUniqueText('Updated trip note', 'E2E-TRIP-EDIT');
+  await page.goto(tripUrl);
+  await page.getByLabel('Trip note (optional)').last().fill(updatedTripNote);
+  await page.getByRole('button', { name: 'Update trip' }).click();
+  await expect(page.getByText(updatedTripNote).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.getByLabel(/I understand this will delete this trip/).check();
+  await page.getByRole('button', { name: 'Delete trip' }).click();
+  await expect(page).toHaveURL(/\/en\/trips$/, {
+    timeout: 15_000,
+  });
+  await expect(page.getByText(updatedTripNote)).toBeHidden();
 
   await page.goto('/en/trips/not-a-uuid');
   await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();

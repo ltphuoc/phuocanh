@@ -1,9 +1,31 @@
+import type { Page } from '@playwright/test';
+
 import { Buffer } from 'node:buffer';
 
 import { expect, test } from '@playwright/test';
 
 import { memoryFixturePath } from './support/runtime';
 import { buildUniqueText, createTodayDateTimeLocalInput } from './support/test-data';
+
+const stubGeoSearch = async (page: Page) => {
+  await page.route('**/api/geo/search**', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      json: {
+        locations: [
+          {
+            address: 'Da Nang, Vietnam',
+            latitude: 16.0544,
+            longitude: 108.2022,
+            name: 'Da Nang',
+            provider: 'nominatim',
+            providerId: 'relation:67890',
+          },
+        ],
+      },
+    });
+  });
+};
 
 test('E2E-MEM-000 memory creation requires a note or media', async ({ page }) => {
   await page.goto('/en/memories/new');
@@ -47,6 +69,7 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   page,
 }) => {
   test.slow();
+  await stubGeoSearch(page);
 
   const memoryLocation = buildUniqueText('Memory place', 'E2E-MEM-001');
   const memoryNote = buildUniqueText('Memory note', 'E2E-MEM-001');
@@ -54,12 +77,15 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   const wishNote = buildUniqueText('Wish note', 'E2E-WISH-001');
   const checklistTitle = buildUniqueText('Checklist', 'E2E-CHK-001');
   const checklistItemText = buildUniqueText('Checklist item', 'E2E-CHK-001');
+  const selectedLocation = 'Da Nang';
 
   await page.goto('/en/memories/new');
   await page.getByLabel('Happened at').fill(createTodayDateTimeLocalInput(11, 30));
   await page.getByLabel('Location').fill(memoryLocation);
+  await page.getByLabel('Location').press('Enter');
+  await page.getByRole('button', { name: 'Da Nang Da Nang, Vietnam' }).click();
   await page.getByLabel('Note').fill(memoryNote);
-  await page.getByLabel('Media').setInputFiles(memoryFixturePath);
+  await page.getByLabel('Media').setInputFiles([memoryFixturePath, memoryFixturePath]);
   await page.getByRole('button', { name: 'Save memory' }).click();
   await expect(page).toHaveURL(/\/en\/home$/, {
     timeout: 20_000,
@@ -71,9 +97,9 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
   await expect(memoryLink).toBeVisible();
   await memoryLink.click();
   await expect(page).toHaveURL(/\/en\/memories\/[0-9a-f-]+$/);
-  await expect(page.getByText(memoryLocation).first()).toBeVisible();
+  await expect(page.getByText(selectedLocation).first()).toBeVisible();
   await expect(page.getByText(memoryNote).first()).toBeVisible();
-  await expect(page.getByAltText('Memory media')).toBeVisible();
+  await expect(page.getByAltText('Memory media')).toHaveCount(2);
 
   await page.goto('/en/on-this-day');
   await expect(page.getByRole('heading', { name: 'On this day' })).toBeVisible();
@@ -133,4 +159,33 @@ test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memo
     timeout: 15_000,
   });
   await expect(pendingChecklistCard.getByText('Completed')).toBeHidden();
+});
+
+test('E2E-MEM-EDIT-DELETE memory edit and delete flows work', async ({ page }) => {
+  test.slow();
+  await stubGeoSearch(page);
+
+  const memoryNote = buildUniqueText('Editable memory note', 'E2E-MEM-EDIT');
+  const updatedMemoryNote = buildUniqueText('Updated memory note', 'E2E-MEM-EDIT');
+
+  await page.goto('/en/memories/new');
+  await page.getByLabel('Happened at').fill(createTodayDateTimeLocalInput(10, 0));
+  await page.getByLabel('Location').fill('Da Nang');
+  await page.getByLabel('Location').press('Enter');
+  await page.getByRole('button', { name: 'Da Nang Da Nang, Vietnam' }).click();
+  await page.getByLabel('Note').fill(memoryNote);
+  await page.getByLabel('Media').setInputFiles([memoryFixturePath, memoryFixturePath]);
+  await page.getByRole('button', { name: 'Save memory' }).click();
+  await expect(page).toHaveURL(/\/en\/home$/, { timeout: 20_000 });
+
+  await page.getByRole('link').filter({ hasText: memoryNote }).first().click();
+  await expect(page).toHaveURL(/\/en\/memories\/[0-9a-f-]+$/);
+  await page.getByLabel('Note').last().fill(updatedMemoryNote);
+  await page.getByRole('button', { name: 'Update memory' }).click();
+  await expect(page.getByText(updatedMemoryNote).first()).toBeVisible({ timeout: 15_000 });
+
+  await page.getByLabel(/I understand this will delete this memory/).check();
+  await page.getByRole('button', { name: 'Delete memory' }).click();
+  await expect(page).toHaveURL(/\/en\/home$/, { timeout: 15_000 });
+  await expect(page.getByText(updatedMemoryNote)).toBeHidden();
 });

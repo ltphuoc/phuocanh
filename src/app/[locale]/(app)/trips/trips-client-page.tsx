@@ -141,6 +141,7 @@ export const TripsClientPage = (): ReactElement => {
                 eyebrowLabel={tripCardT('eyebrow')}
                 href={`/trips/${trip.id}`}
                 key={trip.id}
+                locationName={trip.locationName}
                 metaLabel={formatTripDuration(trip, tripCardT)}
                 note={trip.note}
                 title={trip.title}

@@ -7,7 +7,9 @@ import { Album, MapPinned, Plus } from 'lucide-react';
 
 import { AddAlbumItemsForm } from '@/components/forms/add-album-items-form';
 import { CreateAlbumForm } from '@/components/forms/create-album-form';
+import { CreateMemoryForm } from '@/components/forms/create-memory-form';
 import { CreateVisitedPlaceForm } from '@/components/forms/create-visited-place-form';
+import { TripManagementForms } from '@/components/forms/trip-management-forms';
 import { ResponsiveGrid } from '@/components/layout/responsive-grid';
 import { SectionStack } from '@/components/layout/section-stack';
 import { ShellPage } from '@/components/layout/shell-page';
@@ -72,7 +74,8 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
     );
   }
 
-  const { context, trip } = query.data;
+  const data = query.data;
+  const { context, trip } = data;
   const timeZone = context.timeZone;
   const dateRangeLabel = formatTripDateRange(trip, format, tripCardT, timeZone);
   const durationLabel = formatTripDuration(trip, tripCardT);
@@ -105,6 +108,7 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
             badgeLabel={statusLabel}
             dateRangeLabel={dateRangeLabel}
             eyebrowLabel={tripCardT('eyebrow')}
+            locationName={trip.locationName}
             metaLabel={durationLabel}
             note={trip.note}
             title={trip.title}
@@ -123,6 +127,27 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
             </p>
           </SectionCard>
         </ResponsiveGrid>
+      </PageReveal>
+
+      <PageReveal delay={0.08}>
+        <SectionCard
+          className="flex flex-col gap-5"
+          padding="comfortable"
+          surface="paper"
+        >
+          <div className="space-y-2">
+            <p className="ui-meta">{tripDetailT('mediaComposerEyebrow')}</p>
+            <h2 className="ui-card-title">{tripDetailT('mediaComposerTitle')}</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {tripDetailT('mediaComposerDescription')}
+            </p>
+          </div>
+          <CreateMemoryForm
+            coupleId={context.coupleId}
+            defaultHappenedAt={new Date(`${trip.startDate}T12:00:00`).toISOString()}
+            redirectHref={`/trips/${trip.id}`}
+          />
+        </SectionCard>
       </PageReveal>
 
       {trip.album && albumItemCountLabel ? (
@@ -327,6 +352,20 @@ export const TripDetailClientPage = ({ tripId }: TripDetailClientPageProps): Rea
               />
             )}
           </ResponsiveGrid>
+        </SectionCard>
+      </PageReveal>
+
+      <PageReveal delay={0.18}>
+        <SectionCard
+          className="flex flex-col gap-5"
+          padding="comfortable"
+          surface="paper"
+        >
+          <div className="space-y-2">
+            <p className="ui-meta">{tripDetailT('manageEyebrow')}</p>
+            <h2 className="ui-card-title">{tripDetailT('manageTitle')}</h2>
+          </div>
+          <TripManagementForms data={data} />
         </SectionCard>
       </PageReveal>
     </ShellPage>

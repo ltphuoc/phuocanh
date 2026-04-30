@@ -27,8 +27,7 @@ route-by-route runtime status.
   and backfill UI
 - General analytics beyond daily-question gameplay stats
 - AI retrieval memory search
-- Mapbox, coordinates, geocoding, provider-backed tiles, route polylines, and deeper travel-map
-  behavior
+- Route polylines and deeper travel-map behavior
 - Per-user timezone overrides
 - Album captions, reordering, removal, delete flow, and multi-album-per-trip behavior
 - Public sharing, native mobile app, and multi-couple workspaces
@@ -37,6 +36,6 @@ route-by-route runtime status.
 
 - Shell polish is not proof of backend support.
 - `/games/[mode]` is live only for `daily-question`, `guess-date`, and `trivia`.
-- `/map` is a provider-free atlas over `visited_places`, not a geographic tile integration.
+- `/map` is an atlas over saved location coordinates; route polylines are not implemented.
 - `/stats` is gameplay-only and currently sourced from daily-question history.
 - Future-note email reminders are summary-only and must not include decrypted note bodies.

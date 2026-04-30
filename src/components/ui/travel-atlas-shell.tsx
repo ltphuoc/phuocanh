@@ -1,11 +1,17 @@
 'use client';
 
 import type { ReactElement } from 'react';
-import type { MapTripGroup, TripCard, VisitedPlaceCard } from '@/lib/server/phase-two-data';
+import type {
+  MapMemoryPlace,
+  MapTripGroup,
+  TripCard,
+  VisitedPlaceCard,
+} from '@/lib/server/phase-two-data';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MapPinned, Route } from 'lucide-react';
+import maplibregl from 'maplibre-gl';
 import { motion } from 'motion/react';
 
 import { SectionCard } from '@/components/ui/section-card';
@@ -16,7 +22,9 @@ import { parseDateInputValueInTimeZone } from '@/lib/utils/couple-timezone';
 
 interface TravelAtlasShellProps {
   readonly groups: readonly MapTripGroup[];
+  readonly memories: readonly MapMemoryPlace[];
   readonly timeZone: string;
+  readonly tripLocations: readonly TripCard[];
 }
 
 interface AtlasPlace extends VisitedPlaceCard {
@@ -40,6 +48,8 @@ const ATLAS_POINT_POSITION_CLASS_NAMES = [
   'left-[80%] top-[40%]',
 ] as const;
 
+const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+
 const getAtlasPlaces = (groups: readonly MapTripGroup[]): readonly AtlasPlace[] =>
   groups.flatMap((group) =>
     group.visitedPlaces.map((visitedPlace) => ({
@@ -48,13 +58,147 @@ const getAtlasPlaces = (groups: readonly MapTripGroup[]): readonly AtlasPlace[] 
     })),
   );
 
-export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): ReactElement => {
+interface MapMarkerPoint {
+  readonly id: string;
+  readonly latitude: number;
+  readonly longitude: number;
+  readonly title: string;
+  readonly type: 'memory' | 'stop' | 'trip';
+}
+
+const hasCoordinates = (location: {
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+}): location is { readonly latitude: number; readonly longitude: number } =>
+  typeof location.latitude === 'number' && typeof location.longitude === 'number';
+
+export const TravelAtlasShell = ({
+  groups,
+  memories,
+  timeZone,
+  tripLocations,
+}: TravelAtlasShellProps): ReactElement => {
   const { format, t } = useI18n('ui.travelAtlas');
   const reduceMotion = useHydratedReducedMotion();
-  const atlasPlaces = getAtlasPlaces(groups);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const atlasPlaces = useMemo(() => getAtlasPlaces(groups), [groups]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>(atlasPlaces[0]?.id ?? '');
+  const [unavailableMapPointsKey, setUnavailableMapPointsKey] = useState<string | null>(null);
   const selectedPlace =
     atlasPlaces.find((visitedPlace) => visitedPlace.id === selectedPlaceId) ?? atlasPlaces[0];
+  const mapPoints: readonly MapMarkerPoint[] = useMemo(
+    () => [
+      ...atlasPlaces.flatMap((place) =>
+        hasCoordinates(place.location)
+          ? [
+              {
+                id: place.id,
+                latitude: place.location.latitude,
+                longitude: place.location.longitude,
+                title: place.title,
+                type: 'stop' as const,
+              },
+            ]
+          : [],
+      ),
+      ...tripLocations.flatMap((trip) =>
+        hasCoordinates(trip.location)
+          ? [
+              {
+                id: trip.id,
+                latitude: trip.location.latitude,
+                longitude: trip.location.longitude,
+                title: trip.title,
+                type: 'trip' as const,
+              },
+            ]
+          : [],
+      ),
+      ...memories.flatMap((memory) =>
+        hasCoordinates(memory.location) && memory.location.name
+          ? [
+              {
+                id: memory.id,
+                latitude: memory.location.latitude,
+                longitude: memory.location.longitude,
+                title: memory.location.name,
+                type: 'memory' as const,
+              },
+            ]
+          : [],
+      ),
+    ],
+    [atlasPlaces, memories, tripLocations],
+  );
+  const mapPointsKey = useMemo(
+    () =>
+      mapPoints
+        .map((point) => `${point.type}:${point.id}:${point.latitude}:${point.longitude}`)
+        .join('|'),
+    [mapPoints],
+  );
+  const isMapUnavailable = mapPointsKey.length > 0 && unavailableMapPointsKey === mapPointsKey;
+  const shouldRenderMap = mapPoints.length > 0 && !isMapUnavailable;
+
+  useEffect(() => {
+    if (!mapContainerRef.current || !mapPoints.length || isMapUnavailable) {
+      return;
+    }
+
+    const firstPoint = mapPoints[0];
+    if (!firstPoint) {
+      return;
+    }
+
+    let hasLoaded = false;
+    let isDisposed = false;
+    const map = new maplibregl.Map({
+      attributionControl: {
+        compact: false,
+      },
+      center: [firstPoint.longitude, firstPoint.latitude],
+      container: mapContainerRef.current,
+      style: OPENFREEMAP_STYLE_URL,
+      zoom: mapPoints.length === 1 ? 10 : 2,
+    });
+    const bounds = new maplibregl.LngLatBounds();
+
+    map.on('load', () => {
+      hasLoaded = true;
+    });
+
+    map.on('error', () => {
+      if (!isDisposed && !hasLoaded) {
+        setUnavailableMapPointsKey(mapPointsKey);
+      }
+    });
+
+    mapPoints.forEach((point) => {
+      bounds.extend([point.longitude, point.latitude]);
+      const markerElement = document.createElement('button');
+      markerElement.type = 'button';
+      markerElement.className =
+        'size-5 rounded-full border-4 border-white bg-primary shadow-[0_0_0_10px_rgba(190,52,85,0.14)]';
+      markerElement.setAttribute('aria-label', point.title);
+      new maplibregl.Marker({ element: markerElement })
+        .setLngLat([point.longitude, point.latitude])
+        .setPopup(new maplibregl.Popup({ offset: 18 }).setText(point.title))
+        .addTo(map);
+    });
+
+    if (mapPoints.length > 1) {
+      map.fitBounds(bounds, {
+        maxZoom: 11,
+        padding: 70,
+      });
+    }
+
+    return () => {
+      isDisposed = true;
+      map.remove();
+    };
+  }, [isMapUnavailable, mapPoints, mapPointsKey]);
+
   const formatDateLabel = (value: string): string =>
     format.dateTime(parseDateInputValueInTimeZone(value, timeZone), {
       day: 'numeric',
@@ -128,26 +272,21 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
     >
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="relative min-h-[440px] overflow-hidden rounded-[calc(var(--radius-hero)-0.5rem)] border border-white/60 bg-[linear-gradient(160deg,#fff8f1_0%,#ffede8_48%,#f8d6d2_100%)]">
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,245,228,0.18)_0%,rgba(255,227,225,0.05)_100%)]" />
-          <svg
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full opacity-50"
-            fill="none"
-            viewBox="0 0 800 560"
-          >
-            <path
-              d="M96 140C170 118 248 154 302 224C346 281 402 352 505 360C612 368 655 290 714 248"
-              stroke="rgba(255,148,148,0.44)"
-              strokeLinecap="round"
-              strokeWidth="9"
+          {shouldRenderMap ? (
+            <div
+              className="absolute inset-0"
+              ref={mapContainerRef}
             />
-            <path
-              d="M164 310C230 346 302 400 430 422C534 440 620 412 708 352"
-              stroke="rgba(255,255,255,0.62)"
-              strokeLinecap="round"
-              strokeWidth="4"
-            />
-          </svg>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center p-6">
+              <div className="max-w-sm rounded-[var(--radius-panel)] border border-white/70 bg-[rgba(255,249,242,0.86)] p-5 text-center shadow-whisper backdrop-blur-xl">
+                <p className="ui-card-title">{t('mapFallback.title')}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {t('mapFallback.description')}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="absolute inset-x-4 top-4 rounded-[var(--radius-panel)] border border-white/70 bg-[rgba(255,249,242,0.78)] px-4 py-3 shadow-whisper backdrop-blur-xl md:inset-x-6">
             <p className="ui-meta ui-couple-mark">{t('header.eyebrow')}</p>
@@ -162,46 +301,55 @@ export const TravelAtlasShell = ({ groups, timeZone }: TravelAtlasShellProps): R
             </div>
           </div>
 
-          {atlasPlaces.map((visitedPlace, index) => {
-            const isSelected = visitedPlace.id === selectedPlace?.id;
-            const positionClassName =
-              ATLAS_POINT_POSITION_CLASS_NAMES[index % ATLAS_POINT_POSITION_CLASS_NAMES.length];
+          {!shouldRenderMap
+            ? atlasPlaces.map((visitedPlace, index) => {
+                const isSelected = visitedPlace.id === selectedPlace?.id;
+                const positionClassName =
+                  ATLAS_POINT_POSITION_CLASS_NAMES[index % ATLAS_POINT_POSITION_CLASS_NAMES.length];
 
-            return (
-              <button
-                aria-label={visitedPlace.title}
-                aria-pressed={isSelected}
-                className={cn('absolute', positionClassName)}
-                key={visitedPlace.id}
-                onClick={() => setSelectedPlaceId(visitedPlace.id)}
-                type="button"
-              >
-                <motion.span
-                  animate={{ scale: !reduceMotion && isSelected ? 1.06 : 1 }}
-                  className={cn(
-                    'relative inline-flex flex-col items-center gap-2',
-                    isSelected ? 'text-foreground' : 'text-muted-foreground',
-                  )}
-                  transition={
-                    reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
-                  }
-                >
-                  <span
-                    className={cn(
-                      'inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_10px_rgba(190,52,85,0.12)]',
-                      isSelected ? 'bg-accent-blue' : 'bg-primary/45',
-                    )}
-                  />
-                  <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold tracking-[0.06em] uppercase shadow-whisper backdrop-blur-lg">
-                    {visitedPlace.title}
-                  </span>
-                </motion.span>
-              </button>
-            );
-          })}
+                return (
+                  <button
+                    aria-label={visitedPlace.title}
+                    aria-pressed={isSelected}
+                    className={cn('absolute', positionClassName)}
+                    key={visitedPlace.id}
+                    onClick={() => setSelectedPlaceId(visitedPlace.id)}
+                    type="button"
+                  >
+                    <motion.span
+                      animate={{ scale: !reduceMotion && isSelected ? 1.06 : 1 }}
+                      className={cn(
+                        'relative inline-flex flex-col items-center gap-2',
+                        isSelected ? 'text-foreground' : 'text-muted-foreground',
+                      )}
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
+                      }
+                    >
+                      <span
+                        className={cn(
+                          'inline-flex size-5 rounded-full border-4 border-white shadow-[0_0_0_10px_rgba(190,52,85,0.12)]',
+                          isSelected ? 'bg-accent-blue' : 'bg-primary/45',
+                        )}
+                      />
+                      <span className="max-w-[11rem] rounded-pill border border-white/70 bg-[rgba(255,249,242,0.84)] px-3 py-1 text-center text-[11px] font-semibold tracking-[0.06em] uppercase shadow-whisper backdrop-blur-lg">
+                        {visitedPlace.title}
+                      </span>
+                    </motion.span>
+                  </button>
+                );
+              })
+            : null}
 
           {selectedPlace ? (
-            <div className="absolute inset-x-4 bottom-4 rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,249,242,0.9)] px-4 py-4 shadow-cloud backdrop-blur-xl md:inset-x-6">
+            <div
+              className={cn(
+                'absolute inset-x-4 rounded-[var(--radius-memory)] border border-white/70 bg-[rgba(255,249,242,0.9)] px-4 py-4 shadow-cloud backdrop-blur-xl md:inset-x-6',
+                shouldRenderMap ? 'bottom-10' : 'bottom-4',
+              )}
+            >
               <div className="flex items-center gap-2 text-primary">
                 <MapPinned
                   aria-hidden="true"
