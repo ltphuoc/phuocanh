@@ -84,7 +84,7 @@ const getAuthLookupResult = async (
       },
     };
   } catch (error: unknown) {
-    console.error('Failed to resolve middleware auth state', error);
+    console.error('Failed to resolve proxy auth state', error);
 
     return {
       response: mutableResponse,
@@ -96,7 +96,7 @@ const getAuthLookupResult = async (
   }
 };
 
-export const middleware = async (request: NextRequest): Promise<NextResponse> => {
+export const proxy = async (request: NextRequest): Promise<NextResponse> => {
   if (isAuthCallbackPath(request.nextUrl.pathname)) {
     return NextResponse.next({
       request,

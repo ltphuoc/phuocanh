@@ -26,91 +26,176 @@ git diff --check
 Run `pnpm test:e2e` when the change affects browser production flows, auth, routing, or critical
 mutations. Record when E2E was not run.
 
-## App Environment
+## Where To Get Values
 
-Set these in the hosted app environment before `pnpm build`:
+Use provider dashboards for real values. Keep this repo, `.env.example`, and docs placeholder-only.
 
-| Variable                        | Required    | Notes                                                         |
-| ------------------------------- | ----------- | ------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | yes         | Hosted Supabase project URL; exposed to browser code          |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes         | Hosted anon key; exposed to browser code                      |
-| `NEXT_PUBLIC_SITE_URL`          | yes         | Public app origin used for redirects and links                |
-| `OPENAI_API_KEY`                | conditional | Required for live `/games/daily-question` prompt generation   |
-| `OPENAI_DAILY_QUESTION_MODEL`   | no          | Defaults to `gpt-4o-mini`                                     |
-| `SUPABASE_SERVICE_ROLE_KEY`     | no          | Enables the auth-gate fast path; never expose to browser code |
+| Value                            | Where to get it                                                                                   | Placeholder                                     | Used as                                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Supabase Project URL             | Supabase project dashboard: **Connect** dialog or **Project Settings > API**                      | `https://<project-ref>.supabase.co`             | `NEXT_PUBLIC_SUPABASE_URL`, Edge Function `SUPABASE_URL`, Vault `project_url`         |
+| Supabase anon/publishable key    | Supabase **Project Settings > API Keys** or **Connect** dialog                                    | `<anon-or-publishable-key>`                     | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, Vault `anon_key`                                     |
+| Supabase service role/secret key | Supabase **Project Settings > API Keys**                                                          | `<service-role-or-secret-key>`                  | App `SUPABASE_SERVICE_ROLE_KEY`, Edge Function `SUPABASE_SERVICE_ROLE_KEY`            |
+| Database URL                     | Supabase **Connect** dialog; use a direct or pooler connection string as appropriate for the tool | `postgresql://USER:PASSWORD@HOST:PORT/DATABASE` | `DATABASE_URL` for SQL tooling                                                        |
+| OpenAI API key                   | OpenAI platform project API keys page                                                             | `<openai-api-key>`                              | `OPENAI_API_KEY`                                                                      |
+| Resend API key                   | Resend dashboard: **API Keys**                                                                    | `<resend-api-key>`                              | Edge Function `RESEND_API_KEY`                                                        |
+| Reminder sender email            | Resend verified domain/sender setup                                                               | `reminders@<production-domain>`                 | Edge Function `REMINDER_FROM_EMAIL`                                                   |
+| Vercel production URL            | Vercel project **Domains** or the production deployment URL                                       | `https://<production-domain>`                   | `NEXT_PUBLIC_SITE_URL`, Edge Function `REMINDER_APP_BASE_URL`, Supabase Auth Site URL |
 
-Never set `E2E_ENABLE_EMAIL_OTP_HELPER=true` in hosted environments.
+`NEXT_PUBLIC_*` values are bundled into browser code. The Supabase anon/publishable key is expected
+to be public when RLS and storage policies are correct. Service role or secret keys bypass normal
+data protections and must never be placed in `NEXT_PUBLIC_*`, client/browser code, public docs,
+URLs, screenshots, or client bundles.
 
-Configure Supabase Auth so the public site URL and callback URL are allowed:
+`DATABASE_URL` is only needed for tooling in this repo unless future app code directly opens a
+Postgres connection. The current app runtime uses Supabase clients instead.
 
-- `<PUBLIC_APP_ORIGIN>`
-- `<PUBLIC_APP_ORIGIN>/auth/callback`
+## Deploy Supabase
 
-## Next.js App
+Run Supabase deployment before Vercel so hosted app builds point at a migrated backend.
 
-For a Node.js host:
+1. Log in and link the target project:
 
-```bash
-pnpm install --frozen-lockfile
-pnpm build
-pnpm start
-```
+   ```bash
+   supabase login
+   supabase link --project-ref <project-ref>
+   ```
 
-For Vercel, keep the default framework integration and the package manager pinned by
-`packageManager` in `package.json`.
+2. Preview the pending remote migration plan:
 
-## Supabase Database And Storage
+   ```bash
+   supabase db push --dry-run
+   ```
 
-1. Link the local repo to the target Supabase project.
-2. Apply SQL migrations from `supabase/migrations/*.sql`.
-3. Confirm the private `memory-media` bucket, storage policies, RLS policies, triggers, and RPCs
-   match the migrations.
-4. If schema changes landed, regenerate or manually sync `src/lib/supabase/database.types.ts` after
-   applying SQL locally; never edit the type mirror alone.
+   Stop if the dry run shows unexpected migrations or targets the wrong project.
+
+3. Push migrations:
+
+   ```bash
+   supabase db push
+   ```
+
+4. Verify database-owned behavior against `supabase/migrations/*.sql`:
+   - RLS is enabled and policies exist for app tables.
+   - Storage bucket `memory-media` is private and has the migration-defined policies.
+   - RPCs used by app actions and gameplay exist with expected grants.
+   - Triggers exist for membership limits, timestamps, reminders, and gameplay invariants.
+   - Cron jobs `phase2-reminder-enqueue` and `phase2-reminder-processor` exist.
+
+5. If schema changes landed, regenerate the checked-in Supabase types from a migrated local stack:
+
+   ```bash
+   supabase gen types typescript --local > src/lib/supabase/database.types.ts
+   ```
+
+   Never edit `src/lib/supabase/database.types.ts` as a substitute for SQL migrations.
+
+6. Deploy the reminder Edge Function:
+
+   ```bash
+   supabase functions deploy reminder-processor
+   ```
+
+7. Set Edge Function secrets with real values outside source control:
+
+   ```bash
+   supabase secrets set \
+     SUPABASE_URL=https://<project-ref>.supabase.co \
+     SUPABASE_SERVICE_ROLE_KEY=<service-role-or-secret-key> \
+     RESEND_API_KEY=<resend-api-key> \
+     REMINDER_FROM_EMAIL=reminders@<production-domain> \
+     REMINDER_FROM_NAME=PhuocAnh \
+     REMINDER_APP_BASE_URL=https://<production-domain> \
+     REMINDER_LOCALE=vi
+   ```
+
+8. Set hosted Vault secrets for cron-driven function invocation:
+
+   ```sql
+   select vault.create_secret('https://<project-ref>.supabase.co', 'project_url', 'Reminder function project URL');
+   select vault.create_secret('<anon-or-publishable-key>', 'anon_key', 'Reminder function invoke key');
+   ```
+
+   If replaying locally or in CI without Vault, seed the private fallback store instead:
+
+   ```sql
+   select private.upsert_secret_fallback('project_url', '<API_URL>', 'Local functions base URL');
+   select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');
+   ```
 
 Use [docs/engineering/migration-playbook.md](migration-playbook.md) for schema-change rules.
 
-## Reminder Edge Function
+## Deploy Vercel
 
-Deploy `supabase/functions/reminder-processor` and set:
+1. Create or import the Vercel project from the Git repository.
+2. Set the Production branch to `main`.
+3. Add Production and Preview environment variables:
 
-| Secret                      | Required | Purpose                                  |
-| --------------------------- | -------- | ---------------------------------------- |
-| `SUPABASE_URL`              | yes      | Supabase project URL inside the function |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes      | Claims and updates delivery rows         |
-| `RESEND_API_KEY`            | yes      | Outbound email provider                  |
-| `REMINDER_FROM_EMAIL`       | yes      | Sender address                           |
-| `REMINDER_FROM_NAME`        | no       | Sender display name                      |
-| `REMINDER_APP_BASE_URL`     | no       | Public app base URL for reminder links   |
-| `REMINDER_LOCALE`           | no       | Link locale prefix                       |
+   | Variable                        | Production                          | Preview                                                   | Notes                                          |
+   | ------------------------------- | ----------------------------------- | --------------------------------------------------------- | ---------------------------------------------- |
+   | `NEXT_PUBLIC_SUPABASE_URL`      | `https://<project-ref>.supabase.co` | same or preview Supabase project URL                      | Browser-bundled                                |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `<anon-or-publishable-key>`         | matching anon/publishable key                             | Browser-bundled                                |
+   | `NEXT_PUBLIC_SITE_URL`          | `https://<production-domain>`       | preview origin or production fallback                     | Fallback for generated links                   |
+   | `OPENAI_API_KEY`                | `<openai-api-key>`                  | `<openai-api-key>` or omit if not testing live generation | Server-side only                               |
+   | `OPENAI_DAILY_QUESTION_MODEL`   | `gpt-4o-mini`                       | `gpt-4o-mini`                                             | Optional                                       |
+   | `SUPABASE_SERVICE_ROLE_KEY`     | `<service-role-or-secret-key>`      | matching secret key or omit                               | Server-side only; never expose to browser      |
+   | `DATABASE_URL`                  | optional                            | optional                                                  | Tooling only unless app code changes to use it |
 
-Hosted cron invocation also needs Vault secrets:
+   Do not set these in hosted Production or Preview environments:
+   - `E2E_ENABLE_EMAIL_OTP_HELPER=true`
+   - `OPENAI_DAILY_QUESTION_STUB_RESPONSE`
+   - `E2E_BASE_URL`
+   - `E2E_RUN_TOKEN`
+   - `PLAYWRIGHT_HEADLESS`
 
-| Vault secret  | Required | Purpose                                   |
-| ------------- | -------- | ----------------------------------------- |
-| `project_url` | yes      | Base URL for `pg_net` function invocation |
-| `anon_key`    | yes      | Scheduled invoke bearer token             |
+4. Verify Vercel build settings:
+   - Framework preset: Next.js
+   - Package manager: `pnpm`
+   - Build command: `pnpm build`
+   - Output directory: Vercel default for Next.js
+   - Install command: Vercel default for `pnpm`
+   - Static export: disabled; this app needs a server runtime
+   - Image optimization: `next.config.ts` uses `NEXT_PUBLIC_SUPABASE_URL` for Supabase media
 
-Local or CI replay without Vault can seed the fallback secret store:
+5. Deploy a Preview build from a non-production branch or pull request.
+6. Configure Supabase Auth URL settings before testing auth:
+   - Site URL: `https://<production-domain>`
+   - Production redirect URL: `https://<production-domain>/auth/callback`
+   - Local redirect URLs:
+     - `http://localhost:3000/**`
+     - `http://127.0.0.1:3000/**`
+   - Vercel Preview redirect URL: `https://*-<team-or-account-slug>.vercel.app/**`
 
-```sql
-select private.upsert_secret_fallback('project_url', '<API_URL>', 'Local functions base URL');
-select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');
-```
-
-Use `supabase status -o env` locally to find `API_URL` and `ANON_KEY`.
+7. Test the Preview deployment enough to catch env, auth, and media failures.
+8. Deploy Production from `main` after Preview checks pass.
 
 ## Post-Deploy Checks
 
-Verify:
+1. Request a magic-link login from the production domain and confirm the email is delivered.
+2. Open the magic link and verify `/auth/callback` sets a session and redirects to the expected
+   localized route.
+3. Sign in as a ready user and confirm private `memory-media` images/videos render through signed
+   URLs.
+4. Visit `/games/daily-question` and generate a live question when `OPENAI_API_KEY` is configured.
+5. In Supabase, confirm `phase2-reminder-enqueue` and `phase2-reminder-processor` exist in cron,
+   then run:
 
-1. The app can complete magic-link login through `/auth/callback`.
-2. Authenticated users resolve to the correct onboarding, invite, or ready state.
-3. Storage-backed memories render signed media URLs.
-4. `/games/daily-question` can generate a live prompt when `OPENAI_API_KEY` is set.
-5. `phase2-reminder-enqueue` and `phase2-reminder-processor` exist in cron.
-6. `select public.invoke_reminder_processor();` returns a request ID.
-7. Due reminders appear in `public.reminder_deliveries` and advance to `sent` or retry state.
+   ```sql
+   select public.invoke_reminder_processor();
+   ```
+
+   Confirm it returns a request ID and due rows in `public.reminder_deliveries` advance to `sent`,
+   `pending`, or `failed` with retry state.
+
+6. Check Vercel:
+   - Deployment build logs show a successful `pnpm build`.
+   - Runtime logs for `/auth/callback`, `/api/app-data/*`, and Server Actions have no recurring
+     5xx errors.
+
+7. Check Supabase:
+   - Auth logs show expected magic-link verification.
+   - Edge Function logs for `reminder-processor` show successful or explainable delivery attempts.
+   - Database logs do not show repeated RLS, missing relation, missing function, or cron invocation
+     errors.
 
 ## Known Constraints
 
