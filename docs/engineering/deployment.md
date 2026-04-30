@@ -56,7 +56,36 @@ mode.
 
 ## Deploy Supabase
 
+Supabase database migrations are deployed automatically by
+`.github/workflows/deploy-supabase-migrations.yml` on pushes to `main`. The workflow links the
+project, previews pending migrations, and then pushes them:
+
+```bash
+supabase link --project-ref "$SUPABASE_PROJECT_ID"
+supabase db push --dry-run
+supabase db push
+```
+
+Configure these GitHub repository secrets before relying on the workflow:
+
+| Secret                  | Purpose                                  |
+| ----------------------- | ---------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI authentication token        |
+| `SUPABASE_DB_PASSWORD`  | Database password for the target project |
+| `SUPABASE_PROJECT_ID`   | Supabase project ref passed to `link`    |
+
+The workflow deploys database migrations only. It does not deploy Edge Functions, Edge Function
+secrets, Vault secrets, Vercel configuration, or app hosting changes.
+
+Before merging migration changes, verify a clean local rebuild from migrations:
+
+```bash
+supabase db reset --local
+```
+
 Run Supabase deployment before Vercel so hosted app builds point at a migrated backend.
+
+For manual migration deployment, use the same sequence as the workflow:
 
 1. Log in and link the target project:
 
