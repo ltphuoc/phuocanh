@@ -11,11 +11,30 @@ const envSchema = z.object({
   REMINDER_APP_BASE_URL: z.url().default('http://localhost:3000'),
   REMINDER_FROM_EMAIL: z.email(),
   REMINDER_FROM_NAME: z.string().trim().min(1).default('PhuocAnh'),
+  REMINDER_INVOKE_SECRET: z.string().trim().min(1).optional(),
   REMINDER_LOCALE: z.string().trim().min(1).default('vi'),
   RESEND_API_KEY: z.string().trim().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().trim().min(1),
   SUPABASE_URL: z.url(),
 });
+
+const INVOKE_SECRET_HEADER = 'x-reminder-invoke-secret';
+
+// Constant-time string comparison: avoids leaking how many leading characters
+// matched via an early-return compare. Length is folded into the accumulator so a
+// length mismatch still fails without short-circuiting.
+const timingSafeEqualStrings = (expected: string, provided: string): boolean => {
+  const encoder = new TextEncoder();
+  const expectedBytes = encoder.encode(expected);
+  const providedBytes = encoder.encode(provided);
+
+  let mismatch = expectedBytes.length ^ providedBytes.length;
+  for (let index = 0; index < expectedBytes.length; index += 1) {
+    mismatch |= expectedBytes[index] ^ (providedBytes[index] ?? 0);
+  }
+
+  return mismatch === 0;
+};
 
 const reminderPayloadSchema = z.object({
   dateToken: z.string().trim().min(1),
@@ -96,6 +115,7 @@ const env = envSchema.parse({
   REMINDER_APP_BASE_URL: Deno.env.get('REMINDER_APP_BASE_URL'),
   REMINDER_FROM_EMAIL: Deno.env.get('REMINDER_FROM_EMAIL'),
   REMINDER_FROM_NAME: Deno.env.get('REMINDER_FROM_NAME'),
+  REMINDER_INVOKE_SECRET: Deno.env.get('REMINDER_INVOKE_SECRET'),
   REMINDER_LOCALE: Deno.env.get('REMINDER_LOCALE'),
   RESEND_API_KEY: Deno.env.get('RESEND_API_KEY'),
   SUPABASE_SERVICE_ROLE_KEY: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
@@ -170,6 +190,17 @@ const claimReminderDeliveries = async (): Promise<
 Deno.serve(async (request: Request): Promise<Response> => {
   if (request.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
+  }
+
+  // Authenticate the caller before any DB work. Only the pg_cron job (which sends
+  // the shared secret) may trigger a run; the public anon key + function URL are
+  // not sufficient. Fail closed when the secret is not configured on the function.
+  const providedSecret = request.headers.get(INVOKE_SECRET_HEADER) ?? '';
+  if (
+    !env.REMINDER_INVOKE_SECRET ||
+    !timingSafeEqualStrings(env.REMINDER_INVOKE_SECRET, providedSecret)
+  ) {
+    return new Response('Unauthorized', { status: 401 });
   }
 
   const reminders = await claimReminderDeliveries();
