@@ -7,11 +7,11 @@ import type {
   TripCard,
   VisitedPlaceCard,
 } from '@/lib/server/phase-two-data';
+import type { Map as MaplibreMap } from 'maplibre-gl';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MapPinned, Route } from 'lucide-react';
-import maplibregl from 'maplibre-gl';
 import { motion } from 'motion/react';
 
 import { SectionCard } from '@/components/ui/section-card';
@@ -152,50 +152,66 @@ export const TravelAtlasShell = ({
 
     let hasLoaded = false;
     let isDisposed = false;
-    const map = new maplibregl.Map({
-      attributionControl: {
-        compact: false,
-      },
-      center: [firstPoint.longitude, firstPoint.latitude],
-      container: mapContainerRef.current,
-      style: OPENFREEMAP_STYLE_URL,
-      zoom: mapPoints.length === 1 ? 10 : 2,
-    });
-    const bounds = new maplibregl.LngLatBounds();
+    let map: MaplibreMap | null = null;
 
-    map.on('load', () => {
-      hasLoaded = true;
-    });
-
-    map.on('error', () => {
-      if (!isDisposed && !hasLoaded) {
-        setUnavailableMapPointsKey(mapPointsKey);
+    // Load maplibre-gl (~200KB) only when a map actually renders, keeping it out
+    // of the initial bundle for every other route.
+    void (async () => {
+      const maplibregl = (await import('maplibre-gl')).default;
+      // Bail if the effect was cleaned up while the chunk loaded. Keep the
+      // construct-and-assign below synchronous after this guard: introducing an
+      // await between here and `map = mapInstance` would reopen a window where a
+      // Map is created but never disposed.
+      if (isDisposed || !mapContainerRef.current) {
+        return;
       }
-    });
 
-    mapPoints.forEach((point) => {
-      bounds.extend([point.longitude, point.latitude]);
-      const markerElement = document.createElement('button');
-      markerElement.type = 'button';
-      markerElement.className =
-        'size-5 rounded-full border-4 border-white bg-primary shadow-[0_0_0_10px_rgba(190,52,85,0.14)]';
-      markerElement.setAttribute('aria-label', point.title);
-      new maplibregl.Marker({ element: markerElement })
-        .setLngLat([point.longitude, point.latitude])
-        .setPopup(new maplibregl.Popup({ offset: 18 }).setText(point.title))
-        .addTo(map);
-    });
-
-    if (mapPoints.length > 1) {
-      map.fitBounds(bounds, {
-        maxZoom: 11,
-        padding: 70,
+      const mapInstance = new maplibregl.Map({
+        attributionControl: {
+          compact: false,
+        },
+        center: [firstPoint.longitude, firstPoint.latitude],
+        container: mapContainerRef.current,
+        style: OPENFREEMAP_STYLE_URL,
+        zoom: mapPoints.length === 1 ? 10 : 2,
       });
-    }
+      map = mapInstance;
+      const bounds = new maplibregl.LngLatBounds();
+
+      mapInstance.on('load', () => {
+        hasLoaded = true;
+      });
+
+      mapInstance.on('error', () => {
+        if (!isDisposed && !hasLoaded) {
+          setUnavailableMapPointsKey(mapPointsKey);
+        }
+      });
+
+      mapPoints.forEach((point) => {
+        bounds.extend([point.longitude, point.latitude]);
+        const markerElement = document.createElement('button');
+        markerElement.type = 'button';
+        markerElement.className =
+          'size-5 rounded-full border-4 border-white bg-primary shadow-[0_0_0_10px_rgba(190,52,85,0.14)]';
+        markerElement.setAttribute('aria-label', point.title);
+        new maplibregl.Marker({ element: markerElement })
+          .setLngLat([point.longitude, point.latitude])
+          .setPopup(new maplibregl.Popup({ offset: 18 }).setText(point.title))
+          .addTo(mapInstance);
+      });
+
+      if (mapPoints.length > 1) {
+        mapInstance.fitBounds(bounds, {
+          maxZoom: 11,
+          padding: 70,
+        });
+      }
+    })();
 
     return () => {
       isDisposed = true;
-      map.remove();
+      map?.remove();
     };
   }, [isMapUnavailable, mapPoints, mapPointsKey]);
 

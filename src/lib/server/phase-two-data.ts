@@ -373,58 +373,67 @@ export const getTripsPageData = async (context: CoupleContext): Promise<TripsPag
 export const getMapPageData = async (context: CoupleContext): Promise<MapPageData> => {
   const supabase = await createSupabaseServerClient();
   const todayDateToken = getCurrentDateTokenInTimeZone(context.timezone);
-  const { data: visitedPlaceRows, error } = await supabase
-    .from('visited_places')
-    .select('*')
-    .eq('couple_id', context.coupleId)
-    .order('visited_on', { ascending: false })
-    .order('created_at', { ascending: false });
 
-  if (error) {
-    throw new Error(error.message);
+  // visited_places and the located memories/trips are independent of each other,
+  // so issue them concurrently instead of waterfalling. The trips-by-id lookup
+  // below still depends on visited_places and stays sequential.
+  const [visitedPlacesResult, memoryResult, locatedTripsResult] = await Promise.all([
+    supabase
+      .from('visited_places')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .order('visited_on', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('memories')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .not('location_latitude', 'is', null)
+      .not('location_longitude', 'is', null)
+      .order('happened_at', { ascending: false }),
+    supabase
+      .from('trips')
+      .select('*')
+      .eq('couple_id', context.coupleId)
+      .not('location_latitude', 'is', null)
+      .not('location_longitude', 'is', null)
+      .order('start_date', { ascending: false }),
+  ]);
+
+  if (visitedPlacesResult.error) {
+    throw new Error(visitedPlacesResult.error.message);
   }
 
+  if (memoryResult.error) {
+    throw new Error(memoryResult.error.message);
+  }
+
+  if (locatedTripsResult.error) {
+    throw new Error(locatedTripsResult.error.message);
+  }
+
+  const visitedPlaceRows = visitedPlacesResult.data;
+  const mappedMemories = memoryResult.data.map((memory) => ({
+    happenedAt: memory.happened_at,
+    id: memory.id,
+    location: {
+      address: memory.location_address,
+      latitude: memory.location_latitude,
+      longitude: memory.location_longitude,
+      name: memory.location_name,
+      provider: memory.location_provider,
+      providerId: memory.location_provider_id,
+    },
+    note: memory.note,
+  }));
+  const mappedTripLocations = locatedTripsResult.data.map((trip) =>
+    toTripCard(trip, todayDateToken),
+  );
+
   if (!visitedPlaceRows.length) {
-    const [memoryQuery, tripQuery] = await Promise.all([
-      supabase
-        .from('memories')
-        .select('*')
-        .eq('couple_id', context.coupleId)
-        .not('location_latitude', 'is', null)
-        .not('location_longitude', 'is', null)
-        .order('happened_at', { ascending: false }),
-      supabase
-        .from('trips')
-        .select('*')
-        .eq('couple_id', context.coupleId)
-        .not('location_latitude', 'is', null)
-        .not('location_longitude', 'is', null)
-        .order('start_date', { ascending: false }),
-    ]);
-
-    if (memoryQuery.error) {
-      throw new Error(memoryQuery.error.message);
-    }
-
-    if (tripQuery.error) {
-      throw new Error(tripQuery.error.message);
-    }
-
     return {
-      memories: memoryQuery.data.map((memory) => ({
-        happenedAt: memory.happened_at,
-        id: memory.id,
-        location: {
-          address: memory.location_address,
-          latitude: memory.location_latitude,
-          longitude: memory.location_longitude,
-          name: memory.location_name,
-          provider: memory.location_provider,
-          providerId: memory.location_provider_id,
-        },
-        note: memory.note,
-      })),
-      tripLocations: tripQuery.data.map((trip) => toTripCard(trip, todayDateToken)),
+      memories: mappedMemories,
+      tripLocations: mappedTripLocations,
       trips: [],
       visitedPlaces: [],
     };
@@ -473,46 +482,9 @@ export const getMapPageData = async (context: CoupleContext): Promise<MapPageDat
     });
   });
 
-  const [memoryQuery, locatedTripsQuery] = await Promise.all([
-    supabase
-      .from('memories')
-      .select('*')
-      .eq('couple_id', context.coupleId)
-      .not('location_latitude', 'is', null)
-      .not('location_longitude', 'is', null)
-      .order('happened_at', { ascending: false }),
-    supabase
-      .from('trips')
-      .select('*')
-      .eq('couple_id', context.coupleId)
-      .not('location_latitude', 'is', null)
-      .not('location_longitude', 'is', null)
-      .order('start_date', { ascending: false }),
-  ]);
-
-  if (memoryQuery.error) {
-    throw new Error(memoryQuery.error.message);
-  }
-
-  if (locatedTripsQuery.error) {
-    throw new Error(locatedTripsQuery.error.message);
-  }
-
   return {
-    memories: memoryQuery.data.map((memory) => ({
-      happenedAt: memory.happened_at,
-      id: memory.id,
-      location: {
-        address: memory.location_address,
-        latitude: memory.location_latitude,
-        longitude: memory.location_longitude,
-        name: memory.location_name,
-        provider: memory.location_provider,
-        providerId: memory.location_provider_id,
-      },
-      note: memory.note,
-    })),
-    tripLocations: locatedTripsQuery.data.map((trip) => toTripCard(trip, todayDateToken)),
+    memories: mappedMemories,
+    tripLocations: mappedTripLocations,
     trips: Array.from(tripsById.values()),
     visitedPlaces,
   };
