@@ -146,7 +146,8 @@ For manual migration deployment, use the same sequence as the workflow:
      REMINDER_FROM_EMAIL=reminders@<production-domain> \
      REMINDER_FROM_NAME=PhuocAnh \
      REMINDER_APP_BASE_URL=https://<production-domain> \
-     REMINDER_LOCALE=vi
+     REMINDER_LOCALE=vi \
+     REMINDER_INVOKE_SECRET=<cryptographically-random-secret>
    ```
 
 8. Set hosted Vault secrets for cron-driven function invocation:
@@ -154,13 +155,19 @@ For manual migration deployment, use the same sequence as the workflow:
    ```sql
    select vault.create_secret('https://<project-ref>.supabase.co', 'project_url', 'Reminder function project URL');
    select vault.create_secret('<anon-or-publishable-key>', 'anon_key', 'Reminder function invoke key');
+   select vault.create_secret('<cryptographically-random-secret>', 'reminder_invoke_secret', 'Reminder processor invoke authorization');
+   select vault.create_secret('<encryption-key>', 'future_note_encryption_key', 'At-rest future note body encryption key');
    ```
+
+   In production, both `reminder_invoke_secret` and `future_note_encryption_key` must be stored in Vault. The `REMINDER_INVOKE_SECRET` Edge Function env var must match the Vault `reminder_invoke_secret` value.
 
    If replaying locally or in CI without Vault, seed the private fallback store instead:
 
    ```sql
    select private.upsert_secret_fallback('project_url', '<API_URL>', 'Local functions base URL');
    select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');
+   select private.upsert_secret_fallback('reminder_invoke_secret', '<INVOKE_SECRET>', 'Reminder processor invoke authorization');
+   select private.upsert_secret_fallback('future_note_encryption_key', '<ENCRYPTION_KEY>', 'At-rest future note body encryption key');
    ```
 
 Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.

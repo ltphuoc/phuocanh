@@ -18,6 +18,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - The first successful bootstrap always creates `partner_a`.
 - Later invite acceptance assigns the missing active role in the couple.
 - If the invite target user is already an active member of that couple, invite acceptance returns the existing role and marks the invite accepted.
+- Membership updates are scoped to the caller's own row; a member cannot modify their partner's membership status or attributes.
 
 ## Couple Bootstrap Rules
 
@@ -34,7 +35,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - The couple owns one shared timezone stored on `couples.timezone`.
 - The current default and backfill timezone is `Asia/Ho_Chi_Minh`.
 - The timezone must be a valid IANA timezone name and is validated in SQL.
-- Timezone changes are allowed only through the `update_couple_timezone(...)` RPC.
+- Timezone changes are allowed **only** through the `update_couple_timezone(...)` RPC. Direct `UPDATE` statements from app code are blocked by a trigger to prevent desync of reminder due-dates.
 - Changing the couple timezone preserves the visible calendar date for existing countdowns and future notes by rewriting their stored UTC instants.
 - Changing the couple timezone does not rewrite memory timestamps.
 - Couple-level day-boundary features use the saved timezone, including:
@@ -60,6 +61,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - A memory currently requires either:
   - a non-empty note, or
   - one uploaded media file
+- This content invariant (note OR ≥1 media) is enforced atomically in the `update_memory_media()` RPC so concurrent edits cannot both succeed when emptying the memory.
 - The current UI supports multiple uploaded files per memory submission.
 - Supported media types are images and videos only.
 - The app-level upload limit is `25MB`.
@@ -67,7 +69,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Storage object names must follow the contract `couples/{coupleId}/memories/{memoryId}/{timestamp}-{safeFileName}`.
 - If media upload or media metadata insert fails, the app attempts rollback so partial storage/database state is not left behind.
 - Memory locations may store a provider source ID, address, and coordinates alongside the display name.
-- Memory edits can update note, date, location, and media. Deleting media or memories removes private storage objects on a best-effort basis.
+- Memory edits can update note, date, location, and media through the `update_memory_media()` RPC. Deleting media or memories removes private storage objects on a best-effort basis.
 
 ## Lists And Checklists
 

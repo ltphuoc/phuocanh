@@ -1,5 +1,36 @@
 # Implementation Log
 
+## 2026-06-02 - Security and Quality Remediation
+
+### Delivered
+
+- **Least-privilege hardening for couple-scoped tables:**
+  - Scoped `couple_memberships` UPDATE policy to the caller's own row; members can no longer edit their partner's membership.
+  - Added `albums` DELETE policy to enable orphaned-album cleanup.
+  - Protected `couples.timezone` with a `BEFORE UPDATE` trigger that rejects direct writes from app roles; timezone changes now exclusively flow through the `update_couple_timezone()` RPC to preserve calendar dates in countdowns and future notes.
+- **Reminder invocation security:**
+  - `invoke_reminder_processor()` now requires and sends `x-reminder-invoke-secret` header (read from Vault `reminder_invoke_secret` or private fallback).
+  - Edge Function `reminder-processor` validates the secret and returns 401 before any database work if it's missing or mismatched.
+  - New required secret: `reminder_invoke_secret` in Vault and `REMINDER_INVOKE_SECRET` Edge Function env var; both must match.
+- **Atomic memory update transaction:**
+  - New RPC `update_memory_media()` atomically updates memory row, removes specified media, inserts new media, and enforces the content invariant (note OR ≥1 media) inside one transaction with row locking.
+  - Serializes concurrent edits of the same memory to prevent race conditions where both could succeed despite emptying the memory.
+  - Returns removed storage paths and affected album IDs for post-commit cleanup.
+  - `updateMemoryAction` now calls this RPC instead of separate non-atomic statements.
+- **Auth hardening:**
+  - `sendMagicLinkAction` now derives `emailRedirectTo` from server-trusted `getSiteUrl()` only; client-sent origin is ignored.
+  - `NEXT_PUBLIC_SITE_URL` is required in production (no localhost fallback); `getSiteUrl()` ignores forwarded headers in production and trusts them only in preview/dev (via Vercel `VERCEL_ENV` discriminator).
+  - Proxy now preserves rotated session cookies across redirects (fixes intermittent forced logout).
+- **Vault production requirement:**
+  - Production Vault must hold both `future_note_encryption_key` and `reminder_invoke_secret`; `private.secret_fallbacks` is a dev/local fallback only.
+
+### Verification
+
+- All migrations applied locally and verified with clean db rebuild: `supabase db reset --local`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm build`
+
 ## 2026-04-29 - Phase 3 Gameplay Freshness Hardening
 
 ### Delivered

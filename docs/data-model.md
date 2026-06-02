@@ -90,6 +90,9 @@ This file summarizes the current schema. The authoritative source is always `sup
 - RLS is enabled across app tables.
 - `is_couple_member(target_couple_id uuid)` is the central access helper.
 - Direct app-layer insert into `couples` and `couple_memberships` is intentionally blocked; membership creation happens through RPCs.
+- `couple_memberships` UPDATE policy is scoped to the caller's own row; a member cannot modify their partner's membership.
+- `albums` DELETE policy allows deletion only by couple members (enabling empty-album cleanup).
+- `couples.timezone` is protected by a `BEFORE UPDATE` trigger that rejects direct writes from app roles; timezone changes must flow through the `update_couple_timezone()` SECURITY DEFINER RPC to preserve calendar dates in countdowns and future notes.
 - Storage bucket `memory-media` is private.
 - Storage object access is couple-scoped by path policy.
 - `future_note_contents` stores encrypted note bodies and is only decrypted through `get_unlocked_future_note_contents(...)`.
@@ -112,6 +115,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `memories_on_this_day(target_couple_id uuid, target_timezone text)`
 - `create_future_note_with_body(note_title text, note_unlock_at timestamptz, note_body text)`
 - `get_unlocked_future_note_contents(target_couple_id uuid)`
+- `update_memory_media(p_memory_id uuid, p_note text, p_happened_at timestamptz, p_location_address text, p_location_latitude double precision, p_location_longitude double precision, p_location_name text, p_location_provider text, p_location_provider_id text, p_remove_media_ids uuid[], p_add_media jsonb)`
 - `create_album_with_items(target_trip_id uuid, album_title text, album_description text, selected_memory_media_ids uuid[])`
 - `add_album_items(target_album_id uuid, selected_memory_media_ids uuid[])`
 - `ensure_daily_question_round(target_mode game_mode, target_round_date date, prompt_locale text, prompt_text text, prompt_source text)`

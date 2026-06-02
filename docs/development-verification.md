@@ -39,22 +39,25 @@ The app runtime and the reminder Edge Function do not use the same secret set.
 
 Edge Function secrets for `supabase/functions/reminder-processor`:
 
-| Secret                      | Required | Purpose                                       |
-| --------------------------- | -------- | --------------------------------------------- |
-| `SUPABASE_URL`              | yes      | Supabase project URL inside the Edge Function |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes      | Claims and updates `reminder_deliveries`      |
-| `RESEND_API_KEY`            | yes      | Outbound email provider                       |
-| `REMINDER_FROM_EMAIL`       | yes      | Sender address                                |
-| `REMINDER_FROM_NAME`        | no       | Sender display name, defaults to `PhuocAnh`   |
-| `REMINDER_APP_BASE_URL`     | no       | Public app base URL for reminder links        |
-| `REMINDER_LOCALE`           | no       | Link locale prefix, defaults to `vi`          |
+| Secret                      | Required | Purpose                                         |
+| --------------------------- | -------- | ----------------------------------------------- |
+| `SUPABASE_URL`              | yes      | Supabase project URL inside the Edge Function   |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes      | Claims and updates `reminder_deliveries`        |
+| `RESEND_API_KEY`            | yes      | Outbound email provider                         |
+| `REMINDER_FROM_EMAIL`       | yes      | Sender address                                  |
+| `REMINDER_FROM_NAME`        | no       | Sender display name, defaults to `PhuocAnh`     |
+| `REMINDER_APP_BASE_URL`     | no       | Public app base URL for reminder links          |
+| `REMINDER_LOCALE`           | no       | Link locale prefix, defaults to `vi`            |
+| `REMINDER_INVOKE_SECRET`    | yes      | Shared secret for cron invocation authorization |
 
 Hosted reminder cron invocation also needs Supabase Vault secrets:
 
-| Vault secret  | Required | Purpose                           |
-| ------------- | -------- | --------------------------------- |
-| `project_url` | yes      | Base project URL used by `pg_net` |
-| `anon_key`    | yes      | Scheduled invoke bearer token     |
+| Vault secret                 | Required | Purpose                                     |
+| ---------------------------- | -------- | ------------------------------------------- |
+| `project_url`                | yes      | Base project URL used by `pg_net`           |
+| `anon_key`                   | yes      | Scheduled invoke bearer token               |
+| `reminder_invoke_secret`     | yes      | Shared secret for cron invoke authorization |
+| `future_note_encryption_key` | yes      | At-rest future note body encryption key     |
 
 Local/CI replay can use the private fallback secret store documented in
 [docs/deployment.md](deployment.md).
