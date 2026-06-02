@@ -1,10 +1,30 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: '14.5';
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
   public: {
     Tables: {
@@ -1073,7 +1093,12 @@ export type Database = {
           created_at: string;
           happened_at: string;
           id: string;
+          location_address: string | null;
+          location_latitude: number | null;
+          location_longitude: number | null;
           location_name: string | null;
+          location_provider: string | null;
+          location_provider_id: string | null;
           note: string | null;
           updated_at: string;
         }[];
@@ -1102,6 +1127,26 @@ export type Database = {
           couple_id: string;
           timezone: string;
         }[];
+      };
+      update_memory_media: {
+        // NOTE: the type generator emits non-null types for every function
+        // argument, but note/location params are genuinely nullable at runtime.
+        // The unions below are widened by hand to match the SQL; re-apply after
+        // regenerating this file.
+        Args: {
+          p_add_media: Json;
+          p_happened_at: string;
+          p_location_address: string | null;
+          p_location_latitude: number | null;
+          p_location_longitude: number | null;
+          p_location_name: string | null;
+          p_location_provider: string | null;
+          p_location_provider_id: string | null;
+          p_memory_id: string;
+          p_note: string | null;
+          p_remove_media_ids: string[];
+        };
+        Returns: Json;
       };
     };
     Enums: {
@@ -1237,6 +1282,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       countdown_kind: ['anniversary', 'birthday', 'travel', 'plan', 'custom'],

@@ -246,6 +246,11 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
     status: 'sql_authoritative',
   },
   {
+    name: 'public.update_memory_media(uuid, text, timestamptz, text, double precision, double precision, text, text, text, uuid[], jsonb)',
+    sourceMigration: '20260602145200_update_memory_media_rpc.sql',
+    status: 'sql_authoritative',
+  },
+  {
     name: 'storage.objects RLS policies',
     sourceMigration: '20260327214000_phase1_mvp.sql',
     status: 'sql_authoritative',

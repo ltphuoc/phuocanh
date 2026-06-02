@@ -1,7 +1,7 @@
 'use server';
 
 import type { ActionState } from '@/lib/actions/action-state';
-import type { Database } from '@/lib/supabase/database.types';
+import type { Database, Json } from '@/lib/supabase/database.types';
 import type { AppSupabaseClient } from '@/lib/supabase/server';
 
 import { z } from 'zod';
@@ -174,6 +174,45 @@ const toMediaRows = (
     size_bytes: media.sizeBytes,
     storage_path: media.storagePath,
   }));
+
+const toMediaPayload = (mediaInputs: readonly UploadedMediaInput[]): Json =>
+  mediaInputs.map((media) => ({
+    media_type: detectMediaType(media.mimeType),
+    mime_type: media.mimeType,
+    original_file_name: media.originalFileName,
+    size_bytes: media.sizeBytes,
+    storage_path: media.storagePath,
+  }));
+
+const mapUpdateMemoryMediaError = (message: string): ActionState => {
+  if (message.includes('MEMORY_REQUIRES_CONTENT')) {
+    return createErrorState('memory.missingContent');
+  }
+
+  if (message.includes('MEMORY_NOT_FOUND') || message.includes('FORBIDDEN')) {
+    return createErrorState('memory.notFound');
+  }
+
+  console.error('Failed to update memory media', message);
+  return createErrorState('unexpectedError');
+};
+
+const parseUpdateMemoryMediaResult = (
+  result: Json | null,
+): { readonly affectedAlbumIds: string[]; readonly removedStoragePaths: string[] } => {
+  const toStringArray = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+
+  const record =
+    result && typeof result === 'object' && !Array.isArray(result)
+      ? (result as Record<string, Json | undefined>)
+      : {};
+
+  return {
+    affectedAlbumIds: toStringArray(record.affected_album_ids),
+    removedStoragePaths: toStringArray(record.removed_storage_paths),
+  };
+};
 
 const deleteEmptyAlbums = async (
   supabase: AppSupabaseClient,
@@ -387,22 +426,6 @@ export const updateMemoryAction = async (
     });
 
     const supabase = await createSupabaseServerClient();
-    const { data: memories, error: memoryLoadError } = await supabase
-      .from('memories')
-      .select('id')
-      .eq('couple_id', context.coupleId)
-      .eq('id', parsed.memoryId)
-      .limit(1);
-
-    if (memoryLoadError) {
-      console.error('Failed to load memory before update', memoryLoadError);
-      return createErrorState('unexpectedError');
-    }
-
-    if (!memories[0]) {
-      return createErrorState('memory.notFound');
-    }
-
     const mediaValidationState = validateUploadedMedia(
       uploadedMedia,
       context.coupleId,
@@ -416,93 +439,41 @@ export const updateMemoryAction = async (
       return mediaValidationState;
     }
 
-    const existingMediaQuery = await supabase
-      .from('memory_media')
-      .select('id, storage_path')
-      .eq('memory_id', parsed.memoryId);
+    // Single transactional RPC: updates the memory row, removes the requested
+    // media, inserts the new media, and enforces the "note OR >= 1 media"
+    // invariant atomically (with a row lock against concurrent partner edits).
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('update_memory_media', {
+      p_add_media: toMediaPayload(uploadedMedia),
+      p_happened_at: parsed.happenedAt,
+      p_location_address: parsed.locationAddress,
+      p_location_latitude: parsed.locationLatitude,
+      p_location_longitude: parsed.locationLongitude,
+      p_location_name: parsed.locationName,
+      p_location_provider: parsed.locationProvider,
+      p_location_provider_id: parsed.locationProviderId,
+      p_memory_id: parsed.memoryId,
+      p_note: parsed.note,
+      p_remove_media_ids: parsed.removedMediaIds,
+    });
 
-    if (existingMediaQuery.error) {
-      console.error('Failed to load memory media before update', existingMediaQuery.error);
-      return createErrorState('unexpectedError');
-    }
-
-    const removedMediaIdSet = new Set(parsed.removedMediaIds);
-    const remainingExistingMediaCount = existingMediaQuery.data.filter(
-      (media) => !removedMediaIdSet.has(media.id),
-    ).length;
-
-    if (!remainingExistingMediaCount && !uploadedMedia.length && !parsed.note) {
-      return createErrorState('memory.missingContent');
-    }
-
-    const { error: updateError } = await supabase
-      .from('memories')
-      .update({
-        happened_at: parsed.happenedAt,
-        location_address: parsed.locationAddress,
-        location_latitude: parsed.locationLatitude,
-        location_longitude: parsed.locationLongitude,
-        location_name: parsed.locationName,
-        location_provider: parsed.locationProvider,
-        location_provider_id: parsed.locationProviderId,
-        note: parsed.note,
-      })
-      .eq('couple_id', context.coupleId)
-      .eq('id', parsed.memoryId);
-
-    if (updateError) {
-      console.error('Failed to update memory', updateError);
-      return createErrorState('unexpectedError');
-    }
-
-    if (parsed.removedMediaIds.length) {
-      const mediaToRemove = existingMediaQuery.data.filter((media) =>
-        removedMediaIdSet.has(media.id),
-      );
-      if (!mediaToRemove.length) {
-        return createErrorState('memory.invalidSubmission');
-      }
-      const affectedAlbumIds = await getAffectedAlbumIds(
-        supabase,
-        mediaToRemove.map((media) => media.id),
-      );
-      const { error: removeMediaError } = await supabase
-        .from('memory_media')
-        .delete()
-        .in(
-          'id',
-          mediaToRemove.map((media) => media.id),
-        )
-        .eq('memory_id', parsed.memoryId);
-
-      if (removeMediaError) {
-        console.error('Failed to remove memory media rows', removeMediaError);
-        return createErrorState('unexpectedError');
-      }
-
-      await deleteEmptyAlbums(supabase, affectedAlbumIds);
+    if (rpcError) {
       const cleanupError = await removeUploadedStorageObjects(
         supabase,
-        mediaToRemove.map((media) => media.storage_path),
+        uploadedMedia.map((media) => media.storagePath),
       );
       if (cleanupError) {
-        console.error('Failed to remove memory media storage objects', cleanupError);
+        console.error('Memory update storage cleanup failed after RPC error', cleanupError);
       }
+      return mapUpdateMemoryMediaError(rpcError.message);
     }
 
-    if (uploadedMedia.length) {
-      const { error: mediaError } = await supabase
-        .from('memory_media')
-        .insert(toMediaRows(uploadedMedia, context.coupleId, parsed.memoryId));
-
-      if (mediaError) {
-        await removeUploadedStorageObjects(
-          supabase,
-          uploadedMedia.map((media) => media.storagePath),
-        );
-        console.error('Failed to store added memory media metadata', mediaError);
-        return createErrorState('unexpectedError');
-      }
+    // Post-commit cleanup, driven by the RPC's returned values: drop now-empty
+    // albums and delete the storage objects for removed media.
+    const { affectedAlbumIds, removedStoragePaths } = parseUpdateMemoryMediaResult(rpcResult);
+    await deleteEmptyAlbums(supabase, affectedAlbumIds);
+    const storageCleanupError = await removeUploadedStorageObjects(supabase, removedStoragePaths);
+    if (storageCleanupError) {
+      console.error('Failed to remove memory media storage objects', storageCleanupError);
     }
 
     revalidateMemoryPaths(parsed.memoryId);
