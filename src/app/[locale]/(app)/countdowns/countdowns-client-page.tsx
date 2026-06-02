@@ -78,7 +78,7 @@ export const CountdownsClientPage = (): ReactElement => {
         eyebrow={countdownsT('header.eyebrow')}
         title={countdownsT('header.title')}
       >
-        <QueryLoadingState />
+        <QueryLoadingState variant="card-grid" />
       </ShellPage>
     );
   }

@@ -106,10 +106,12 @@ export const SubmitGuessDateAnswerForm = ({
         errorMessage={guessedDateErrorMessage}
         htmlFor="guessDateAnswer"
         label={formT('guessedDateLabel')}
+        required
       >
         <Input
           aria-describedby={guessedDateErrorMessage ? 'guess-date-answer-error' : undefined}
           aria-invalid={Boolean(guessedDateErrorMessage)}
+          aria-required
           id="guessDateAnswer"
           type="date"
           {...form.register('guessedDate')}

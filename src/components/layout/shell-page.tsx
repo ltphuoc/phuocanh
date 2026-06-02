@@ -13,6 +13,9 @@ interface ShellPageProps {
   readonly title: string;
 }
 
+// The `<main>` landmark is owned by `(app)/layout.tsx` (with id="main-content"),
+// so this shell renders only the inner stack — wrapping it in `<main>` here
+// would produce a nested landmark on every consumer page.
 export const ShellPage = ({
   action,
   children,
@@ -21,18 +24,16 @@ export const ShellPage = ({
   quote,
   title,
 }: ShellPageProps): ReactElement => (
-  <main>
-    <SectionStack>
-      <PageReveal>
-        <PageHeader
-          action={action}
-          description={description}
-          eyebrow={eyebrow}
-          quote={quote}
-          title={title}
-        />
-      </PageReveal>
-      {children}
-    </SectionStack>
-  </main>
+  <SectionStack>
+    <PageReveal>
+      <PageHeader
+        action={action}
+        description={description}
+        eyebrow={eyebrow}
+        quote={quote}
+        title={title}
+      />
+    </PageReveal>
+    {children}
+  </SectionStack>
 );

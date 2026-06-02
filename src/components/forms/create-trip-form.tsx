@@ -121,10 +121,12 @@ export const CreateTripForm = (): ReactElement => {
         errorMessage={titleErrorMessage}
         htmlFor="tripTitle"
         label={formT('titleLabel')}
+        required
       >
         <Input
           aria-describedby={titleErrorMessage ? 'trip-title-error' : undefined}
           aria-invalid={Boolean(titleErrorMessage)}
+          aria-required
           id="tripTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"
@@ -139,10 +141,12 @@ export const CreateTripForm = (): ReactElement => {
           errorMessage={startDateErrorMessage}
           htmlFor="tripStartDate"
           label={formT('startDateLabel')}
+          required
         >
           <Input
             aria-describedby={startDateErrorMessage ? 'trip-start-date-error' : undefined}
             aria-invalid={Boolean(startDateErrorMessage)}
+            aria-required
             id="tripStartDate"
             type="date"
             {...form.register('startDate')}
@@ -155,10 +159,12 @@ export const CreateTripForm = (): ReactElement => {
           errorMessage={endDateErrorMessage}
           htmlFor="tripEndDate"
           label={formT('endDateLabel')}
+          required
         >
           <Input
             aria-describedby={endDateErrorMessage ? 'trip-end-date-error' : undefined}
             aria-invalid={Boolean(endDateErrorMessage)}
+            aria-required
             id="tripEndDate"
             min={startDateValue}
             type="date"

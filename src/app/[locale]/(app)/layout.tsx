@@ -47,7 +47,7 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-5 pt-5 pb-32 md:px-7 md:pt-6 md:pb-12 lg:px-10">
+    <div className="relative mx-auto flex min-h-[100svh] w-full max-w-[1320px] flex-col px-5 pt-5 pb-32 md:px-7 md:pt-6 md:pb-12 lg:px-10">
       <div className="mb-6 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.68)] px-4 py-3 shadow-whisper backdrop-blur-xl md:hidden">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -64,7 +64,13 @@ export default async function AppLayout({
       </div>
       <div className="flex flex-1 gap-6 lg:gap-8">
         <SideNavigation />
-        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+        <main
+          className="flex min-w-0 flex-1 flex-col"
+          id="main-content"
+          tabIndex={-1}
+        >
+          {children}
+        </main>
       </div>
       <BottomNavigation />
     </div>

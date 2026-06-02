@@ -38,7 +38,7 @@ export const StatsClientPage = (): ReactElement => {
         eyebrow={statsT('header.eyebrow')}
         title={statsT('header.title')}
       >
-        <QueryLoadingState />
+        <QueryLoadingState variant="stat-grid" />
       </ShellPage>
     );
   }

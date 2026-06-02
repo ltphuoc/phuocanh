@@ -19,7 +19,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps): ReactEl
   const isSchemaSetupIssue = isSchemaReadinessErrorMessage(error.message);
 
   return (
-    <main className="flex min-h-screen items-center">
+    <main
+      className="flex min-h-[100svh] items-center"
+      id="main-content"
+      tabIndex={-1}
+    >
       <PageContainer size="sm">
         <SectionCard
           className="mx-auto flex w-full max-w-lg flex-col gap-4"

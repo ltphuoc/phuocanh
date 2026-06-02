@@ -10,7 +10,11 @@ export default async function NotFound(): Promise<ReactElement> {
   const [t, commonT] = await Promise.all([getTranslations('notFound'), getTranslations('common')]);
 
   return (
-    <main className="flex min-h-screen items-center">
+    <main
+      className="flex min-h-[100svh] items-center"
+      id="main-content"
+      tabIndex={-1}
+    >
       <PageContainer size="sm">
         <SectionCard
           className="mx-auto flex w-full max-w-md flex-col items-center gap-3 text-center"

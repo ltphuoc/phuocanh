@@ -84,10 +84,12 @@ export const CreateFutureNoteForm = (): ReactElement => {
           errorMessage={titleErrorMessage}
           htmlFor="futureNoteTitle"
           label={formT('titleLabel')}
+          required
         >
           <Input
             aria-describedby={titleErrorMessage ? 'future-note-title-error' : undefined}
             aria-invalid={Boolean(titleErrorMessage)}
+            aria-required
             id="futureNoteTitle"
             placeholder={formT('titlePlaceholder')}
             type="text"
@@ -101,10 +103,12 @@ export const CreateFutureNoteForm = (): ReactElement => {
           errorMessage={unlockDateErrorMessage}
           htmlFor="futureNoteUnlockDate"
           label={formT('unlockDateLabel')}
+          required
         >
           <Input
             aria-describedby={unlockDateErrorMessage ? 'future-note-unlock-date-error' : undefined}
             aria-invalid={Boolean(unlockDateErrorMessage)}
+            aria-required
             id="futureNoteUnlockDate"
             type="date"
             {...form.register('unlockDate')}
@@ -118,10 +122,12 @@ export const CreateFutureNoteForm = (): ReactElement => {
         errorMessage={bodyErrorMessage}
         htmlFor="futureNoteBody"
         label={formT('bodyLabel')}
+        required
       >
         <Textarea
           aria-describedby={bodyErrorMessage ? 'future-note-body-error' : undefined}
           aria-invalid={Boolean(bodyErrorMessage)}
+          aria-required
           id="futureNoteBody"
           placeholder={formT('bodyPlaceholder')}
           rows={6}

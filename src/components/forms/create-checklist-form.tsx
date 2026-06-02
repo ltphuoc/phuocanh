@@ -69,10 +69,12 @@ export const CreateChecklistForm = (): ReactElement => {
         errorMessage={titleErrorMessage}
         htmlFor="checklistTitle"
         label={formT('titleLabel')}
+        required
       >
         <Input
           aria-describedby={titleErrorMessage ? 'checklistTitle-error' : undefined}
           aria-invalid={Boolean(titleErrorMessage)}
+          aria-required
           id="checklistTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"

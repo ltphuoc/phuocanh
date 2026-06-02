@@ -1,10 +1,12 @@
 'use client';
 
-import type { FormEvent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { useId, useState } from 'react';
+import { useEffect } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -40,6 +42,8 @@ const buildUpdateCoupleTimezoneSchema = (
       }),
   });
 
+type UpdateCoupleTimezoneValues = z.infer<ReturnType<typeof buildUpdateCoupleTimezoneSchema>>;
+
 export const UpdateCoupleTimezoneForm = ({
   currentTimeZone,
 }: UpdateCoupleTimezoneFormProps): ReactElement => {
@@ -48,40 +52,53 @@ export const UpdateCoupleTimezoneForm = ({
   const { t: formT } = useI18n('forms.settingsTimezone');
   const queryClient = useQueryClient();
   const mutation = useActionMutation(updateCoupleTimezoneAction);
-  const formKey = useId();
-  const [timeZoneErrorMessage, setTimeZoneErrorMessage] = useState<string | undefined>(undefined);
+  const form = useForm<UpdateCoupleTimezoneValues>({
+    defaultValues: {
+      timeZone: currentTimeZone,
+    },
+    resolver: zodResolver(buildUpdateCoupleTimezoneSchema(formT)),
+  });
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const timeZoneErrorMessage = form.formState.errors.timeZone?.message;
 
-    const payload = new FormData(event.currentTarget);
-    const parsed = buildUpdateCoupleTimezoneSchema(formT).safeParse({
-      timeZone: payload.get('timeZone'),
-    });
-
-    if (!parsed.success) {
-      setTimeZoneErrorMessage(parsed.error.flatten().fieldErrors.timeZone?.[0]);
+  // Re-sync the field when the saved timezone changes (e.g. a refetch on tab focus,
+  // or the partner saves a new timezone on another device). Skip when the user has
+  // unsaved typing so a background refetch can't wipe a mid-keystroke value — this
+  // couples app explicitly supports two devices.
+  useEffect(() => {
+    if (form.formState.isDirty) {
       return;
     }
+    form.reset({
+      timeZone: currentTimeZone,
+    });
+  }, [currentTimeZone, form]);
 
-    setTimeZoneErrorMessage(undefined);
+  const onSubmit = form.handleSubmit(async (values) => {
+    const payload = new FormData();
+    payload.set('timeZone', values.timeZone);
 
     try {
       const nextState = await mutation.mutateAsync(payload);
       const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
-      setSettingsTimeZone(queryClient, parsed.data.timeZone);
+      setSettingsTimeZone(queryClient, values.timeZone);
+      // Update defaults to the just-saved value so `isDirty` clears and subsequent
+      // external prop changes can flow through the sync effect above.
+      form.reset({
+        timeZone: values.timeZone,
+      });
       await invalidateTimezoneDerivedData(queryClient);
     } catch (error: unknown) {
       console.error('Failed to submit couple timezone form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
     }
-  };
+  });
 
   return (
     <form
       className="flex flex-col gap-4"
-      key={`${formKey}-${currentTimeZone}`}
+      noValidate
       onSubmit={onSubmit}
     >
       <FormSection
@@ -90,24 +107,20 @@ export const UpdateCoupleTimezoneForm = ({
         errorMessage={timeZoneErrorMessage}
         htmlFor="coupleTimeZone"
         label={formT('label')}
+        required
       >
         <>
           <Input
             aria-describedby={timeZoneErrorMessage ? 'couple-timezone-error' : undefined}
             aria-invalid={Boolean(timeZoneErrorMessage)}
+            aria-required
             autoComplete="off"
             id="coupleTimeZone"
             list={TIME_ZONE_DATALIST_ID}
-            name="timeZone"
-            defaultValue={currentTimeZone}
-            onChange={() => {
-              if (timeZoneErrorMessage) {
-                setTimeZoneErrorMessage(undefined);
-              }
-            }}
             placeholder={formT('placeholder')}
             spellCheck={false}
             type="text"
+            {...form.register('timeZone')}
           />
           <datalist id={TIME_ZONE_DATALIST_ID}>
             {COUPLE_TIME_ZONE_OPTIONS.map((timeZone) => (

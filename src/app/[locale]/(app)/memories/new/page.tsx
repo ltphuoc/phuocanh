@@ -30,7 +30,7 @@ export default async function NewMemoryPage({ params }: NewMemoryPageProps): Pro
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-4xl">
       <SectionStack>
         <PageHeader
           description={t('header.description')}
@@ -44,6 +44,6 @@ export default async function NewMemoryPage({ params }: NewMemoryPageProps): Pro
           <CreateMemoryForm coupleId={context.coupleId} />
         </SectionCard>
       </SectionStack>
-    </main>
+    </div>
   );
 }

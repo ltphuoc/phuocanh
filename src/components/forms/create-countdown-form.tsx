@@ -93,10 +93,12 @@ export const CreateCountdownForm = (): ReactElement => {
           errorMessage={titleErrorMessage}
           htmlFor="countdownTitle"
           label={formT('titleLabel')}
+          required
         >
           <Input
             aria-describedby={titleErrorMessage ? 'countdown-title-error' : undefined}
             aria-invalid={Boolean(titleErrorMessage)}
+            aria-required
             id="countdownTitle"
             placeholder={formT('titlePlaceholder')}
             type="text"
@@ -109,10 +111,12 @@ export const CreateCountdownForm = (): ReactElement => {
           errorMessage={kindErrorMessage}
           htmlFor="countdownKind"
           label={formT('kindLabel')}
+          required
         >
           <Select
             aria-describedby={kindErrorMessage ? 'countdown-kind-error' : undefined}
             aria-invalid={Boolean(kindErrorMessage)}
+            aria-required
             id="countdownKind"
             {...form.register('kind')}
           >
@@ -128,17 +132,19 @@ export const CreateCountdownForm = (): ReactElement => {
         </FormSection>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="grid gap-4 md:grid-cols-2">
         <FormSection
           description={formT('targetDateDescription')}
           errorId="countdown-target-date-error"
           errorMessage={targetDateErrorMessage}
           htmlFor="countdownTargetDate"
           label={formT('targetDateLabel')}
+          required
         >
           <Input
             aria-describedby={targetDateErrorMessage ? 'countdown-target-date-error' : undefined}
             aria-invalid={Boolean(targetDateErrorMessage)}
+            aria-required
             id="countdownTargetDate"
             type="date"
             {...form.register('targetDate')}

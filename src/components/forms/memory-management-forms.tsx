@@ -5,9 +5,12 @@ import type { MemoryDetailAppData } from '@/lib/app-data/types';
 
 import { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 import { deleteMemoryAction, updateMemoryAction } from '@/app/actions/memory-actions';
 import { LocationPicker } from '@/components/forms/location-picker';
@@ -68,6 +71,14 @@ const appendLocationFields = (payload: FormData, form: HTMLFormElement): void =>
   });
 };
 
+const buildUpdateMemorySchema = (t: ReturnType<typeof useI18n<'forms.memory'>>['t']) =>
+  z.object({
+    happenedAtLocal: z.string().min(1, t('validation.happenedAtRequired')),
+    note: z.string().max(800, t('validation.noteMax')).optional(),
+  });
+
+type UpdateMemoryValues = z.infer<ReturnType<typeof buildUpdateMemorySchema>>;
+
 export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): ReactElement => {
   const { t: actionsT } = useI18n('actions');
   const { t: commonT } = useI18n('common');
@@ -86,6 +97,17 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
     ? ''
     : format(happenedAt, "yyyy-MM-dd'T'HH:mm");
 
+  const form = useForm<UpdateMemoryValues>({
+    defaultValues: {
+      happenedAtLocal,
+      note: data.memory.note ?? '',
+    },
+    resolver: zodResolver(buildUpdateMemorySchema(formT)),
+  });
+
+  const happenedAtErrorMessage = form.formState.errors.happenedAtLocal?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
+
   const invalidateMemoryData = async (): Promise<void> => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: appQueryKeys.home() }),
@@ -98,20 +120,19 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
     ]);
   };
 
-  const submitUpdate = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+  const onSubmit = form.handleSubmit(async (values) => {
+    const formElement = document.getElementById('memory-update-form') as HTMLFormElement | null;
     const payload = new FormData();
     const uploadedStoragePaths: string[] = [];
-    const happenedAtLocalValue = String(formData.get('happenedAtLocal') ?? '');
     payload.set(
       'happenedAt',
-      happenedAtLocalValue ? new Date(happenedAtLocalValue).toISOString() : '',
+      values.happenedAtLocal ? new Date(values.happenedAtLocal).toISOString() : '',
     );
     payload.set('memoryId', data.memory.id);
-    payload.set('note', String(formData.get('note') ?? ''));
-    appendLocationFields(payload, form);
+    payload.set('note', values.note ?? '');
+    if (formElement) {
+      appendLocationFields(payload, formElement);
+    }
     removedMediaIds.forEach((mediaId) => payload.append('removedMediaIds', mediaId));
 
     try {
@@ -165,7 +186,7 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
     } finally {
       setIsUploading(false);
     }
-  };
+  });
 
   const submitDelete = async (): Promise<void> => {
     const payload = new FormData();
@@ -199,19 +220,26 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
   return (
     <div className="flex flex-col gap-6">
       <form
+        id="memory-update-form"
         className="flex flex-col gap-4"
-        onSubmit={(event) => void submitUpdate(event)}
+        noValidate
+        onSubmit={onSubmit}
       >
         <div className="grid gap-4 md:grid-cols-2">
           <FormSection
+            errorId="edit-happened-at-error"
+            errorMessage={happenedAtErrorMessage}
             htmlFor="editHappenedAtLocal"
             label={formT('happenedAtLabel')}
+            required
           >
             <Input
-              defaultValue={happenedAtLocal}
+              aria-describedby={happenedAtErrorMessage ? 'edit-happened-at-error' : undefined}
+              aria-invalid={Boolean(happenedAtErrorMessage)}
+              aria-required
               id="editHappenedAtLocal"
-              name="happenedAtLocal"
               type="datetime-local"
+              {...form.register('happenedAtLocal')}
             />
           </FormSection>
 
@@ -231,15 +259,18 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
 
         <FormSection
           description={formT('noteDescription')}
+          errorId="edit-memory-note-error"
+          errorMessage={noteErrorMessage}
           htmlFor="editMemoryNote"
           label={formT('noteLabel')}
         >
           <Textarea
-            defaultValue={data.memory.note ?? ''}
+            aria-describedby={noteErrorMessage ? 'edit-memory-note-error' : undefined}
+            aria-invalid={Boolean(noteErrorMessage)}
             id="editMemoryNote"
-            name="note"
             placeholder={formT('notePlaceholder')}
             rows={5}
+            {...form.register('note')}
           />
         </FormSection>
 
@@ -279,7 +310,10 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
             type="file"
           />
           {mediaFiles.length ? (
-            <p className="mt-2 text-xs font-medium text-muted-foreground">
+            <p
+              aria-live="polite"
+              className="mt-2 text-xs font-medium text-muted-foreground"
+            >
               {formT('mediaSelected', { count: mediaFiles.length })}
             </p>
           ) : null}

@@ -23,12 +23,13 @@ import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mut
 import { invalidateMemoryCreated } from '@/lib/query/app-query-updates';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
-const createMemorySchema = z.object({
-  happenedAtLocal: z.string().min(1),
-  note: z.string().max(800).optional(),
-});
+const buildCreateMemorySchema = (t: ReturnType<typeof useI18n<'forms.memory'>>['t']) =>
+  z.object({
+    happenedAtLocal: z.string().min(1, t('validation.happenedAtRequired')),
+    note: z.string().max(800, t('validation.noteMax')).optional(),
+  });
 
-type CreateMemoryValues = z.infer<typeof createMemorySchema>;
+type CreateMemoryValues = z.infer<ReturnType<typeof buildCreateMemorySchema>>;
 
 interface CreateMemoryFormProps {
   readonly coupleId: string;
@@ -82,8 +83,11 @@ export const CreateMemoryForm = ({
       happenedAtLocal: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
       note: '',
     },
-    resolver: zodResolver(createMemorySchema),
+    resolver: zodResolver(buildCreateMemorySchema(formT)),
   });
+
+  const happenedAtErrorMessage = form.formState.errors.happenedAtLocal?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
@@ -174,10 +178,18 @@ export const CreateMemoryForm = ({
       <div className="grid gap-4 md:grid-cols-2">
         <FormSection
           description={formT('happenedAtDescription')}
+          errorId="create-memory-happened-at-error"
+          errorMessage={happenedAtErrorMessage}
           htmlFor="happenedAtLocal"
           label={formT('happenedAtLabel')}
+          required
         >
           <Input
+            aria-describedby={
+              happenedAtErrorMessage ? 'create-memory-happened-at-error' : undefined
+            }
+            aria-invalid={Boolean(happenedAtErrorMessage)}
+            aria-required
             id="happenedAtLocal"
             type="datetime-local"
             {...form.register('happenedAtLocal')}
@@ -199,10 +211,14 @@ export const CreateMemoryForm = ({
 
       <FormSection
         description={formT('noteDescription')}
+        errorId="create-memory-note-error"
+        errorMessage={noteErrorMessage}
         htmlFor="note"
         label={formT('noteLabel')}
       >
         <Textarea
+          aria-describedby={noteErrorMessage ? 'create-memory-note-error' : undefined}
+          aria-invalid={Boolean(noteErrorMessage)}
           id="note"
           placeholder={formT('notePlaceholder')}
           rows={5}
@@ -224,7 +240,10 @@ export const CreateMemoryForm = ({
           type="file"
         />
         {mediaFiles.length ? (
-          <p className="mt-2 text-xs font-medium text-muted-foreground">
+          <p
+            aria-live="polite"
+            className="mt-2 text-xs font-medium text-muted-foreground"
+          >
             {formT('mediaSelected', { count: mediaFiles.length })}
           </p>
         ) : null}

@@ -16,11 +16,12 @@ import { Input } from '@/components/ui/input';
 import { useI18n } from '@/hooks/useI18n';
 import { initialActionState } from '@/lib/actions/action-state';
 
-const loginSchema = z.object({
-  email: z.email(),
-});
+const buildLoginSchema = (t: ReturnType<typeof useI18n<'forms.login'>>['t']) =>
+  z.object({
+    email: z.email(t('validation.emailInvalid')),
+  });
 
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginValues = z.infer<ReturnType<typeof buildLoginSchema>>;
 
 interface LoginFormProps {
   readonly initialNextPath?: string;
@@ -36,8 +37,10 @@ export const LoginForm = ({ initialNextPath }: LoginFormProps): ReactElement => 
     defaultValues: {
       email: '',
     },
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(buildLoginSchema(formT)),
   });
+
+  const emailErrorMessage = form.formState.errors.email?.message;
 
   useEffect(() => {
     const actionMessageKey = state.message || 'unexpectedError';
@@ -78,10 +81,16 @@ export const LoginForm = ({ initialNextPath }: LoginFormProps): ReactElement => 
       ) : null}
       <FormSection
         description={formT('emailDescription')}
+        errorId="login-email-error"
+        errorMessage={emailErrorMessage}
         htmlFor="email"
         label={formT('emailLabel')}
+        required
       >
         <Input
+          aria-describedby={emailErrorMessage ? 'login-email-error' : undefined}
+          aria-invalid={Boolean(emailErrorMessage)}
+          aria-required
           autoComplete="email"
           id="email"
           placeholder={formT('emailPlaceholder')}

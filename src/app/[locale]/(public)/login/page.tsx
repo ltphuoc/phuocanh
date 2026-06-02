@@ -32,7 +32,10 @@ export default async function LoginPage({
   });
 
   return (
-    <main>
+    <main
+      id="main-content"
+      tabIndex={-1}
+    >
       <AuthShell
         helper={t('helper')}
         helperTitle={t('helperTitle')}

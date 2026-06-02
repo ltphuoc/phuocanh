@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Menu } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
@@ -38,6 +38,27 @@ export const SideNavigation = (): ReactElement => {
   }));
   const isExpanded =
     expansionState.pathname === pathname ? expansionState.open : hasSecondaryActive;
+  const secondaryPanelId = 'desktop-secondary-navigation';
+
+  useEffect(() => {
+    if (!isExpanded) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setExpansionState({
+          open: false,
+          pathname,
+        });
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isExpanded, pathname]);
+
   const easing = [0.22, 1, 0.36, 1] as const;
   const activeTransition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: easing };
   const panelTransition = reduceMotion ? { duration: 0 } : { duration: 0.24, ease: easing };
@@ -108,6 +129,8 @@ export const SideNavigation = (): ReactElement => {
             </Link>
             <LanguageSwitcher />
             <button
+              aria-controls={secondaryPanelId}
+              aria-expanded={isExpanded}
               className={cn(
                 'mt-auto inline-flex size-12 items-center justify-center rounded-full border border-white/72 bg-white/76 shadow-whisper transition-transform active:translate-y-px',
                 isExpanded ? 'text-foreground' : 'text-muted-foreground',
@@ -134,6 +157,7 @@ export const SideNavigation = (): ReactElement => {
                 animate={{ opacity: 1, x: 0 }}
                 className="w-[240px] rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.78)] p-5 shadow-cloud backdrop-blur-xl"
                 exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -12 }}
+                id={secondaryPanelId}
                 initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -18 }}
                 transition={panelTransition}
               >

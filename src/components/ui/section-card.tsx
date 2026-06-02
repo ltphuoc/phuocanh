@@ -17,7 +17,7 @@ const sectionCardVariants = tv({
     },
     surface: {
       glass:
-        'rounded-[var(--radius-panel)] border-white/70 bg-white/68 shadow-whisper backdrop-blur-xl before:bg-white/12',
+        'rounded-[var(--radius-panel)] border-white/70 bg-card shadow-whisper before:bg-white/12',
       hero: 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/64 shadow-cloud before:bg-white/10',
       inset:
         'rounded-[var(--radius-panel)] border-[#e8c8bf]/70 bg-[rgba(255,248,241,0.72)] shadow-none before:bg-white/14',

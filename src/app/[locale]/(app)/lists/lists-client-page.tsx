@@ -37,28 +37,28 @@ export const ListsClientPage = (): ReactElement => {
 
   if (query.isPending) {
     return (
-      <main>
+      <div>
         <SectionStack>
-          <QueryLoadingState />
+          <QueryLoadingState variant="card-grid" />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
   if (query.isError && query.data === undefined) {
     return (
-      <main>
+      <div>
         <SectionStack>
           <QueryErrorState onRetry={() => void query.refetch()} />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
   const data = query.data;
 
   return (
-    <main>
+    <div>
       <SectionStack>
         <PageHeader
           description={listsT('header.description')}
@@ -149,6 +149,6 @@ export const ListsClientPage = (): ReactElement => {
           </SectionCard>
         </ResponsiveGrid>
       </SectionStack>
-    </main>
+    </div>
   );
 };

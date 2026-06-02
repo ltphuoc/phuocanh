@@ -23,7 +23,7 @@ export const AuthShell = async ({
 
   return (
     <PageContainer
-      className="flex min-h-screen items-center py-8 md:py-12"
+      className="flex min-h-[100svh] items-center py-8 md:py-12"
       size="immersive"
     >
       <div className="grid w-full gap-5 md:grid-cols-[minmax(0,1.05fr)_minmax(360px,430px)] md:gap-6">

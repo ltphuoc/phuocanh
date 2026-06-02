@@ -72,7 +72,7 @@ export const AnniversarySpotlight = ({
         <div className="space-y-3">
           <p className="ui-meta ui-couple-mark">{t('eyebrow')}</p>
           <div className="space-y-2">
-            <p className="ui-display">
+            <p className="ui-display ui-tabular">
               {t('dayCount', {
                 count: Math.max(1, relationshipDays + 1),
               })}

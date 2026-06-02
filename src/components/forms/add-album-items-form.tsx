@@ -146,6 +146,7 @@ export const AddAlbumItemsForm = ({
         errorId="add-album-media-error"
         errorMessage={mediaErrorMessage}
         label={formT('addMediaLabel')}
+        required
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {candidates.map((candidate) => {

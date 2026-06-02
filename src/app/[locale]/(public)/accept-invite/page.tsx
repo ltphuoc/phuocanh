@@ -78,7 +78,10 @@ export default async function AcceptInvitePage({
   }
 
   return (
-    <main>
+    <main
+      id="main-content"
+      tabIndex={-1}
+    >
       <AuthShell
         helper={t('helper')}
         helperTitle={t('helperTitle')}

@@ -38,6 +38,8 @@ export const AcceptInviteForm = ({ initialToken }: AcceptInviteFormProps): React
     resolver: zodResolver(acceptInviteSchema),
   });
 
+  const tokenErrorMessage = form.formState.errors.token?.message;
+
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
     payload.set('token', values.token);
@@ -60,10 +62,16 @@ export const AcceptInviteForm = ({ initialToken }: AcceptInviteFormProps): React
     >
       <FormSection
         description={formT('tokenDescription')}
+        errorId="invite-token-error"
+        errorMessage={tokenErrorMessage}
         htmlFor="inviteToken"
         label={formT('tokenLabel')}
+        required
       >
         <Input
+          aria-describedby={tokenErrorMessage ? 'invite-token-error' : undefined}
+          aria-invalid={Boolean(tokenErrorMessage)}
+          aria-required
           id="inviteToken"
           readOnly
           type="text"

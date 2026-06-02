@@ -111,11 +111,13 @@ export const SubmitTriviaAnswerForm = ({
         errorId="trivia-answer-error"
         errorMessage={selectedAnswerErrorMessage}
         label={formT('answerLabel')}
+        required
       >
         <div
           aria-describedby={selectedAnswerErrorMessage ? 'trivia-answer-error' : undefined}
           aria-invalid={Boolean(selectedAnswerErrorMessage)}
           aria-label={formT('answerLabel')}
+          aria-required
           className="grid gap-3"
           role="radiogroup"
         >

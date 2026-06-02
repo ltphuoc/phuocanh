@@ -82,7 +82,7 @@ describe('UpdateCoupleTimezoneForm', () => {
     const user = userEvent.setup();
     renderWithQueryClient(<UpdateCoupleTimezoneForm currentTimeZone="Asia/Ho_Chi_Minh" />);
 
-    const timezoneInput = screen.getByLabelText('Couple timezone');
+    const timezoneInput = screen.getByLabelText('Couple timezone', { exact: false });
     await user.clear(timezoneInput);
     await user.type(timezoneInput, 'Not/A_Real_Zone');
     await user.click(screen.getByRole('button', { name: 'Save timezone' }));
@@ -96,7 +96,7 @@ describe('UpdateCoupleTimezoneForm', () => {
     const user = userEvent.setup();
     renderWithQueryClient(<UpdateCoupleTimezoneForm currentTimeZone="Asia/Ho_Chi_Minh" />);
 
-    const timezoneInput = screen.getByLabelText('Couple timezone');
+    const timezoneInput = screen.getByLabelText('Couple timezone', { exact: false });
     await user.clear(timezoneInput);
     await user.type(timezoneInput, 'Not/A_Real_Zone');
     await user.click(screen.getByRole('button', { name: 'Save timezone' }));

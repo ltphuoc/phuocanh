@@ -39,7 +39,7 @@ export const MemoryDetailClientPage = ({ memoryId }: MemoryDetailClientPageProps
         size="reading"
       >
         <SectionStack>
-          <QueryLoadingState />
+          <QueryLoadingState variant="detail" />
         </SectionStack>
       </PageContainer>
     );

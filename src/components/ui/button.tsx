@@ -34,20 +34,37 @@ export interface ButtonProps
 }
 
 export const Button = ({
+  'aria-busy': ariaBusyProp,
   busyLabel,
   children,
   className,
+  disabled,
   isBusy = false,
   size,
+  type,
   variant,
   ...props
 }: ButtonProps): ReactElement => (
+  // Destructure `aria-busy`/`disabled`/`type` out of `props` so the trailing
+  // spread can't clobber the controlled values below (e.g. an `isBusy` button
+  // must stay disabled even if a caller also passes `disabled={false}`).
   <button
-    className={cn(buttonVariants({ size, variant }), className)}
-    disabled={isBusy || props.disabled}
-    type={props.type ?? 'button'}
     {...props}
+    aria-busy={isBusy || ariaBusyProp || undefined}
+    className={cn(buttonVariants({ size, variant }), className)}
+    disabled={isBusy || disabled}
+    type={type ?? 'button'}
   >
-    {isBusy ? (busyLabel ?? children) : children}
+    {isBusy ? (
+      <>
+        <span
+          aria-hidden="true"
+          className="size-4 animate-spin rounded-full border-2 border-current/30 border-t-current"
+        />
+        {busyLabel ?? children}
+      </>
+    ) : (
+      children
+    )}
   </button>
 );

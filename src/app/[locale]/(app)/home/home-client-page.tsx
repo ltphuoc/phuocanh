@@ -43,21 +43,21 @@ export const HomeClientPage = (): ReactElement => {
 
   if (query.isPending) {
     return (
-      <main className="pb-6">
+      <div className="pb-6">
         <SectionStack>
-          <QueryLoadingState />
+          <QueryLoadingState variant="timeline" />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
   if (query.isError && query.data === undefined) {
     return (
-      <main className="pb-6">
+      <div className="pb-6">
         <SectionStack>
           <QueryErrorState onRetry={() => void query.refetch()} />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
@@ -84,7 +84,7 @@ export const HomeClientPage = (): ReactElement => {
     : null;
 
   return (
-    <main className="pb-6">
+    <div className="pb-6">
       <SectionStack>
         <PageReveal>
           <AnniversarySpotlight
@@ -257,6 +257,6 @@ export const HomeClientPage = (): ReactElement => {
           </div>
         </div>
       </SectionStack>
-    </main>
+    </div>
   );
 };

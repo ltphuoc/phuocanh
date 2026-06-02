@@ -21,7 +21,11 @@ export default async function GlobalLoading({ params }: GlobalLoadingProps): Pro
   });
 
   return (
-    <main className="flex min-h-screen items-center">
+    <main
+      className="flex min-h-[100svh] items-center"
+      id="main-content"
+      tabIndex={-1}
+    >
       <PageContainer size="sm">
         <SectionCard
           className="mx-auto w-full max-w-md"

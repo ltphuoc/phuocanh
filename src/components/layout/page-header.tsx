@@ -31,21 +31,23 @@ export const PageHeader = ({
       surface === 'hero'
         ? 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/64 shadow-cloud'
         : surface === 'glass'
-          ? 'rounded-[var(--radius-hero)] border-white/70 bg-white/64 shadow-whisper backdrop-blur-xl'
+          ? 'rounded-[var(--radius-hero)] border-white/70 bg-card shadow-whisper'
           : 'rounded-[var(--radius-panel)] border-white/72 bg-card/95 shadow-whisper',
       className,
     )}
     {...props}
   >
-    <div className="absolute inset-x-6 top-5 flex items-center justify-between md:inset-x-8">
-      {eyebrow ? <p className="ui-meta ui-couple-mark">{eyebrow}</p> : <span />}
-      {milestone ? (
-        <span className="rounded-pill bg-white/70 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper">
-          {milestone}
-        </span>
-      ) : null}
-    </div>
-    <div className="relative mt-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    {eyebrow || milestone ? (
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+        {eyebrow ? <p className="ui-meta ui-couple-mark">{eyebrow}</p> : <span />}
+        {milestone ? (
+          <span className="rounded-pill bg-white/70 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper">
+            {milestone}
+          </span>
+        ) : null}
+      </div>
+    ) : null}
+    <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
       <div className="max-w-3xl space-y-3">
         <div className="space-y-3">
           <h1 className="ui-page-title">{title}</h1>

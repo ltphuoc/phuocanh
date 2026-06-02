@@ -25,21 +25,21 @@ export const OnThisDayClientPage = (): ReactElement => {
 
   if (query.isPending) {
     return (
-      <main>
+      <div>
         <SectionStack>
-          <QueryLoadingState />
+          <QueryLoadingState variant="timeline" />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
   if (query.isError && query.data === undefined) {
     return (
-      <main>
+      <div>
         <SectionStack>
           <QueryErrorState onRetry={() => void query.refetch()} />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
@@ -47,7 +47,7 @@ export const OnThisDayClientPage = (): ReactElement => {
   const stackedMemories = memories.slice(0, 3);
 
   return (
-    <main>
+    <div>
       <SectionStack>
         <PageReveal>
           <PageHeader
@@ -136,6 +136,6 @@ export const OnThisDayClientPage = (): ReactElement => {
           />
         )}
       </SectionStack>
-    </main>
+    </div>
   );
 };

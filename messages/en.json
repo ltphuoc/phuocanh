@@ -40,6 +40,7 @@
     "working": "Working…"
   },
   "nav": {
+    "skipToContent": "Skip to main content",
     "groups": {
       "planning": "Planning",
       "play": "Play",
@@ -157,7 +158,10 @@
       "emailDescription": "Use the email linked to your couple space.",
       "emailLabel": "Email",
       "emailPlaceholder": "you@example.com…",
-      "submit": "Send magic link"
+      "submit": "Send magic link",
+      "validation": {
+        "emailInvalid": "Enter a valid email address."
+      }
     },
     "acceptInvite": {
       "submit": "Join couple space",
@@ -266,7 +270,11 @@
       "submit": "Save memory",
       "updateSubmit": "Update memory",
       "deleteConfirm": "I understand this will delete this memory and its attached media.",
-      "deleteSubmit": "Delete memory"
+      "deleteSubmit": "Delete memory",
+      "validation": {
+        "happenedAtRequired": "Choose when this memory happened.",
+        "noteMax": "Keep the note to 800 characters or fewer."
+      }
     },
     "countdown": {
       "kindLabel": "Type",

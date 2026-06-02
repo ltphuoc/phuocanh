@@ -5,8 +5,11 @@ import type { TripDetailAppData } from '@/lib/app-data/types';
 
 import { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
 import { deleteTripAction, updateTripAction } from '@/app/actions/planning-actions';
 import { LocationPicker } from '@/components/forms/location-picker';
@@ -40,6 +43,25 @@ const appendLocationFields = (payload: FormData, form: HTMLFormElement): void =>
   });
 };
 
+const buildUpdateTripSchema = (t: ReturnType<typeof useI18n<'forms.trip'>>['t']) =>
+  z
+    .object({
+      endDate: z.string().min(1, t('validation.endDateRequired')),
+      note: z.string().max(2000, t('validation.noteMax')).optional(),
+      startDate: z.string().min(1, t('validation.startDateRequired')),
+      title: z
+        .string()
+        .trim()
+        .min(1, t('validation.titleRequired'))
+        .max(120, t('validation.titleMax')),
+    })
+    .refine(({ endDate, startDate }) => endDate >= startDate, {
+      message: t('validation.dateRangeInvalid'),
+      path: ['endDate'],
+    });
+
+type UpdateTripValues = z.infer<ReturnType<typeof buildUpdateTripSchema>>;
+
 export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactElement => {
   const { t: actionsT } = useI18n('actions');
   const { t: commonT } = useI18n('common');
@@ -49,6 +71,21 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
   const updateMutation = useActionMutation(updateTripAction);
   const deleteMutation = useActionMutation(deleteTripAction);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+
+  const form = useForm<UpdateTripValues>({
+    defaultValues: {
+      endDate: data.trip.endDate,
+      note: data.trip.note ?? '',
+      startDate: data.trip.startDate,
+      title: data.trip.title,
+    },
+    resolver: zodResolver(buildUpdateTripSchema(formT)),
+  });
+
+  const endDateErrorMessage = form.formState.errors.endDate?.message;
+  const noteErrorMessage = form.formState.errors.note?.message;
+  const startDateErrorMessage = form.formState.errors.startDate?.message;
+  const titleErrorMessage = form.formState.errors.title?.message;
 
   const invalidateTripData = async (): Promise<void> => {
     await Promise.all([
@@ -60,17 +97,17 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
     ]);
   };
 
-  const submitUpdate = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+  const onSubmit = form.handleSubmit(async (values) => {
+    const formElement = document.getElementById('trip-update-form') as HTMLFormElement | null;
     const payload = new FormData();
-    payload.set('endDate', String(formData.get('endDate') ?? ''));
-    payload.set('note', String(formData.get('note') ?? ''));
-    payload.set('startDate', String(formData.get('startDate') ?? ''));
-    payload.set('title', String(formData.get('title') ?? ''));
+    payload.set('endDate', values.endDate);
+    payload.set('note', values.note ?? '');
+    payload.set('startDate', values.startDate);
+    payload.set('title', values.title);
     payload.set('tripId', data.trip.id);
-    appendLocationFields(payload, form);
+    if (formElement) {
+      appendLocationFields(payload, formElement);
+    }
 
     try {
       const nextState = await updateMutation.mutateAsync(payload);
@@ -80,7 +117,7 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
       console.error('Failed to update trip', error);
       toast.error(actionsT(getActionErrorMessage(error)));
     }
-  };
+  });
 
   const submitDelete = async (): Promise<void> => {
     const payload = new FormData();
@@ -101,42 +138,59 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
   return (
     <div className="flex flex-col gap-6">
       <form
+        id="trip-update-form"
         className="flex flex-col gap-4"
-        onSubmit={(event) => void submitUpdate(event)}
+        noValidate
+        onSubmit={onSubmit}
       >
         <FormSection
+          errorId="edit-trip-title-error"
+          errorMessage={titleErrorMessage}
           htmlFor="editTripTitle"
           label={formT('titleLabel')}
+          required
         >
           <Input
-            defaultValue={data.trip.title}
+            aria-describedby={titleErrorMessage ? 'edit-trip-title-error' : undefined}
+            aria-invalid={Boolean(titleErrorMessage)}
+            aria-required
             id="editTripTitle"
-            name="title"
             type="text"
+            {...form.register('title')}
           />
         </FormSection>
 
         <div className="grid gap-4 md:grid-cols-2">
           <FormSection
+            errorId="edit-trip-start-date-error"
+            errorMessage={startDateErrorMessage}
             htmlFor="editTripStartDate"
             label={formT('startDateLabel')}
+            required
           >
             <Input
-              defaultValue={data.trip.startDate}
+              aria-describedby={startDateErrorMessage ? 'edit-trip-start-date-error' : undefined}
+              aria-invalid={Boolean(startDateErrorMessage)}
+              aria-required
               id="editTripStartDate"
-              name="startDate"
               type="date"
+              {...form.register('startDate')}
             />
           </FormSection>
           <FormSection
+            errorId="edit-trip-end-date-error"
+            errorMessage={endDateErrorMessage}
             htmlFor="editTripEndDate"
             label={formT('endDateLabel')}
+            required
           >
             <Input
-              defaultValue={data.trip.endDate}
+              aria-describedby={endDateErrorMessage ? 'edit-trip-end-date-error' : undefined}
+              aria-invalid={Boolean(endDateErrorMessage)}
+              aria-required
               id="editTripEndDate"
-              name="endDate"
               type="date"
+              {...form.register('endDate')}
             />
           </FormSection>
         </div>
@@ -156,14 +210,17 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
 
         <FormSection
           description={formT('noteDescription')}
+          errorId="edit-trip-note-error"
+          errorMessage={noteErrorMessage}
           htmlFor="editTripNote"
           label={formT('noteLabel')}
         >
           <Textarea
-            defaultValue={data.trip.note ?? ''}
+            aria-describedby={noteErrorMessage ? 'edit-trip-note-error' : undefined}
+            aria-invalid={Boolean(noteErrorMessage)}
             id="editTripNote"
-            name="note"
             rows={5}
+            {...form.register('note')}
           />
         </FormSection>
 

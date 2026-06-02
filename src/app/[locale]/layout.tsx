@@ -57,6 +57,10 @@ export default async function RootLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const t = await getTranslations({
+    locale,
+    namespace: 'nav',
+  });
 
   return (
     <html
@@ -65,6 +69,12 @@ export default async function RootLayout({
       className={`${manrope.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground">
+        <a
+          className="ui-skip-link"
+          href="#main-content"
+        >
+          {t('skipToContent')}
+        </a>
         <NextIntlClientProvider
           locale={locale}
           messages={messages}

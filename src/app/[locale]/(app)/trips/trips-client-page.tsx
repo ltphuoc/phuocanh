@@ -47,7 +47,7 @@ export const TripsClientPage = (): ReactElement => {
         eyebrow={tripsT('header.eyebrow')}
         title={tripsT('header.title')}
       >
-        <QueryLoadingState />
+        <QueryLoadingState variant="card-grid" />
       </ShellPage>
     );
   }

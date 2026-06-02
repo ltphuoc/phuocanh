@@ -44,7 +44,7 @@ export const AlbumsClientPage = (): ReactElement => {
         eyebrow={albumsT('header.eyebrow')}
         title={albumsT('header.title')}
       >
-        <QueryLoadingState />
+        <QueryLoadingState variant="card-grid" />
       </ShellPage>
     );
   }

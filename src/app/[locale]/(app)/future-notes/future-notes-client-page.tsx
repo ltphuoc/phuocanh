@@ -48,7 +48,7 @@ export const FutureNotesClientPage = (): ReactElement => {
         eyebrow={futureNotesT('header.eyebrow')}
         title={futureNotesT('header.title')}
       >
-        <QueryLoadingState />
+        <QueryLoadingState variant="card-grid" />
       </ShellPage>
     );
   }

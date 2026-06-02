@@ -105,21 +105,21 @@ export const AlbumDetailClientPage = ({ albumId }: AlbumDetailClientPageProps): 
 
   if (query.isPending) {
     return (
-      <main>
+      <div>
         <SectionStack>
-          <QueryLoadingState />
+          <QueryLoadingState variant="detail" />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 
   if (query.isError && query.data === undefined) {
     return (
-      <main>
+      <div>
         <SectionStack>
           <QueryErrorState onRetry={() => void query.refetch()} />
         </SectionStack>
-      </main>
+      </div>
     );
   }
 

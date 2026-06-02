@@ -307,6 +307,34 @@ h3 {
   background: rgba(37, 99, 235, 0.28);
 }
 
+.ui-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skip-to-content link: off-screen until keyboard focus reveals it. `fixed`
+ * (not `absolute`) so the link stays viewport-anchored when focused — an
+ * `absolute` element scrolls with the document and would be off-screen for
+ * any user who reaches the link after scrolling. */
+.ui-skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(calc(-100% - 1rem));
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-cloud);
+}
+
+.ui-skip-link:focus,
+.ui-skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 .ui-section-gap {
   display: flex;
   flex-direction: column;

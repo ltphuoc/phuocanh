@@ -74,6 +74,20 @@ Container intent:
 - Editorial/floating elevation: `--shadow-cloud`
 - Focus/emphasis glow: `--shadow-glow`
 
+## Surface Hierarchy
+
+The app uses a three-tier surface hierarchy to create visual depth:
+
+| Tier                   | Elements                                                                                             | Treatment                                                                                                   | Purpose                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Page background**    | `body`                                                                                               | Layered gradient + grain texture (unchanged)                                                                | Establishes the warm editorial foundation                                                                 |
+| **Content surface**    | `SectionCard` (default), `PageHeader`, `EmptyState`, `InsetPanel`, cards                             | Solid `--card` / `--panel` token backgrounds; border + `--shadow-whisper` tinted shadow; no `backdrop-blur` | Inline content sits directly on the page; solid surface ensures legibility and reduces GPU load on mobile |
+| **Floating / overlay** | `SideNavigation` rail + drawer, `BottomNavigation` dock, `MoreNavigationSheet`, sticky mobile header | Translucent white + `backdrop-blur-xl` (content scrolls behind)                                             | Floating elements blur scrolling content to signal elevation and distinguish from fixed page layout       |
+
+Keep the `SectionCard` `hero` gradient variant and `::before` overlay — they create depth through
+layering without blur. Numeric displays within surfaces apply `font-variant-numeric: tabular-nums`
+for stable figure alignment.
+
 ## Component Principles
 
 - Compose from shared primitives before adding route-local markup.

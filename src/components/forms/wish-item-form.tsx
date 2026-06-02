@@ -92,10 +92,12 @@ export const WishItemForm = (): ReactElement => {
         errorMessage={titleErrorMessage}
         htmlFor="wishTitle"
         label={formT('titleLabel')}
+        required
       >
         <Input
           aria-describedby={titleErrorMessage ? 'wishTitle-error' : undefined}
           aria-invalid={Boolean(titleErrorMessage)}
+          aria-required
           id="wishTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"

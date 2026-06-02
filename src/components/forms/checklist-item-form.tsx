@@ -76,6 +76,7 @@ export const ChecklistItemForm = ({ checklistId }: ChecklistItemFormProps): Reac
         <Input
           aria-describedby={textErrorMessage ? errorId : undefined}
           aria-invalid={Boolean(textErrorMessage)}
+          aria-required
           id={inputId}
           placeholder={formT('placeholder')}
           type="text"
@@ -83,9 +84,9 @@ export const ChecklistItemForm = ({ checklistId }: ChecklistItemFormProps): Reac
         />
         {textErrorMessage ? (
           <p
-            aria-live="polite"
             className="mt-2 text-sm font-medium text-error"
             id={errorId}
+            role="alert"
           >
             {textErrorMessage}
           </p>
@@ -93,7 +94,7 @@ export const ChecklistItemForm = ({ checklistId }: ChecklistItemFormProps): Reac
       </div>
       <Button
         busyLabel={commonT('working')}
-        className="sm:w-auto"
+        className="shrink-0 sm:w-auto"
         isBusy={mutation.isPending}
         size="sm"
         type="submit"

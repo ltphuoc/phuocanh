@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 import type { AppNavigationItem } from '@/components/app/navigation-model';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
@@ -60,22 +60,77 @@ export const MoreNavigationSheet = ({
   const sheetTransition = reduceMotion
     ? { duration: 0 }
     : { damping: 28, stiffness: 280, type: 'spring' as const };
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  // Keep the latest onClose without re-running the focus-trap effect on every parent render.
+  const onCloseRef = useRef(onClose);
 
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
+  // While open: store the trigger, move focus into the sheet, trap Tab, handle Escape;
+  // on close, restore focus to the element that opened the sheet.
   useEffect(() => {
     if (!open) {
       return;
     }
 
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    const sheet = sheetRef.current;
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = (): HTMLElement[] =>
+      sheet ? Array.from(sheet.querySelectorAll<HTMLElement>(focusableSelector)) : [];
+
+    (getFocusable()[0] ?? sheet)?.focus();
+
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
+
+        return;
+      }
+
+      if (event.key !== 'Tab' || !sheet) {
+        return;
+      }
+
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        sheet.focus();
+
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) {
+        return;
+      }
+
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || !sheet.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !sheet.contains(active))) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
 
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, open]);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore focus only if the trigger is still in the document.
+      if (triggerRef.current && document.contains(triggerRef.current)) {
+        triggerRef.current.focus();
+      }
+    };
+  }, [open]);
 
   return (
     <AnimatePresence>
@@ -99,7 +154,9 @@ export const MoreNavigationSheet = ({
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
             id={sheetId}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+            ref={sheetRef}
             role="dialog"
+            tabIndex={-1}
             transition={sheetTransition}
           >
             <div className="mb-5 flex items-center justify-between gap-3">

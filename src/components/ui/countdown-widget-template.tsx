@@ -40,7 +40,7 @@ export const CountdownWidgetTemplate = ({
     </div>
     <div className="flex min-w-0 shrink-0 flex-row items-center gap-2 text-left sm:flex-col sm:items-end sm:text-right">
       <Badge
-        className="max-w-full text-center leading-snug whitespace-normal"
+        className="ui-tabular shrink-0 leading-snug whitespace-nowrap"
         variant="primary"
       >
         {daysLeftLabel}

@@ -275,7 +275,7 @@ describe('create location forms', () => {
     fetchMock.mockResolvedValue(createJsonResponse({ locations: nominatimLocations }));
     renderWithQueryClient(<CreateTripForm />);
 
-    await user.type(screen.getByLabelText('Trip title'), 'First trip');
+    await user.type(screen.getByLabelText('Trip title', { exact: false }), 'First trip');
     await user.type(screen.getByLabelText('Location'), 'Hoi An');
     await user.click(screen.getByRole('button', { name: 'Search' }));
     await user.click(await screen.findByRole('button', { name: /Hoi An/ }));
@@ -289,7 +289,7 @@ describe('create location forms', () => {
     await waitFor(() =>
       expect((screen.getByLabelText('Location') as HTMLInputElement).value).toBe(''),
     );
-    await user.type(screen.getByLabelText('Trip title'), 'Second trip');
+    await user.type(screen.getByLabelText('Trip title', { exact: false }), 'Second trip');
     await user.click(screen.getByRole('button', { name: 'Create trip' }));
 
     await waitFor(() => expect(mutationMocks.mutateAsync).toHaveBeenCalledTimes(2));
@@ -317,7 +317,7 @@ describe('create location forms', () => {
       />,
     );
 
-    await user.type(screen.getByLabelText('Place title'), 'First stop');
+    await user.type(screen.getByLabelText('Place title', { exact: false }), 'First stop');
     await user.type(screen.getByLabelText('Location'), 'Hoi An');
     await user.click(screen.getByRole('button', { name: 'Search' }));
     await user.click(await screen.findByRole('button', { name: /Hoi An/ }));
@@ -331,7 +331,7 @@ describe('create location forms', () => {
     await waitFor(() =>
       expect((screen.getByLabelText('Location') as HTMLInputElement).value).toBe(''),
     );
-    await user.type(screen.getByLabelText('Place title'), 'Second stop');
+    await user.type(screen.getByLabelText('Place title', { exact: false }), 'Second stop');
     await user.click(screen.getByRole('button', { name: 'Add stop' }));
 
     await waitFor(() => expect(mutationMocks.mutateAsync).toHaveBeenCalledTimes(2));

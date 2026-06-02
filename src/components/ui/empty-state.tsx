@@ -8,6 +8,11 @@ interface EmptyStateProps {
   readonly description: string;
   readonly icon?: ReactNode;
   readonly title: string;
+  /**
+   * Heading level for the title. Defaults to `h2`; pass `h3` when the empty state sits
+   * inside a card that already owns an `h2`, to keep heading order valid on the page.
+   */
+  readonly titleAs?: 'h2' | 'h3';
 }
 
 export const EmptyState = ({
@@ -16,10 +21,11 @@ export const EmptyState = ({
   description,
   icon,
   title,
+  titleAs: TitleTag = 'h2',
 }: EmptyStateProps): ReactElement => (
   <div
     className={cn(
-      'flex min-h-36 flex-col items-center justify-center gap-3 rounded-[var(--radius-panel)] border border-dashed border-[#e8c8bf] bg-white/58 px-5 py-7 text-center shadow-whisper backdrop-blur-md',
+      'flex min-h-36 flex-col items-center justify-center gap-3 rounded-[var(--radius-panel)] border border-dashed border-[#e8c8bf] bg-panel px-5 py-7 text-center shadow-whisper',
       className,
     )}
   >
@@ -31,7 +37,7 @@ export const EmptyState = ({
         {icon}
       </span>
     ) : null}
-    <p className="ui-panel-title">{title}</p>
+    <TitleTag className="ui-panel-title">{title}</TitleTag>
     <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
     {action ? <div className="pt-1">{action}</div> : null}
   </div>

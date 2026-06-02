@@ -156,10 +156,12 @@ export const CreateAlbumForm = ({
         errorMessage={titleErrorMessage}
         htmlFor="albumTitle"
         label={formT('titleLabel')}
+        required
       >
         <Input
           aria-describedby={titleErrorMessage ? 'album-title-error' : undefined}
           aria-invalid={Boolean(titleErrorMessage)}
+          aria-required
           id="albumTitle"
           placeholder={formT('titlePlaceholder')}
           type="text"
@@ -191,6 +193,7 @@ export const CreateAlbumForm = ({
         errorId="album-media-error"
         errorMessage={mediaErrorMessage}
         label={formT('mediaLabel')}
+        required
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {candidates.map((candidate) => {

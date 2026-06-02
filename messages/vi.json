@@ -40,6 +40,7 @@
     "working": "Đang xử lý…"
   },
   "nav": {
+    "skipToContent": "Chuyển đến nội dung chính",
     "groups": {
       "planning": "Lên kế hoạch",
       "play": "Giải trí",
@@ -157,7 +158,10 @@
       "emailDescription": "Dùng email đã liên kết với không gian cặp đôi.",
       "emailLabel": "Email",
       "emailPlaceholder": "you@example.com…",
-      "submit": "Gửi magic link"
+      "submit": "Gửi magic link",
+      "validation": {
+        "emailInvalid": "Nhập địa chỉ email hợp lệ."
+      }
     },
     "acceptInvite": {
       "submit": "Tham gia không gian cặp đôi",
@@ -266,7 +270,11 @@
       "submit": "Lưu kỷ niệm",
       "updateSubmit": "Cập nhật kỷ niệm",
       "deleteConfirm": "Tôi hiểu thao tác này sẽ xoá kỷ niệm này và media đính kèm.",
-      "deleteSubmit": "Xoá kỷ niệm"
+      "deleteSubmit": "Xoá kỷ niệm",
+      "validation": {
+        "happenedAtRequired": "Hãy chọn thời điểm kỷ niệm này diễn ra.",
+        "noteMax": "Ghi chú tối đa 800 ký tự."
+      }
     },
     "countdown": {
       "kindLabel": "Loại",

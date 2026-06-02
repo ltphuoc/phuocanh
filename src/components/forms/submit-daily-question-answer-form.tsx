@@ -108,10 +108,12 @@ export const SubmitDailyQuestionAnswerForm = ({
         errorMessage={answerErrorMessage}
         htmlFor="dailyQuestionAnswer"
         label={formT('answerLabel')}
+        required
       >
         <Textarea
           aria-describedby={answerErrorMessage ? 'daily-question-answer-error' : undefined}
           aria-invalid={Boolean(answerErrorMessage)}
+          aria-required
           id="dailyQuestionAnswer"
           placeholder={formT('answerPlaceholder')}
           rows={6}

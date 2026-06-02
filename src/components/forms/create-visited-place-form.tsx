@@ -139,16 +139,18 @@ export const CreateVisitedPlaceForm = ({
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <div className="grid gap-4 md:grid-cols-2">
         <FormSection
           errorId="visited-place-title-error"
           errorMessage={titleErrorMessage}
           htmlFor="visitedPlaceTitle"
           label={formT('titleLabel')}
+          required
         >
           <Input
             aria-describedby={titleErrorMessage ? 'visited-place-title-error' : undefined}
             aria-invalid={Boolean(titleErrorMessage)}
+            aria-required
             id="visitedPlaceTitle"
             placeholder={formT('titlePlaceholder')}
             type="text"
@@ -162,10 +164,12 @@ export const CreateVisitedPlaceForm = ({
           errorMessage={visitedOnErrorMessage}
           htmlFor="visitedPlaceDate"
           label={formT('visitedOnLabel')}
+          required
         >
           <Input
             aria-describedby={visitedOnErrorMessage ? 'visited-place-date-error' : undefined}
             aria-invalid={Boolean(visitedOnErrorMessage)}
+            aria-required
             id="visitedPlaceDate"
             max={endDate}
             min={startDate}

@@ -207,10 +207,12 @@ export const CompleteOnboardingForm = (): ReactElement => {
           errorMessage={coupleNameError}
           htmlFor="onboardingCoupleName"
           label={formT('coupleNameLabel')}
+          required
         >
           <Input
             aria-describedby={coupleNameError ? 'onboarding-couple-name-error' : undefined}
             aria-invalid={Boolean(coupleNameError)}
+            aria-required
             id="onboardingCoupleName"
             placeholder={formT('coupleNamePlaceholder')}
             type="text"
@@ -226,11 +228,13 @@ export const CompleteOnboardingForm = (): ReactElement => {
           errorMessage={timeZoneError}
           htmlFor="onboardingTimeZone"
           label={formT('timeZoneLabel')}
+          required
         >
           <>
             <Input
               aria-describedby={timeZoneError ? 'onboarding-timezone-error' : undefined}
               aria-invalid={Boolean(timeZoneError)}
+              aria-required
               autoComplete="off"
               id="onboardingTimeZone"
               list={TIME_ZONE_DATALIST_ID}
@@ -258,10 +262,12 @@ export const CompleteOnboardingForm = (): ReactElement => {
           errorMessage={startedDateError}
           htmlFor="onboardingStartedDate"
           label={formT('startedDateLabel')}
+          required
         >
           <Input
             aria-describedby={startedDateError ? 'onboarding-started-date-error' : undefined}
             aria-invalid={Boolean(startedDateError)}
+            aria-required
             id="onboardingStartedDate"
             type="date"
             {...form.register('startedDate')}
@@ -293,11 +299,13 @@ export const CompleteOnboardingForm = (): ReactElement => {
             errorMessage={confirmationError}
             htmlFor="onboardingConfirmation"
             label={formT('confirmationLabel')}
+            required
           >
             <label className="flex min-h-12 items-start gap-3 rounded-[var(--radius-control)] border border-white/72 bg-white/76 px-4 py-3 text-sm text-foreground shadow-whisper transition-[background-color,box-shadow] duration-200 hover:bg-white/90">
               <input
                 aria-describedby={confirmationError ? 'onboarding-confirmation-error' : undefined}
                 aria-invalid={Boolean(confirmationError)}
+                aria-required
                 className="mt-1 size-4 rounded border-border accent-primary"
                 id="onboardingConfirmation"
                 type="checkbox"

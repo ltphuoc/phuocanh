@@ -196,7 +196,7 @@ export const LocationPicker = ({
       />
 
       {results.length ? (
-        <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-[var(--radius-panel)] border border-white/72 bg-white/95 shadow-cloud backdrop-blur-xl">
+        <div className="absolute z-30 mt-2 max-h-[16rem] w-full overflow-x-hidden overflow-y-auto overscroll-contain rounded-[var(--radius-panel)] border border-white/72 bg-white/95 shadow-cloud backdrop-blur-xl">
           {results.map((location) => (
             <button
               className={cn(
@@ -229,8 +229,10 @@ export const LocationPicker = ({
 
       {statusMessage ? (
         <p
+          aria-live="polite"
           className="mt-2 text-xs font-medium text-muted-foreground"
           id={statusId}
+          role="status"
         >
           {statusMessage}
         </p>
