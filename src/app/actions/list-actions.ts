@@ -11,17 +11,17 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const wishItemSchema = z.object({
   category: z.enum(['place', 'food', 'movie']),
-  note: z.string().max(200).optional(),
-  title: z.string().min(1).max(120),
+  note: z.string().trim().max(200).optional(),
+  title: z.string().trim().min(1).max(120),
 });
 
 const checklistSchema = z.object({
-  title: z.string().min(1).max(120),
+  title: z.string().trim().min(1).max(120),
 });
 
 const checklistItemSchema = z.object({
   checklistId: z.uuid(),
-  text: z.string().min(1).max(180),
+  text: z.string().trim().min(1).max(180),
 });
 
 const checklistToggleSchema = z.object({
@@ -46,9 +46,9 @@ export const addWishItemAction = async (
       category: parsed.category,
       couple_id: context.coupleId,
       created_by_user_id: context.userId,
-      note: parsed.note?.trim() || null,
+      note: parsed.note || null,
       status: 'pending',
-      title: parsed.title.trim(),
+      title: parsed.title,
     });
 
     if (error) {
@@ -78,7 +78,7 @@ export const createChecklistAction = async (
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.from('checklists').insert({
       couple_id: context.coupleId,
-      title: parsed.title.trim(),
+      title: parsed.title,
     });
 
     if (error) {
@@ -100,6 +100,7 @@ export const addChecklistItemAction = async (
   formData: FormData,
 ): Promise<ActionState> => {
   try {
+    await requireReadyCoupleContext();
     const parsed = checklistItemSchema.parse({
       checklistId: formData.get('checklistId'),
       text: formData.get('text'),
@@ -109,7 +110,7 @@ export const addChecklistItemAction = async (
     const { error } = await supabase.from('checklist_items').insert({
       checklist_id: parsed.checklistId,
       is_done: false,
-      text: parsed.text.trim(),
+      text: parsed.text,
     });
 
     if (error) {
@@ -131,6 +132,7 @@ export const toggleChecklistItemAction = async (
   formData: FormData,
 ): Promise<ActionState> => {
   try {
+    await requireReadyCoupleContext();
     const parsed = checklistToggleSchema.parse({
       checklistItemId: formData.get('checklistItemId'),
       nextDone: formData.get('nextDone'),
