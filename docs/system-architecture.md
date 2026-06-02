@@ -11,9 +11,13 @@ flowchart LR
   Next --> App["(app) routes"]
   App --> Reads["Server reads in src/lib/server/*"]
   Browser --> Actions["Server Actions in src/app/actions/*"]
+  Browser -->|TanStack Query refetch| AppDataApi["GET /api/app-data/*"]
+  Browser -->|place search| GeoApi["GET /api/geo/search"]
   Browser --> Callback["GET /auth/callback"]
   Browser --> OtpHelper["POST /auth/callback/verify-email-otp (E2E only)"]
 
+  AppDataApi --> Reads
+  GeoApi --> Nominatim["Nominatim place search"]
   Reads --> Auth["Supabase Auth"]
   Reads --> PG["Supabase Postgres"]
   Reads --> ReadRpcs["Security-definer read RPCs"]
@@ -54,6 +58,7 @@ flowchart LR
 
 - Implemented authenticated pages are Server Components.
 - Pages call server read helpers in `src/lib/server/*`.
+- Client refetches after TanStack Query invalidation go through the internal `/api/app-data/*` route handlers, which call the same server read helpers; place search goes through the `/api/geo/search` proxy.
 - Read helpers query couple-scoped data through typed Supabase clients.
 - Gameplay reads that depend on hidden answer state use security-definer SQL RPCs instead of direct `game_round_answers` table reads.
 - Gameplay stats compute the couple-local meaning of `today` inside SQL before deriving streak and recent-history output.

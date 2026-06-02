@@ -86,16 +86,53 @@ slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mod
 - New pages should compose existing shared primitives instead of defining route-local layout
   systems.
 
+### Landmarks and Keyboard Navigation
+
+- Every route exposes exactly one `<main id="main-content" tabIndex={-1}>` element as the page
+  landmark. The `(app)` layout wraps its content in `<main>`; `(public)` pages and root special
+  files (`loading.tsx`, `error.tsx`, `not-found.tsx`) each carry their own.
+- A skip-to-content link (`nav.skipToContent` i18n key) is the first focusable element in
+  `src/app/[locale]/layout.tsx`, hidden until `:focus`, and links to `#main-content`.
+- `SideNavigation` toggle button announces its expanded/collapsed state via `aria-expanded` and
+  closes the panel on Escape.
+- `MoreNavigationSheet` (mobile overflow menu) traps Tab focus while open, restores focus to its
+  trigger button on close, and closes on Escape.
+
 ## Shared UI Primitives
 
-- Layout: `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`,
-  `AuthShell`, `ShellPage`
-- Controls: `Button`, `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`
-- State/display: `EmptyState`, `LoadingState`, `ListRow`, `MemoryCard`, `ComingSoonCard`,
-  `PageReveal`
-- Story/travel/game surfaces: `AnniversarySpotlight`, `TimelineRibbon`, `TravelAtlasShell`,
-  `CountdownWidgetTemplate`, `FutureNoteCard`, `TripCardTemplate`, `AlbumCard`,
-  `GameCardTemplate`, `StatCardTemplate`
+### Layout
+
+- `PageContainer`, `PageHeader`, `SectionStack`, `ResponsiveGrid`, `FormSection`, `AuthShell`,
+  `ShellPage`, `InsetPanel`
+
+### Controls
+
+- `Button` — renders `aria-busy` when `isBusy` is true; displays an inline spinner while busy;
+  reduced-motion users see no animation.
+- `Input`, `Textarea`, `Select`, `Badge`, `SectionCard`
+
+### State/Display
+
+- `EmptyState` — renders its title as a semantic heading (`<h2>` by default, or `<h3>` via
+  optional `titleAs` prop); use `titleAs="h3"` when the empty state sits inside a card that
+  already owns an `<h2>`.
+- `FormSection` — always renders a real `<label>` associated to the control via `htmlFor`;
+  accepts optional `required?: boolean` to render a visual asterisk marker (only when `htmlFor`
+  is set); surfaces validation errors via `role="alert"` so they announce on submit.
+- `LoadingState` — centered spinner for indeterminate loading states; use `QueryLoadingState`
+  with a `variant` for layout-matched skeletons instead.
+- `QueryLoadingState` — layout-aware loading state; pass `variant` ('spinner' | 'timeline' |
+  'card-grid' | 'stat-grid' | 'detail') matching the content being loaded; defaults to 'spinner'
+  for backward compatibility.
+- `Skeleton` — base placeholder block; composed into `TimelineSkeleton`, `CardGridSkeleton`,
+  `StatGridSkeleton`, `DetailSkeleton` to mirror final layouts; respects `prefers-reduced-motion`.
+- `ListRow`, `MemoryCard`, `ComingSoonCard`, `PageReveal`
+
+### Story/Travel/Game Surfaces
+
+- `AnniversarySpotlight`, `TimelineRibbon`, `TravelAtlasShell`, `CountdownWidgetTemplate`,
+  `FutureNoteCard`, `TripCardTemplate`, `AlbumCard`, `GameCardTemplate`, `StatCardTemplate` —
+  numeric displays render with `font-variant-numeric: tabular-nums` for stable figure alignment.
 
 ## Responsive Rules
 
@@ -107,6 +144,8 @@ slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mod
 - Forms stack on mobile and may use two columns from `md` when fields are parallel.
 - Preserve safe-area clearance for the floating mobile dock.
 - Keep desktop spacing intentionally roomier than mobile spacing.
+- Full-height layouts use `min-h-[100svh]` (smallest viewport unit, matches `globals.css`
+  `body`) to avoid content jump when mobile browser chrome appears; do not use `100vh` or `100dvh`.
 
 ## Production-Flow E2E Coverage
 

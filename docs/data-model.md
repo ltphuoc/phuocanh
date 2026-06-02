@@ -7,7 +7,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - Live schema, RLS, triggers, RPCs, and storage policies are owned by SQL migrations.
 - `src/lib/supabase/database.types.ts` is a checked-in TypeScript mirror and must match SQL.
 - `src/lib/db/schema.ts` is baseline inventory only and does not replace SQL.
-- Use `docs/engineering/migration-playbook.md` before making schema changes.
+- Use `docs/migration-playbook.md` before making schema changes.
 
 ## Tables Implemented
 
@@ -32,6 +32,13 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `game_round_answers`
 - `game_round_memory_targets`
 - `game_round_trivia_targets`
+
+## Internal Schema
+
+- `private.secret_fallbacks` holds fallback secret material for local and CI reminder replay when
+  Vault is unavailable. It is not couple-scoped app data and exposes no member-facing policies.
+- Reminder scheduling depends on the `pg_cron`, `pg_net`, and `vault` extensions provisioned by the
+  Phase 2 closeout migration.
 
 ## Core Relationships
 
@@ -118,6 +125,15 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `get_trivia_round_state(target_round_date date)`
 - `has_any_couple()`
 - `submit_daily_question_answer(target_round_id uuid, answer_body text)`
+
+## Reminder Service-Role RPCs
+
+These run under cron/service-role context only and are not part of the app-layer contract:
+
+- `enqueue_due_reminder_deliveries()`
+- `claim_reminder_deliveries(max_batch_size integer)`
+- `invoke_reminder_processor()`
+- `configure_phase2_reminder_jobs()`
 
 ## Couple Timezone Foundation
 

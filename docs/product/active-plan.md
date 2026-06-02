@@ -1,6 +1,6 @@
 # Active Product Plan
 
-This is the compact current-intent file for roadmap and feature-planning work. It is not a historical log. When this file conflicts with current runtime status, trust `docs/engineering/route-capability-matrix.md`.
+This is the compact current-intent file for roadmap and feature-planning work. It is not a historical log. When this file conflicts with current runtime status, trust `docs/route-capability-matrix.md`.
 
 ## Current Direction
 
@@ -17,10 +17,8 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 
 ## Deferred
 
-- AI retrieval memory search remains Phase 4 work.
-- Route polylines and deeper travel-map behavior remain deferred.
-- Additional gameplay modes beyond the currently implemented `daily_question`, `guess_date`, and `trivia` modes remain deferred.
-- Leaderboards, sharing, scoring, similarity matching, answer edits, answer deletes, and gameplay backfill UI remain out of scope until separately decided.
+See [roadmap.md](roadmap.md) "Planned / Deferred" and [features.md](features.md) "Deferred" for the
+canonical deferred-scope list. This file does not restate it.
 
 ## Decision Queue
 
@@ -31,6 +29,6 @@ This is the compact current-intent file for roadmap and feature-planning work. I
 ## Agent Instructions
 
 - For roadmap, feature-planning, or "what should we build next" tasks, read this file after `docs/agent/agent-handbook.md`.
-- Before changing route behavior, re-check `docs/engineering/route-capability-matrix.md`.
-- Before adding schema, RPCs, or storage behavior, re-check `docs/product/business-rules.md` and `docs/engineering/migration-playbook.md`.
-- Record user/product choices in `docs/product/user-decisions.md`, engineering tradeoffs in `docs/engineering/tech-decisions.md`, and shipped outcomes in `docs/changelog/implementation-log.md`.
+- Before changing route behavior, re-check `docs/route-capability-matrix.md`.
+- Before adding schema, RPCs, or storage behavior, re-check `docs/product/business-rules.md` and `docs/migration-playbook.md`.
+- Record user/product choices in `docs/product/user-decisions.md`, engineering tradeoffs in `docs/tech-decisions.md`, and shipped outcomes in `docs/changelog/implementation-log.md`.

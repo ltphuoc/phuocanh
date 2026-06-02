@@ -57,7 +57,7 @@ Hosted reminder cron invocation also needs Supabase Vault secrets:
 | `anon_key`    | yes      | Scheduled invoke bearer token     |
 
 Local/CI replay can use the private fallback secret store documented in
-[docs/engineering/deployment.md](deployment.md).
+[docs/deployment.md](deployment.md).
 
 ## Local Services
 
@@ -167,10 +167,10 @@ For a new key:
 
 ## Docs Update Rules
 
-- Update `docs/engineering/route-capability-matrix.md` whenever route status changes.
-- Update `docs/product/business-rules.md` and `docs/engineering/api-contracts.md` when behavior,
+- Update `docs/route-capability-matrix.md` whenever route status changes.
+- Update `docs/product/business-rules.md` and `docs/api-contracts.md` when behavior,
   validation, RPCs, or mutation contracts change.
-- Update `docs/engineering/deployment.md` when hosted setup, secrets, cron, or rollout steps change.
+- Update `docs/deployment.md` when hosted setup, secrets, cron, or rollout steps change.
 - Keep `docs/changelog/implementation-log.md`, `docs/product/user-decisions.md`, and
-  `docs/engineering/tech-decisions.md` historical. Do not use older log entries as current source
+  `docs/tech-decisions.md` historical. Do not use older log entries as current source
   of truth.

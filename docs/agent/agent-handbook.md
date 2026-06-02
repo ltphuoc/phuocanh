@@ -7,12 +7,12 @@ database-owned invariants. Do not treat visual completeness as proof that backen
 
 - Read root `AGENTS.md`.
 - For Next.js work, read the matching bundled docs under `node_modules/next/dist/docs/`.
-- Read `docs/engineering/development-verification.md` before changing setup, commands, env vars,
+- Read `docs/development-verification.md` before changing setup, commands, env vars,
   testing, or E2E instructions.
-- Read `docs/engineering/route-capability-matrix.md` before changing route behavior or route docs.
+- Read `docs/route-capability-matrix.md` before changing route behavior or route docs.
 - Read `docs/product/business-rules.md` before touching auth, membership, invite, memory, list,
   planning, travel, gameplay, stats, or timezone behavior.
-- Read `docs/engineering/migration-playbook.md` before proposing schema, RLS, RPC, trigger, or
+- Read `docs/migration-playbook.md` before proposing schema, RLS, RPC, trigger, or
   storage policy work.
 - Read `docs/product/active-plan.md` before roadmap or "what should we build next" work.
 
@@ -21,10 +21,10 @@ database-owned invariants. Do not treat visual completeness as proof that backen
 1. Business rules: `docs/product/business-rules.md`
 2. Schema and security enforcement: `supabase/migrations/*.sql`
 3. Runtime mutation/API contract: `src/app/actions/*` plus documented RPCs in
-   `docs/engineering/api-contracts.md`
+   `docs/api-contracts.md`
 4. UI behavior and current route status:
-   `docs/engineering/frontend-architecture.md` and
-   `docs/engineering/route-capability-matrix.md`
+   `docs/frontend-architecture.md` and
+   `docs/route-capability-matrix.md`
 5. Historical logs and decision logs: context only unless explicitly marked current
 
 If docs conflict with SQL on schema, RLS, RPCs, or storage policy, trust SQL. If roadmap or feature
@@ -32,20 +32,22 @@ copy conflicts with the route matrix, trust the route matrix.
 
 ## Repo Map
 
-| Path                        | Purpose                                                        |
-| --------------------------- | -------------------------------------------------------------- |
-| `src/app/[locale]/(public)` | Login, first-user onboarding, invite acceptance                |
-| `src/app/[locale]/(app)`    | Authenticated app shell and user-facing routes                 |
-| `src/app/actions`           | Server Actions that own app-layer mutations                    |
-| `src/lib/server`            | Auth gate, couple context, app-data reads, site URL resolution |
-| `src/lib/query`             | Query keys, fetchers, hydration, mutation cache updates        |
-| `src/lib/supabase`          | Typed server/browser clients and middleware                    |
-| `supabase/migrations`       | Authoritative schema, RLS, RPCs, triggers, storage policies    |
-| `supabase/functions`        | Reminder Edge Function                                         |
-| `docs/product`              | Product rules, flows, feature state, current plan              |
-| `docs/engineering`          | Architecture, contracts, migration, deployment, verification   |
-| `tests/e2e`                 | Production-flow Playwright coverage                            |
-| `tests/unit`                | Vitest coverage                                                |
+| Path                        | Purpose                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `src/app/[locale]/(public)` | Login, first-user onboarding, invite acceptance                                                        |
+| `src/app/[locale]/(app)`    | Authenticated app shell and user-facing routes                                                         |
+| `src/app/actions`           | Server Actions that own app-layer mutations                                                            |
+| `src/lib/server`            | Auth gate, couple context, app-data reads, site URL resolution                                         |
+| `src/lib/query`             | Query keys, fetchers, hydration, mutation cache updates                                                |
+| `src/lib/supabase`          | Typed server/browser clients and middleware                                                            |
+| `supabase/migrations`       | Authoritative schema, RLS, RPCs, triggers, storage policies                                            |
+| `supabase/functions`        | Reminder Edge Function                                                                                 |
+| `docs/product`              | Product rules, flows, feature state, current plan                                                      |
+| `docs`                      | Architecture, codebase map, contracts, data model, code standards, migration, deployment, verification |
+| `docs/agent`                | Agent handbook and source-of-truth order                                                               |
+| `docs/changelog`            | Historical implementation log (context only)                                                           |
+| `tests/e2e`                 | Production-flow Playwright coverage                                                                    |
+| `tests/unit`                | Vitest coverage                                                                                        |
 
 ## Capability Model
 
@@ -53,7 +55,7 @@ copy conflicts with the route matrix, trust the route matrix.
 - `shell-only`: route defines layout/navigation only; it does not prove backend support.
 - `planned`: not currently routed or implemented.
 
-Use `docs/engineering/route-capability-matrix.md` as the canonical current route map.
+Use `docs/route-capability-matrix.md` as the canonical current route map.
 
 ## Safe Change Areas
 
@@ -61,7 +63,7 @@ Use `docs/engineering/route-capability-matrix.md` as the canonical current route
 - Presentational changes on implemented routes that do not alter auth, mutation, schema, or storage
   behavior.
 - Small component changes that preserve shared layout and token rules from
-  `docs/engineering/frontend-architecture.md` and `docs/design-system.md`.
+  `docs/frontend-architecture.md` and `docs/design-system.md`.
 - Shell-only routes, if they remain clearly non-authoritative and do not invent backend assumptions.
 
 ## High-Risk Areas

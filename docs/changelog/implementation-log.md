@@ -75,14 +75,14 @@
 
 - Expanded root `AGENTS.md` outside the Next-managed block with project source-of-truth order, verification expectations, and repo safety boundaries.
 - Updated `docs/agent/agent-handbook.md` with Next.js 16.2 agent guidance, MCP/runtime inspection expectations, locale-aware repo paths, and validation rules.
-- Added `docs/engineering/development-verification.md` as the compact local setup, app startup, E2E, env, and docs-update guide.
+- Added `docs/development-verification.md` as the compact local setup, app startup, E2E, env, and docs-update guide.
 - Synced roadmap/status wording for `Phase 3 Slice 1: Live Daily Question + Gameplay Stats`.
 - Marked prior E2E suite results as historical instead of fresh current-run verification.
 - Replaced machine-specific manual-test index links with repo-relative links.
 
 ### Verification
 
-- Route inventory was re-checked against `docs/engineering/route-capability-matrix.md` before editing.
+- Route inventory was re-checked against `docs/route-capability-matrix.md` before editing.
 - Official Next.js docs checked: v16.2.4 docs for AI agents, local development, version 16 upgrading, and Playwright testing, last updated 2026-04-23.
 - Current npm metadata was checked for package latest versions; dependency upgrades were intentionally left out of this docs-only task.
 - `pnpm lint`
@@ -138,7 +138,7 @@
   - viewer participation count/rate
   - recent 14-day gameplay history
 - Synced product and engineering docs to mark `/games` and `/stats` implemented and document `/games/[mode]` as live only for `daily-question`.
-- Synced `README.md` and `docs/engineering/system-architecture.md` with the live OpenAI-backed gameplay runtime and the hardened gameplay contract.
+- Synced `README.md` and `docs/system-architecture.md` with the live OpenAI-backed gameplay runtime and the hardened gameplay contract.
 
 ### Verification
 
@@ -539,7 +539,7 @@
 - Refactored form composition with `FormSection` for consistent label/field hierarchy and responsive rhythm.
 - Added required UI specification docs:
 - `docs/design-system.md`
-- responsive guidance that has since been folded into `docs/engineering/frontend-architecture.md` and `docs/design-system.md`
+- responsive guidance that has since been folded into `docs/frontend-architecture.md` and `docs/design-system.md`
 
 ### Verification
 

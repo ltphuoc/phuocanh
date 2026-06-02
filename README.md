@@ -7,7 +7,7 @@ TanStack Query hydration, and a light-only editorial UI system.
 
 ## Current State
 
-Use [docs/engineering/route-capability-matrix.md](docs/engineering/route-capability-matrix.md) as
+Use [docs/route-capability-matrix.md](docs/route-capability-matrix.md) as
 the canonical route map. Implemented areas include auth/onboarding, memories, lists, countdowns,
 future notes, trips, trip albums, visited places, map, daily-question, guess-date, trivia, gameplay
 stats, and shared timezone settings.
@@ -28,24 +28,26 @@ live backend features.
 
 - Agent rules: [AGENTS.md](AGENTS.md) and [docs/agent/agent-handbook.md](docs/agent/agent-handbook.md)
 - Setup and commands:
-  [docs/engineering/development-verification.md](docs/engineering/development-verification.md)
-- Deployment: [docs/engineering/deployment.md](docs/engineering/deployment.md)
+  [docs/development-verification.md](docs/development-verification.md)
+- Deployment: [docs/deployment.md](docs/deployment.md)
 - Business rules: [docs/product/business-rules.md](docs/product/business-rules.md)
-- System architecture: [docs/engineering/system-architecture.md](docs/engineering/system-architecture.md)
+- System architecture: [docs/system-architecture.md](docs/system-architecture.md)
+- Codebase map: [docs/codebase-summary.md](docs/codebase-summary.md)
 - Frontend architecture:
-  [docs/engineering/frontend-architecture.md](docs/engineering/frontend-architecture.md)
-- API/action contracts: [docs/engineering/api-contracts.md](docs/engineering/api-contracts.md)
-- Data model: [docs/engineering/data-model.md](docs/engineering/data-model.md)
-- Migration rules: [docs/engineering/migration-playbook.md](docs/engineering/migration-playbook.md)
+  [docs/frontend-architecture.md](docs/frontend-architecture.md)
+- Code standards: [docs/code-standards.md](docs/code-standards.md)
+- API/action contracts: [docs/api-contracts.md](docs/api-contracts.md)
+- Data model: [docs/data-model.md](docs/data-model.md)
+- Migration rules: [docs/migration-playbook.md](docs/migration-playbook.md)
 
 ## Source Of Truth
 
 1. Business rules: `docs/product/business-rules.md`
 2. Schema, RLS, triggers, RPCs, and storage policy: `supabase/migrations/*.sql`
-3. Runtime mutation/API contract: `src/app/actions/*` and `docs/engineering/api-contracts.md`
+3. Runtime mutation/API contract: `src/app/actions/*` and `docs/api-contracts.md`
 4. UI behavior and route status:
-   `docs/engineering/frontend-architecture.md` and
-   `docs/engineering/route-capability-matrix.md`
+   `docs/frontend-architecture.md` and
+   `docs/route-capability-matrix.md`
 5. Historical logs: context only unless explicitly marked current
 
 If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL and update the docs.
@@ -92,7 +94,7 @@ Copy `.env.example` and fill at least:
 Do not run local reset, push, or E2E workflows against the deployed database. `pnpm test:e2e` is
 designed to reset and seed local Supabase.
 
-See [docs/engineering/development-verification.md](docs/engineering/development-verification.md)
+See [docs/development-verification.md](docs/development-verification.md)
 for the full local/E2E/reminder environment matrix.
 
 ## Common Commands
@@ -111,7 +113,7 @@ for the full local/E2E/reminder environment matrix.
 | `pnpm validate`             | Lint, format check, typecheck, build, and whitespace check |
 
 Before PRs, run the baseline listed in
-[docs/engineering/development-verification.md](docs/engineering/development-verification.md). Do
+[docs/development-verification.md](docs/development-verification.md). Do
 not report a fresh E2E result unless `pnpm test:e2e` ran in the current change.
 
 ## Folder Map

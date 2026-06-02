@@ -39,6 +39,9 @@ yarn-error.log*
 !.env.example
 !.env.test.example
 
+# agent working artifacts (local scratch; not synced)
+/plans
+
 # vercel
 .vercel
 

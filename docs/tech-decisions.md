@@ -36,7 +36,7 @@
 - Historical direction: mobile bottom navigation + tablet/desktop sidebar navigation from one shared navigation model.
 - Historical direction: pastel pink light-mode-only system with soft premium surfaces.
 - Historical direction: retain Geist fonts to avoid new network/font dependency risk.
-- Current UI architecture and typography are defined by the 2026-03-29 sections and `docs/engineering/frontend-architecture.md`.
+- Current UI architecture and typography are defined by the 2026-03-29 sections and `docs/frontend-architecture.md`.
 
 ## 2026-03-29 (UI Architecture Finalization)
 

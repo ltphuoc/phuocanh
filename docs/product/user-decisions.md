@@ -3,7 +3,7 @@
 ## Decision Recording Rule
 
 - Record user/product choices here.
-- Record engineering tradeoffs and implementation architecture choices in `docs/engineering/tech-decisions.md`.
+- Record engineering tradeoffs and implementation architecture choices in `docs/tech-decisions.md`.
 - Record shipped outcomes and verification history in `docs/changelog/implementation-log.md`.
 
 ## 2026-03-27

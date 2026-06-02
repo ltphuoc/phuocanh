@@ -1,17 +1,19 @@
 # Engineering Architecture
 
-This is the engineering index. Use the focused docs below instead of treating this file as the full
-system spec.
+This is the engineering documentation index. Use the focused docs below instead of treating this
+file as the full system spec.
 
 ## Read In This Order
 
-1. `docs/engineering/system-architecture.md`
-2. `docs/engineering/frontend-architecture.md`
-3. `docs/engineering/api-contracts.md`
-4. `docs/engineering/data-model.md`
-5. `docs/engineering/migration-playbook.md`
-6. `docs/engineering/development-verification.md`
-7. `docs/engineering/deployment.md`
+1. `docs/system-architecture.md`
+2. `docs/codebase-summary.md`
+3. `docs/frontend-architecture.md`
+4. `docs/code-standards.md`
+5. `docs/api-contracts.md`
+6. `docs/data-model.md`
+7. `docs/migration-playbook.md`
+8. `docs/development-verification.md`
+9. `docs/deployment.md`
 
 ## Current Runtime Summary
 
@@ -30,9 +32,9 @@ system spec.
 
 - Business rules: `docs/product/business-rules.md`
 - Schema/security: `supabase/migrations/*.sql`
-- Runtime contracts: `docs/engineering/api-contracts.md`
+- Runtime contracts: `docs/api-contracts.md`
 - UI/route behavior:
-  `docs/engineering/frontend-architecture.md` and
-  `docs/engineering/route-capability-matrix.md`
-- Setup/testing: `docs/engineering/development-verification.md`
-- Deployment: `docs/engineering/deployment.md`
+  `docs/frontend-architecture.md` and
+  `docs/route-capability-matrix.md`
+- Setup/testing: `docs/development-verification.md`
+- Deployment: `docs/deployment.md`

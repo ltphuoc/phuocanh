@@ -1,7 +1,7 @@
 # Product Roadmap
 
 Use this file for phase-level direction. Use [active-plan.md](active-plan.md) for the current
-planning queue and [../engineering/route-capability-matrix.md](../engineering/route-capability-matrix.md)
+planning queue and [../route-capability-matrix.md](../route-capability-matrix.md)
 for current route status.
 
 ## Implemented Phases
@@ -32,5 +32,5 @@ for current route status.
 - This roadmap is not an implementation contract.
 - Do not infer live backend support from planned items.
 - Record user/product choices in [user-decisions.md](user-decisions.md), engineering tradeoffs in
-  [../engineering/tech-decisions.md](../engineering/tech-decisions.md), and shipped outcomes in
+  [../tech-decisions.md](../tech-decisions.md), and shipped outcomes in
   [../changelog/implementation-log.md](../changelog/implementation-log.md).

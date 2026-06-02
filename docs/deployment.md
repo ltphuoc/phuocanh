@@ -163,7 +163,7 @@ For manual migration deployment, use the same sequence as the workflow:
    select private.upsert_secret_fallback('anon_key', '<ANON_KEY>', 'Local anon key for reminder invoke');
    ```
 
-Use [docs/engineering/migration-playbook.md](migration-playbook.md) for schema-change rules.
+Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.
 
 ## Deploy Vercel
 

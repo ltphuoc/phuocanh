@@ -19,10 +19,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 1. Business rules: `docs/product/business-rules.md`
 2. Schema, RLS, RPCs, triggers, and storage policies: `supabase/migrations/*.sql`
-3. Runtime mutation/API contract: `src/app/actions/*` and `docs/engineering/api-contracts.md`
+3. Runtime mutation/API contract: `src/app/actions/*` and `docs/api-contracts.md`
 4. UI behavior and route status:
-   `docs/engineering/frontend-architecture.md` and
-   `docs/engineering/route-capability-matrix.md`
+   `docs/frontend-architecture.md` and
+   `docs/route-capability-matrix.md`
 5. Historical logs: context only unless explicitly marked current
 
 If docs conflict with SQL on schema, RLS, RPCs, or storage behavior, trust SQL and update docs to
@@ -40,8 +40,8 @@ match.
 ## Development And Verification
 
 - Start with `docs/agent/agent-handbook.md` and
-  `docs/engineering/development-verification.md`.
-- Check `docs/engineering/route-capability-matrix.md` before changing route behavior or route docs.
+  `docs/development-verification.md`.
+- Check `docs/route-capability-matrix.md` before changing route behavior or route docs.
 - Required baseline before PRs:
   - `pnpm lint`
   - `pnpm typecheck`

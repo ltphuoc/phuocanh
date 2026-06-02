@@ -1,7 +1,7 @@
 # Features
 
 This file is the product feature summary. Use
-[docs/engineering/route-capability-matrix.md](../engineering/route-capability-matrix.md) for
+[docs/route-capability-matrix.md](../route-capability-matrix.md) for
 route-by-route runtime status.
 
 ## Implemented

@@ -22,7 +22,7 @@ If SQL, TypeScript mirror files, and docs disagree, trust SQL and update the oth
 - storage bucket policies
 - Edit `src/lib/supabase/database.types.ts` only after the SQL change exists.
 - Edit `src/lib/db/schema.ts` only as a mirror/inventory update. It is not the live schema authority.
-- Edit `docs/product/business-rules.md`, `docs/engineering/api-contracts.md`, and `docs/engineering/route-capability-matrix.md` whenever the change affects behavior or feature status.
+- Edit `docs/product/business-rules.md`, `docs/api-contracts.md`, and `docs/route-capability-matrix.md` whenever the change affects behavior or feature status.
 
 ## Required Checklist For Every Schema Change
 
