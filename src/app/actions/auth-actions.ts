@@ -39,10 +39,6 @@ const emailSchema = z.object({
     (value) => (typeof value === 'string' ? value : undefined),
     z.string().optional(),
   ),
-  origin: z.preprocess(
-    (value) => (typeof value === 'string' ? value : undefined),
-    z.url().optional(),
-  ),
 });
 
 const inviteTokenSchema = z.object({
@@ -192,11 +188,10 @@ export const sendMagicLinkAction = async (
       email: formData.get('email'),
       locale: formData.get('locale'),
       next: formData.get('next'),
-      origin: formData.get('origin'),
     });
 
     const locale = resolveLocale(parsed.locale);
-    const siteUrl = parsed.origin ? new URL(parsed.origin).origin : await getSiteUrl();
+    const siteUrl = await getSiteUrl();
     const fallbackPath = toLocalizedPathname(locale, '/home');
     const nextPath = normalizeAuthRedirectPath(parsed.next, fallbackPath);
     const emailRedirectTo = `${siteUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`;

@@ -32,6 +32,18 @@ const isPublicPath = (pathname: string): boolean =>
 
 const isAuthCallbackPath = (pathname: string): boolean => pathname.startsWith('/auth/callback');
 
+// Supabase may rotate the session tokens while resolving auth; those refreshed
+// `sb-*` cookies are written onto the i18n response. When we instead return a
+// fresh redirect response we must carry those cookies over, otherwise the rotated
+// session is dropped and the user is intermittently forced to log in again.
+const withCarriedCookies = (source: NextResponse, redirect: NextResponse): NextResponse => {
+  source.cookies.getAll().forEach((cookie) => {
+    redirect.cookies.set(cookie);
+  });
+
+  return redirect;
+};
+
 const getAuthLookupResult = async (
   request: NextRequest,
   response: NextResponse,
@@ -116,12 +128,27 @@ export const proxy = async (request: NextRequest): Promise<NextResponse> => {
   const normalizedPathname = stripLocalePrefix(request.nextUrl.pathname);
   const authLookup = await getAuthLookupResult(request, i18nResponse);
 
+  // Fail closed on a transient Supabase outage: protected routes redirect to
+  // login rather than rendering a shell whose server loaders would 401 anyway.
+  // Log it so an outage-driven wave of forced logouts is diagnosable.
+  if (authLookup.result.status === 'unavailable') {
+    console.warn('Proxy auth lookup unavailable; treating request as unauthenticated', {
+      pathname: request.nextUrl.pathname,
+    });
+  }
+
   if (authLookup.result.status !== 'authenticated' && !isPublicPath(normalizedPathname)) {
-    return NextResponse.redirect(new URL(toLocalizedPathname(locale, '/login'), request.url));
+    return withCarriedCookies(
+      authLookup.response,
+      NextResponse.redirect(new URL(toLocalizedPathname(locale, '/login'), request.url)),
+    );
   }
 
   if (authLookup.result.status === 'authenticated' && normalizedPathname === '/login') {
-    return NextResponse.redirect(new URL(toLocalizedPathname(locale, '/home'), request.url));
+    return withCarriedCookies(
+      authLookup.response,
+      NextResponse.redirect(new URL(toLocalizedPathname(locale, '/home'), request.url)),
+    );
   }
 
   return authLookup.response;

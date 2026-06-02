@@ -58,7 +58,6 @@ export const LoginForm = ({ initialNextPath }: LoginFormProps): ReactElement => 
     const payload = new FormData();
     payload.set('email', values.email);
     payload.set('locale', locale);
-    payload.set('origin', window.location.origin);
     if (initialNextPath) {
       payload.set('next', initialNextPath);
     }
