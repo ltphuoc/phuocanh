@@ -52,7 +52,12 @@ export default async function AppLayout({
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="ui-meta ui-couple-mark">{t('mobile.eyebrow')}</p>
-            <p className="mt-1 font-display text-[1.65rem] text-foreground">PhuocAnh</p>
+            <p
+              className="mt-1 font-display text-[1.65rem] text-foreground"
+              translate="no"
+            >
+              PhuocAnh
+            </p>
           </div>
           <Link
             className="inline-flex min-h-11 items-center rounded-pill border border-white/72 bg-white/76 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper"

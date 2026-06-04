@@ -527,7 +527,7 @@
   },
   "loading": {
     "description": "Vui lòng chờ một chút.",
-    "title": "Đang tải"
+    "title": "Đang tải…"
   },
   "notFound": {
     "description": "Trang này không tồn tại.",

@@ -75,12 +75,20 @@ export const SideNavigation = (): ReactElement => {
               className="ui-gradient-hero flex size-[60px] items-center justify-center rounded-[var(--radius-panel)] border border-white/70 text-center shadow-whisper"
               href="/home"
             >
-              <span className="font-display text-lg text-foreground">
+              <span
+                className="font-display text-lg text-foreground"
+                translate="no"
+              >
                 P<span className="text-primary">&</span>A
               </span>
             </Link>
             <div className="text-center">
-              <p className="ui-meta">PhuocAnh</p>
+              <p
+                className="ui-meta"
+                translate="no"
+              >
+                PhuocAnh
+              </p>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
                 {t('nav.side.keepsakeSpace')}
               </p>
@@ -94,7 +102,7 @@ export const SideNavigation = (): ReactElement => {
                   <Link
                     className={cn(
                       'relative flex size-14 items-center justify-center rounded-full transition-transform active:translate-y-px',
-                      active ? 'text-foreground' : 'text-muted-foreground',
+                      active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
                     )}
                     href={item.href}
                     key={item.href}

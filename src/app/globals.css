@@ -156,6 +156,13 @@ select {
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Enabled buttons are clickable; disabled buttons keep their not-allowed cursor
+ * (set per-control via `disabled:cursor-not-allowed`). Tailwind v4 preflight no
+ * longer applies a pointer to bare buttons, so set it once here. */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,

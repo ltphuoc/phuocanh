@@ -37,6 +37,12 @@ export interface SectionCardProps
   extends
     HTMLAttributes<HTMLDivElement>,
     Omit<VariantProps<typeof sectionCardVariants>, 'surface'> {
+  /**
+   * When true, the card lifts and deepens its shadow on hover. Defaults to `false`:
+   * a hover-lift reads as "this whole surface is clickable", so it should be opt-in only
+   * for cards that actually navigate/act. Container cards (and clickable cards whose
+   * <Link> wrapper already supplies the lift) should leave it off.
+   */
   readonly hoverLift?: boolean;
   readonly surface?: SectionCardSurface;
   readonly tone?: LegacyTone;
@@ -58,7 +64,7 @@ const getSurfaceFromTone = (tone?: LegacyTone): SectionCardSurface | undefined =
 export const SectionCard = ({
   children,
   className,
-  hoverLift = true,
+  hoverLift = false,
   padding,
   surface,
   tone,

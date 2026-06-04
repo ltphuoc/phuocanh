@@ -75,7 +75,7 @@ export const BottomNavigation = (): ReactElement => {
                         className="size-[18px]"
                         strokeWidth={2.2}
                       />
-                      <span className="text-[10px] font-semibold tracking-[0.04em] uppercase">
+                      <span className="text-[11px] font-semibold tracking-[0.04em] uppercase">
                         {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
                       </span>
                     </span>
@@ -94,7 +94,9 @@ export const BottomNavigation = (): ReactElement => {
                         aria-haspopup="dialog"
                         className={cn(
                           'relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5',
-                          active || isMoreOpen ? 'text-foreground' : 'text-muted-foreground',
+                          active || isMoreOpen
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground',
                         )}
                         onClick={() =>
                           setMoreSheetState({
@@ -110,7 +112,9 @@ export const BottomNavigation = (): ReactElement => {
                       <Link
                         className={cn(
                           'relative flex min-w-[72px] items-center justify-center rounded-full px-2 py-2.5',
-                          active ? 'text-foreground' : 'text-muted-foreground',
+                          active
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground',
                         )}
                         href={item.href}
                       >

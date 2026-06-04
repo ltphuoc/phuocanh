@@ -527,7 +527,7 @@
   },
   "loading": {
     "description": "Please wait a moment.",
-    "title": "Loading"
+    "title": "Loading…"
   },
   "notFound": {
     "description": "This page does not exist.",
