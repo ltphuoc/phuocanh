@@ -29,10 +29,10 @@ export const PageHeader = ({
     className={cn(
       'relative overflow-hidden border p-5 md:p-7',
       surface === 'hero'
-        ? 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/64 shadow-cloud'
+        ? 'ui-gradient-hero rounded-hero border-white/64 shadow-cloud'
         : surface === 'glass'
-          ? 'rounded-[var(--radius-hero)] border-white/70 bg-card shadow-whisper'
-          : 'rounded-[var(--radius-panel)] border-white/72 bg-card/95 shadow-whisper',
+          ? 'rounded-hero border-white/70 bg-card shadow-whisper'
+          : 'rounded-panel border-white/72 bg-card/95 shadow-whisper',
       className,
     )}
     {...props}
@@ -41,7 +41,7 @@ export const PageHeader = ({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         {eyebrow ? <p className="ui-meta ui-couple-mark">{eyebrow}</p> : <span />}
         {milestone ? (
-          <span className="rounded-pill bg-white/70 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper">
+          <span className="rounded-pill bg-white/70 px-4 py-2 text-xs font-semibold tracking-meta text-foreground uppercase shadow-whisper">
             {milestone}
           </span>
         ) : null}

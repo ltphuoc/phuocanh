@@ -29,7 +29,7 @@ export const AlbumsClientPage = (): ReactElement => {
   });
   const action = (
     <Link
-      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-whisper transition-colors hover:bg-muted-soft"
       href="/trips"
     >
       {commonT('backToTrips')}
@@ -126,9 +126,7 @@ export const AlbumsClientPage = (): ReactElement => {
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] text-foreground">
-              {albumsT('deferred.title')}
-            </p>
+            <p className="font-display text-title text-foreground">{albumsT('deferred.title')}</p>
           </div>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {albumsT('deferred.description')}

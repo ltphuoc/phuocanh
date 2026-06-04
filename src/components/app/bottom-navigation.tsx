@@ -54,7 +54,7 @@ export const BottomNavigation = (): ReactElement => {
                 <span className="sr-only">{t(appMemoryActionItem.labelKey)}</span>
               </Link>
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-[rgba(255,249,242,0.82)] px-3 py-3 shadow-cloud backdrop-blur-xl">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_72px_minmax(0,1fr)_minmax(0,1fr)] items-end rounded-full border border-white/70 bg-bg-soft/82 px-3 py-3 shadow-cloud backdrop-blur-xl">
               {appMobileNavigationItems.map((item, index) => {
                 const active = isAppNavigationItemActive(pathname, item);
                 const Icon = item.icon;
@@ -64,7 +64,7 @@ export const BottomNavigation = (): ReactElement => {
                   <>
                     {active ? (
                       <motion.span
-                        className="absolute inset-0 rounded-full bg-[rgba(255,255,255,0.88)] shadow-whisper"
+                        className="absolute inset-0 rounded-full bg-white/88 shadow-whisper"
                         layoutId="mobile-dock-active"
                         transition={activeTransition}
                       />
@@ -75,7 +75,7 @@ export const BottomNavigation = (): ReactElement => {
                         className="size-[18px]"
                         strokeWidth={2.2}
                       />
-                      <span className="text-[11px] font-semibold tracking-[0.04em] uppercase">
+                      <span className="text-2xs font-semibold tracking-wider uppercase">
                         {item.mobileLabelKey ? t(item.mobileLabelKey) : t(item.labelKey)}
                       </span>
                     </span>
@@ -125,7 +125,7 @@ export const BottomNavigation = (): ReactElement => {
                 );
               })}
             </div>
-            <div className="pointer-events-none mt-3 text-center text-[11px] font-medium text-muted-foreground">
+            <div className="pointer-events-none mt-3 text-center text-2xs font-medium text-muted-foreground">
               {t('nav.bottom.captureMoment')}
             </div>
           </div>

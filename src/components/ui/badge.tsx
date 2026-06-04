@@ -6,7 +6,7 @@ import { tv } from 'tailwind-variants';
 import { cn } from '@/lib/utils/cn';
 
 const badgeVariants = tv({
-  base: 'inline-flex min-h-8 items-center rounded-pill border px-3 py-1 text-xs font-semibold tracking-[0.06em] uppercase backdrop-blur-md',
+  base: 'inline-flex min-h-8 items-center rounded-pill border px-3 py-1 text-xs font-semibold tracking-meta uppercase backdrop-blur-md',
   variants: {
     variant: {
       neutral: 'border-white/70 bg-white/64 text-muted-foreground',

@@ -61,7 +61,7 @@ export const SettingsClientPage = (): ReactElement => {
       >
         <div className="space-y-2">
           <p className="ui-meta">{settingsT('timezone.eyebrow')}</p>
-          <h2 className="font-display text-[2rem] text-foreground">
+          <h2 className="font-display text-heading-lg text-foreground">
             {settingsT('timezone.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -81,7 +81,7 @@ export const SettingsClientPage = (): ReactElement => {
 
           return (
             <Link
-              className="rounded-2xl border border-border/70 bg-card px-4 py-3 shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+              className="rounded-2xl border border-border/70 bg-card px-4 py-3 shadow-whisper transition-colors hover:bg-muted-soft"
               href={item.href}
               key={item.href}
             >

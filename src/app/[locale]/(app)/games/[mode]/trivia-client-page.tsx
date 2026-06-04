@@ -67,7 +67,7 @@ export const TriviaClientPage = (): ReactElement => {
 
   const action = (
     <Link
-      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-whisper transition-colors hover:bg-muted-soft"
       href="/games"
     >
       {commonT('backToGames')}
@@ -125,7 +125,7 @@ export const TriviaClientPage = (): ReactElement => {
                 />
                 <p className="ui-meta text-primary-foreground/80">{triviaT('round.eyebrow')}</p>
               </div>
-              <h2 className="font-display text-[2rem] text-primary-foreground">
+              <h2 className="font-display text-heading-lg text-primary-foreground">
                 {data.round ? triviaT('round.title') : triviaT('intro.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/82">
@@ -138,12 +138,12 @@ export const TriviaClientPage = (): ReactElement => {
           </div>
 
           {data.round ? (
-            <div className="space-y-4 rounded-[1.7rem] border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
+            <div className="space-y-4 rounded-hero border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
               <div className="flex flex-wrap items-center gap-3 text-xs text-primary-foreground/75 uppercase">
                 <span>{triviaT('round.localDay', { date: data.round.roundDate })}</span>
                 <span>{triviaT('round.answerCount', { count: data.round.answerCount })}</span>
               </div>
-              <p className="font-display text-[2rem] leading-tight text-primary-foreground">
+              <p className="font-display text-heading-lg leading-tight text-primary-foreground">
                 {data.round.clueText}
               </p>
             </div>
@@ -162,7 +162,7 @@ export const TriviaClientPage = (): ReactElement => {
           >
             <div className="space-y-2">
               <p className="ui-meta">{triviaT('composer.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] text-foreground">
+              <h2 className="font-display text-heading text-foreground">
                 {triviaT('composer.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -192,7 +192,7 @@ export const TriviaClientPage = (): ReactElement => {
               />
               <p className="ui-meta">{triviaT('pending.eyebrow')}</p>
             </div>
-            <h2 className="font-display text-[1.8rem] text-foreground">
+            <h2 className="font-display text-heading text-foreground">
               {triviaT('pending.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -207,7 +207,7 @@ export const TriviaClientPage = (): ReactElement => {
           <section className="flex flex-col gap-4">
             <div className="space-y-2">
               <p className="ui-meta">{triviaT('reveal.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] text-foreground">
+              <h2 className="font-display text-heading text-foreground">
                 {triviaT('reveal.title')}
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -244,7 +244,7 @@ export const TriviaClientPage = (): ReactElement => {
                     <p className="text-sm leading-relaxed text-muted-foreground">
                       {triviaT('reveal.selectedAnswer')}
                     </p>
-                    <p className="font-display text-[1.7rem] text-foreground">
+                    <p className="font-display text-title-lg text-foreground">
                       {answer.selectedAnswer}
                     </p>
                     <p className="text-sm font-semibold text-foreground">
@@ -272,7 +272,7 @@ export const TriviaClientPage = (): ReactElement => {
             />
             <p className="ui-meta">{triviaT('statusNote.eyebrow')}</p>
           </div>
-          <h2 className="font-display text-[1.7rem] text-foreground">
+          <h2 className="font-display text-title-lg text-foreground">
             {triviaT('statusNote.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">

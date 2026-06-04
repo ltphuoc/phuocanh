@@ -139,7 +139,7 @@ export const MoreNavigationSheet = ({
           <motion.button
             animate={{ opacity: 1 }}
             aria-label={t('nav.moreSheet.closeAriaLabel')}
-            className="absolute inset-0 bg-[rgba(75,55,66,0.24)] backdrop-blur-sm"
+            className="absolute inset-0 bg-foreground/24 backdrop-blur-sm"
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
             onClick={onClose}
@@ -150,7 +150,7 @@ export const MoreNavigationSheet = ({
             animate={{ opacity: 1, y: 0 }}
             aria-labelledby={titleId}
             aria-modal="true"
-            className="absolute inset-x-4 bottom-4 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.94)] px-5 py-5 shadow-cloud backdrop-blur-xl"
+            className="absolute inset-x-4 bottom-4 rounded-hero border border-white/70 bg-bg-soft/94 px-5 py-5 shadow-cloud backdrop-blur-xl"
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
             id={sheetId}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
@@ -170,7 +170,7 @@ export const MoreNavigationSheet = ({
                 </h2>
               </div>
               <button
-                className="inline-flex size-11 items-center justify-center rounded-full border border-white/72 bg-white/76 text-xs font-semibold tracking-[0.06em] text-foreground uppercase shadow-whisper"
+                className="inline-flex size-11 items-center justify-center rounded-full border border-white/72 bg-white/76 text-xs font-semibold tracking-meta text-foreground uppercase shadow-whisper"
                 onClick={onClose}
                 type="button"
               >
@@ -193,7 +193,7 @@ export const MoreNavigationSheet = ({
                       return (
                         <Link
                           className={cn(
-                            'rounded-[var(--radius-panel)] border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5 active:translate-y-px',
+                            'rounded-panel border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5 active:translate-y-px',
                             isActive
                               ? 'border-primary/20 bg-primary/14'
                               : 'border-white/72 bg-white/74',

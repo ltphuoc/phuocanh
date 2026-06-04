@@ -16,15 +16,11 @@ const sectionCardVariants = tv({
       comfortable: 'p-5 md:p-7',
     },
     surface: {
-      glass:
-        'rounded-[var(--radius-panel)] border-white/70 bg-card shadow-whisper before:bg-white/12',
-      hero: 'ui-gradient-hero rounded-[var(--radius-hero)] border-white/64 shadow-cloud before:bg-white/10',
-      inset:
-        'rounded-[var(--radius-panel)] border-[#e8c8bf]/70 bg-[rgba(255,248,241,0.72)] shadow-none before:bg-white/14',
-      paper:
-        'rounded-[var(--radius-panel)] border-white/72 bg-card/95 shadow-whisper before:bg-white/20',
-      petal:
-        'rounded-[var(--radius-panel)] border-[#e8c8bf]/75 bg-panel/90 shadow-whisper before:bg-white/16',
+      glass: 'rounded-panel border-white/70 bg-card shadow-whisper before:bg-white/12',
+      hero: 'ui-gradient-hero rounded-hero border-white/64 shadow-cloud before:bg-white/10',
+      inset: 'rounded-panel border-stroke-soft/70 bg-card/72 shadow-none before:bg-white/14',
+      paper: 'rounded-panel border-white/72 bg-card/95 shadow-whisper before:bg-white/20',
+      petal: 'rounded-panel border-stroke-soft/75 bg-panel/90 shadow-whisper before:bg-white/16',
     },
   },
   defaultVariants: {

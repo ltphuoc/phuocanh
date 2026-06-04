@@ -11,15 +11,14 @@ export const SonnerToaster = (): ReactElement => (
     toastOptions={{
       classNames: {
         actionButton:
-          '!rounded-xl !border !border-border !bg-card !text-foreground !shadow-[var(--elevation-soft)]',
+          '!rounded-xl !border !border-border !bg-card !text-foreground !shadow-whisper',
         cancelButton:
-          '!rounded-xl !border !border-border !bg-muted-soft !text-foreground !shadow-[var(--elevation-soft)]',
+          '!rounded-xl !border !border-border !bg-muted-soft !text-foreground !shadow-whisper',
         description: '!text-muted-foreground',
         error: '!border !border-border !bg-card !text-foreground',
         info: '!border !border-border !bg-card !text-foreground',
         success: '!border !border-border !bg-card !text-foreground',
-        toast:
-          '!rounded-[var(--radius-panel)] !border !border-border !bg-card !text-foreground !shadow-[var(--elevation-soft)]',
+        toast: '!rounded-panel !border !border-border !bg-card !text-foreground !shadow-whisper',
         warning: '!border !border-border !bg-card !text-foreground',
       },
     }}

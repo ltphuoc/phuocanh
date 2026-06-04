@@ -69,11 +69,11 @@ export const OnThisDayClientPage = (): ReactElement => {
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div>
                   <p className="ui-meta ui-couple-mark">{onThisDayT('stackedReveal.eyebrow')}</p>
-                  <h2 className="mt-2 font-display text-[2rem] text-foreground">
+                  <h2 className="mt-2 font-display text-heading-lg text-foreground">
                     {onThisDayT('stackedReveal.title')}
                   </h2>
                 </div>
-                <div className="rounded-pill border border-white/72 bg-white/72 px-4 py-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
+                <div className="rounded-pill border border-white/72 bg-white/72 px-4 py-2 text-xs font-semibold tracking-meta text-muted-foreground uppercase shadow-whisper">
                   {onThisDayT('stackedReveal.chapterCount', {
                     count: memories.length,
                   })}

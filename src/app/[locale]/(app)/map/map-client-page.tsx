@@ -23,7 +23,7 @@ export const MapClientPage = (): ReactElement => {
   });
   const action = (
     <Link
-      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-whisper transition-colors hover:bg-muted-soft"
       href="/trips"
     >
       {commonT('backToTrips')}

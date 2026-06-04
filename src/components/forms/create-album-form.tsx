@@ -56,7 +56,7 @@ const renderMediaPreview = (
 ): ReactElement => {
   if (candidate.mediaType === 'image' && candidate.signedUrl) {
     return (
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[1.3rem] border border-white/70 bg-white/70 shadow-whisper">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-card border border-white/70 bg-white/70 shadow-whisper">
         <Image
           alt={candidate.note?.trim() || fallbackLabel}
           className="object-cover"
@@ -72,7 +72,7 @@ const renderMediaPreview = (
   if (candidate.mediaType === 'video' && candidate.signedUrl) {
     return (
       <video
-        className="aspect-[4/3] w-full rounded-[1.3rem] border border-white/70 bg-black/80 object-cover shadow-whisper"
+        className="aspect-[4/3] w-full rounded-card border border-white/70 bg-black/80 object-cover shadow-whisper"
         muted
         playsInline
         preload="metadata"
@@ -82,8 +82,8 @@ const renderMediaPreview = (
   }
 
   return (
-    <div className="ui-gradient-memory flex aspect-[4/3] items-end rounded-[1.3rem] border border-white/70 p-4 shadow-whisper">
-      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
+    <div className="ui-gradient-memory flex aspect-[4/3] items-end rounded-card border border-white/70 p-4 shadow-whisper">
+      <div className="rounded-pill border border-white/65 bg-white/78 px-3 py-1.5 text-xs font-semibold tracking-meta text-muted-foreground uppercase shadow-whisper">
         {candidate.mediaType === 'video' ? videoLabel : fallbackLabel}
       </div>
     </div>
@@ -225,7 +225,7 @@ export const CreateAlbumForm = ({
                 />
                 <div
                   className={cn(
-                    'flex h-full cursor-pointer flex-col gap-3 rounded-[1.6rem] border bg-white/72 p-4 shadow-whisper transition-[border-color,box-shadow,transform]',
+                    'flex h-full cursor-pointer flex-col gap-3 rounded-hero border bg-white/72 p-4 shadow-whisper transition-[border-color,box-shadow,transform]',
                     isSelected
                       ? 'border-primary shadow-cloud ring-2 ring-primary/20'
                       : 'border-white/70 hover:-translate-y-0.5 hover:shadow-cloud',
@@ -235,7 +235,7 @@ export const CreateAlbumForm = ({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3">
                       <p className="ui-meta">{happenedAtLabel}</p>
-                      <span className="text-xs font-semibold tracking-[0.06em] text-primary uppercase">
+                      <span className="text-xs font-semibold tracking-meta text-primary uppercase">
                         {isSelected ? formT('selectedLabel') : formT('selectLabel')}
                       </span>
                     </div>
@@ -243,7 +243,7 @@ export const CreateAlbumForm = ({
                       {candidate.note?.trim() || formT('mediaNoteFallback')}
                     </p>
                     {candidate.locationName ? (
-                      <p className="text-xs tracking-[0.06em] text-muted-foreground uppercase">
+                      <p className="text-xs tracking-meta text-muted-foreground uppercase">
                         {candidate.locationName}
                       </p>
                     ) : null}

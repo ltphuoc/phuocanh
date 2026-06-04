@@ -25,7 +25,7 @@ export const EmptyState = ({
 }: EmptyStateProps): ReactElement => (
   <div
     className={cn(
-      'flex min-h-36 flex-col items-center justify-center gap-3 rounded-[var(--radius-panel)] border border-dashed border-[#e8c8bf] bg-panel px-5 py-7 text-center shadow-whisper',
+      'flex min-h-36 flex-col items-center justify-center gap-3 rounded-panel border border-dashed border-stroke-soft bg-panel px-5 py-7 text-center shadow-whisper',
       className,
     )}
   >

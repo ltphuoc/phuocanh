@@ -51,12 +51,12 @@ export const TimelineRibbon = ({ items, timeZone }: TimelineRibbonProps): ReactE
             key={item.id}
           >
             {shouldRenderDivider ? (
-              <div className="sticky top-4 z-10 ml-4 self-start rounded-pill border border-white/72 bg-[rgba(255,249,242,0.84)] px-4 py-2 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper backdrop-blur-xl md:ml-6">
+              <div className="sticky top-4 z-10 ml-4 self-start rounded-pill border border-white/72 bg-bg-soft/84 px-4 py-2 text-xs font-semibold tracking-meta text-muted-foreground uppercase shadow-whisper backdrop-blur-xl md:ml-6">
                 {monthKey}
               </div>
             ) : null}
             <div className="relative">
-              <div className="absolute top-6 left-[-4px] size-3 rounded-full bg-primary shadow-[0_0_0_8px_rgba(255,148,148,0.14)] md:left-0" />
+              <div className="absolute top-6 left-[-4px] size-3 rounded-full bg-primary shadow-focus-blush md:left-0" />
               <MemoryCard
                 className={cn(index % 2 === 0 ? 'md:ml-12' : 'md:mr-12')}
                 happenedAt={item.happenedAt}

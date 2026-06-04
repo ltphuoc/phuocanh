@@ -3,6 +3,8 @@ import nextTs from 'eslint-config-next/typescript';
 import prettier from 'eslint-config-prettier/flat';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
+import noArbitraryDesignTokens from './eslint-rules/no-arbitrary-design-tokens.mjs';
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -80,6 +82,15 @@ const eslintConfig = defineConfig([
       'react-hooks/immutability': 'warn',
       'react-hooks/purity': 'warn',
     },
+  },
+
+  // Keep Tailwind classes on the design-token scale: ban arbitrary values in the
+  // tokenized axes (font-size, tracking, leading, color, radius, shadow) while
+  // allowing layout one-offs and functional var()/calc()/inherit forms.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: { 'design-tokens': { rules: { 'no-arbitrary': noArbitraryDesignTokens } } },
+    rules: { 'design-tokens/no-arbitrary': 'error' },
   },
 ]);
 

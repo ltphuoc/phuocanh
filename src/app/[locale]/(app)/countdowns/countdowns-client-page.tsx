@@ -111,7 +111,7 @@ export const CountdownsClientPage = (): ReactElement => {
         >
           <div className="space-y-2">
             <p className="ui-meta">{countdownsT('composer.eyebrow')}</p>
-            <h2 className="font-display text-[2rem] text-foreground">
+            <h2 className="font-display text-heading-lg text-foreground">
               {countdownsT('composer.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -126,7 +126,7 @@ export const CountdownsClientPage = (): ReactElement => {
         <section className="flex flex-col gap-4">
           <div className="space-y-2">
             <p className="ui-meta">{countdownsT('sections.upcomingEyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] text-foreground">
+            <h2 className="font-display text-heading text-foreground">
               {countdownsT('sections.upcomingTitle')}
             </h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -171,7 +171,7 @@ export const CountdownsClientPage = (): ReactElement => {
         <section className="flex flex-col gap-4">
           <div className="space-y-2">
             <p className="ui-meta">{countdownsT('sections.pastEyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] text-foreground">
+            <h2 className="font-display text-heading text-foreground">
               {countdownsT('sections.pastTitle')}
             </h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -224,7 +224,7 @@ export const CountdownsClientPage = (): ReactElement => {
               className="size-5 text-primary"
               strokeWidth={2.1}
             />
-            <p className="font-display text-[1.5rem] text-foreground">
+            <p className="font-display text-title text-foreground">
               {countdownsT('automationNote.title')}
             </p>
           </div>

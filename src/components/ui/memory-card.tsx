@@ -93,7 +93,7 @@ export const MemoryCard = ({
     >
       <Link
         className={cn(
-          'group relative block overflow-hidden rounded-[var(--radius-memory)] border border-white/72 bg-[rgba(255,248,241,0.9)] shadow-cloud backdrop-blur-xl',
+          'group relative block overflow-hidden rounded-memory border border-white/72 bg-card/90 shadow-cloud backdrop-blur-xl',
           variant === 'compact' ? 'p-4 md:p-5' : 'p-5 md:p-6',
           className,
         )}
@@ -104,14 +104,14 @@ export const MemoryCard = ({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="ui-meta">{monthYearLabel}</p>
-              <p className="mt-2 font-display text-[1.4rem] text-foreground">{dayLabel}</p>
+              <p className="mt-2 font-display text-title-sm text-foreground">{dayLabel}</p>
               <p className="text-sm text-muted-foreground">{weekdayLabel}</p>
             </div>
             {mediaLabel ? <Badge variant="primary">{mediaLabel}</Badge> : null}
           </div>
           <div
             className={cn(
-              'overflow-hidden rounded-[var(--radius-panel)] border border-white/70 bg-white/60',
+              'overflow-hidden rounded-panel border border-white/70 bg-white/60',
               isFeatureVariant ? 'aspect-[4/3]' : 'aspect-[5/3]',
             )}
           >
@@ -128,7 +128,7 @@ export const MemoryCard = ({
               </div>
             ) : (
               <div className="ui-gradient-memory flex h-full items-end p-4">
-                <div className="rounded-pill border border-white/65 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase shadow-whisper">
+                <div className="rounded-pill border border-white/65 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-meta text-muted-foreground uppercase shadow-whisper">
                   {mediaLabel ?? t('journalNote')}
                 </div>
               </div>
@@ -145,11 +145,11 @@ export const MemoryCard = ({
             >
               {noteText}
             </p>
-            <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.06em] text-muted-foreground uppercase">
+            <div className="flex flex-wrap items-center gap-2 text-xs tracking-meta text-muted-foreground uppercase">
               <span>{fullDateLabel}</span>
               {locationName ? (
                 <>
-                  <span className="text-[rgba(121,99,110,0.6)]">/</span>
+                  <span className="text-muted-foreground/60">/</span>
                   <span>{locationName}</span>
                 </>
               ) : null}

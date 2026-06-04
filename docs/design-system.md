@@ -46,6 +46,25 @@ Status tones should stay conservative and palette-adjacent.
 Shared text utilities include `ui-display`, `ui-page-title`, `ui-heading-xl`, `ui-heading-lg`,
 `ui-page-description`, `ui-meta`, and `ui-quote`.
 
+### Font-Size Scale
+
+For one-off sizes that the `ui-*` utilities do not cover, use the `@theme` font-size scale instead
+of arbitrary `text-[Nrem]` values. These tokens set font-size only (no line-height), so line-height
+keeps coming from context or the `ui-*` classes.
+
+| Token             | Size             |
+| ----------------- | ---------------- |
+| `text-2xs`        | `0.6875rem` 11px |
+| `text-title-sm`   | `1.375rem` 22px  |
+| `text-title`      | `1.5rem` 24px    |
+| `text-title-lg`   | `1.6875rem` 27px |
+| `text-heading`    | `1.875rem` 30px  |
+| `text-heading-lg` | `2rem` 32px      |
+| `text-display-sm` | `2.25rem` 36px   |
+
+Letter-spacing uses `tracking-meta` (`0.06em`, the eyebrow/meta tracking) — avoid arbitrary
+`tracking-[…]`.
+
 ## Spacing And Layout
 
 - Vertical rhythm: `SectionStack`
@@ -65,14 +84,19 @@ Container intent:
 
 ## Radius And Elevation
 
-- Control radius: `--radius-control`
-- Panel radius: `--radius-panel`
-- Memory object radius: `--radius-memory`
-- Hero/editorial radius: `--radius-hero`
-- Pill/tag radius: `--radius-pill`
+- Control radius: `--radius-control` (`rounded-control`)
+- Card radius: `--radius-card` (`rounded-card`)
+- Panel radius: `--radius-panel` (`rounded-panel`)
+- Memory object radius: `--radius-memory` (`rounded-memory`)
+- Hero/editorial radius: `--radius-hero` (`rounded-hero`)
+- Pill/tag radius: `--radius-pill` (`rounded-pill`)
 - Standard elevation: `--shadow-whisper`
 - Editorial/floating elevation: `--shadow-cloud`
 - Focus/emphasis glow: `--shadow-glow`
+- Ring glows: `shadow-focus-blush`, `shadow-focus-rose`, `shadow-focus-rose-soft`
+
+Use the named radius utilities (`rounded-card`, `rounded-panel`, …) rather than
+`rounded-[var(--radius-*)]` or raw `rounded-[Nrem]` values.
 
 ## Surface Hierarchy
 
@@ -112,3 +136,10 @@ for stable figure alignment.
 - Do not duplicate component styling per route when a shared primitive exists.
 - Do not describe or implement the current shell as a simple sidebar plus bottom-nav pattern; it is
   dock plus rail/drawer.
+- Do not use arbitrary Tailwind values for typography, color, radius, or shadow
+  (`text-[Nrem]`, `tracking-[…]`, `bg-[rgba(…)]`, `rounded-[Nrem]`, `shadow-[…]`). Use the `@theme`
+  tokens above. The `design-tokens/no-arbitrary` ESLint rule
+  (`eslint-rules/no-arbitrary-design-tokens.mjs`) fails the build on violations. Translucent brand
+  surfaces use the `/alpha` modifier (e.g. `bg-bg-soft/78`, `text-muted-foreground/60`). Layout
+  one-offs (`min-h-[100svh]`, `aspect-[4/3]`, `grid-cols-[…]`, `*-[var(…)]`, `rounded-[calc(…)]`)
+  remain allowed.

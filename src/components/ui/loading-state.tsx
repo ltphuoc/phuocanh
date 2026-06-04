@@ -16,7 +16,7 @@ export const LoadingState = ({
   <div
     aria-live="polite"
     className={cn(
-      'flex flex-col items-center gap-3 rounded-[var(--radius-panel)] border border-white/72 bg-white/62 px-4 py-6 text-center shadow-whisper backdrop-blur-md',
+      'flex flex-col items-center gap-3 rounded-panel border border-white/72 bg-white/62 px-4 py-6 text-center shadow-whisper backdrop-blur-md',
       className,
     )}
   >

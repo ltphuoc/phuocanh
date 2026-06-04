@@ -100,9 +100,7 @@ export const StatsClientPage = (): ReactElement => {
         >
           <div className="space-y-2">
             <p className="ui-meta">{statsT('history.eyebrow')}</p>
-            <h2 className="font-display text-[1.9rem] text-foreground">
-              {statsT('history.title')}
-            </h2>
+            <h2 className="font-display text-heading text-foreground">{statsT('history.title')}</h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
               {statsT('history.description')}
             </p>

@@ -68,11 +68,11 @@ export const SideNavigation = (): ReactElement => {
       <LayoutGroup id="desktop-rail">
         <div className="sticky top-6 flex items-start gap-3">
           <motion.div
-            className="flex w-[92px] flex-col items-center gap-4 rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.72)] p-4 shadow-cloud backdrop-blur-xl"
+            className="flex w-[92px] flex-col items-center gap-4 rounded-hero border border-white/70 bg-bg-soft/72 p-4 shadow-cloud backdrop-blur-xl"
             layout={!reduceMotion}
           >
             <Link
-              className="ui-gradient-hero flex size-[60px] items-center justify-center rounded-[var(--radius-panel)] border border-white/70 text-center shadow-whisper"
+              className="ui-gradient-hero flex size-[60px] items-center justify-center rounded-panel border border-white/70 text-center shadow-whisper"
               href="/home"
             >
               <span
@@ -89,7 +89,7 @@ export const SideNavigation = (): ReactElement => {
               >
                 PhuocAnh
               </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
                 {t('nav.side.keepsakeSpace')}
               </p>
             </div>
@@ -163,7 +163,7 @@ export const SideNavigation = (): ReactElement => {
             {isExpanded ? (
               <motion.div
                 animate={{ opacity: 1, x: 0 }}
-                className="w-[240px] rounded-[var(--radius-hero)] border border-white/70 bg-[rgba(255,249,242,0.78)] p-5 shadow-cloud backdrop-blur-xl"
+                className="w-[240px] rounded-hero border border-white/70 bg-bg-soft/78 p-5 shadow-cloud backdrop-blur-xl"
                 exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -12 }}
                 id={secondaryPanelId}
                 initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -18 }}
@@ -181,7 +181,7 @@ export const SideNavigation = (): ReactElement => {
                     return (
                       <Link
                         className={cn(
-                          'rounded-[var(--radius-panel)] border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5 active:translate-y-px',
+                          'rounded-panel border px-4 py-3 shadow-whisper transition-transform hover:-translate-y-0.5 active:translate-y-px',
                           active
                             ? 'border-primary/20 bg-primary/14'
                             : 'border-white/72 bg-white/72',

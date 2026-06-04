@@ -23,11 +23,11 @@ export const Skeleton = ({
     aria-hidden="true"
     className={cn(
       'animate-pulse bg-muted',
-      radius === 'control' && 'rounded-[var(--radius-control)]',
-      radius === 'panel' && 'rounded-[var(--radius-panel)]',
-      radius === 'memory' && 'rounded-[var(--radius-memory)]',
-      radius === 'hero' && 'rounded-[var(--radius-hero)]',
-      radius === 'pill' && 'rounded-[var(--radius-pill)]',
+      radius === 'control' && 'rounded-control',
+      radius === 'panel' && 'rounded-panel',
+      radius === 'memory' && 'rounded-memory',
+      radius === 'hero' && 'rounded-hero',
+      radius === 'pill' && 'rounded-pill',
       className,
     )}
     {...props}
@@ -125,7 +125,7 @@ export const StatGridSkeleton = ({ label }: LayoutSkeletonProps): ReactElement =
   >
     {[0, 1, 2, 3, 4, 5].map((i) => (
       <div
-        className="flex flex-col gap-3 rounded-[var(--radius-panel)] bg-panel p-5"
+        className="flex flex-col gap-3 rounded-panel bg-panel p-5"
         key={i}
       >
         {/* Label (meta) */}
@@ -166,7 +166,7 @@ export const DetailSkeleton = ({ label }: LayoutSkeletonProps): ReactElement => 
       radius="memory"
     />
     {/* Content card */}
-    <div className="flex flex-col gap-4 rounded-[var(--radius-panel)] bg-panel p-5">
+    <div className="flex flex-col gap-4 rounded-panel bg-panel p-5">
       <Skeleton className="h-5 w-full" />
       <Skeleton className="h-5 w-5/6" />
       <Skeleton className="h-5 w-4/6" />

@@ -18,9 +18,7 @@ export const StatCardTemplate = ({
     surface="glass"
   >
     <p className="ui-meta">{label}</p>
-    <p className="ui-tabular font-display text-[2.15rem] leading-none text-foreground md:text-[2.35rem]">
-      {value}
-    </p>
+    <p className="ui-tabular font-display text-display-sm leading-none text-foreground">{value}</p>
     {trendLabel ? <p className="text-xs text-muted-foreground">{trendLabel}</p> : null}
   </SectionCard>
 );

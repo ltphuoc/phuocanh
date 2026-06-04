@@ -70,7 +70,7 @@ export const InviteLinkForm = (): ReactElement => {
           <p className="text-xs font-semibold text-muted-foreground">{formT('readyStatus')}</p>
           <button
             aria-label={formT('copyLabel')}
-            className="min-h-11 rounded-[var(--radius-control)] border border-white/72 bg-white/78 px-3 py-2 text-left text-xs break-all text-muted-foreground shadow-whisper transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/92 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none"
+            className="min-h-11 rounded-control border border-white/72 bg-white/78 px-3 py-2 text-left text-xs break-all text-muted-foreground shadow-whisper transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/92 focus-visible:ring-3 focus-visible:ring-ring focus-visible:outline-none"
             onClick={async () => {
               await navigator.clipboard.writeText(state.data?.inviteUrl ?? '');
               toast.success(formT('copySuccess'));

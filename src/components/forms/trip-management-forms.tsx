@@ -234,7 +234,7 @@ export const TripManagementForms = ({ data }: TripManagementFormsProps): ReactEl
         </Button>
       </form>
 
-      <div className="border-destructive/20 bg-destructive/5 rounded-[var(--radius-panel)] border p-4">
+      <div className="border-destructive/20 bg-destructive/5 rounded-panel border p-4">
         <label className="flex items-start gap-3 text-sm text-foreground">
           <input
             checked={deleteConfirmed}

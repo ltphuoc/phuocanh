@@ -41,7 +41,7 @@ export const TripCardTemplate = ({
       {locationName ? (
         <p className="text-sm font-medium break-words text-foreground/76">{locationName}</p>
       ) : null}
-      <p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+      <p className="text-xs font-semibold tracking-meta text-muted-foreground uppercase">
         {metaLabel}
       </p>
       {note?.trim() ? (
@@ -56,7 +56,7 @@ export const TripCardTemplate = ({
 
   return (
     <Link
-      className="block rounded-[var(--radius-panel)] transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none active:translate-y-px"
+      className="block rounded-panel transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none active:translate-y-px"
       href={href}
     >
       {content}

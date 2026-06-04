@@ -38,7 +38,7 @@ export const LanguageSwitcher = ({ className }: LanguageSwitcherProps): ReactEle
         return (
           <button
             className={cn(
-              'rounded-pill px-3 py-1.5 text-[11px] font-semibold tracking-[0.06em] uppercase transition-colors',
+              'rounded-pill px-3 py-1.5 text-2xs font-semibold tracking-meta uppercase transition-colors',
               isActive
                 ? 'ui-gradient-active text-primary-foreground'
                 : 'text-muted-foreground hover:bg-white/70',

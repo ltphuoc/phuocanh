@@ -43,7 +43,7 @@ export const AuthShell = async ({
                 {t('description')}
               </p>
             </div>
-            <div className="relative z-10 max-w-md rounded-[var(--radius-panel)] border border-white/72 bg-[rgba(255,255,255,0.72)] px-5 py-5 shadow-whisper backdrop-blur-md">
+            <div className="relative z-10 max-w-md rounded-panel border border-white/72 bg-white/72 px-5 py-5 shadow-whisper backdrop-blur-md">
               <p className="ui-meta">{t('noteLabel')}</p>
               <p className="ui-panel-title mt-3">{helper}</p>
             </div>

@@ -19,7 +19,7 @@ export const ListRow = ({
 }: ListRowProps): ReactElement => (
   <div
     className={cn(
-      'flex min-h-16 items-center justify-between gap-3 rounded-[var(--radius-control)] border border-white/72 bg-white/68 px-4 py-3 shadow-whisper backdrop-blur-md',
+      'flex min-h-16 items-center justify-between gap-3 rounded-control border border-white/72 bg-white/68 px-4 py-3 shadow-whisper backdrop-blur-md',
       className,
     )}
   >

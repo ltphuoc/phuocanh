@@ -279,7 +279,7 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
             <div className="grid gap-2">
               {data.media.map((media) => (
                 <label
-                  className="flex items-center justify-between gap-3 rounded-[var(--radius-panel)] border border-white/72 bg-white/70 px-4 py-3 text-sm"
+                  className="flex items-center justify-between gap-3 rounded-panel border border-white/72 bg-white/70 px-4 py-3 text-sm"
                   key={media.id}
                 >
                   <span className="break-all text-muted-foreground">{media.storagePath}</span>
@@ -329,7 +329,7 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
         </Button>
       </form>
 
-      <div className="border-destructive/20 bg-destructive/5 rounded-[var(--radius-panel)] border p-4">
+      <div className="border-destructive/20 bg-destructive/5 rounded-panel border p-4">
         <label className="flex items-start gap-3 text-sm text-foreground">
           <input
             checked={deleteConfirmed}

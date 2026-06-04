@@ -9,7 +9,7 @@ interface InsetPanelProps extends HTMLAttributes<HTMLDivElement> {
 export const InsetPanel = ({ children, className, ...props }: InsetPanelProps): ReactElement => (
   <div
     className={cn(
-      'rounded-[var(--radius-panel)] border border-[#e8c8bf]/70 bg-card p-4 shadow-none md:p-5',
+      'rounded-panel border border-stroke-soft/70 bg-card p-4 shadow-none md:p-5',
       className,
     )}
     {...props}

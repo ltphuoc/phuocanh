@@ -68,7 +68,7 @@ export const GuessDateClientPage = (): ReactElement => {
 
   const action = (
     <Link
-      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[var(--elevation-soft)] transition-colors hover:bg-muted-soft"
+      className="inline-flex h-10 items-center rounded-2xl border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-whisper transition-colors hover:bg-muted-soft"
       href="/games"
     >
       {commonT('backToGames')}
@@ -134,7 +134,7 @@ export const GuessDateClientPage = (): ReactElement => {
                 />
                 <p className="ui-meta text-primary-foreground/80">{guessDateT('round.eyebrow')}</p>
               </div>
-              <h2 className="font-display text-[2rem] text-primary-foreground">
+              <h2 className="font-display text-heading-lg text-primary-foreground">
                 {data.round ? guessDateT('round.title') : guessDateT('intro.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/82">
@@ -147,12 +147,12 @@ export const GuessDateClientPage = (): ReactElement => {
           </div>
 
           {data.round ? (
-            <div className="space-y-4 rounded-[1.7rem] border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
+            <div className="space-y-4 rounded-hero border border-white/35 bg-white/18 px-5 py-5 text-primary-foreground shadow-cloud backdrop-blur-md">
               <div className="flex flex-wrap items-center gap-3 text-xs text-primary-foreground/75 uppercase">
                 <span>{guessDateT('round.localDay', { date: data.round.roundDate })}</span>
                 <span>{guessDateT('round.answerCount', { count: data.round.answerCount })}</span>
               </div>
-              <p className="font-display text-[2rem] leading-tight text-primary-foreground">
+              <p className="font-display text-heading-lg leading-tight text-primary-foreground">
                 {data.round.clueText}
               </p>
             </div>
@@ -171,7 +171,7 @@ export const GuessDateClientPage = (): ReactElement => {
           >
             <div className="space-y-2">
               <p className="ui-meta">{guessDateT('composer.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] text-foreground">
+              <h2 className="font-display text-heading text-foreground">
                 {guessDateT('composer.title')}
               </h2>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -198,7 +198,7 @@ export const GuessDateClientPage = (): ReactElement => {
               />
               <p className="ui-meta">{guessDateT('pending.eyebrow')}</p>
             </div>
-            <h2 className="font-display text-[1.8rem] text-foreground">
+            <h2 className="font-display text-heading text-foreground">
               {guessDateT('pending.title')}
             </h2>
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -213,7 +213,7 @@ export const GuessDateClientPage = (): ReactElement => {
           <section className="flex flex-col gap-4">
             <div className="space-y-2">
               <p className="ui-meta">{guessDateT('reveal.eyebrow')}</p>
-              <h2 className="font-display text-[1.9rem] text-foreground">
+              <h2 className="font-display text-heading text-foreground">
                 {guessDateT('reveal.title')}
               </h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
@@ -237,7 +237,7 @@ export const GuessDateClientPage = (): ReactElement => {
                     <p className="text-sm leading-relaxed text-muted-foreground">
                       {guessDateT('reveal.guessedDate')}
                     </p>
-                    <p className="font-display text-[1.7rem] text-foreground">
+                    <p className="font-display text-title-lg text-foreground">
                       {format.dateTime(
                         parseDateInputValueInTimeZone(guess.guessedDate, data.context.timeZone),
                         {
@@ -270,7 +270,7 @@ export const GuessDateClientPage = (): ReactElement => {
             />
             <p className="ui-meta">{guessDateT('statusNote.eyebrow')}</p>
           </div>
-          <h2 className="font-display text-[1.7rem] text-foreground">
+          <h2 className="font-display text-title-lg text-foreground">
             {guessDateT('statusNote.title')}
           </h2>
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">

@@ -99,6 +99,26 @@
   --shadow-whisper: var(--shadow-whisper);
   --shadow-cloud: var(--shadow-cloud);
   --shadow-glow: var(--shadow-glow);
+  /* Font-size scale. No `--line-height` companions on purpose: these replace
+   * fixed `text-[Nrem]` utilities that set font-size only, so line-height keeps
+   * coming from context / the `.ui-*` classes. */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-title-sm: 1.375rem; /* 22px */
+  --text-title: 1.5rem; /* 24px */
+  --text-title-lg: 1.6875rem; /* 27px */
+  --text-heading: 1.875rem; /* 30px */
+  --text-heading-lg: 2rem; /* 32px */
+  --text-display-sm: 2.25rem; /* 36px */
+  --tracking-meta: 0.06em;
+  /* Brand colors re-exported so the `/alpha` opacity modifier works
+   * (bg-bg-soft/78). Raw stroke (not the --border mix) matches the literal
+   * `border-[#e8c8bf]` it replaces. */
+  --color-bg-soft: var(--bg-soft);
+  --color-stroke-soft: var(--stroke-soft);
+  --radius-card: 1.375rem; /* 22px */
+  --shadow-focus-blush: 0 0 0 8px rgba(255, 148, 148, 0.14);
+  --shadow-focus-rose: 0 0 0 10px rgba(190, 52, 85, 0.14);
+  --shadow-focus-rose-soft: 0 0 0 10px rgba(190, 52, 85, 0.12);
 }
 
 * {
