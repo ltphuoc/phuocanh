@@ -42,6 +42,17 @@ If SQL, TypeScript mirror files, and docs disagree, trust SQL and update the oth
 - Any mutation that could violate membership count, role uniqueness, invite validity, or storage isolation should be reviewed for RPC ownership.
 - If a new table is couple-scoped, define how `is_couple_member(...)` or an equivalent access rule applies before shipping.
 
+## RLS Policy Completeness
+
+- RLS is enabled on every couple-scoped table, so a missing policy for a verb does not error — it
+  silently matches zero rows. Any change that adds a direct `.delete()` or `.update()` from app code
+  MUST ship a matching membership-scoped policy in the same migration (mirror `albums_delete` in
+  `20260602145000_rls_least_privilege_hardening.sql`).
+- Known partial-policy tables (intentionally lacking a DELETE policy today; `countdowns` also lacks
+  UPDATE): `countdowns`, `wish_items`, `checklists`, `checklist_items`, `couple_invites`. No current
+  feature deletes or edits these directly. Do not add the policies pre-emptively (YAGNI) — add them
+  only alongside the first real direct-write feature.
+
 ## Backward Compatibility Rules
 
 - Prefer additive changes first.

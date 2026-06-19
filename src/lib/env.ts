@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { PublicEnv } from './public-env';
 
 import { z } from 'zod';
