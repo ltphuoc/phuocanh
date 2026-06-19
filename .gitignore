@@ -41,6 +41,8 @@ yarn-error.log*
 
 # agent working artifacts (local scratch; not synced)
 /plans
+.claude/agent-memory/
+.claude/settings.local.json
 
 # vercel
 .vercel
