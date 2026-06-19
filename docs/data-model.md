@@ -93,7 +93,7 @@ This file summarizes the current schema. The authoritative source is always `sup
 - `couple_memberships` UPDATE policy is scoped to the caller's own row; a member cannot modify their partner's membership.
 - `albums` DELETE policy allows deletion only by couple members (enabling empty-album cleanup).
 - `couples.timezone` is protected by a `BEFORE UPDATE` trigger that rejects direct writes from app roles; timezone changes must flow through the `update_couple_timezone()` SECURITY DEFINER RPC to preserve calendar dates in countdowns and future notes.
-- Storage bucket `memory-media` is private.
+- Storage bucket `memory-media` is private, capped at 25 MiB per object (`file_size_limit`), and restricted to `image/*` and `video/*` declared content-types (`allowed_mime_types`).
 - Storage object access is couple-scoped by path policy.
 - `future_note_contents` stores encrypted note bodies and is only decrypted through `get_unlocked_future_note_contents(...)`.
 - `albums` and `album_items` are couple-scoped through RLS.
