@@ -69,7 +69,8 @@ flowchart LR
 - Client forms use `react-hook-form` and submit to Server Actions.
 - Server Actions validate inputs, require auth/couple context where needed, and then:
 - write directly to couple-scoped tables when that is allowed by RLS, or
-- call SQL RPCs when the mutation owns membership/invite invariants
+- call SQL RPCs when the mutation owns membership/invite invariants or needs atomic multi-row writes
+  (for example, memory row plus media through `update_memory_media`)
 - `/games/daily-question` prompt generation calls the OpenAI Responses API from the server and persists through SQL RPCs only.
 - Mutations revalidate affected routes after successful writes.
 
@@ -79,6 +80,7 @@ flowchart LR
 - The auth gate is read-only and does not bootstrap data implicitly.
 - Membership visibility is controlled through `is_couple_member(...)`.
 - Storage visibility and writes are controlled through storage policies keyed off the couple ID in the object path.
+- The `reminder-processor` Edge Function requires a shared invoke secret, so only `pg_cron` (and authorized callers) can trigger reminder delivery.
 - The app layer must not substitute UI checks for SQL ownership rules.
 
 ## Current External Services
@@ -89,6 +91,7 @@ flowchart LR
 - OpenAI Responses API
 - OpenFreeMap and MapLibre GL JS for map display
 - Nominatim through the server-side `/api/geo/search` proxy for place search
+- Resend for reminder email delivery from the `reminder-processor` Edge Function (invoked by `pg_cron` with a shared secret)
 
 There is no live Mapbox integration in the current runtime.
 

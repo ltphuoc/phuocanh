@@ -44,7 +44,8 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 
 - `auth-actions.ts` — `sendMagicLinkAction`, `createInviteAction`, `acceptInviteAction`,
   `completeOnboardingAction`.
-- `memory-actions.ts` — `createMemoryAction`, `updateMemoryAction`, `deleteMemoryAction`.
+- `memory-actions.ts` — `createMemoryAction`, `updateMemoryAction`, `deleteMemoryAction`;
+  `updateMemoryAction` routes media changes through the atomic `update_memory_media` RPC.
 - `list-actions.ts` — `addWishItemAction`, `createChecklistAction`, `addChecklistItemAction`,
   `toggleChecklistItemAction`.
 - `planning-actions.ts` — countdown, future-note, trip, album, visited-place, and couple-timezone
@@ -82,7 +83,8 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 ## Components (`src/components`)
 
 - `ui/` — presentational primitives (`Button`, `Input`, `MemoryCard`, `TravelAtlasShell`, card and
-  template widgets, state components).
+  template widgets, state components, and `skeleton.tsx` loading primitives: `Skeleton`,
+  `TimelineSkeleton`, `CardGridSkeleton`, `StatGridSkeleton`, `DetailSkeleton`).
 - `forms/` — React Hook Form components, one per Server Action flow, plus `location-picker.tsx`.
 - `app/` — navigation: `navigation-model.ts` is the source of truth, consumed by
   `side-navigation.tsx`, `bottom-navigation.tsx`, `more-navigation-sheet.tsx`,
@@ -96,6 +98,8 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 - `utils/` — `cn.ts`, `couple-timezone.ts`, `date-input.ts`, `trip-display.ts`.
 - `location/` — shared location type definitions.
 - `env.ts` / `public-env.ts` — validated server and public environment access.
+- `runtime-env.ts` — shared `isProductionRuntime` detection used by `public-env.ts` and
+  `server/site-url.ts`.
 - `db/schema.ts` — baseline Drizzle inventory only; not a live ORM model.
 - `auth/`, `actions/`, `app-data/` — auth redirect helpers, Server Action utilities, app-data types.
 

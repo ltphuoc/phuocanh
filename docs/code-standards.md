@@ -32,8 +32,9 @@ not override `AGENTS.md` safety boundaries or the source-of-truth order in
 - Wrap Server Actions in TanStack `useMutation` via `src/lib/query/action-mutation.ts`.
 - Same-session freshness is owned by targeted `invalidateQueries(...)`, precise `setQueryData(...)`,
   or optimistic updates — not broad invalidation or hard reloads.
-- Mutations that own membership, invite, encryption, album, or gameplay invariants go through SQL
-  RPCs, never direct table writes.
+- Mutations that own membership, invite, encryption, album, media, or gameplay invariants go through
+  SQL RPCs, never direct table writes. Memory media edits run through the atomic `update_memory_media`
+  RPC so row and media changes commit together.
 
 ### Canonical Form-Error Pattern
 
@@ -85,6 +86,11 @@ Every validated form field follows this structure:
 - Use semantic tokens from `src/app/globals.css`; no route-local hardcoded palette values.
 - Compose class names with `cn(...)` from `src/lib/utils/cn.ts`.
 - Use shared text utilities (`ui-display`, `ui-page-title`, etc.) over ad hoc type scales.
+- No arbitrary Tailwind values for typography, color, radius, or shadow (`text-[Nrem]`,
+  `tracking-[…]`, `bg-[rgba(…)]`, `rounded-[Nrem]`, `shadow-[…]`); use the `@theme` tokens. The
+  `design-tokens/no-arbitrary` ESLint rule (`eslint-rules/no-arbitrary-design-tokens.mjs`) fails the
+  build on violations. Layout one-offs (`min-h-[100svh]`, `aspect-[4/3]`, `grid-cols-[…]`) remain
+  allowed.
 - See `docs/design-system.md` for tokens, typography, spacing, and responsive rules.
 
 ## Internationalization
