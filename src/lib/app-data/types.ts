@@ -55,10 +55,10 @@ export interface MemoryDetailAppData {
     readonly id: string;
     readonly mediaType: 'image' | 'video';
     readonly mimeType: string;
+    readonly originalFileName: string | null;
     readonly signedUrl: string | null;
-    readonly storagePath: string;
   }[];
-  readonly memory: MemoryDetailData;
+  readonly memory: Omit<MemoryDetailData, 'media'>;
 }
 
 export interface CountdownsAppData extends CountdownsPageData {

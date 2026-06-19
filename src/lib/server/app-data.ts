@@ -117,10 +117,23 @@ export const getMemoryDetailAppData = async (
     return null;
   }
 
+  // Destructure media out so the private storage object keys never serialize to the
+  // client through `memory.media`; the server still uses them to sign URLs below.
+  const { media: memoryMedia, ...memoryWithoutMedia } = memory;
+  const signedMedia = await signMemoryMediaStorageItems(memoryMedia);
+
   return {
     context: toAppDataContext(context),
-    media: await signMemoryMediaStorageItems(memory.media),
-    memory,
+    // Ship only client-rendered fields; the private storage object key (storagePath)
+    // must not leave the server.
+    media: signedMedia.map((item) => ({
+      id: item.id,
+      mediaType: item.mediaType,
+      mimeType: item.mimeType,
+      originalFileName: item.originalFileName,
+      signedUrl: item.signedUrl,
+    })),
+    memory: memoryWithoutMedia,
   };
 };
 

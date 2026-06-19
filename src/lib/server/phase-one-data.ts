@@ -58,6 +58,7 @@ export interface MemoryDetailData {
     readonly id: string;
     readonly mediaType: Database['public']['Enums']['media_type'];
     readonly mimeType: string;
+    readonly originalFileName: string | null;
     readonly storagePath: string;
   }[];
   readonly note: string | null;
@@ -374,6 +375,7 @@ export const getMemoryDetailData = async (
       id: media.id,
       mediaType: media.media_type,
       mimeType: media.mime_type,
+      originalFileName: media.original_file_name,
       storagePath: media.storage_path,
     })),
     note: memory.note,

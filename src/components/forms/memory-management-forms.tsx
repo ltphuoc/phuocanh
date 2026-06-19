@@ -282,7 +282,9 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
                   className="flex items-center justify-between gap-3 rounded-panel border border-white/72 bg-white/70 px-4 py-3 text-sm"
                   key={media.id}
                 >
-                  <span className="break-all text-muted-foreground">{media.storagePath}</span>
+                  <span className="break-all text-muted-foreground">
+                    {media.originalFileName ?? media.mimeType}
+                  </span>
                   <span className="flex shrink-0 items-center gap-2 font-semibold text-foreground">
                     <input
                       checked={removedMediaIds.has(media.id)}
