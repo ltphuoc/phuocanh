@@ -77,6 +77,7 @@ export const SubmitGuessDateAnswerForm = ({
             ...current.round,
             answerCount: nextAnswerCount,
             status:
+              current.round.activePartnerCount >= 2 &&
               nextAnswerCount >= current.round.activePartnerCount
                 ? 'completed'
                 : 'waiting_for_partner',
