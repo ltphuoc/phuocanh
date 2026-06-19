@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+import { generateInvite } from './support/journeys/auth-journeys';
 import { waitForMagicLinkUrl } from './support/mailpit';
 import { E2E_BASE_URL, onboardingTimeZone, partnerAStorageStatePath } from './support/runtime';
 import { createPartnerIdentity } from './support/test-data';
@@ -103,16 +104,7 @@ test('E2E-AUTH-003 invite login preserves token through the Mailpit magic link',
     const partnerAPage = await partnerAContext.newPage();
 
     await partnerAPage.goto('/en/home');
-    await partnerAPage.getByRole('button', { name: 'Generate partner invite' }).click();
-
-    const inviteUrlButton = partnerAPage.getByRole('button').filter({
-      hasText: /accept-invite\?token=/,
-    });
-    await expect(inviteUrlButton).toBeVisible();
-    const inviteUrl = (await inviteUrlButton.textContent())?.trim();
-    if (!inviteUrl) {
-      throw new Error('Invite URL button did not contain an invite URL.');
-    }
+    const inviteUrl = await generateInvite(partnerAPage);
 
     const invitePath = new URL(inviteUrl).pathname + new URL(inviteUrl).search;
 

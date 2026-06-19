@@ -49,12 +49,55 @@ export default defineConfig({
       },
     },
     {
+      // Ordered, pre-baseline window: empty-state + couple-global gameplay counts are deterministic
+      // here because nothing has touched the shared couple yet. Runs once, serially.
       dependencies: ['setup'],
-      name: 'chromium',
-      testIgnore: /auth\.setup\.ts/,
+      name: 'first-run',
+      testMatch: /first-run\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: partnerAStorageStatePath,
+      },
+    },
+    {
+      // Seeds rich couple data through the real UI, once, after first-run and before feature tests.
+      dependencies: ['first-run'],
+      name: 'baseline',
+      testMatch: /baseline\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: partnerAStorageStatePath,
+      },
+    },
+    {
+      // Order-independent feature/assertion tests; every test asserts only on its own tokenized rows.
+      dependencies: ['baseline'],
+      name: 'chromium',
+      testIgnore: [
+        /auth\.setup\.ts/,
+        /first-run\.spec\.ts/,
+        /baseline\.setup\.ts/,
+        /\.mobile\.spec\.ts/,
+      ],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: partnerAStorageStatePath,
+      },
+    },
+    {
+      // Phone-viewport pass over high-value flows. Chromium at a 390px viewport (not a WebKit device
+      // descriptor) keeps the existing browser install; mobile onboarding is out of scope under the
+      // single-couple invariant, so these test mobile login → existing-couple home.
+      dependencies: ['baseline'],
+      name: 'mobile',
+      testMatch: /\.mobile\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: partnerAStorageStatePath,
+        viewport: {
+          height: 844,
+          width: 390,
+        },
       },
     },
   ],

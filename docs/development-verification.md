@@ -145,6 +145,30 @@ The harness:
 The suite covers implemented backend-backed routes only. Game slugs other than `daily-question`,
 `guess-date`, and `trivia` are intentionally excluded.
 
+### Project graph and order-independence
+
+All tests run against ONE couple (single-couple invariant) at `workers: 1`. Projects execute in
+dependency order:
+
+1. `setup` (`auth.setup.ts`) — onboards the couple, writes `playwright/.auth/partner-{a,b}.json`.
+2. `first-run` (`first-run.spec.ts`) — the ONLY ordered window. Holds assertions that need a pristine
+   couple: empty-state (`/home`, `/on-this-day`), the games prerequisite gate, and the gameplay
+   flows whose couple-global counts/streak are only deterministic before baseline data exists.
+3. `baseline` (`baseline.setup.ts`) — seeds rich data once through the real UI.
+4. `chromium` — order-independent feature, validation, RLS, and read tests. Each asserts only on its
+   own uniquely-tokenized data (`buildUniqueText`), never absolute counts or empty-state on the
+   shared couple.
+5. `mobile` (`*.mobile.spec.ts`) — Chromium at a 390px viewport over high-value flows.
+
+Reusable UI flows live in `tests/e2e/support/journeys/` (auth/seed/gameplay). When adding a test:
+empty-state or couple-global-count assertions go in `first-run`; everything else goes in `chromium`
+and must be identity-scoped. Two deliberate exceptions in `chromium` read couple-global gameplay
+state — `E2E-GAMESHUB-001` asserts three `Completed` rounds, and the stats reads assert the `1 day`
+streak — safe only because gameplay completion is immutable after `first-run`. A new `chromium` test
+that plays a round or adds a fourth game mode breaks those counts; play rounds in `first-run` instead.
+`browser.newContext()` inherits the project storageState, so guest / fresh-login contexts must pass
+`storageState: { cookies: [], origins: [] }` explicitly.
+
 ## Internationalization
 
 - Locales: `vi` default, `en` supported

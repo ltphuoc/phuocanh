@@ -20,6 +20,12 @@ export const createPartnerIdentity = (label: 'partner-a' | 'partner-b'): Partner
   email: `${label}-${E2E_RUN_TOKEN}@example.com`,
 });
 
+// Mints a unique authenticated email distinct from partner-a/b. Each call adds a random suffix so
+// repeated calls never collide — used for the authed-non-member who lands on `needs_invite` and
+// never joins the single couple.
+export const createUniqueEmail = (label: string): string =>
+  `${label}-${E2E_RUN_TOKEN}-${randomUUID().slice(0, 6)}@example.com`;
+
 export const createOffsetDateInput = (days: number): string =>
   format(addDays(getTimeZoneNow(), days), 'yyyy-MM-dd');
 
