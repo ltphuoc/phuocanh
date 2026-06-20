@@ -424,6 +424,7 @@
     "auth": {
       "invite": {
         "accepted": "Đã chấp nhận lời mời. Chào mừng đến không gian cặp đôi của bạn.",
+        "alreadyMember": "Bạn đã ở trong không gian cặp đôi này rồi. Hãy chia sẻ link mời với người ấy để họ tham gia.",
         "created": "Đã tạo link mời.",
         "coupleFull": "Không gian cặp đôi này đã có đủ hai thành viên hoạt động.",
         "expired": "Lời mời đã hết hạn.",

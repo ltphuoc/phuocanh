@@ -72,6 +72,10 @@ const completeOnboardingSchema = z
   });
 
 const mapAcceptInviteError = (message: string): ActionMessageKey => {
+  if (message.includes('INVITE_ALREADY_MEMBER')) {
+    return 'auth.invite.alreadyMember';
+  }
+
   if (message.includes('INVITE_NOT_FOUND')) {
     return 'auth.invite.invalidOrUsed';
   }

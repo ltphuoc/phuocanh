@@ -20,6 +20,7 @@ export type ActionMessageKey =
   | 'gameplay.trivia.noMemory'
   | 'gameplay.trivia.ready'
   | 'auth.invite.accepted'
+  | 'auth.invite.alreadyMember'
   | 'auth.invite.coupleFull'
   | 'auth.invite.created'
   | 'auth.invite.expired'

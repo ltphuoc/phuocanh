@@ -50,8 +50,17 @@ export const AcceptInviteForm = ({ initialToken }: AcceptInviteFormProps): React
       toast.success(actionsT(actionMessageKey));
       router.replace('/home');
     } catch (error: unknown) {
+      const messageKey = getActionErrorMessage(error);
+
+      // Creator/existing member opening an unused invite is an informational
+      // outcome, not a failure: the token was not consumed and is still usable.
+      if (messageKey === 'auth.invite.alreadyMember') {
+        toast.info(actionsT(messageKey));
+        return;
+      }
+
       console.error('Failed to accept invite', error);
-      toast.error(actionsT(getActionErrorMessage(error)));
+      toast.error(actionsT(messageKey));
     }
   });
 

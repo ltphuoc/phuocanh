@@ -424,6 +424,7 @@
     "auth": {
       "invite": {
         "accepted": "Invite accepted. Welcome to your couple space.",
+        "alreadyMember": "You’re already in this couple space. Share this invite link with your partner so they can join.",
         "created": "Invite link created.",
         "coupleFull": "This couple space already has two active members.",
         "expired": "Invite has expired.",
