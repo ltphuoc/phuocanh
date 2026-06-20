@@ -17,7 +17,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - The current app only creates `active` memberships. There is no UI flow for deactivation yet.
 - The first successful bootstrap always creates `partner_a`.
 - Later invite acceptance assigns the missing active role in the couple.
-- If the invite target user is already an active member of that couple, invite acceptance returns the existing role and marks the invite accepted.
+- If the caller is already an active member of that couple, an unused invite is left intact and acceptance raises `INVITE_ALREADY_MEMBER` without consuming the token (see Invite Lifecycle).
 - Membership updates are scoped to the caller's own row; a member cannot modify their partner's membership status or attributes.
 
 ## Couple Bootstrap Rules
@@ -38,6 +38,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Timezone changes are allowed **only** through the `update_couple_timezone(...)` RPC. Direct `UPDATE` statements from app code are blocked by a trigger to prevent desync of reminder due-dates.
 - Changing the couple timezone preserves the visible calendar date for existing countdowns and future notes by rewriting their stored UTC instants.
 - Changing the couple timezone does not rewrite memory timestamps.
+- Changing the couple timezone reconciles in-flight game rounds inside the same RPC transaction: rounds dated today-or-future under the old zone that are not yet revealed (per each mode's reveal threshold) are deleted, so the next open regenerates a single canonical round under the new zone instead of stranding the old one. Already-revealed rounds — including a solo `guess_date`/`trivia` round at a single answer — and all past rounds are preserved. Child answer/target rows drop via cascade.
 - Couple-level day-boundary features use the saved timezone, including:
   - relationship-day math
   - on-this-day lookup
@@ -54,6 +55,8 @@ This file is the canonical business-rule reference for the current app. If this 
 - Only unused invites (`accepted_at is null`) can be accepted.
 - Expired invites fail.
 - If the couple already has two active members, invite acceptance fails with `COUPLE_FULL`.
+- If the caller is already an active member of the couple, an unused invite is not consumed: acceptance fails with `INVITE_ALREADY_MEMBER` and `accepted_at`/`accepted_by_user_id` stay null, so a creator opening their own link cannot lock out the real invitee. The app surfaces this as an informational notice, not an error.
+- Re-clicking an invite that was already accepted returns `INVITE_NOT_FOUND` (the RPC only opens invites where `accepted_at is null`).
 - Successful invite acceptance creates an active membership, records `accepted_at`, and records `accepted_by_user_id`.
 
 ## Memory And Media Rules
@@ -67,7 +70,9 @@ This file is the canonical business-rule reference for the current app. If this 
 - The app-level upload limit is `25MB`.
 - Memory media is stored in the private `memory-media` bucket.
 - Storage object names must follow the contract `couples/{coupleId}/memories/{memoryId}/{timestamp}-{safeFileName}`.
-- If media upload or media metadata insert fails, the app attempts rollback so partial storage/database state is not left behind.
+- The new-memory form uploads each selected file to the bucket immediately (before the memory row exists), tracking the objects so it can remove them when the user deselects a file, when the submit fails, and best-effort on unmount/navigation. A hard crash or force-closed tab can still leave a residual object; there is no server-side sweep.
+- Memory creation is whole-submission atomic: media metadata is written as a single bulk insert, and if the memory row or the media insert fails the action removes every uploaded storage object and the memory row, so no partial storage/database state is left behind.
+- Deleting a memory or its media propagates into albums: `memory_media` drops via `memories.on delete cascade`, `album_items` drops via `album_items.memory_media_id on delete cascade`, and the app then auto-deletes any album left with zero items. This differs from trip delete, which removes trip-rooted albums but preserves independent memories.
 - Memory locations may store a provider source ID, address, and coordinates alongside the display name.
 - Memory edits can update note, date, location, and media through the `update_memory_media()` RPC. Deleting media or memories removes private storage objects on a best-effort basis.
 
@@ -120,6 +125,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Eligible album media is derived from couple-owned `memory_media` whose parent memory’s local date in the saved couple timezone falls within the trip’s `start_date..end_date` window.
 - Adding media later is allowed, but only for remaining eligible media not already attached to the album.
 - This slice has no captions, reordering, removal, delete flow, or multi-album-per-trip behavior.
+- A memory or media delete can still empty an album indirectly: when its last `album_items` row cascades away, the app deletes the now-empty album (`deleteEmptyAlbums`).
 
 ## Visited Places
 
@@ -140,6 +146,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - A gameplay round is unique per `(couple_id, mode, round_date)`.
 - `game_rounds.round_date` is the couple-local date token derived from the saved `couples.timezone`, not the server timezone.
 - The first successful round creation for a given couple-local day becomes canonical for that day.
+- When the couple timezone changes, `update_couple_timezone(...)` clears not-yet-revealed rounds dated today-or-future under the old zone (using each mode's reveal threshold — `daily_question` at 2 answers, `guess_date`/`trivia` at `greatest(active_partner_count, 1)`), so a date shift cannot strand an in-flight round and break reveal. Revealed and past rounds are preserved.
 - Daily-question prompt generation is on demand, not cron-driven.
 - The stored prompt locale is set by the first successful opener for that couple-local day and is reused for both partners.
 - `game_rounds.prompt_source` records `openai` for generated daily-question prompts and `memory` for guess-date and trivia memory clues.
