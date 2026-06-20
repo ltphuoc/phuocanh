@@ -13,6 +13,7 @@ import { z } from 'zod';
 
 import { createMemoryAction } from '@/app/actions/memory-actions';
 import { LocationPicker } from '@/components/forms/location-picker';
+import { useMemoryMediaUploads } from '@/components/forms/use-memory-media-uploads';
 import { FormSection } from '@/components/layout/form-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +22,6 @@ import { useI18n } from '@/hooks/useI18n';
 import { useRouter } from '@/i18n/navigation';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { invalidateMemoryCreated } from '@/lib/query/app-query-updates';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const buildCreateMemorySchema = (t: ReturnType<typeof useI18n<'forms.memory'>>['t']) =>
   z.object({
@@ -37,31 +37,14 @@ interface CreateMemoryFormProps {
   readonly redirectHref?: '/home' | `/trips/${string}`;
 }
 
-const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-
-const isAllowedMediaMimeType = (mimeType: string): boolean =>
-  ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
-
-const sanitizeFileName = (fileName: string): string =>
-  fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, '_');
-
-const buildStoragePath = (coupleId: string, memoryId: string, fileName: string): string => {
-  const safeName = sanitizeFileName(fileName || 'upload');
-
-  return `couples/${coupleId}/memories/${memoryId}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-};
-
-const cleanupUploadedMemoryMedia = async (
-  supabase: ReturnType<typeof createSupabaseBrowserClient>,
-  storagePath: string,
-): Promise<void> => {
-  const { error } = await supabase.storage.from('memory-media').remove([storagePath]);
-
-  if (error) {
-    console.error('Failed to clean up uploaded memory media', error);
-  }
-};
+const LOCATION_FIELD_KEYS = [
+  'locationName',
+  'locationAddress',
+  'locationLatitude',
+  'locationLongitude',
+  'locationProvider',
+  'locationProviderId',
+] as const;
 
 export const CreateMemoryForm = ({
   coupleId,
@@ -74,9 +57,11 @@ export const CreateMemoryForm = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const mutation = useActionMutation(createMemoryAction);
-  const [supabase] = useState(createSupabaseBrowserClient);
-  const [isUploading, setIsUploading] = useState(false);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  // Stable for the form's lifetime so media uploaded on selection land under the
+  // same memory id that the submit will create.
+  const [memoryId] = useState(() => crypto.randomUUID());
+  const { uploads, isUploading, addFiles, removeUpload, clearTracking, cleanupAll } =
+    useMemoryMediaUploads(coupleId, memoryId);
   const defaultDate = defaultHappenedAt ? parseISO(defaultHappenedAt) : new Date();
   const form = useForm<CreateMemoryValues>({
     defaultValues: {
@@ -91,81 +76,41 @@ export const CreateMemoryForm = ({
 
   const onSubmit = form.handleSubmit(async (values) => {
     const payload = new FormData();
-    const memoryId = crypto.randomUUID();
     payload.set('happenedAt', new Date(values.happenedAtLocal).toISOString());
     payload.set('memoryId', memoryId);
     payload.set('note', values.note ?? '');
     const formElement = document.getElementById('create-memory-form') as HTMLFormElement | null;
     if (formElement) {
       const formData = new FormData(formElement);
-      [
-        'locationName',
-        'locationAddress',
-        'locationLatitude',
-        'locationLongitude',
-        'locationProvider',
-        'locationProviderId',
-      ].forEach((key) => {
+      LOCATION_FIELD_KEYS.forEach((key) => {
         const value = formData.get(key);
         if (typeof value === 'string') {
           payload.set(key, value);
         }
       });
     }
-    const uploadedStoragePaths: string[] = [];
+
+    for (const upload of uploads) {
+      payload.append('mimeType', upload.mimeType);
+      payload.append('originalFileName', upload.originalFileName);
+      payload.append('sizeBytes', String(upload.sizeBytes));
+      payload.append('storagePath', upload.storagePath);
+    }
 
     try {
-      if (mediaFiles.length) {
-        setIsUploading(true);
-      }
-
-      for (const mediaFile of mediaFiles) {
-        if (mediaFile.size > MAX_UPLOAD_BYTES) {
-          toast.error(actionsT('memory.fileTooLarge'));
-          return;
-        }
-
-        if (!isAllowedMediaMimeType(mediaFile.type)) {
-          toast.error(actionsT('memory.unsupportedType'));
-          return;
-        }
-
-        const storagePath = buildStoragePath(coupleId, memoryId, mediaFile.name);
-
-        const { error } = await supabase.storage
-          .from('memory-media')
-          .upload(storagePath, mediaFile, {
-            cacheControl: '3600',
-            upsert: false,
-          });
-
-        if (error) {
-          console.error('Failed to upload memory media', error);
-          toast.error(actionsT('unexpectedError'));
-          return;
-        }
-
-        uploadedStoragePaths.push(storagePath);
-        payload.append('mimeType', mediaFile.type);
-        payload.append('originalFileName', mediaFile.name);
-        payload.append('sizeBytes', String(mediaFile.size));
-        payload.append('storagePath', storagePath);
-      }
-
       const nextState = await mutation.mutateAsync(payload);
       const actionMessageKey = nextState.message || 'unexpectedError';
       toast.success(actionsT(actionMessageKey));
+      // Ownership of the uploaded objects passes to the created memory; clear the
+      // tracking ref BEFORE navigating so the unmount cleanup does not delete them.
+      clearTracking();
       await invalidateMemoryCreated(queryClient);
       router.replace(redirectHref);
     } catch (error: unknown) {
       console.error('Failed to submit memory form', error);
       toast.error(actionsT(getActionErrorMessage(error)));
-
-      for (const uploadedStoragePath of uploadedStoragePaths) {
-        await cleanupUploadedMemoryMedia(supabase, uploadedStoragePath);
-      }
-    } finally {
-      setIsUploading(false);
+      // Submit failed: the uploaded objects are now orphaned, remove them.
+      await cleanupAll();
     }
   });
 
@@ -236,16 +181,39 @@ export const CreateMemoryForm = ({
           name="media"
           accept="image/*,video/*"
           multiple
-          onChange={(event) => setMediaFiles(Array.from(event.target.files ?? []))}
+          onChange={(event) => {
+            const selectedFiles = Array.from(event.target.files ?? []);
+            // Reset the native picker so the same file can be re-selected after
+            // removal; our own list is the source of truth.
+            event.target.value = '';
+            void addFiles(selectedFiles);
+          }}
           type="file"
         />
-        {mediaFiles.length ? (
-          <p
+        {uploads.length ? (
+          <ul
             aria-live="polite"
-            className="mt-2 text-xs font-medium text-muted-foreground"
+            className="mt-2 flex flex-col gap-1"
           >
-            {formT('mediaSelected', { count: mediaFiles.length })}
-          </p>
+            {uploads.map((upload) => (
+              <li
+                key={upload.id}
+                className="flex items-center justify-between gap-2 text-xs"
+              >
+                <span className="truncate font-medium text-muted-foreground">
+                  {upload.originalFileName}
+                </span>
+                <button
+                  aria-label={`${formT('removeMedia')} ${upload.originalFileName}`}
+                  className="text-destructive shrink-0 font-semibold hover:underline"
+                  onClick={() => void removeUpload(upload.id)}
+                  type="button"
+                >
+                  {formT('removeMedia')}
+                </button>
+              </li>
+            ))}
+          </ul>
         ) : null}
       </FormSection>
 
