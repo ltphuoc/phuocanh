@@ -52,7 +52,7 @@ flowchart LR
 - authenticated but needs onboarding
 - authenticated but needs invite
 - authenticated and ready
-- Existing-couple detection uses the service-role fast path when `SUPABASE_SERVICE_ROLE_KEY` is present and otherwise falls back to the security-definer `has_any_couple()` RPC.
+- Existing-couple detection uses the security-definer `has_any_couple()` RPC on the authenticated request path; it no longer uses a service-role admin client.
 
 ## Data Read Flow
 
@@ -81,6 +81,7 @@ flowchart LR
 - Membership visibility is controlled through `is_couple_member(...)`.
 - Storage visibility and writes are controlled through storage policies keyed off the couple ID in the object path.
 - The `reminder-processor` Edge Function requires a shared invoke secret, so only `pg_cron` (and authorized callers) can trigger reminder delivery.
+- The `media-sweeper` Edge Function (hourly `memory-media-sweeper` pg_cron job) deletes orphaned `memory-media` bucket objects through the Storage API. It reuses the same shared invoke secret, selects candidates via the service-role-only `list_orphaned_memory_media(interval, int)` RPC (no `memory_media` row, older than a 24h cutoff), is bounded per run, and ships dry-run by default.
 - The app layer must not substitute UI checks for SQL ownership rules.
 
 ## Current External Services
@@ -90,7 +91,7 @@ flowchart LR
 - Supabase Storage
 - OpenAI Responses API
 - OpenFreeMap and MapLibre GL JS for map display
-- Nominatim through the server-side `/api/geo/search` proxy for place search
+- Nominatim through the server-side `/api/geo/search` proxy for place search. The proxy's result cache and per-user / upstream rate limits are per-process (in-memory), so on a multi-instance deploy throttling is best-effort per instance rather than a single global budget; this is acceptable at the current scale and would need a distributed limiter to enforce globally.
 - Resend for reminder email delivery from the `reminder-processor` Edge Function (invoked by `pg_cron` with a shared secret)
 
 There is no live Mapbox integration in the current runtime.

@@ -55,6 +55,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Only unused invites (`accepted_at is null`) can be accepted.
 - Expired invites fail.
 - If the couple already has two active members, invite acceptance fails with `COUPLE_FULL`.
+- When two valid invites are accepted concurrently, exactly one succeeds; the loser also fails with `COUPLE_FULL` (even when it collides on the active-role unique index rather than the active-count guard), never a raw or unexpected error. The couple still ends with two active members.
 - If the caller is already an active member of the couple, an unused invite is not consumed: acceptance fails with `INVITE_ALREADY_MEMBER` and `accepted_at`/`accepted_by_user_id` stay null, so a creator opening their own link cannot lock out the real invitee. The app surfaces this as an informational notice, not an error.
 - Re-clicking an invite that was already accepted returns `INVITE_NOT_FOUND` (the RPC only opens invites where `accepted_at is null`).
 - Successful invite acceptance creates an active membership, records `accepted_at`, and records `accepted_by_user_id`.
@@ -70,7 +71,8 @@ This file is the canonical business-rule reference for the current app. If this 
 - The app-level upload limit is `25MB`.
 - Memory media is stored in the private `memory-media` bucket.
 - Storage object names must follow the contract `couples/{coupleId}/memories/{memoryId}/{timestamp}-{safeFileName}`.
-- The new-memory form uploads each selected file to the bucket immediately (before the memory row exists), tracking the objects so it can remove them when the user deselects a file, when the submit fails, and best-effort on unmount/navigation. A hard crash or force-closed tab can still leave a residual object; there is no server-side sweep.
+- These media rules are also enforced at the database level by same-row CHECK constraints on `memory_media`, so a direct PostgREST write cannot bypass them: `mime_type` must be `image/*` or `video/*`, `size_bytes` must be `> 0` and `<= 26214400` (25 MiB, matching the bucket `file_size_limit`), and `storage_path` must sit under this row's `couples/{couple_id}/memories/{memory_id}/` prefix.
+- The new-memory form uploads each selected file to the bucket immediately (before the memory row exists), tracking the objects so it can remove them when the user deselects a file, when the submit fails, and best-effort on unmount/navigation. A hard crash or force-closed tab can still leave a residual object; an hourly server-side sweep (`media-sweeper` edge function, driven by the `memory-media-sweeper` pg_cron job) deletes bucket objects that have no `memory_media` row and are older than a 24h cutoff. The cutoff exceeds any realistic compose session so an in-flight upload is never swept, and the sweep ships dry-run (log-only) by default until a clean cycle is observed.
 - Memory creation is whole-submission atomic: media metadata is written as a single bulk insert, and if the memory row or the media insert fails the action removes every uploaded storage object and the memory row, so no partial storage/database state is left behind.
 - Deleting a memory or its media propagates into albums: `memory_media` drops via `memories.on delete cascade`, `album_items` drops via `album_items.memory_media_id on delete cascade`, and the app then auto-deletes any album left with zero items. This differs from trip delete, which removes trip-rooted albums but preserves independent memories.
 - Memory locations may store a provider source ID, address, and coordinates alongside the display name.
@@ -89,6 +91,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Countdowns are couple-scoped and readable by active couple members only.
 - Countdown creation records the creating member in `created_by_user_id` and is authorized by RLS.
 - Countdown dates are stored as UTC timestamps derived from the selected local date in the saved couple timezone.
+- Countdown `title` and `note` validation is enforced in SQL as well as in the app: trimmed `title` length `1..120`, optional `note` max `280` characters.
 - Past countdowns remain visible as history; the current slice does not auto-archive or auto-delete them.
 - Countdowns enqueue one day-of reminder email per active partner based on the saved couple timezone.
 
@@ -111,7 +114,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Trip status is derived in app code as `planned`, `active`, or `completed` from the saved couple timezone day token and the stored date range.
 - The database enforces `end_date >= start_date`.
 - Trips may store a provider source ID, address, and coordinates alongside the trip location display name.
-- Trip edits can update title, date range, notes, and location. Date-range edits are rejected when existing stops would fall outside the new range.
+- Trip edits can update title, date range, notes, and location. Date-range edits are rejected when existing stops would fall outside the new range, and likewise rejected when the trip's album holds photos whose memory date (in the saved couple timezone) would fall outside the new range — both guards leave the trip row unchanged.
 - Trip delete removes the trip plus trip-rooted stops, albums, and album items through database cascades. Independent memories and their media are not deleted.
 
 ## Albums
@@ -168,6 +171,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Daily-question answers remain hidden until both active partners have submitted for the same round.
 - Guess-date actual memory dates and both guesses remain hidden until both active partners have submitted for the same round.
 - Trivia correct locations and both selected answers remain hidden until both active partners have submitted for the same round.
+- Daily-question reveal, the `/stats` completed-round count, and the timezone-reconcile threshold all count only answers from currently-active members (an answer from a since-deactivated member is excluded), matching the guess-date / trivia rule, so the reveal boundary is identical across all three SQL sites.
 - Current gameplay stats are participation-only:
   - completed-round streak
   - total rounds

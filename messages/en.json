@@ -499,6 +499,7 @@
     "trip": {
       "created": "Trip saved.",
       "deleted": "Trip deleted.",
+      "invalidDateRangeWithAlbumMedia": "Remove album photos whose memory date falls outside the new date range before updating this trip.",
       "invalidDateRangeWithStops": "Move or remove stops outside the new date range before updating this trip.",
       "invalidSubmission": "Trip submission is invalid.",
       "updated": "Trip updated."
@@ -523,6 +524,7 @@
     "databaseSetupRequired": "Database setup required",
     "genericDescription": "An unexpected error occurred. Please try again.",
     "genericTitle": "Something went wrong",
+    "refetchFailed": "Couldn’t refresh — showing the last loaded data.",
     "schemaCommandsDescription": "Local migrations are missing. Run these commands, then reload:",
     "tryAgain": "Try again"
   },

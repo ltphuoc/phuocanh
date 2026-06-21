@@ -499,6 +499,7 @@
     "trip": {
       "created": "Đã lưu chuyến đi.",
       "deleted": "Đã xoá chuyến đi.",
+      "invalidDateRangeWithAlbumMedia": "Hãy gỡ những ảnh trong album có ngày kỷ niệm nằm ngoài khoảng ngày mới trước khi cập nhật chuyến đi.",
       "invalidDateRangeWithStops": "Hãy chuyển hoặc xoá các điểm dừng nằm ngoài khoảng ngày mới trước khi cập nhật chuyến đi.",
       "invalidSubmission": "Thông tin chuyến đi không hợp lệ.",
       "updated": "Đã cập nhật chuyến đi."
@@ -523,6 +524,7 @@
     "databaseSetupRequired": "Cần thiết lập cơ sở dữ liệu",
     "genericDescription": "Đã xảy ra lỗi ngoài dự kiến. Vui lòng thử lại.",
     "genericTitle": "Có lỗi xảy ra",
+    "refetchFailed": "Không làm mới được — đang hiển thị dữ liệu đã tải gần nhất.",
     "schemaCommandsDescription": "Thiếu migration local. Hãy chạy các lệnh sau rồi tải lại:",
     "tryAgain": "Thử lại"
   },
