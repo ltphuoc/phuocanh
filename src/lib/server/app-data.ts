@@ -70,9 +70,11 @@ export const getHomeAppData = async (context: CoupleContext): Promise<HomeAppDat
   return {
     checklists: data.checklists,
     context: toAppDataContext(context),
-    memories: data.memories.map((memory) => ({
-      ...memory,
-      imageUrl: imageUrlByMemoryId.get(memory.id) ?? null,
+    // Strip the private storage object key so it never serializes to the client; the
+    // signed `imageUrl` is the only media reference the client needs.
+    memories: data.memories.map(({ storagePath: _storagePath, ...card }) => ({
+      ...card,
+      imageUrl: imageUrlByMemoryId.get(card.id) ?? null,
     })),
     relationshipDays: data.relationshipDays,
     wishItems: data.wishItems,
@@ -101,9 +103,11 @@ export const getOnThisDayAppData = async (context: CoupleContext): Promise<OnThi
 
   return {
     context: toAppDataContext(context),
-    memories: memories.map((memory) => ({
-      ...memory,
-      imageUrl: imageUrlByMemoryId.get(memory.id) ?? null,
+    // Strip the private storage object key so it never serializes to the client; the
+    // signed `imageUrl` is the only media reference the client needs.
+    memories: memories.map(({ storagePath: _storagePath, ...card }) => ({
+      ...card,
+      imageUrl: imageUrlByMemoryId.get(card.id) ?? null,
     })),
   };
 };

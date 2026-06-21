@@ -28,7 +28,10 @@ export interface AppDataContext {
   readonly timeZone: string;
 }
 
-export interface HomeMemoryCard extends MemoryCard {
+// The client card carries the signed `imageUrl` but never the private storage object
+// key (`storagePath`); omitting it here makes re-adding it to these payloads a
+// typecheck error.
+export interface HomeMemoryCard extends Omit<MemoryCard, 'storagePath'> {
   readonly imageUrl: string | null;
 }
 
