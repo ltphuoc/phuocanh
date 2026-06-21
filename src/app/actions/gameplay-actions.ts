@@ -98,6 +98,17 @@ export const ensureDailyQuestionRoundAction = async (
       return createSuccessState('gameplay.dailyQuestion.ready');
     }
 
+    // Re-check immediately before the paid OpenAI call to narrow the window where two
+    // partners opening at once both generate a prompt. This does not fully close the
+    // race (only a DB advisory lock around generate+insert would); ensure_daily_question_round
+    // is idempotent (ON CONFLICT DO NOTHING), so at most one canonical round ever
+    // persists and the residual duplicate call is an accepted cost for a 2-person app.
+    const roundCreatedConcurrently = await getTodayDailyQuestionRoundId(context, roundDate);
+    if (roundCreatedConcurrently) {
+      revalidateGameplayPaths();
+      return createSuccessState('gameplay.dailyQuestion.ready');
+    }
+
     const promptText = await generateDailyQuestionPrompt({
       coupleName: context.coupleName,
       locale: parsed.locale,
