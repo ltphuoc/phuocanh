@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation';
 
 import { isSchemaCacheMissMessage, SchemaReadinessError } from '@/lib/errors';
 import { toLocalizedPathname } from '@/lib/i18n/pathname';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 type MembershipRole = Database['public']['Enums']['membership_role'];
@@ -100,21 +99,9 @@ const getCoupleById = async (coupleId: string): Promise<CoupleRow | null> => {
 };
 
 const hasAnyCouple = async (): Promise<boolean> => {
-  const adminSupabase = createSupabaseAdminClient();
-  if (adminSupabase) {
-    const { data, error } = await adminSupabase.from('couples').select('id').limit(1);
-
-    if (error) {
-      if (isSchemaCacheMissMessage(error.message)) {
-        throw new SchemaReadinessError('public.couples');
-      }
-
-      throw new Error(error.message);
-    }
-
-    return Boolean(data[0]);
-  }
-
+  // Resolve the gate through the SECURITY DEFINER has_any_couple() RPC, which sees
+  // couple existence regardless of RLS. The caller is always authenticated here
+  // (getAuthGateState returns early for guests), so no service-role client is needed.
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc('has_any_couple');
 

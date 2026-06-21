@@ -30,7 +30,7 @@ deployed database.
 | `OPENAI_API_KEY`                      | conditional | daily-question generation | Required unless using the local/E2E stub                               |
 | `OPENAI_DAILY_QUESTION_MODEL`         | no          | daily-question generation | Defaults to `gpt-4o-mini` in app code                                  |
 | `OPENAI_DAILY_QUESTION_STUB_RESPONSE` | test only   | local/E2E                 | Skips OpenAI calls with a fixed prompt                                 |
-| `SUPABASE_SERVICE_ROLE_KEY`           | no          | auth gate fast path       | Runtime falls back to `has_any_couple()` when unset                    |
+| `SUPABASE_SERVICE_ROLE_KEY`           | no          | reminder edge function    | No longer used by the app auth gate (gate uses `has_any_couple()`)     |
 | `E2E_ENABLE_EMAIL_OTP_HELPER`         | test only   | local E2E                 | Never enable in hosted environments                                    |
 
 ### Data API table grants

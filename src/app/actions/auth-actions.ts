@@ -12,6 +12,7 @@ import { hasLocale } from 'next-intl';
 import { z } from 'zod';
 
 import { routing } from '@/i18n/routing';
+import { mapAcceptInviteError } from '@/lib/actions/accept-invite-error-map';
 import { createErrorState, createSuccessState } from '@/lib/actions/action-state';
 import { normalizeAuthRedirectPath } from '@/lib/auth/redirect-path';
 import { env } from '@/lib/env';
@@ -70,30 +71,6 @@ const completeOnboardingSchema = z
       });
     }
   });
-
-const mapAcceptInviteError = (message: string): ActionMessageKey => {
-  if (message.includes('INVITE_ALREADY_MEMBER')) {
-    return 'auth.invite.alreadyMember';
-  }
-
-  if (message.includes('INVITE_NOT_FOUND')) {
-    return 'auth.invite.invalidOrUsed';
-  }
-
-  if (message.includes('INVITE_EXPIRED')) {
-    return 'auth.invite.expired';
-  }
-
-  if (message.includes('COUPLE_FULL')) {
-    return 'auth.invite.coupleFull';
-  }
-
-  if (message.includes('AUTH_REQUIRED')) {
-    return 'auth.signInRequired';
-  }
-
-  return 'unexpectedError';
-};
 
 const mapCompleteOnboardingError = (message: string): ActionMessageKey => {
   if (message.includes('COUPLE_EXISTS')) {

@@ -31,7 +31,7 @@ This file is the canonical “what exists today” route map.
 
 - Reminder cron/invoke uses Vault-backed secrets in hosted environments.
 - Local and CI replay uses a private fallback secret store when Vault is unavailable, so this is no longer a route-capability blocker.
-- Existing-couple auth-gate branching no longer depends on service-role access alone; the runtime now falls back to the authenticated `has_any_couple()` RPC when `SUPABASE_SERVICE_ROLE_KEY` is unset.
+- Existing-couple auth-gate branching uses the authenticated `has_any_couple()` RPC unconditionally; it no longer uses a service-role admin client on the user-triggered path.
 - Cross-session reveal freshness is implemented for `/games/daily-question`, `/games/guess-date`, and `/games/trivia`.
 
 ## Status Definitions
