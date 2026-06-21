@@ -304,6 +304,27 @@ export const updateTripAction = async (
       return createErrorState('trip.invalidDateRangeWithStops');
     }
 
+    // Block a narrowing edit that would strand album photos whose memory date now
+    // falls outside the new window. Mirrors the visited-places guard above; the RPC
+    // reuses add_album_items' couple-timezone eligibility predicate.
+    const { data: orphanedAlbumItemCount, error: orphanedAlbumItemError } = await supabase.rpc(
+      'count_album_items_outside_trip_window',
+      {
+        p_end_date: parsed.endDate,
+        p_start_date: parsed.startDate,
+        p_trip_id: parsed.tripId,
+      },
+    );
+
+    if (orphanedAlbumItemError) {
+      console.error('Failed to validate trip album media before update', orphanedAlbumItemError);
+      return createErrorState('unexpectedError');
+    }
+
+    if ((orphanedAlbumItemCount ?? 0) > 0) {
+      return createErrorState('trip.invalidDateRangeWithAlbumMedia');
+    }
+
     const { error } = await supabase
       .from('trips')
       .update({

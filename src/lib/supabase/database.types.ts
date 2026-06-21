@@ -984,6 +984,10 @@ export type Database = {
         }[];
       };
       configure_phase2_reminder_jobs: { Args: never; Returns: undefined };
+      count_album_items_outside_trip_window: {
+        Args: { p_end_date: string; p_start_date: string; p_trip_id: string };
+        Returns: number;
+      };
       create_album_with_items: {
         Args: {
           album_description: string;

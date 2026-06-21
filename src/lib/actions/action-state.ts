@@ -50,6 +50,7 @@ export type ActionMessageKey =
   | 'settings.timezone.updated'
   | 'trip.created'
   | 'trip.deleted'
+  | 'trip.invalidDateRangeWithAlbumMedia'
   | 'trip.invalidDateRangeWithStops'
   | 'trip.invalidSubmission'
   | 'trip.updated'
