@@ -39,9 +39,9 @@ copy conflicts with the route matrix, trust the route matrix.
 | `src/app/actions`           | Server Actions that own app-layer mutations                                                            |
 | `src/lib/server`            | Auth gate, couple context, app-data reads, site URL resolution                                         |
 | `src/lib/query`             | Query keys, fetchers, hydration, mutation cache updates                                                |
-| `src/lib/supabase`          | Typed server/browser clients and middleware                                                            |
+| `src/lib/supabase`          | Typed server and browser clients                                                                       |
 | `supabase/migrations`       | Authoritative schema, RLS, RPCs, triggers, storage policies                                            |
-| `supabase/functions`        | Reminder Edge Function                                                                                 |
+| `supabase/functions`        | Reminder and media-sweeper Edge Functions                                                              |
 | `docs/product`              | Product rules, flows, feature state, current plan                                                      |
 | `docs`                      | Architecture, codebase map, contracts, data model, code standards, migration, deployment, verification |
 | `docs/agent`                | Agent handbook and source-of-truth order                                                               |
@@ -98,7 +98,7 @@ Use `docs/route-capability-matrix.md` as the canonical current route map.
   - `pnpm typecheck`
   - `pnpm build`
   - `git diff --check`
-- Run `pnpm typecheck:functions` for Edge Function, reminder contract, or reminder docs changes.
+- Run `pnpm typecheck:functions` for Edge Function or docs/contract changes affecting reminder or media-sweeper.
 - Run i18n checks for translation or user-visible copy changes.
 - Consider `pnpm test:e2e` for browser production-flow changes. Never claim a fresh E2E result
   unless it ran in the current change.

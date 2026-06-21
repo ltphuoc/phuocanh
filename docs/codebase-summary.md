@@ -76,8 +76,7 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 
 ## Supabase Clients (`src/lib/supabase`)
 
-- `server.ts`, `client.ts`, `middleware.ts`, `admin.ts` — typed server/browser/middleware/admin
-  clients.
+- `server.ts`, `client.ts` — typed server and browser clients.
 - `database.types.ts` — checked-in TypeScript schema mirror; must match SQL migrations.
 
 ## Components (`src/components`)
@@ -101,7 +100,9 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 - `runtime-env.ts` — shared `isProductionRuntime` detection used by `public-env.ts` and
   `server/site-url.ts`.
 - `db/schema.ts` — baseline Drizzle inventory only; not a live ORM model.
-- `auth/`, `actions/`, `app-data/` — auth redirect helpers, Server Action utilities, app-data types.
+- `auth/` — auth redirect helpers and callback origin utilities.
+- `actions/` — Server Action helpers and shared error mapping (e.g., `accept-invite-error-map.ts`).
+- `app-data/` — app-data types and payload contract.
 
 ## Internationalization
 
@@ -115,4 +116,6 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 - `migrations/` — authoritative schema, RLS, triggers, RPCs, and storage policies.
 - `functions/reminder-processor/` — Deno Edge Function that claims and delivers reminder rows via
   Resend; invoked by `pg_cron`.
+- `functions/media-sweeper/` — Deno Edge Function that deletes orphaned `memory-media` bucket
+  objects; invoked by the `memory-media-sweeper` `pg_cron` job (dry-run by default).
 - `config.toml` — local ports; local Edge Runtime is disabled.

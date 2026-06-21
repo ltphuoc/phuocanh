@@ -117,18 +117,18 @@ the runtime contract.
 
 ## Verification Commands
 
-| Command                     | Run when                                                           |
-| --------------------------- | ------------------------------------------------------------------ |
-| `pnpm format:check`         | Docs/code formatting validation                                    |
-| `pnpm test:unit`            | Logic, utility, form, or query-cache changes                       |
-| `pnpm lint`                 | Every PR baseline                                                  |
-| `pnpm typecheck`            | Every PR baseline                                                  |
-| `pnpm typecheck:functions`  | Edge Function, reminder contract, or reminder docs changes         |
-| `pnpm build`                | Every PR baseline                                                  |
-| `git diff --check`          | Every PR baseline                                                  |
-| `pnpm i18n:check`           | Translation key or locale changes                                  |
-| `pnpm i18n:audit-hardcoded` | User-visible copy changes                                          |
-| `pnpm test:e2e`             | Browser production-flow, auth, route, or critical mutation changes |
+| Command                     | Run when                                                                   |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `pnpm format:check`         | Docs/code formatting validation                                            |
+| `pnpm test:unit`            | Logic, utility, form, or query-cache changes                               |
+| `pnpm lint`                 | Every PR baseline                                                          |
+| `pnpm typecheck`            | Every PR baseline                                                          |
+| `pnpm typecheck:functions`  | Edge Function or docs/contract changes affecting reminder or media-sweeper |
+| `pnpm build`                | Every PR baseline                                                          |
+| `git diff --check`          | Every PR baseline                                                          |
+| `pnpm i18n:check`           | Translation key or locale changes                                          |
+| `pnpm i18n:audit-hardcoded` | User-visible copy changes                                                  |
+| `pnpm test:e2e`             | Browser production-flow, auth, route, or critical mutation changes         |
 
 Baseline before PRs:
 
@@ -139,8 +139,7 @@ pnpm build
 git diff --check
 ```
 
-Also run `pnpm typecheck:functions` when Supabase Edge Functions or reminder docs/contracts are
-touched. Do not claim a fresh E2E result unless `pnpm test:e2e` was actually run in the current
+Also run `pnpm typecheck:functions` when any Supabase Edge Function or related docs/contracts change. Do not claim a fresh E2E result unless `pnpm test:e2e` was actually run in the current
 change.
 
 ## E2E Harness

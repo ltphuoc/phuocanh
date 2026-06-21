@@ -109,7 +109,6 @@ Every validated form field follows this structure:
 ## Verification Baseline
 
 Before PRs, run `pnpm lint`, `pnpm typecheck`, `pnpm build`, and `git diff --check`. Add
-`pnpm typecheck:functions` for Edge Function or reminder-contract changes, and i18n checks for
-copy changes. See `docs/development-verification.md` for the full matrix. Never claim a fresh
+`pnpm typecheck:functions` for Edge Function or docs/contract changes affecting reminder or media-sweeper, and i18n checks for copy changes. See `docs/development-verification.md` for the full matrix. Never claim a fresh
 `pnpm test:e2e` result unless the suite ran in the current change.
 </content>
