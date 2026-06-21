@@ -120,7 +120,7 @@ For manual migration deployment, use the same sequence as the workflow:
    - Storage bucket `memory-media` is private and has the migration-defined policies.
    - RPCs used by app actions and gameplay exist with expected grants.
    - Triggers exist for membership limits, timestamps, reminders, and gameplay invariants.
-   - Cron jobs `phase2-reminder-enqueue` and `phase2-reminder-processor` exist.
+   - Cron jobs `phase2-reminder-enqueue`, `phase2-reminder-processor`, and `memory-media-sweeper` exist.
 
 5. If schema changes landed, regenerate the checked-in Supabase types from a migrated local stack:
 
@@ -130,10 +130,11 @@ For manual migration deployment, use the same sequence as the workflow:
 
    Never edit `src/lib/supabase/database.types.ts` as a substitute for SQL migrations.
 
-6. Deploy the reminder Edge Function:
+6. Deploy the Edge Functions:
 
    ```bash
    supabase functions deploy reminder-processor
+   supabase functions deploy media-sweeper
    ```
 
 7. Set Edge Function secrets with real values outside source control:
@@ -149,6 +150,14 @@ For manual migration deployment, use the same sequence as the workflow:
      REMINDER_LOCALE=vi \
      REMINDER_INVOKE_SECRET=<cryptographically-random-secret>
    ```
+
+   The `media-sweeper` function reuses `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and
+   `REMINDER_INVOKE_SECRET` (the shared cron invoke secret). It ships **dry-run** by
+   default: leave `MEDIA_SWEEPER_DELETE_ENABLED` unset/`false` for the first deploy,
+   observe one clean cycle in the function logs (`mode: "dry_run"`, candidate counts),
+   then set `MEDIA_SWEEPER_DELETE_ENABLED=true` to enable deletion. Optional overrides:
+   `MEDIA_SWEEPER_CUTOFF_INTERVAL` (default `24 hours`) and `MEDIA_SWEEPER_BATCH_SIZE`
+   (default `100`).
 
 8. Set hosted Vault secrets for cron-driven function invocation:
 
@@ -224,11 +233,12 @@ Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.
 3. Sign in as a ready user and confirm private `memory-media` images/videos render through signed
    URLs.
 4. Visit `/games/daily-question` and generate a live question when `OPENAI_API_KEY` is configured.
-5. In Supabase, confirm `phase2-reminder-enqueue` and `phase2-reminder-processor` exist in cron,
-   then run:
+5. In Supabase, confirm `phase2-reminder-enqueue`, `phase2-reminder-processor`, and
+   `memory-media-sweeper` exist in cron, then run:
 
    ```sql
    select public.invoke_reminder_processor();
+   select public.invoke_media_sweeper();
    ```
 
    Confirm it returns a request ID and due rows in `public.reminder_deliveries` advance to `sent`,
