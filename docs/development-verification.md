@@ -33,6 +33,27 @@ deployed database.
 | `SUPABASE_SERVICE_ROLE_KEY`           | no          | auth gate fast path       | Runtime falls back to `has_any_couple()` when unset                    |
 | `E2E_ENABLE_EMAIL_OTP_HELPER`         | test only   | local E2E                 | Never enable in hosted environments                                    |
 
+### Data API table grants
+
+New `public` tables are not auto-exposed to the Data API. Supabase is making this opt-in for all
+projects on 2026-10-30, and the local Supabase stack already behaves this way: tables created by
+migrations (run as the `postgres` role) come up without `select/insert/update/delete` for `anon`/
+`authenticated`, so a direct PostgREST read returns `permission denied for table ...`.
+
+Every new table the app reaches directly through PostgREST must ship its grants in the same
+migration, next to RLS and policies:
+
+```sql
+grant select on public.<table> to authenticated, service_role;                          -- read-only
+grant select, insert, update, delete on public.<table> to authenticated, service_role;  -- app-managed
+-- RLS (already the row/command gate) must be enabled with policies for the table.
+```
+
+Keep RPC-only or sensitive tables ungranted (e.g. encrypted future-note bodies, gameplay
+answer/target tables) so they stay Data-API-invisible. Existing tables are granted in
+`supabase/migrations/20260621140000_data_api_grants_public_tables.sql`; that migration is idempotent
+on the deployed project, which still carries the legacy auto-grants.
+
 ## Reminder Environment
 
 The app runtime and the reminder Edge Function do not use the same secret set.
