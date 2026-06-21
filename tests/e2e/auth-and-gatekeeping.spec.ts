@@ -133,7 +133,14 @@ test('E2E-AUTH-003 invite login preserves token through the Mailpit magic link',
       new RegExp(`${invitePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
     );
     await callbackPage.getByRole('button', { name: 'Join couple space' }).click();
-    await expect(callbackPage).toHaveURL(/\/en\/home$/);
+    // partner-b already joined the couple during setup, so re-accepting an unused
+    // invite no longer burns the token or redirects: accept_couple_invite raises
+    // INVITE_ALREADY_MEMBER, which the app surfaces as a friendly notice while
+    // leaving the caller on the accept-invite page (token stays usable).
+    await expect(callbackPage.getByText(/already in this couple space/i)).toBeVisible();
+    await expect(callbackPage).toHaveURL(
+      new RegExp(`${invitePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`),
+    );
   } finally {
     await guestContext?.close();
     await partnerAContext.close();

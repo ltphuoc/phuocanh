@@ -48,21 +48,12 @@ test('E2E-MEM-000-TYPE unsupported memory media is rejected before save', async 
     mimeType: 'text/plain',
     name: 'unsupported-memory-file.txt',
   });
-  await expect
-    .poll(async () =>
-      mediaInput.evaluate((input) => {
-        const fileInput = input as HTMLInputElement;
 
-        return fileInput.files?.[0]?.type ?? null;
-      }),
-    )
-    .toBe('text/plain');
-  await page.getByLabel('Note').fill(buildUniqueText('Unsupported media note', 'E2E-MEM-000-TYPE'));
-
-  await page.getByRole('button', { name: 'Save memory' }).click();
-
-  await expect(page).toHaveURL(/\/en\/memories\/new$/);
+  // Media uploads on selection, so an unsupported type is rejected immediately
+  // (before any upload) with an error and is never attached to the memory.
   await expect(page.getByText('Only image and video files are supported.')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Remove/ })).toHaveCount(0);
+  await expect(page).toHaveURL(/\/en\/memories\/new$/);
 });
 
 test('E2E-HOME-001 / E2E-MEM-001 / E2E-OTD-001 / E2E-WISH-001 / E2E-CHK-001 memory, wishlist, and checklist flows work across home, detail, and lists', async ({
