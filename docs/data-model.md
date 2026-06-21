@@ -68,6 +68,8 @@ This file summarizes the current schema. The authoritative source is always `sup
 - Unique invite token
 - Storage authorization bound to the couple ID embedded in object paths
 - `future_note_contents.future_note_id` is one-to-one with `future_notes.id`
+- `memory_media.mime_type` must be `image/*` or `video/*`, `size_bytes` must be `0 < n <= 26214400` (25 MiB), and `storage_path` must sit under the row's `couples/{couple_id}/memories/{memory_id}/` prefix (same-row CHECKs backing the Server Action and bucket limits)
+- `countdowns.title` must be trimmed length `1..120`; `countdowns.note` must be null or `<= 280` chars
 - `reminder_deliveries` is unique on `(kind, source_id, recipient_user_id)`
 - `trips.end_date >= trips.start_date`
 - `albums.trip_id` is unique in Slice 3 (`one album per trip`)
