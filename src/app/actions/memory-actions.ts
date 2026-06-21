@@ -216,6 +216,7 @@ const parseUpdateMemoryMediaResult = (
 
 const deleteEmptyAlbums = async (
   supabase: AppSupabaseClient,
+  coupleId: string,
   albumIds: readonly string[],
 ): Promise<void> => {
   if (!albumIds.length) {
@@ -238,9 +239,14 @@ const deleteEmptyAlbums = async (
     return;
   }
 
+  // Defense-in-depth couple scoping: album_items has no couple_id to filter on, but
+  // the albums DELETE does, so a stray cross-couple album id can never be deleted even
+  // if one reached this far. RLS already enforces this; the explicit predicate makes it
+  // local and auditable.
   const { error: albumDeleteError } = await supabase
     .from('albums')
     .delete()
+    .eq('couple_id', coupleId)
     .in('id', emptyAlbumIds);
   if (albumDeleteError) {
     console.error('Failed to delete empty albums after media deletion', albumDeleteError);
@@ -249,15 +255,20 @@ const deleteEmptyAlbums = async (
 
 const getAffectedAlbumIds = async (
   supabase: AppSupabaseClient,
+  coupleId: string,
   mediaIds: readonly string[],
 ): Promise<string[]> => {
   if (!mediaIds.length) {
     return [];
   }
 
+  // Couple-scope the source at its root by requiring the parent album to belong to
+  // this couple (album_items itself has no couple_id). RLS already enforces this; the
+  // inner-join filter makes the scoping explicit.
   const { data, error } = await supabase
     .from('album_items')
-    .select('album_id')
+    .select('album_id, albums!inner(couple_id)')
+    .eq('albums.couple_id', coupleId)
     .in('memory_media_id', [...mediaIds]);
 
   if (error) {
@@ -470,7 +481,7 @@ export const updateMemoryAction = async (
     // Post-commit cleanup, driven by the RPC's returned values: drop now-empty
     // albums and delete the storage objects for removed media.
     const { affectedAlbumIds, removedStoragePaths } = parseUpdateMemoryMediaResult(rpcResult);
-    await deleteEmptyAlbums(supabase, affectedAlbumIds);
+    await deleteEmptyAlbums(supabase, context.coupleId, affectedAlbumIds);
     const storageCleanupError = await removeUploadedStorageObjects(supabase, removedStoragePaths);
     if (storageCleanupError) {
       console.error('Failed to remove memory media storage objects', storageCleanupError);
@@ -513,6 +524,7 @@ export const deleteMemoryAction = async (
 
     const affectedAlbumIds = await getAffectedAlbumIds(
       supabase,
+      context.coupleId,
       mediaRows.map((media) => media.id),
     );
     const { error: deleteError } = await supabase
@@ -526,7 +538,7 @@ export const deleteMemoryAction = async (
       return createErrorState('unexpectedError');
     }
 
-    await deleteEmptyAlbums(supabase, affectedAlbumIds);
+    await deleteEmptyAlbums(supabase, context.coupleId, affectedAlbumIds);
     const cleanupError = await removeUploadedStorageObjects(
       supabase,
       mediaRows.map((media) => media.storage_path),

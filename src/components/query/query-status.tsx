@@ -67,3 +67,28 @@ export const QueryErrorState = ({ onRetry }: QueryErrorStateProps): ReactElement
     </SectionCard>
   );
 };
+
+// Non-blocking affordance shown when a background refetch fails but cached data is
+// still on screen: keep the stale data visible and offer a retry, rather than
+// silently swallowing the error.
+export const QueryRefetchErrorBanner = ({ onRetry }: QueryErrorStateProps): ReactElement => {
+  const { t } = useI18n('errors');
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-lg border border-border/60 bg-muted/40 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+      role="status"
+    >
+      <span className="text-muted-foreground">{t('refetchFailed')}</span>
+      <Button
+        className="w-full sm:w-auto"
+        onClick={onRetry}
+        size="sm"
+        type="button"
+        variant="outline"
+      >
+        {t('tryAgain')}
+      </Button>
+    </div>
+  );
+};

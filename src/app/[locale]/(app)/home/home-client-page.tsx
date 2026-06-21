@@ -13,7 +13,11 @@ import { InviteLinkForm } from '@/components/forms/invite-link-form';
 import { WishItemForm } from '@/components/forms/wish-item-form';
 import { PageHeader } from '@/components/layout/page-header';
 import { SectionStack } from '@/components/layout/section-stack';
-import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
+import {
+  QueryErrorState,
+  QueryLoadingState,
+  QueryRefetchErrorBanner,
+} from '@/components/query/query-status';
 import { AnniversarySpotlight } from '@/components/ui/anniversary-spotlight';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -86,6 +90,7 @@ export const HomeClientPage = (): ReactElement => {
   return (
     <div className="pb-6">
       <SectionStack>
+        {query.isError ? <QueryRefetchErrorBanner onRetry={() => void query.refetch()} /> : null}
         <PageReveal>
           <AnniversarySpotlight
             coupleStartedAt={data.context.coupleStartedAt}

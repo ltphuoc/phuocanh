@@ -9,6 +9,7 @@ import { hasLocale } from 'next-intl';
 import { routing } from '@/i18n/routing';
 import { normalizeAuthRedirectPath } from '@/lib/auth/redirect-path';
 import { getLocaleFromPathname, toLocalizedPathname } from '@/lib/i18n/pathname';
+import { getSiteUrl } from '@/lib/server/site-url';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const isSupportedOtpType = (value: string): value is EmailOtpType =>
@@ -35,14 +36,6 @@ interface PendingCookie {
   readonly value: string;
 }
 
-const getRedirectOrigin = (request: NextRequest, requestUrl: URL): string => {
-  const forwardedHost = request.headers.get('x-forwarded-host');
-  const host = forwardedHost ?? request.headers.get('host');
-  const protocol = request.headers.get('x-forwarded-proto') ?? requestUrl.protocol.replace(':', '');
-
-  return host ? `${protocol}://${host}` : requestUrl.origin;
-};
-
 const createRedirectResponse = (
   redirectOrigin: string,
   targetPath: string,
@@ -59,7 +52,10 @@ const createRedirectResponse = (
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const requestUrl = new URL(request.url);
-  const redirectOrigin = getRedirectOrigin(request, requestUrl);
+  // Route the redirect origin through the prod-hardened helper: in production it uses
+  // the configured site URL and ignores forwarded headers, matching getSiteUrl()'s
+  // posture (the redirect path itself is already same-origin validated below).
+  const redirectOrigin = await getSiteUrl();
   const fallbackLocale = resolveFallbackLocale(request);
   const fallbackPath = toLocalizedPathname(fallbackLocale, '/home');
   const authCode = requestUrl.searchParams.get('code');

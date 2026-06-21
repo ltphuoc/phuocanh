@@ -7,7 +7,11 @@ import { CalendarDays } from 'lucide-react';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { SectionStack } from '@/components/layout/section-stack';
-import { QueryErrorState, QueryLoadingState } from '@/components/query/query-status';
+import {
+  QueryErrorState,
+  QueryLoadingState,
+  QueryRefetchErrorBanner,
+} from '@/components/query/query-status';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MemoryCard } from '@/components/ui/memory-card';
 import { PageReveal } from '@/components/ui/page-reveal';
@@ -49,6 +53,7 @@ export const OnThisDayClientPage = (): ReactElement => {
   return (
     <div>
       <SectionStack>
+        {query.isError ? <QueryRefetchErrorBanner onRetry={() => void query.refetch()} /> : null}
         <PageReveal>
           <PageHeader
             description={onThisDayT('header.description')}

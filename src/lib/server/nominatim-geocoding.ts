@@ -51,6 +51,11 @@ interface SearchNominatimLocationsResult {
   readonly locations: readonly LocationDraft[];
 }
 
+// NOTE: these caches and rate-limit clocks are per-process (in-memory), so on a
+// multi-instance deploy each instance keeps its own cache and throttle. The effective
+// upstream rate can therefore be up to N× the per-process limit with N instances.
+// This is intentional/best-effort for this app's scale; a distributed limiter (e.g.
+// Redis) would be needed to enforce a single global Nominatim budget.
 const locationCache = new Map<string, CacheEntry>();
 const userLastRequestAt = new Map<string, number>();
 let lastUpstreamRequestAt = 0;
