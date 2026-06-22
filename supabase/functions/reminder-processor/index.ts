@@ -4,6 +4,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { Resend } from 'npm:resend';
 import { z } from 'npm:zod@4.3.6';
 
+import { INVOKE_SECRET_HEADER, timingSafeEqualStrings } from './invoke-auth.ts';
+import { buildReminderHtml, buildReminderText } from './reminder-email.ts';
+
 const CLAIM_BATCH_SIZE = 25;
 const MAX_BACKOFF_MINUTES = 6 * 60;
 
@@ -17,24 +20,6 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().trim().min(1),
   SUPABASE_URL: z.url(),
 });
-
-const INVOKE_SECRET_HEADER = 'x-reminder-invoke-secret';
-
-// Constant-time string comparison: avoids leaking how many leading characters
-// matched via an early-return compare. Length is folded into the accumulator so a
-// length mismatch still fails without short-circuiting.
-const timingSafeEqualStrings = (expected: string, provided: string): boolean => {
-  const encoder = new TextEncoder();
-  const expectedBytes = encoder.encode(expected);
-  const providedBytes = encoder.encode(provided);
-
-  let mismatch = expectedBytes.length ^ providedBytes.length;
-  for (let index = 0; index < expectedBytes.length; index += 1) {
-    mismatch |= expectedBytes[index] ^ (providedBytes[index] ?? 0);
-  }
-
-  return mismatch === 0;
-};
 
 const reminderPayloadSchema = z.object({
   dateToken: z.string().trim().min(1),
@@ -57,53 +42,12 @@ const claimedReminderDeliveriesSchema = z.array(claimedReminderDeliverySchema);
 const buildReminderUrl = (appBaseUrl: string, locale: string, routePath: string): string =>
   new URL(`/${locale}${routePath}`, appBaseUrl).toString();
 
-const escapeHtml = (value: string): string =>
-  value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-
 const getReminderIdempotencyKey = (reminderId: string): string => `reminder-delivery/${reminderId}`;
 
 const buildReminderSubject = (
   kind: z.infer<typeof claimedReminderDeliverySchema>['kind'],
   title: string,
 ): string => (kind === 'countdown_day_of' ? `${title} is today` : `Future note unlocked: ${title}`);
-
-const buildReminderText = (
-  reminder: z.infer<typeof claimedReminderDeliverySchema>,
-  reminderUrl: string,
-): string => {
-  const intro =
-    reminder.kind === 'countdown_day_of'
-      ? `Your countdown is due today: ${reminder.payload.title}.`
-      : `Your future note is unlocked today: ${reminder.payload.title}.`;
-
-  return `${intro}\n\nDate: ${reminder.payload.dateToken}\nOpen in app: ${reminderUrl}`;
-};
-
-const buildReminderHtml = (
-  reminder: z.infer<typeof claimedReminderDeliverySchema>,
-  reminderUrl: string,
-): string => {
-  const intro =
-    reminder.kind === 'countdown_day_of'
-      ? 'Your countdown is due today.'
-      : 'Your future note is unlocked today.';
-  const escapedIntro = escapeHtml(intro);
-  const escapedTitle = escapeHtml(reminder.payload.title);
-  const escapedDateToken = escapeHtml(reminder.payload.dateToken);
-  const escapedReminderUrl = escapeHtml(reminderUrl);
-
-  return [
-    `<p>${escapedIntro}</p>`,
-    `<p><strong>${escapedTitle}</strong></p>`,
-    `<p>Date: ${escapedDateToken}</p>`,
-    `<p><a href="${escapedReminderUrl}">Open in app</a></p>`,
-  ].join('');
-};
 
 const getRetryDelayMinutes = (attempts: number): number => {
   const exponentialDelay = Math.min(2 ** Math.max(attempts - 1, 0) * 15, MAX_BACKOFF_MINUTES);

@@ -17,6 +17,7 @@
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "test:e2e": "./scripts/e2e/run.sh",
     "test:e2e:headed": "./scripts/e2e/run.sh --headed",
+    "test:functions": "deno test --config ./supabase/functions/reminder-processor/deno.json ./supabase/functions/reminder-processor",
     "typecheck": "tsc --noEmit",
     "typecheck:functions": "deno check --config ./supabase/functions/reminder-processor/deno.json ./supabase/functions/reminder-processor/index.ts && deno check --config ./supabase/functions/media-sweeper/deno.json ./supabase/functions/media-sweeper/index.ts",
     "i18n:check": "node ./scripts/i18n/check-key-parity.mjs && node ./scripts/i18n/check-fallback.mjs",

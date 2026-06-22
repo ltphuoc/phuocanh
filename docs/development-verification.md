@@ -121,6 +121,7 @@ the runtime contract.
 | --------------------------- | -------------------------------------------------------------------------- |
 | `pnpm format:check`         | Docs/code formatting validation                                            |
 | `pnpm test:unit`            | Logic, utility, form, or query-cache changes                               |
+| `pnpm test:functions`       | Reminder-processor Deno unit tests                                         |
 | `pnpm lint`                 | Every PR baseline                                                          |
 | `pnpm typecheck`            | Every PR baseline                                                          |
 | `pnpm typecheck:functions`  | Edge Function or docs/contract changes affecting reminder or media-sweeper |

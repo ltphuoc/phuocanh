@@ -79,8 +79,10 @@ test('E2E-RLS-NONMEMBER an authenticated non-member is denied couple app-data an
 test('E2E-RLS-FOREIGN-ROUTE foreign (valid but non-couple) detail ids render not found', async ({
   page,
 }) => {
-  // Valid UUIDs that do not belong to the couple must 404 — this is the RLS read-isolation guard,
-  // complementing E2E-ROUTE-001 which covers malformed ids.
+  // Valid UUIDs that do not belong to the couple must render the 404 page, NOT a 403 — a 403 would
+  // confirm the row exists and leak its presence. RLS scopes the foreign id to zero rows, so the
+  // loader calls notFound(). This covers the foreign-but-valid case across memories/trips/albums;
+  // malformed ids (not-a-uuid) are covered by E2E-ROUTE-001 in auth-and-gatekeeping.spec.ts.
   for (const path of [
     `/en/memories/${randomUUID()}`,
     `/en/trips/${randomUUID()}`,
