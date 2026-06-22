@@ -66,3 +66,55 @@ describe('couple timezone utilities', () => {
     expect(isSupportedCoupleTimeZone('Not/A_Real_Zone')).toBe(false);
   });
 });
+
+// The couple-default zone (Asia/Ho_Chi_Minh) has no DST, so DST edges use a DST-observing zone.
+// US spring-forward 2026 is 2026-03-08 (02:00 -> 03:00 local); that local day is only 23 hours.
+// Expected values are hand-derived from the EST/EDT offsets and cross-checked against the helpers.
+const DST_TZ = 'America/New_York';
+
+describe('couple timezone DST + leap-year boundaries', () => {
+  test('day-start/end-exclusive stay calendar-correct across the 23-hour spring-forward day', () => {
+    // Start of the DST day is still EST (UTC-5); the next day's start is already EDT (UTC-4).
+    expect(new Date(toTimeZoneDateStartIso('2026-03-08', DST_TZ)).toISOString()).toBe(
+      '2026-03-08T05:00:00.000Z',
+    );
+    // End-exclusive is exactly the NEXT calendar day's local start (04:00Z, EDT) — 23 hours after
+    // the start, NOT a naive +24h (which would land on 2026-03-09T05:00:00.000Z).
+    expect(new Date(toTimeZoneDateEndExclusiveIso('2026-03-08', DST_TZ)).toISOString()).toBe(
+      '2026-03-09T04:00:00.000Z',
+    );
+    expect(toTimeZoneDateEndExclusiveIso('2026-03-08', DST_TZ)).toBe(
+      toTimeZoneDateStartIso('2026-03-09', DST_TZ),
+    );
+  });
+
+  test('derives the local date token without off-by-one as the DST offset switches', () => {
+    // End of the DST day: the midnight boundary must use EDT (UTC-4), not the pre-shift EST.
+    expect(getDateTokenForInstantInTimeZone('2026-03-09T03:59:00Z', DST_TZ)).toBe('2026-03-08');
+    expect(getDateTokenForInstantInTimeZone('2026-03-09T04:00:00Z', DST_TZ)).toBe('2026-03-09');
+    // Start of the DST day: the midnight boundary is still EST (UTC-5).
+    expect(getDateTokenForInstantInTimeZone('2026-03-08T04:59:00Z', DST_TZ)).toBe('2026-03-07');
+    expect(getDateTokenForInstantInTimeZone('2026-03-08T05:00:00Z', DST_TZ)).toBe('2026-03-08');
+  });
+
+  test('a valid leap day round-trips and day deltas count Feb-29 only in leap years', () => {
+    expect(new Date(toTimeZoneDateStartIso('2024-02-29', DST_TZ)).toISOString()).toBe(
+      '2024-02-29T05:00:00.000Z',
+    );
+    expect(
+      getDateTokenForInstantInTimeZone(toTimeZoneDateStartIso('2024-02-29', DST_TZ), DST_TZ),
+    ).toBe('2024-02-29');
+    // 2024 is a leap year (Feb has 29 days) so Feb-28 -> Mar-01 is 2 days; 2023 is not, so it is 1.
+    expect(getDaysBetweenDateTokens('2024-03-01', '2024-02-28')).toBe(2);
+    expect(getDaysBetweenDateTokens('2023-03-01', '2023-02-28')).toBe(1);
+  });
+
+  test('characterizes the current handling of Feb-29 in a non-leap year (silent roll, no throw)', () => {
+    // parseDateSegments accepts 2023-02-29 (positive integers), and the TZDate/JS Date constructor
+    // overflows the day into the next month — so the input silently normalizes to 2023-03-01 rather
+    // than throwing. Pin the actual behavior; do not invent a stricter contract.
+    expect(
+      getDateTokenForInstantInTimeZone(toTimeZoneDateStartIso('2023-02-29', DST_TZ), DST_TZ),
+    ).toBe('2023-03-01');
+  });
+});
