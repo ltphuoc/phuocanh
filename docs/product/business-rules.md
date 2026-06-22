@@ -94,6 +94,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Checklists are couple-scoped and member-visible through RLS.
 - Checklist item writes are authorized through the parent checklist’s couple membership in SQL.
 - Checklist item actions do not need to fetch the couple context explicitly because RLS enforces the parent checklist relationship.
+- Wish items and checklist items carry no uniqueness constraint by design: duplicate free-text entries are allowed because a couple may legitimately list the same wish or task more than once. Accidental double-submits are a form-layer concern, not a database invariant.
 
 ## Countdowns
 
