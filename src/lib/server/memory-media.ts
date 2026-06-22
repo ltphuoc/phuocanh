@@ -18,7 +18,10 @@ export type SignedStoragePathItem<TItem extends StoragePathItem> = Simplify<
   }
 >;
 
-const MEMORY_MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 15;
+// 4 hours: long enough that a signed URL never expires mid-playback for a long video
+// (the prior 15 min could 403 mid-view), while staying a short-lived bearer link for
+// low-sensitivity couple media. Server-side member-scoped signing is unchanged.
+const MEMORY_MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 60 * 4;
 
 const getStoragePath = (item: StoragePathItem): string | null =>
   'storagePath' in item ? item.storagePath : item.storage_path;

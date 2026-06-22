@@ -19,6 +19,9 @@ vi.mock('@/hooks/useI18n', () => ({
   useI18n: (namespace: string) => ({
     t: (key: string, values?: Record<string, string>) => {
       const translations: Record<string, string> = {
+        confirmCancel: 'Cancel',
+        confirmProceed: 'Yes, change timezone',
+        confirmWarning: 'Changing your timezone may clear today’s not-yet-revealed game rounds.',
         description: 'Shared couple timezone',
         label: 'Couple timezone',
         placeholder: 'Asia/Ho_Chi_Minh',
@@ -92,7 +95,7 @@ describe('UpdateCoupleTimezoneForm', () => {
     expect(mutationMocks.mutateAsync).not.toHaveBeenCalled();
   });
 
-  test('clears validation and submits valid timezone values', async () => {
+  test('clears validation and submits valid timezone values after confirmation', async () => {
     const user = userEvent.setup();
     renderWithQueryClient(<UpdateCoupleTimezoneForm currentTimeZone="Asia/Ho_Chi_Minh" />);
 
@@ -106,10 +109,29 @@ describe('UpdateCoupleTimezoneForm', () => {
     await user.type(timezoneInput, 'America/New_York');
     expect(screen.queryByText('Enter a valid IANA timezone.')).toBeNull();
 
+    // A changed zone is gated: clicking save reveals the confirmation, not a mutation.
     await user.click(screen.getByRole('button', { name: 'Save timezone' }));
+    expect(mutationMocks.mutateAsync).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Yes, change timezone' }));
 
     await waitFor(() => expect(mutationMocks.mutateAsync).toHaveBeenCalledTimes(1));
     const submittedPayload = mutationMocks.mutateAsync.mock.calls[0]?.[0] as FormData;
     expect(submittedPayload.get('timeZone')).toBe('America/New_York');
+  });
+
+  test('cancelling the confirmation does not run the mutation', async () => {
+    const user = userEvent.setup();
+    renderWithQueryClient(<UpdateCoupleTimezoneForm currentTimeZone="Asia/Ho_Chi_Minh" />);
+
+    const timezoneInput = screen.getByLabelText('Couple timezone', { exact: false });
+    await user.clear(timezoneInput);
+    await user.type(timezoneInput, 'America/New_York');
+    await user.click(screen.getByRole('button', { name: 'Save timezone' }));
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(mutationMocks.mutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Save timezone' })).toBeDefined();
   });
 });

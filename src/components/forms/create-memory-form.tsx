@@ -20,13 +20,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useI18n } from '@/hooks/useI18n';
 import { useRouter } from '@/i18n/navigation';
+import { MEMORY_NOTE_MAX_LENGTH } from '@/lib/media/memory-media-validation';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { invalidateMemoryCreated } from '@/lib/query/app-query-updates';
 
 const buildCreateMemorySchema = (t: ReturnType<typeof useI18n<'forms.memory'>>['t']) =>
   z.object({
     happenedAtLocal: z.string().min(1, t('validation.happenedAtRequired')),
-    note: z.string().max(800, t('validation.noteMax')).optional(),
+    note: z.string().max(MEMORY_NOTE_MAX_LENGTH, t('validation.noteMax')).optional(),
   });
 
 type CreateMemoryValues = z.infer<ReturnType<typeof buildCreateMemorySchema>>;

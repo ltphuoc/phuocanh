@@ -203,6 +203,9 @@
     "invite": {
       "copyLabel": "Sao chép link mời",
       "copySuccess": "Đã sao chép link mời.",
+      "emailHint": "Người ấy phải đăng nhập đúng bằng email này để chấp nhận.",
+      "emailLabel": "Email của người ấy",
+      "emailPlaceholder": "nguoiay@example.com",
       "readyStatus": "Link mời đã sẵn sàng.",
       "submit": "Tạo link mời cho người ấy"
     },
@@ -273,7 +276,7 @@
       "deleteSubmit": "Xoá kỷ niệm",
       "validation": {
         "happenedAtRequired": "Hãy chọn thời điểm kỷ niệm này diễn ra.",
-        "noteMax": "Ghi chú tối đa 800 ký tự."
+        "noteMax": "Ghi chú tối đa 4000 ký tự."
       }
     },
     "countdown": {
@@ -338,6 +341,9 @@
     },
     "settingsTimezone": {
       "currentValue": "Múi giờ hiện tại: {timeZone}",
+      "confirmCancel": "Huỷ",
+      "confirmProceed": "Có, đổi múi giờ",
+      "confirmWarning": "Đổi múi giờ có thể xoá các lượt chơi hôm nay chưa được mở, kể cả câu trả lời bạn đã gửi. Hành động này không thể hoàn tác. Tiếp tục?",
       "description": "Múi giờ chung này quyết định ngày đếm ngược, thời điểm mở ghi chú tương lai, trạng thái chuyến đi và các mốc ngày chung khác.",
       "label": "Múi giờ của cặp đôi",
       "placeholder": "Asia/Ho_Chi_Minh…",
@@ -427,7 +433,9 @@
         "alreadyMember": "Bạn đã ở trong không gian cặp đôi này rồi. Hãy chia sẻ link mời với người ấy để họ tham gia.",
         "created": "Đã tạo link mời.",
         "coupleFull": "Không gian cặp đôi này đã có đủ hai thành viên hoạt động.",
+        "emailMismatch": "Lời mời này được gửi đến một email khác. Hãy đăng nhập bằng email mà người ấy đã dùng để mời bạn.",
         "expired": "Lời mời đã hết hạn.",
+        "invalidEmail": "Hãy nhập email hợp lệ cho người ấy.",
         "invalidOrUsed": "Lời mời không hợp lệ hoặc đã được dùng."
       },
       "magicLink": {
@@ -461,6 +469,7 @@
       "invalidSubmission": "Thông tin kỷ niệm không hợp lệ.",
       "missingContent": "Hãy thêm ghi chú hoặc ít nhất một tệp media.",
       "notFound": "Không tìm thấy kỷ niệm.",
+      "svgNotAllowed": "Không hỗ trợ tệp SVG. Hãy chọn ảnh PNG, JPG hoặc định dạng ảnh khác, hoặc video.",
       "unsupportedType": "Chỉ hỗ trợ tệp ảnh và video.",
       "updated": "Đã cập nhật kỷ niệm."
     },
@@ -514,6 +523,9 @@
       "invalidSubmission": "Thông tin địa điểm đã ghé không hợp lệ."
     },
     "settings": {
+      "couple": {
+        "erased": "Đã xoá không gian cặp đôi. Bắt đầu lại bất cứ khi nào bạn sẵn sàng."
+      },
       "timezone": {
         "invalidSubmission": "Thông tin múi giờ không hợp lệ.",
         "updated": "Đã cập nhật múi giờ của cặp đôi."
@@ -1103,6 +1115,14 @@
     },
     "openShell": "Mở giao diện mẫu {label}.",
     "description": "Màn hình này giờ quản lý múi giờ chung của hai bạn. Tài khoản, quyền riêng tư và tuỳ chọn theo từng người vẫn nằm ở các phase sau.",
+    "dangerZone": {
+      "confirmLabel": "Nhập {token} để xác nhận bạn muốn xoá tất cả.",
+      "description": "Xoá vĩnh viễn không gian cặp đôi — mọi kỷ niệm, ảnh, album, chuyến đi, danh sách, đếm ngược, ghi chú tương lai và lượt chơi. Tài khoản đăng nhập vẫn giữ nguyên, nên bạn có thể tạo không gian mới sau đó.",
+      "eyebrow": "Vùng nguy hiểm",
+      "submit": "Xoá không gian cặp đôi",
+      "title": "Xoá không gian cặp đôi này",
+      "warning": "Hành động này xoá vĩnh viễn toàn bộ dữ liệu cặp đôi và media đã tải lên của cả hai. Không thể hoàn tác."
+    },
     "timezone": {
       "description": "Chọn một múi giờ chung duy nhất để xác định mốc nửa đêm cục bộ cho đếm ngược, ghi chú tương lai, album, chuyến đi và bản đồ.",
       "eyebrow": "Múi giờ",

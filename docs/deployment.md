@@ -255,6 +255,40 @@ Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.
    - Database logs do not show repeated RLS, missing relation, missing function, or cron invocation
      errors.
 
+## Media-Sweeper Go-Live
+
+`media-sweeper` ships in dry-run (`MEDIA_SWEEPER_DELETE_ENABLED` defaults to `false`): each run lists
+orphaned storage objects but deletes nothing. Promote it to live deletion only after observing a clean
+dry-run window, so a logic gap can never delete a still-referenced object.
+
+1. **Observe (≥24–48h).** The hourly `memory-media-sweeper` pg_cron job runs the function in dry-run.
+   Collect the response JSON (`mode: "dry_run"`, `candidateCount`) from the Edge Function logs. Confirm
+   candidates are genuine orphans (no `memory_media` row, older than the 24h cutoff) by cross-checking a
+   sample against:
+
+   ```sql
+   select * from public.list_orphaned_memory_media(50, now() - interval '24 hours');
+   ```
+
+   Record the observation window and sample verification under
+   `plans/260621-1909-verified-hardening-backlog/reports/` as ops evidence.
+
+2. **Flip.** Set the secret in the hosted project:
+
+   ```bash
+   supabase secrets set MEDIA_SWEEPER_DELETE_ENABLED=true
+   ```
+
+   The first live run should report `mode: "delete"` with `deletedCount == candidateCount`.
+
+3. **Monitor.** Recheck (periodic log review is enough at current volume) if `candidateCount` trends
+   upward — that signals a compose-cleanup regression leaking objects — or if runs start erroring.
+
+**Rollback:** set `MEDIA_SWEEPER_DELETE_ENABLED=false` (or unset it) to return to dry-run instantly.
+
+Do not skip the observation window. The 24h cutoff protects in-flight uploads, but enabling deletion
+before confirming candidates are true orphans risks removing a valid object.
+
 ## Known Constraints
 
 - The product currently enforces one global couple space, not general multi-tenant SaaS behavior.

@@ -120,7 +120,9 @@ const toTestOrigin = (rawUrl: string): string => {
 };
 
 // Generates a partner invite from the home page and returns the invite URL on the e2e origin.
-export const generateInvite = async (page: Page): Promise<string> => {
+// The invite is bound to invitedEmail; only an accepter signing in with that email can claim it.
+export const generateInvite = async (page: Page, invitedEmail: string): Promise<string> => {
+  await page.getByLabel("Partner's email").fill(invitedEmail);
   await page.getByRole('button', { name: 'Generate partner invite' }).click();
   const inviteUrlButton = page.getByRole('button').filter({
     hasText: /accept-invite\?token=/,
@@ -179,7 +181,7 @@ export const bootstrapCouple = async ({
     timeZone: onboardingTimeZone,
   });
 
-  const inviteUrl = await generateInvite(page);
+  const inviteUrl = await generateInvite(page, partnerB.email);
 
   await page.context().storageState({
     path: partnerAStorageStatePath,

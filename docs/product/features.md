@@ -31,6 +31,16 @@ route-by-route runtime status.
 - Per-user timezone overrides
 - Album captions, reordering, removal, delete flow, and multi-album-per-trip behavior
 - Public sharing, native mobile app, and multi-couple workspaces
+- Daily-question reveal threshold vs active-member count: daily questions reveal at a fixed two
+  answers, while guess-date/trivia reveal at `greatest(active_member_count, 1)`. A couple with only
+  one active member would never reach the two-answer daily-question reveal. **Unreachable today** —
+  there is no membership-deactivation UI, so a one-active-member couple cannot occur. _Revisit when_
+  membership deactivation is built (the same change that makes the active-member gate meaningful at
+  runtime).
+- Full-timeline cursor pagination: the home feed is capped (20) and "on this day" is date-bounded, so
+  no memory list is unbounded today. A future full-timeline view that selects every memory would need
+  a `limit` + keyset/cursor. _Revisit_ once a couple accumulates thousands of memories (years away at
+  two-user volume).
 
 ## Current Non-Contracts
 

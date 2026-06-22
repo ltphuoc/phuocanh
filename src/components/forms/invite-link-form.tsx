@@ -3,12 +3,13 @@
 import type { ReactElement } from 'react';
 import type { ActionStateWithData } from '@/lib/actions/action-state';
 
-import { startTransition, useActionState, useEffect } from 'react';
+import { startTransition, useActionState, useEffect, useState } from 'react';
 
 import { toast } from 'sonner';
 
 import { createInviteAction } from '@/app/actions/auth-actions';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useI18n } from '@/hooks/useI18n';
 import { initialActionState } from '@/lib/actions/action-state';
 
@@ -27,6 +28,7 @@ export const InviteLinkForm = (): ReactElement => {
   const { t: commonT } = useI18n('common');
   const { t: formT } = useI18n('forms.invite');
   const [state, submitAction, isPending] = useActionState(createInviteAction, initialInviteState);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
     const actionMessageKey = state.message || 'unexpectedError';
@@ -43,15 +45,35 @@ export const InviteLinkForm = (): ReactElement => {
   return (
     <div className="flex flex-col gap-3">
       <form
+        className="flex flex-col gap-3"
         onSubmit={(event) => {
           event.preventDefault();
           startTransition(() => {
             const payload = new FormData();
             payload.set('locale', locale);
+            payload.set('email', email);
             submitAction(payload);
           });
         }}
       >
+        <div className="flex flex-col gap-1">
+          <label
+            className="text-sm font-semibold text-foreground"
+            htmlFor="invite-email"
+          >
+            {formT('emailLabel')}
+          </label>
+          <Input
+            autoComplete="off"
+            id="invite-email"
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder={formT('emailPlaceholder')}
+            required
+            type="email"
+            value={email}
+          />
+          <p className="text-xs text-muted-foreground">{formT('emailHint')}</p>
+        </div>
         <Button
           busyLabel={commonT('working')}
           className="w-full md:w-auto"

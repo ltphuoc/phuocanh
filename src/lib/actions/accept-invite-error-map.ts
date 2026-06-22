@@ -8,6 +8,10 @@ export const mapAcceptInviteError = (message: string): ActionMessageKey => {
     return 'auth.invite.alreadyMember';
   }
 
+  if (message.includes('INVITE_EMAIL_MISMATCH')) {
+    return 'auth.invite.emailMismatch';
+  }
+
   if (message.includes('INVITE_NOT_FOUND')) {
     return 'auth.invite.invalidOrUsed';
   }

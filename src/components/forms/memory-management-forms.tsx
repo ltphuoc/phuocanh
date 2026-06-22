@@ -20,6 +20,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useI18n } from '@/hooks/useI18n';
 import { useRouter } from '@/i18n/navigation';
+import {
+  isAllowedMediaMimeType,
+  isDeniedMediaMimeType,
+  MAX_UPLOAD_BYTES,
+  MEMORY_NOTE_MAX_LENGTH,
+} from '@/lib/media/memory-media-validation';
 import { getActionErrorMessage, useActionMutation } from '@/lib/query/action-mutation';
 import { appQueryKeys } from '@/lib/query/app-query-keys';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -27,12 +33,6 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 interface MemoryManagementFormsProps {
   readonly data: MemoryDetailAppData;
 }
-
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
-
-const isAllowedMediaMimeType = (mimeType: string): boolean =>
-  ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
 
 const sanitizeFileName = (fileName: string): string =>
   fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, '_');
@@ -74,7 +74,7 @@ const appendLocationFields = (payload: FormData, form: HTMLFormElement): void =>
 const buildUpdateMemorySchema = (t: ReturnType<typeof useI18n<'forms.memory'>>['t']) =>
   z.object({
     happenedAtLocal: z.string().min(1, t('validation.happenedAtRequired')),
-    note: z.string().max(800, t('validation.noteMax')).optional(),
+    note: z.string().max(MEMORY_NOTE_MAX_LENGTH, t('validation.noteMax')).optional(),
   });
 
 type UpdateMemoryValues = z.infer<ReturnType<typeof buildUpdateMemorySchema>>;
@@ -143,6 +143,11 @@ export const MemoryManagementForms = ({ data }: MemoryManagementFormsProps): Rea
       for (const mediaFile of mediaFiles) {
         if (mediaFile.size > MAX_UPLOAD_BYTES) {
           toast.error(actionsT('memory.fileTooLarge'));
+          return;
+        }
+
+        if (isDeniedMediaMimeType(mediaFile.type)) {
+          toast.error(actionsT('memory.svgNotAllowed'));
           return;
         }
 

@@ -5,10 +5,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { useI18n } from '@/hooks/useI18n';
+import {
+  isAllowedMediaMimeType,
+  isDeniedMediaMimeType,
+  MAX_UPLOAD_BYTES,
+} from '@/lib/media/memory-media-validation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
-const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const MEMORY_MEDIA_BUCKET = 'memory-media';
 
 export interface TrackedUpload {
@@ -18,9 +21,6 @@ export interface TrackedUpload {
   readonly originalFileName: string;
   readonly sizeBytes: number;
 }
-
-const isAllowedMediaMimeType = (mimeType: string): boolean =>
-  ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
 
 const sanitizeFileName = (fileName: string): string =>
   fileName.replaceAll(/[^a-zA-Z0-9.\-_]/g, '_');
@@ -84,6 +84,11 @@ export const useMemoryMediaUploads = (
         for (const file of files) {
           if (file.size > MAX_UPLOAD_BYTES) {
             toast.error(actionsT('memory.fileTooLarge'));
+            continue;
+          }
+
+          if (isDeniedMediaMimeType(file.type)) {
+            toast.error(actionsT('memory.svgNotAllowed'));
             continue;
           }
 

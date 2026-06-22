@@ -203,6 +203,9 @@
     "invite": {
       "copyLabel": "Copy invite link",
       "copySuccess": "Invite link copied.",
+      "emailHint": "Your partner must sign in with this exact email to accept.",
+      "emailLabel": "Partner's email",
+      "emailPlaceholder": "partner@example.com",
       "readyStatus": "Invite link ready.",
       "submit": "Generate partner invite"
     },
@@ -273,7 +276,7 @@
       "deleteSubmit": "Delete memory",
       "validation": {
         "happenedAtRequired": "Choose when this memory happened.",
-        "noteMax": "Keep the note to 800 characters or fewer."
+        "noteMax": "Keep the note to 4000 characters or fewer."
       }
     },
     "countdown": {
@@ -338,6 +341,9 @@
     },
     "settingsTimezone": {
       "currentValue": "Current timezone: {timeZone}",
+      "confirmCancel": "Cancel",
+      "confirmProceed": "Yes, change timezone",
+      "confirmWarning": "Changing your timezone may clear today's not-yet-revealed game rounds, including any answer you've already submitted. This can't be undone. Continue?",
       "description": "This shared timezone controls countdown dates, future note unlocks, trip status, and other couple-level day boundaries.",
       "label": "Couple timezone",
       "placeholder": "Asia/Ho_Chi_Minh…",
@@ -427,7 +433,9 @@
         "alreadyMember": "You’re already in this couple space. Share this invite link with your partner so they can join.",
         "created": "Invite link created.",
         "coupleFull": "This couple space already has two active members.",
+        "emailMismatch": "This invite was sent to a different email. Sign in with the email your partner used to invite you.",
         "expired": "Invite has expired.",
+        "invalidEmail": "Enter a valid email address for your partner.",
         "invalidOrUsed": "Invite is invalid or already used."
       },
       "magicLink": {
@@ -461,6 +469,7 @@
       "invalidSubmission": "Memory submission is invalid.",
       "missingContent": "Add a note or at least one media file.",
       "notFound": "Memory was not found.",
+      "svgNotAllowed": "SVG files aren't supported. Choose a PNG, JPG, or other image, or a video.",
       "unsupportedType": "Only image and video files are supported.",
       "updated": "Memory updated."
     },
@@ -514,6 +523,9 @@
       "invalidSubmission": "Visited place submission is invalid."
     },
     "settings": {
+      "couple": {
+        "erased": "Couple space erased. Start fresh whenever you're ready."
+      },
       "timezone": {
         "invalidSubmission": "Timezone submission is invalid.",
         "updated": "Couple timezone updated."
@@ -1103,6 +1115,14 @@
     },
     "openShell": "Open the {label} shell page.",
     "description": "This screen now owns the couple timezone. Account, privacy, and per-user preferences still remain downstream.",
+    "dangerZone": {
+      "confirmLabel": "Type {token} to confirm you want to erase everything.",
+      "description": "Permanently delete the couple space — every memory, photo, album, trip, list, countdown, future note, and game round. Your sign-in stays, so you can start a brand-new space afterward.",
+      "eyebrow": "Danger zone",
+      "submit": "Erase couple space",
+      "title": "Erase this couple space",
+      "warning": "This permanently deletes all couple data and uploaded media for both of you. It cannot be undone."
+    },
     "timezone": {
       "description": "Choose the single shared timezone that should define local-midnight boundaries across countdowns, future notes, albums, trips, and map views.",
       "eyebrow": "Timezone",

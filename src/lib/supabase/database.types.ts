@@ -273,6 +273,7 @@ export type Database = {
           expires_at: string;
           id: string;
           invited_by_user_id: string;
+          invited_email: string | null;
           token: string;
         };
         Insert: {
@@ -283,6 +284,7 @@ export type Database = {
           expires_at: string;
           id?: string;
           invited_by_user_id: string;
+          invited_email?: string | null;
           token: string;
         };
         Update: {
@@ -293,6 +295,7 @@ export type Database = {
           expires_at?: string;
           id?: string;
           invited_by_user_id?: string;
+          invited_email?: string | null;
           token?: string;
         };
         Relationships: [
@@ -1001,6 +1004,10 @@ export type Database = {
         Args: { note_body: string; note_title: string; note_unlock_at: string };
         Returns: string;
       };
+      delete_empty_albums: {
+        Args: { p_album_ids: string[]; p_couple_id: string };
+        Returns: undefined;
+      };
       enqueue_due_reminder_deliveries: { Args: never; Returns: number };
       ensure_daily_question_round: {
         Args: {
@@ -1020,6 +1027,7 @@ export type Database = {
         Args: { target_round_date: string };
         Returns: string;
       };
+      erase_couple_space: { Args: never; Returns: undefined };
       get_daily_question_round_state: {
         Args: { target_round_date: string };
         Returns: {
@@ -1086,9 +1094,16 @@ export type Database = {
         }[];
       };
       has_any_couple: { Args: never; Returns: boolean };
+      invoke_media_sweeper: { Args: never; Returns: number };
       invoke_reminder_processor: { Args: never; Returns: number };
       is_couple_member: { Args: { target_couple_id: string }; Returns: boolean };
       is_valid_timezone: { Args: { target_timezone: string }; Returns: boolean };
+      list_orphaned_memory_media: {
+        Args: { max_rows: number; older_than: string };
+        Returns: {
+          object_name: string;
+        }[];
+      };
       memories_on_this_day: {
         Args: { target_couple_id: string; target_timezone?: string };
         Returns: {

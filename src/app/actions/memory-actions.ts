@@ -8,11 +8,15 @@ import { z } from 'zod';
 
 import { createErrorState, createSuccessState } from '@/lib/actions/action-state';
 import { revalidateLocalizedPath } from '@/lib/i18n/revalidate';
+import {
+  isAllowedMediaMimeType,
+  isDeniedMediaMimeType,
+  MAX_UPLOAD_BYTES,
+  MEMORY_NOTE_MAX_LENGTH,
+} from '@/lib/media/memory-media-validation';
 import { requireReadyCoupleContext } from '@/lib/server/couple-context';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const ALLOWED_MEDIA_MIME_PREFIXES = ['image/', 'video/'] as const;
 const MEMORY_UPLOAD_PATH_PATTERN =
   /^couples\/([0-9a-f-]{36})\/memories\/([0-9a-f-]{36})\/([0-9]+)-([A-Za-z0-9._-]+)$/i;
 
@@ -41,7 +45,7 @@ const locationSchema = {
 const baseMemorySchema = z.object({
   happenedAt: z.iso.datetime(),
   memoryId: z.uuid(),
-  note: optionalTrimmedString(800),
+  note: optionalTrimmedString(MEMORY_NOTE_MAX_LENGTH),
   ...locationSchema,
 });
 
@@ -62,9 +66,6 @@ interface UploadedMediaInput {
   readonly sizeBytes: number;
   readonly storagePath: string;
 }
-
-const isAllowedMediaMimeType = (mimeType: string): boolean =>
-  ALLOWED_MEDIA_MIME_PREFIXES.some((prefix) => mimeType.startsWith(prefix));
 
 const getOptionalFormDataValue = (formData: FormData, key: string): string | undefined => {
   const value = formData.get(key);
@@ -141,6 +142,10 @@ const validateUploadedMedia = (
       media.sizeBytes > MAX_UPLOAD_BYTES
     ) {
       return createErrorState('memory.fileTooLarge');
+    }
+
+    if (isDeniedMediaMimeType(media.mimeType)) {
+      return createErrorState('memory.svgNotAllowed');
     }
 
     if (!isAllowedMediaMimeType(media.mimeType)) {
@@ -223,33 +228,20 @@ const deleteEmptyAlbums = async (
     return;
   }
 
-  const { data: remainingItems, error: remainingItemsError } = await supabase
-    .from('album_items')
-    .select('album_id')
-    .in('album_id', [...albumIds]);
+  // Atomic guarded delete: delete_empty_albums removes only the candidate albums that
+  // have zero album_items at delete time, in a single statement. The prior
+  // read-then-delete could drop an album a partner had just added an item to (the
+  // emptiness snapshot went stale before the delete); the in-statement NOT EXISTS
+  // closes that race. The RPC is SECURITY INVOKER, so the albums_delete RLS policy
+  // (is_couple_member) still scopes it to this couple — p_couple_id only narrows the
+  // candidate set.
+  const { error } = await supabase.rpc('delete_empty_albums', {
+    p_album_ids: [...albumIds],
+    p_couple_id: coupleId,
+  });
 
-  if (remainingItemsError) {
-    console.error('Failed to check album items after media deletion', remainingItemsError);
-    return;
-  }
-
-  const nonEmptyAlbumIds = new Set(remainingItems.map((item) => item.album_id));
-  const emptyAlbumIds = albumIds.filter((albumId) => !nonEmptyAlbumIds.has(albumId));
-  if (!emptyAlbumIds.length) {
-    return;
-  }
-
-  // Defense-in-depth couple scoping: album_items has no couple_id to filter on, but
-  // the albums DELETE does, so a stray cross-couple album id can never be deleted even
-  // if one reached this far. RLS already enforces this; the explicit predicate makes it
-  // local and auditable.
-  const { error: albumDeleteError } = await supabase
-    .from('albums')
-    .delete()
-    .eq('couple_id', coupleId)
-    .in('id', emptyAlbumIds);
-  if (albumDeleteError) {
-    console.error('Failed to delete empty albums after media deletion', albumDeleteError);
+  if (error) {
+    console.error('Failed to delete empty albums after media deletion', error);
   }
 };
 

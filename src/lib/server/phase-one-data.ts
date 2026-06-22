@@ -283,6 +283,10 @@ export const getListsPageData = async (context: CoupleContext): Promise<ListsPag
 
 export const getOnThisDayData = async (context: CoupleContext): Promise<MemoryCard[]> => {
   const supabase = await createSupabaseServerClient();
+  // This returns the date-bounded "on this day" set and the home feed is capped at 20, so
+  // neither is unbounded today. A future full-timeline view that selects every memory for a
+  // couple would need a limit + keyset/cursor; that only matters once a couple accumulates
+  // thousands of memories (years away at two-user volume).
   const { data: memories, error } = await supabase.rpc('memories_on_this_day', {
     target_couple_id: context.coupleId,
     target_timezone: context.timezone,

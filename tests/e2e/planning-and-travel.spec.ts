@@ -152,6 +152,8 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.goto('/en/settings');
   await replaceInputValue(page.getByLabel('Couple timezone'), 'America/New_York');
   await page.getByRole('button', { name: 'Save timezone' }).click();
+  // A changed zone now requires explicit confirmation before the destructive reconcile.
+  await page.getByRole('button', { name: 'Yes, change timezone' }).click();
   await expect(page.getByText('Current timezone: America/New_York')).toBeVisible({
     timeout: 15_000,
   });
@@ -173,9 +175,32 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   await page.goto('/en/settings');
   await replaceInputValue(page.getByLabel('Couple timezone'), onboardingTimeZone);
   await page.getByRole('button', { name: 'Save timezone' }).click();
+  await page.getByRole('button', { name: 'Yes, change timezone' }).click();
   await expect(page.getByText(`Current timezone: ${onboardingTimeZone}`)).toBeVisible({
     timeout: 15_000,
   });
+});
+
+test('E2E-TZ-002 a timezone change requires confirmation and cancel is non-destructive', async ({
+  page,
+}) => {
+  // Picks a zone no other test saves, so asserting it is never applied is order-independent.
+  const abandonedZone = 'Europe/Paris';
+
+  await page.goto('/en/settings');
+  await replaceInputValue(page.getByLabel('Couple timezone'), abandonedZone);
+  await page.getByRole('button', { name: 'Save timezone' }).click();
+
+  const confirmWarning = page.getByText(
+    "Changing your timezone may clear today's not-yet-revealed game rounds",
+    { exact: false },
+  );
+  await expect(confirmWarning).toBeVisible();
+
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(confirmWarning).toBeHidden();
+  // Cancel saved nothing: the current-zone label never shows the abandoned target.
+  await expect(page.getByText(`Current timezone: ${abandonedZone}`)).toBeHidden();
 });
 
 test('E2E-TRIP-001 / E2E-PLACE-001 / E2E-ALBUM-001 trips, visited places, albums, and invalid detail routes behave correctly', async ({

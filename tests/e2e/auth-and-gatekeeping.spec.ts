@@ -104,7 +104,7 @@ test('E2E-AUTH-003 invite login preserves token through the Mailpit magic link',
     const partnerAPage = await partnerAContext.newPage();
 
     await partnerAPage.goto('/en/home');
-    const inviteUrl = await generateInvite(partnerAPage);
+    const inviteUrl = await generateInvite(partnerAPage, partnerB.email);
 
     const invitePath = new URL(inviteUrl).pathname + new URL(inviteUrl).search;
 

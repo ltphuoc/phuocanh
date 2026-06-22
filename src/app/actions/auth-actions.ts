@@ -217,6 +217,18 @@ export const createInviteAction = async (
 
   try {
     const locale = resolveLocale(formData.get('locale'));
+
+    // Bind the invite to the partner's email so a bare-token link cannot be claimed by
+    // anyone else. Stored normalized; accept_couple_invite hard-rejects on mismatch.
+    const parsedEmail = z.email().safeParse(formData.get('email'));
+    if (!parsedEmail.success) {
+      return {
+        ...createErrorState('auth.invite.invalidEmail'),
+        data: undefined,
+      };
+    }
+    const invitedEmail = parsedEmail.data.trim().toLowerCase();
+
     const context = await requireReadyCoupleContext();
     const supabase = await createSupabaseServerClient();
     const siteUrl = await getSiteUrl();
@@ -227,6 +239,7 @@ export const createInviteAction = async (
       couple_id: context.coupleId,
       expires_at: expiresAt,
       invited_by_user_id: context.userId,
+      invited_email: invitedEmail,
       token,
     });
 

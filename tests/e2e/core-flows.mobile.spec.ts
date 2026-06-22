@@ -177,6 +177,8 @@ test('E2E-MOBILE-TIMEZONE update the couple timezone on a phone viewport', async
     await timezoneInput.fill('America/New_York');
     await timezoneInput.press('Tab');
     await page.getByRole('button', { name: 'Save timezone' }).click();
+    // A changed zone now requires explicit confirmation before the destructive reconcile.
+    await page.getByRole('button', { name: 'Yes, change timezone' }).click();
     await expect(page.getByText('Current timezone: America/New_York')).toBeVisible({
       timeout: 15_000,
     });
@@ -187,6 +189,7 @@ test('E2E-MOBILE-TIMEZONE update the couple timezone on a phone viewport', async
     await timezoneInput.fill(onboardingTimeZone);
     await timezoneInput.press('Tab');
     await page.getByRole('button', { name: 'Save timezone' }).click();
+    await page.getByRole('button', { name: 'Yes, change timezone' }).click();
     await expect(page.getByText(`Current timezone: ${onboardingTimeZone}`)).toBeVisible({
       timeout: 15_000,
     });

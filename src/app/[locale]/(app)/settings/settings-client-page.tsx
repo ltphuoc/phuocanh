@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { appSecondaryNavigationItems } from '@/components/app/navigation-model';
+import { EraseCoupleSpaceForm } from '@/components/forms/erase-couple-space-form';
 import { UpdateCoupleTimezoneForm } from '@/components/forms/update-couple-timezone-form';
 import { ResponsiveGrid } from '@/components/layout/responsive-grid';
 import { ShellPage } from '@/components/layout/shell-page';
@@ -109,6 +110,23 @@ export const SettingsClientPage = (): ReactElement => {
         tone="muted"
       >
         {settingsT('description')}
+      </SectionCard>
+
+      <SectionCard
+        className="border-destructive/30 flex flex-col gap-5 border"
+        padding="comfortable"
+        surface="glass"
+      >
+        <div className="space-y-2">
+          <p className="ui-meta text-destructive">{settingsT('dangerZone.eyebrow')}</p>
+          <h2 className="font-display text-heading-lg text-foreground">
+            {settingsT('dangerZone.title')}
+          </h2>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            {settingsT('dangerZone.description')}
+          </p>
+        </div>
+        <EraseCoupleSpaceForm />
       </SectionCard>
     </ShellPage>
   );

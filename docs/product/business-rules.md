@@ -39,6 +39,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - Changing the couple timezone preserves the visible calendar date for existing countdowns and future notes by rewriting their stored UTC instants.
 - Changing the couple timezone does not rewrite memory timestamps.
 - Changing the couple timezone reconciles in-flight game rounds inside the same RPC transaction: rounds dated today-or-future under the old zone that are not yet revealed (per each mode's reveal threshold) are deleted, so the next open regenerates a single canonical round under the new zone instead of stranding the old one. Already-revealed rounds — including a solo `guess_date`/`trivia` round at a single answer — and all past rounds are preserved. Child answer/target rows drop via cascade.
+- Because that reconciliation is destructive, the settings UI requires an explicit confirmation before submitting a _changed_ zone (an unchanged zone saves straight through; cancel is non-destructive). The warning is unconditional rather than a live count, to avoid duplicating the RPC's delete predicate or leaking hidden gameplay state.
 - Couple-level day-boundary features use the saved timezone, including:
   - relationship-day math
   - on-this-day lookup
@@ -49,16 +50,24 @@ This file is the canonical business-rule reference for the current app. If this 
 
 ## Invite Lifecycle
 
-- Invites are created by an active couple member through `createInviteAction`.
+- Invites are created by an active couple member through `createInviteAction`, which requires the partner's email and stores it normalized (`lower(btrim(...))`) as `invited_email`.
 - Invite tokens are UUIDs and expire 14 days after creation.
 - Invite acceptance is only allowed through the `accept_couple_invite(invite_token)` RPC.
 - Only unused invites (`accepted_at is null`) can be accepted.
 - Expired invites fail.
+- An invite is bound to its `invited_email`: acceptance succeeds only when the accepter's `auth.users` email matches it (normalized both sides; a null accepter email is also rejected for a bound invite), else it fails with `INVITE_EMAIL_MISMATCH` and the token stays unconsumed. The mismatch is checked **before** `COUPLE_FULL`, so a wrong-email stranger cannot learn whether a seat is free. The accepter email is read from `auth.users`, never caller input. (Pre-binding unbound invites were force-expired at the binding migration's cutover, so no bare-token link survives.)
 - If the couple already has two active members, invite acceptance fails with `COUPLE_FULL`.
-- When two valid invites are accepted concurrently, exactly one succeeds; the loser also fails with `COUPLE_FULL` (even when it collides on the active-role unique index rather than the active-count guard), never a raw or unexpected error. The couple still ends with two active members.
+- When two valid invites are accepted concurrently, exactly one succeeds; the loser also fails with `COUPLE_FULL` — whether it collides on the active-role unique index or trips the max-two-active-members trigger, both map to `COUPLE_FULL`, never a raw or unexpected error. The couple still ends with two active members.
 - If the caller is already an active member of the couple, an unused invite is not consumed: acceptance fails with `INVITE_ALREADY_MEMBER` and `accepted_at`/`accepted_by_user_id` stay null, so a creator opening their own link cannot lock out the real invitee. The app surfaces this as an informational notice, not an error.
 - Re-clicking an invite that was already accepted returns `INVITE_NOT_FOUND` (the RPC only opens invites where `accepted_at is null`).
 - Successful invite acceptance creates an active membership, records `accepted_at`, and records `accepted_by_user_id`.
+
+## Couple Data Erasure
+
+- An active member may erase the couple space through `eraseCoupleSpaceAction` → `erase_couple_space()` RPC. It is **destructive and irreversible** and is gated by a typed `DELETE` confirmation (enforced both in the UI and server-side).
+- Erasure removes the couple data, **not** the auth users: it deletes the single `couples` row (and `game_rounds` first so the `ON DELETE RESTRICT` game-target → memory FKs cannot abort the cascade), which cascades the entire couple-scoped graph. Membership/erasure never writes `couples`/`couple_memberships` directly from app code.
+- The action wipes the couple's `memory-media` storage objects **before** the DB delete (the object keys live in `memory_media`), so a crash leaves the path source intact and the action is safe to retry.
+- After erasure the singleton invariant resets: both members keep their login and return to pre-onboarding, where the same user can immediately re-bootstrap a fresh couple. A non-member calling the RPC gets `NOT_A_MEMBER` and nothing is deleted.
 
 ## Memory And Media Rules
 
@@ -67,14 +76,15 @@ This file is the canonical business-rule reference for the current app. If this 
   - one uploaded media file
 - This content invariant (note OR ≥1 media) is enforced atomically in the `update_memory_media()` RPC so concurrent edits cannot both succeed when emptying the memory.
 - The current UI supports multiple uploaded files per memory submission.
-- Supported media types are images and videos only.
+- A memory note is capped at 4000 characters (after trim). The cap is enforced in the form Zod schema (graceful inline error) and by a `memories.note` CHECK so a direct PostgREST write cannot exceed it.
+- Supported media types are images and videos only. `image/svg+xml` (and the `image/svg` alias) is explicitly denied at upload time as defense-in-depth hygiene — active SVG markup is never stored — surfaced to the user as `memory.svgNotAllowed`.
 - The app-level upload limit is `25MB`.
 - Memory media is stored in the private `memory-media` bucket.
 - Storage object names must follow the contract `couples/{coupleId}/memories/{memoryId}/{timestamp}-{safeFileName}`.
 - These media rules are also enforced at the database level by same-row CHECK constraints on `memory_media`, so a direct PostgREST write cannot bypass them: `mime_type` must be `image/*` or `video/*`, `size_bytes` must be `> 0` and `<= 26214400` (25 MiB, matching the bucket `file_size_limit`), and `storage_path` must sit under this row's `couples/{couple_id}/memories/{memory_id}/` prefix.
 - The new-memory form uploads each selected file to the bucket immediately (before the memory row exists), tracking the objects so it can remove them when the user deselects a file, when the submit fails, and best-effort on unmount/navigation. A hard crash or force-closed tab can still leave a residual object; an hourly server-side sweep (`media-sweeper` edge function, driven by the `memory-media-sweeper` pg_cron job) deletes bucket objects that have no `memory_media` row and are older than a 24h cutoff. The cutoff exceeds any realistic compose session so an in-flight upload is never swept, and the sweep ships dry-run (log-only) by default until a clean cycle is observed.
 - Memory creation is whole-submission atomic: media metadata is written as a single bulk insert, and if the memory row or the media insert fails the action removes every uploaded storage object and the memory row, so no partial storage/database state is left behind.
-- Deleting a memory or its media propagates into albums: `memory_media` drops via `memories.on delete cascade`, `album_items` drops via `album_items.memory_media_id on delete cascade`, and the app then auto-deletes any album left with zero items. This differs from trip delete, which removes trip-rooted albums but preserves independent memories.
+- Deleting a memory or its media propagates into albums: `memory_media` drops via `memories.on delete cascade`, `album_items` drops via `album_items.memory_media_id on delete cascade`, and the app then auto-deletes any album left with zero items through the atomic `delete_empty_albums(...)` RPC (a single guarded statement, so a partner's concurrent `add_album_items` is never lost to a stale emptiness check). This differs from trip delete, which removes trip-rooted albums but preserves independent memories.
 - Memory locations may store a provider source ID, address, and coordinates alongside the display name.
 - Memory edits can update note, date, location, and media through the `update_memory_media()` RPC. Deleting media or memories removes private storage objects on a best-effort basis.
 

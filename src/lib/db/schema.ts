@@ -251,6 +251,26 @@ export const sqlAuthoritativeObjects: readonly DrizzleBaselineEntity[] = [
     status: 'sql_authoritative',
   },
   {
+    name: 'public.list_orphaned_memory_media(integer, timestamptz)',
+    sourceMigration: '20260621190000_memory_media_orphan_sweep.sql',
+    status: 'sql_authoritative',
+  },
+  {
+    name: 'public.invoke_media_sweeper()',
+    sourceMigration: '20260621190000_memory_media_orphan_sweep.sql',
+    status: 'sql_authoritative',
+  },
+  {
+    name: 'public.delete_empty_albums(uuid, uuid[])',
+    sourceMigration: '20260621200500_delete_empty_albums_rpc.sql',
+    status: 'sql_authoritative',
+  },
+  {
+    name: 'public.erase_couple_space()',
+    sourceMigration: '20260621220000_erase_couple_space_rpc.sql',
+    status: 'sql_authoritative',
+  },
+  {
     name: 'storage.objects RLS policies',
     sourceMigration: '20260327214000_phase1_mvp.sql',
     status: 'sql_authoritative',
