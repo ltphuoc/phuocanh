@@ -96,7 +96,12 @@ test('E2E-COUNT-001 / E2E-FNOTE-001 / E2E-TZ-001 countdowns, future notes, and t
   const countdownDateLabel = `On ${formatCalendarDateLabel(countdownTargetDate)}`;
   const lockedFutureNoteUnlockDate = createOffsetDateInput(45);
   const lockedUnlockDateLabel = `Unlocks ${formatCalendarDateLabel(lockedFutureNoteUnlockDate)}`;
-  const unlockedFutureNoteUnlockDate = createTodayDateInput();
+  // Unlock comfortably in the past, not "today": a future note's reveal boundary is the
+  // couple's CURRENT timezone, so a same-day unlock re-locks when this test switches the
+  // zone backward across the date line (e.g. Asia morning -> still-yesterday New York),
+  // hiding the body. A past date stays revealed in every zone, so the test exercises
+  // "a revealed note survives a timezone change" without the date-line knife-edge.
+  const unlockedFutureNoteUnlockDate = createOffsetDateInput(-2);
   const unlockedUnlockDateLabel = `Unlocks ${formatCalendarDateLabel(unlockedFutureNoteUnlockDate)}`;
 
   await page.goto('/en/settings');

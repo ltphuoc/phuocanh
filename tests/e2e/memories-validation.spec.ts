@@ -17,11 +17,11 @@ test('E2E-MEM-NOTE-ONLY a note-only memory saves without any media', async ({ pa
   await expect(page.getByText(note).first()).toBeVisible();
 });
 
-test('E2E-MEM-NOTE-MAX rejects a note longer than 800 characters', async ({ page }) => {
+test('E2E-MEM-NOTE-MAX rejects a note longer than 4000 characters', async ({ page }) => {
   await page.goto('/en/memories/new');
-  await page.getByLabel('Note').fill('a'.repeat(801));
+  await page.getByLabel('Note').fill('a'.repeat(4001));
   await page.getByRole('button', { name: 'Save memory' }).click();
 
   await expect(page).toHaveURL(/\/en\/memories\/new$/);
-  await expect(page.getByText('Keep the note to 800 characters or fewer.')).toBeVisible();
+  await expect(page.getByText('Keep the note to 4000 characters or fewer.')).toBeVisible();
 });

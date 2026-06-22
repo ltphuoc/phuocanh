@@ -82,16 +82,21 @@ test('E2E-APPDATA-001 app-data routes enforce auth and no-store JSON contracts',
     });
   }
 
-  // Home and on-this-day memory previews must ship only the signed `imageUrl`; the
-  // private storage object key must never leave the server.
+  // Home and on-this-day memory previews must expose the object key ONLY inside a
+  // short-lived, member-scoped signed URL (Supabase embeds the object path in the
+  // signed link and gates access with a token). The raw `storagePath`/`storage_path`
+  // field and any bare, un-signed object key must never leave the server.
   const objectKeyPattern = /couples\/[0-9a-f-]+\/memories\//i;
+  const signedMediaUrlPattern = /https?:\/\/[^"\\]*\/storage\/v1\/object\/sign\/[^"\\]*/gi;
   for (const path of ['/api/app-data/home', '/api/app-data/on-this-day'] as const) {
     const response = await partnerAContext.request.get(`${E2E_BASE_URL}${path}`);
     const rawBody = await response.text();
 
     expect(rawBody, path).not.toContain('storagePath');
     expect(rawBody, path).not.toContain('storage_path');
-    expect(objectKeyPattern.test(rawBody), path).toBe(false);
+    // Strip the sanctioned signed URLs, then assert no bare object key remains.
+    const bodyWithoutSignedUrls = rawBody.replace(signedMediaUrlPattern, '');
+    expect(objectKeyPattern.test(bodyWithoutSignedUrls), path).toBe(false);
   }
 
   await partnerAContext.close();
