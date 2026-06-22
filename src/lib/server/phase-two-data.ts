@@ -19,6 +19,13 @@ export type TripStatus = 'planned' | 'active' | 'completed';
 type AlbumItemRow = Database['public']['Tables']['album_items']['Row'];
 type MemoryMediaRow = Database['public']['Tables']['memory_media']['Row'];
 
+// Defensive ceiling for the unbounded couple-scoped list reads behind the map and
+// albums pages. A single couple realistically holds far fewer rows than this, so the
+// cap never truncates real data; it just stops a pathological row count from loading
+// the whole table into memory at once. This is a safety net, not real pagination —
+// keyset/viewport paging is deferred until a couple's volume warrants it.
+const COUPLE_LIST_SAFETY_LIMIT = 500;
+
 export interface CountdownCard {
   readonly daysFromToday: number;
   readonly id: string;
@@ -383,21 +390,24 @@ export const getMapPageData = async (context: CoupleContext): Promise<MapPageDat
       .select('*')
       .eq('couple_id', context.coupleId)
       .order('visited_on', { ascending: false })
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .limit(COUPLE_LIST_SAFETY_LIMIT),
     supabase
       .from('memories')
       .select('*')
       .eq('couple_id', context.coupleId)
       .not('location_latitude', 'is', null)
       .not('location_longitude', 'is', null)
-      .order('happened_at', { ascending: false }),
+      .order('happened_at', { ascending: false })
+      .limit(COUPLE_LIST_SAFETY_LIMIT),
     supabase
       .from('trips')
       .select('*')
       .eq('couple_id', context.coupleId)
       .not('location_latitude', 'is', null)
       .not('location_longitude', 'is', null)
-      .order('start_date', { ascending: false }),
+      .order('start_date', { ascending: false })
+      .limit(COUPLE_LIST_SAFETY_LIMIT),
   ]);
 
   if (visitedPlacesResult.error) {
@@ -497,7 +507,8 @@ export const getAlbumsPageData = async (context: CoupleContext): Promise<AlbumsP
     .from('albums')
     .select('*')
     .eq('couple_id', context.coupleId)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(COUPLE_LIST_SAFETY_LIMIT);
 
   if (error) {
     throw new Error(error.message);
