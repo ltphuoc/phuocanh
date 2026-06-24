@@ -73,7 +73,7 @@
 - Chosen future-note mutation path: replace app-side two-step insert + rollback with `create_future_note_with_body(...)` so metadata and encrypted body commit atomically.
 - Chosen unlocked-read path: use `get_unlocked_future_note_contents(...)` RPC instead of member-facing `future_note_contents` select policies.
 - Chosen reminder durability model: persist reminder work in `reminder_deliveries` with idempotent uniqueness on `(kind, source_id, recipient_user_id)`.
-- Chosen reminder execution model: enqueue due reminder rows in Postgres, then deliver them from a Supabase Edge Function using service-role access and Resend.
+- Chosen reminder execution model: enqueue due reminder rows in Postgres, then deliver them from a Supabase Edge Function using service-role access and Resend. `SUPERSEDED BY 2026-06-24 (Free Email and AI Provider Migration).`
 - Chosen cron invocation auth: use `project_url` + `anon_key` for `pg_net` calls into the reminder Edge Function, with Vault as the hosted secret backend and a private fallback store for local/CI replay.
 
 ## 2026-04-24 (Authenticated Interactive Sync)
@@ -99,3 +99,20 @@
   throttling instead of a distributed Redis/DB-backed limiter.
 - Chosen storage compatibility: keep historical `mapbox` provider strings readable/editable while
   all new provider selections use `nominatim`.
+
+## 2026-06-24 (Free Email and AI Provider Migration)
+
+- Migrated reminder execution from Resend to Gmail SMTP via denomailer.
+  - Edge Function `reminder-processor` now imports `SMTPClient` from `https://deno.land/x/denomailer@1.6.0/mod.ts`.
+  - Env secrets: removed `RESEND_API_KEY`; added `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`.
+  - `REMINDER_FROM_EMAIL` must equal `SMTP_USERNAME` (Gmail rewrites a mismatched From header).
+  - Gmail requires an App Password (2-Step Verification enabled). `provider_message_id` is now always null (SMTP returns no id).
+  - Database dedup authority remains `(kind, source_id, recipient_user_id)` uniqueness constraint.
+- Migrated daily-question generation from OpenAI to Google Gemini (free tier).
+  - New module `src/lib/server/gemini-daily-question.ts` replaces deleted `src/lib/server/openai-daily-question.ts`.
+  - Exported signature `generateDailyQuestionPrompt(options): Promise<string>` unchanged; contract still `{question}` 1–240 char.
+  - Env vars: removed `OPENAI_API_KEY`, `OPENAI_DAILY_QUESTION_MODEL`; added `GEMINI_API_KEY`, `GEMINI_DAILY_QUESTION_MODEL` (default `gemini-3.5-flash`).
+  - Env var rename: `OPENAI_DAILY_QUESTION_STUB_RESPONSE` → `DAILY_QUESTION_STUB_RESPONSE`.
+  - Server writes `prompt_source: 'gemini'` for new rounds.
+  - Migration 20260624150000 widened `game_rounds_prompt_source_check` to accept `('openai','memory','gemini')`; existing 'openai'/'memory' rows stay valid.
+  - CI: `.github/workflows/deploy-supabase-migrations.yml` gained `deploy-functions` job (runs AFTER migration deploy) for `reminder-processor` and `media-sweeper`; manual `supabase functions deploy` remains first-time/fallback path.

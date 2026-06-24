@@ -35,3 +35,31 @@ jobs:
 
       - name: Deploy database migrations
         run: supabase db push
+
+  deploy-functions:
+    name: Deploy Edge Functions
+    runs-on: ubuntu-latest
+    # Run after migrations so schema and function code stay consistent with the
+    # documented deploy ordering. CI deploys function CODE only; runtime secrets
+    # (SMTP_*, REMINDER_*, REMINDER_INVOKE_SECRET, SUPABASE_SERVICE_ROLE_KEY) remain a
+    # one-time owner `supabase secrets set` unless added as GitHub secrets separately.
+    needs: deploy
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy reminder-processor function
+        run: supabase functions deploy reminder-processor --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Deploy media-sweeper function
+        run: supabase functions deploy media-sweeper --project-ref "$SUPABASE_PROJECT_ID"

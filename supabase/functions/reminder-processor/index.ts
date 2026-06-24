@@ -1,7 +1,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 
+import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { Resend } from 'npm:resend';
 import { z } from 'npm:zod@4.3.6';
 
 import { INVOKE_SECRET_HEADER, timingSafeEqualStrings } from './invoke-auth.ts';
@@ -9,6 +9,7 @@ import { buildReminderHtml, buildReminderText } from './reminder-email.ts';
 
 const CLAIM_BATCH_SIZE = 25;
 const MAX_BACKOFF_MINUTES = 6 * 60;
+const IMPLICIT_TLS_PORT = 465;
 
 const envSchema = z.object({
   REMINDER_APP_BASE_URL: z.url().default('http://localhost:3000'),
@@ -16,7 +17,10 @@ const envSchema = z.object({
   REMINDER_FROM_NAME: z.string().trim().min(1).default('PhuocAnh'),
   REMINDER_INVOKE_SECRET: z.string().trim().min(1).optional(),
   REMINDER_LOCALE: z.string().trim().min(1).default('vi'),
-  RESEND_API_KEY: z.string().trim().min(1),
+  SMTP_HOST: z.string().trim().min(1),
+  SMTP_PASSWORD: z.string().trim().min(1),
+  SMTP_PORT: z.coerce.number().int().positive().default(IMPLICIT_TLS_PORT),
+  SMTP_USERNAME: z.string().trim().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().trim().min(1),
   SUPABASE_URL: z.url(),
 });
@@ -42,8 +46,6 @@ const claimedReminderDeliveriesSchema = z.array(claimedReminderDeliverySchema);
 const buildReminderUrl = (appBaseUrl: string, locale: string, routePath: string): string =>
   new URL(`/${locale}${routePath}`, appBaseUrl).toString();
 
-const getReminderIdempotencyKey = (reminderId: string): string => `reminder-delivery/${reminderId}`;
-
 const buildReminderSubject = (
   kind: z.infer<typeof claimedReminderDeliverySchema>['kind'],
   title: string,
@@ -61,18 +63,32 @@ const env = envSchema.parse({
   REMINDER_FROM_NAME: Deno.env.get('REMINDER_FROM_NAME'),
   REMINDER_INVOKE_SECRET: Deno.env.get('REMINDER_INVOKE_SECRET'),
   REMINDER_LOCALE: Deno.env.get('REMINDER_LOCALE'),
-  RESEND_API_KEY: Deno.env.get('RESEND_API_KEY'),
+  SMTP_HOST: Deno.env.get('SMTP_HOST'),
+  SMTP_PASSWORD: Deno.env.get('SMTP_PASSWORD'),
+  SMTP_PORT: Deno.env.get('SMTP_PORT'),
+  SMTP_USERNAME: Deno.env.get('SMTP_USERNAME'),
   SUPABASE_SERVICE_ROLE_KEY: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
   SUPABASE_URL: Deno.env.get('SUPABASE_URL'),
 });
 
-const resend = new Resend(env.RESEND_API_KEY);
 const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
-const markReminderSent = async (
-  reminderId: string,
-  providerMessageId: string | null,
-): Promise<void> => {
+// One client is opened per batch run (see the handler) and closed in a finally; SMTP
+// connections are stateful, unlike the previous stateless Resend HTTP client.
+const createSmtpClient = (): SMTPClient =>
+  new SMTPClient({
+    connection: {
+      hostname: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      tls: env.SMTP_PORT === IMPLICIT_TLS_PORT,
+      auth: {
+        username: env.SMTP_USERNAME,
+        password: env.SMTP_PASSWORD,
+      },
+    },
+  });
+
+const markReminderSent = async (reminderId: string): Promise<void> => {
   const { error } = await supabase
     .from('reminder_deliveries')
     .update({
@@ -80,7 +96,7 @@ const markReminderSent = async (
       last_error: null,
       not_before: new Date().toISOString(),
       processing_started_at: null,
-      provider_message_id: providerMessageId,
+      provider_message_id: null,
       sent_at: new Date().toISOString(),
       status: 'sent',
     })
@@ -150,40 +166,43 @@ Deno.serve(async (request: Request): Promise<Response> => {
   const reminders = await claimReminderDeliveries();
   const results: Array<{ id: string; status: 'sent' | 'failed' }> = [];
 
-  for (const reminder of reminders) {
-    const reminderUrl = buildReminderUrl(
-      env.REMINDER_APP_BASE_URL,
-      env.REMINDER_LOCALE,
-      reminder.payload.routePath,
-    );
-    const idempotencyKey = getReminderIdempotencyKey(reminder.id);
+  // Open a single SMTP connection for the whole batch and close it in finally; skip
+  // opening one entirely when nothing was claimed. Delivery is governed by the claim/status
+  // state machine: a claimed row reverts to pending after the reclaim window if it is never
+  // acked. The (kind, source_id, recipient_user_id) constraint dedups enqueued rows, not the
+  // redelivery of one row. Unlike Resend, SMTP has no idempotency key, so a crash between a
+  // 250 ack and markReminderSent leaves a narrow at-least-once window — accepted here, since
+  // a duplicate reminder is far less costly than a missed one.
+  const smtpClient = reminders.length > 0 ? createSmtpClient() : null;
 
-    try {
-      const { data, error } = await resend.emails.send(
-        {
-          from: `${env.REMINDER_FROM_NAME} <${env.REMINDER_FROM_EMAIL}>`,
-          html: buildReminderHtml(reminder, reminderUrl),
-          subject: buildReminderSubject(reminder.kind, reminder.payload.title),
-          text: buildReminderText(reminder, reminderUrl),
-          to: [reminder.recipient_email],
-        },
-        {
-          idempotencyKey,
-        },
+  try {
+    for (const reminder of reminders) {
+      const reminderUrl = buildReminderUrl(
+        env.REMINDER_APP_BASE_URL,
+        env.REMINDER_LOCALE,
+        reminder.payload.routePath,
       );
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      try {
+        await smtpClient!.send({
+          from: `${env.REMINDER_FROM_NAME} <${env.REMINDER_FROM_EMAIL}>`,
+          to: reminder.recipient_email,
+          subject: buildReminderSubject(reminder.kind, reminder.payload.title),
+          content: buildReminderText(reminder, reminderUrl),
+          html: buildReminderHtml(reminder, reminderUrl),
+        });
 
-      await markReminderSent(reminder.id, data?.id ?? null);
-      results.push({ id: reminder.id, status: 'sent' });
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown reminder delivery failure';
-      await markReminderFailure(reminder, errorMessage);
-      results.push({ id: reminder.id, status: 'failed' });
+        await markReminderSent(reminder.id);
+        results.push({ id: reminder.id, status: 'sent' });
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown reminder delivery failure';
+        await markReminderFailure(reminder, errorMessage);
+        results.push({ id: reminder.id, status: 'failed' });
+      }
     }
+  } finally {
+    await smtpClient?.close();
   }
 
   return Response.json({

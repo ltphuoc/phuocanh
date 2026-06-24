@@ -206,7 +206,7 @@ These run under cron/service-role context only and are not part of the app-layer
 - `game_rounds`
   - couple-scoped gameplay round rows with `mode`, `round_date`, `prompt_locale`, `prompt_text`, and `prompt_source`
   - `game_mode` currently supports `daily_question`, `guess_date`, and `trivia`
-  - `prompt_source` currently supports `openai` and `memory`
+  - `prompt_source` currently supports `openai`, `memory`, and `gemini`
   - readable by active couple members; canonical inserts flow through gameplay RPCs
 - `game_round_answers`
   - couple-scoped per-user answer rows keyed to a parent `game_round`

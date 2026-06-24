@@ -89,7 +89,7 @@ Copy `.env.example` and fill at least:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `DATABASE_URL`
 - `NEXT_PUBLIC_SITE_URL`
-- `OPENAI_API_KEY`, unless using `OPENAI_DAILY_QUESTION_STUB_RESPONSE` for local/E2E testing
+- `GEMINI_API_KEY`, unless using `DAILY_QUESTION_STUB_RESPONSE` for local/E2E testing
 
 Do not run local reset, push, or E2E workflows against the deployed database. `pnpm test:e2e` is
 designed to reset and seed local Supabase.

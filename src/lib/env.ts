@@ -40,13 +40,13 @@ const defaultedBoolean = (defaultValue: boolean) =>
   }, z.boolean());
 
 const serverEnvSchema = z.object({
-  E2E_ENABLE_EMAIL_OTP_HELPER: defaultedBoolean(false),
-  OPENAI_API_KEY: z.preprocess(emptyStringToUndefined, z.string().trim().min(1).optional()),
-  OPENAI_DAILY_QUESTION_MODEL: defaultedNonEmptyString('gpt-4o-mini'),
-  OPENAI_DAILY_QUESTION_STUB_RESPONSE: z.preprocess(
+  DAILY_QUESTION_STUB_RESPONSE: z.preprocess(
     emptyStringToUndefined,
     z.string().trim().min(1).optional(),
   ),
+  E2E_ENABLE_EMAIL_OTP_HELPER: defaultedBoolean(false),
+  GEMINI_API_KEY: z.preprocess(emptyStringToUndefined, z.string().trim().min(1).optional()),
+  GEMINI_DAILY_QUESTION_MODEL: defaultedNonEmptyString('gemini-3.5-flash'),
   SUPABASE_SERVICE_ROLE_KEY: z.preprocess(
     emptyStringToUndefined,
     z.string().trim().min(1).optional(),
@@ -58,10 +58,10 @@ export type AppEnv = PublicEnv & z.infer<typeof serverEnvSchema>;
 export const env: AppEnv = {
   ...publicEnv,
   ...serverEnvSchema.parse({
+    DAILY_QUESTION_STUB_RESPONSE: process.env.DAILY_QUESTION_STUB_RESPONSE,
     E2E_ENABLE_EMAIL_OTP_HELPER: process.env.E2E_ENABLE_EMAIL_OTP_HELPER,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    OPENAI_DAILY_QUESTION_MODEL: process.env.OPENAI_DAILY_QUESTION_MODEL,
-    OPENAI_DAILY_QUESTION_STUB_RESPONSE: process.env.OPENAI_DAILY_QUESTION_STUB_RESPONSE,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_DAILY_QUESTION_MODEL: process.env.GEMINI_DAILY_QUESTION_MODEL,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   }),
 };

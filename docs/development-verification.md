@@ -21,17 +21,17 @@ Vercel/provider environment variables, or only in `.env.local` for an intentiona
 against the deployed project. Do not run local reset, migration-push, or E2E workflows against a
 deployed database.
 
-| Variable                              | Required    | Used by                   | Notes                                                                  |
-| ------------------------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`            | yes         | app, browser, server      | Local value: `http://127.0.0.1:54331`                                  |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`       | yes         | app, browser, server      | Supabase anon key                                                      |
-| `DATABASE_URL`                        | yes         | SQL tooling               | Local value: `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
-| `NEXT_PUBLIC_SITE_URL`                | yes         | auth redirects, links     | Local default: `http://localhost:3000`                                 |
-| `OPENAI_API_KEY`                      | conditional | daily-question generation | Required unless using the local/E2E stub                               |
-| `OPENAI_DAILY_QUESTION_MODEL`         | no          | daily-question generation | Defaults to `gpt-4o-mini` in app code                                  |
-| `OPENAI_DAILY_QUESTION_STUB_RESPONSE` | test only   | local/E2E                 | Skips OpenAI calls with a fixed prompt                                 |
-| `SUPABASE_SERVICE_ROLE_KEY`           | no          | reminder edge function    | No longer used by the app auth gate (gate uses `has_any_couple()`)     |
-| `E2E_ENABLE_EMAIL_OTP_HELPER`         | test only   | local E2E                 | Never enable in hosted environments                                    |
+| Variable                        | Required    | Used by                   | Notes                                                                  |
+| ------------------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | yes         | app, browser, server      | Local value: `http://127.0.0.1:54331`                                  |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes         | app, browser, server      | Supabase anon key                                                      |
+| `DATABASE_URL`                  | yes         | SQL tooling               | Local value: `postgresql://postgres:postgres@127.0.0.1:54330/postgres` |
+| `NEXT_PUBLIC_SITE_URL`          | yes         | auth redirects, links     | Local default: `http://localhost:3000`                                 |
+| `GEMINI_API_KEY`                | conditional | daily-question generation | Required unless using the local/E2E stub                               |
+| `GEMINI_DAILY_QUESTION_MODEL`   | no          | daily-question generation | Defaults to `gemini-3.5-flash` in app code                             |
+| `DAILY_QUESTION_STUB_RESPONSE`  | test only   | local/E2E                 | Skips Gemini calls with a fixed prompt                                 |
+| `SUPABASE_SERVICE_ROLE_KEY`     | no          | reminder edge function    | No longer used by the app auth gate (gate uses `has_any_couple()`)     |
+| `E2E_ENABLE_EMAIL_OTP_HELPER`   | test only   | local E2E                 | Never enable in hosted environments                                    |
 
 ### Data API table grants
 
@@ -60,16 +60,19 @@ The app runtime and the reminder Edge Function do not use the same secret set.
 
 Edge Function secrets for `supabase/functions/reminder-processor`:
 
-| Secret                      | Required | Purpose                                         |
-| --------------------------- | -------- | ----------------------------------------------- |
-| `SUPABASE_URL`              | yes      | Supabase project URL inside the Edge Function   |
-| `SUPABASE_SERVICE_ROLE_KEY` | yes      | Claims and updates `reminder_deliveries`        |
-| `RESEND_API_KEY`            | yes      | Outbound email provider                         |
-| `REMINDER_FROM_EMAIL`       | yes      | Sender address                                  |
-| `REMINDER_FROM_NAME`        | no       | Sender display name, defaults to `PhuocAnh`     |
-| `REMINDER_APP_BASE_URL`     | no       | Public app base URL for reminder links          |
-| `REMINDER_LOCALE`           | no       | Link locale prefix, defaults to `vi`            |
-| `REMINDER_INVOKE_SECRET`    | yes      | Shared secret for cron invocation authorization |
+| Secret                      | Required | Purpose                                               |
+| --------------------------- | -------- | ----------------------------------------------------- |
+| `SUPABASE_URL`              | yes      | Supabase project URL inside the Edge Function         |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes      | Claims and updates `reminder_deliveries`              |
+| `SMTP_HOST`                 | yes      | SMTP server hostname (e.g., `smtp.gmail.com`)         |
+| `SMTP_PORT`                 | yes      | SMTP server port (default `465` with implicit TLS)    |
+| `SMTP_USERNAME`             | yes      | SMTP login username (Gmail: full email address)       |
+| `SMTP_PASSWORD`             | yes      | SMTP password (Gmail: App Password required)          |
+| `REMINDER_FROM_EMAIL`       | yes      | Sender address (must equal `SMTP_USERNAME` for Gmail) |
+| `REMINDER_FROM_NAME`        | no       | Sender display name, defaults to `PhuocAnh`           |
+| `REMINDER_APP_BASE_URL`     | no       | Public app base URL for reminder links                |
+| `REMINDER_LOCALE`           | no       | Link locale prefix, defaults to `vi`                  |
+| `REMINDER_INVOKE_SECRET`    | yes      | Shared secret for cron invocation authorization       |
 
 Hosted reminder cron invocation also needs Supabase Vault secrets:
 
@@ -160,7 +163,7 @@ The harness:
 - builds the app
 - starts a dedicated server at `E2E_BASE_URL`, default `http://127.0.0.1:3100`
 - enables the loopback-only OTP helper for local auth bootstrap
-- stubs daily-question prompt generation through `OPENAI_DAILY_QUESTION_STUB_RESPONSE`
+- stubs daily-question prompt generation through `DAILY_QUESTION_STUB_RESPONSE`
 - writes Playwright auth state under `playwright/.auth/`
 
 The suite covers implemented backend-backed routes only. Game slugs other than `daily-question`,

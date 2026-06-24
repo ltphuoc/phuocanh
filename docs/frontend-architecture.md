@@ -54,7 +54,7 @@ slugs other than `daily-question`, `guess-date`, and `trivia` under `/games/[mod
 - Server Actions still call `revalidateLocalizedPath(...)` for later server-rendered navigations.
 - First-user onboarding, invite acceptance, future-note body writes, album writes, gameplay round
   creation, gameplay answer submission, and timezone updates rely on SQL RPCs for invariants.
-- OpenAI prompt generation stays on the server.
+- Gemini prompt generation stays on the server.
 
 ## Revalidation And Query Sync
 

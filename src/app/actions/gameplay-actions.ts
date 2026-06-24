@@ -8,7 +8,7 @@ import { routing } from '@/i18n/routing';
 import { createErrorState, createSuccessState } from '@/lib/actions/action-state';
 import { revalidateLocalizedPath } from '@/lib/i18n/revalidate';
 import { requireReadyCoupleContext } from '@/lib/server/couple-context';
-import { generateDailyQuestionPrompt } from '@/lib/server/openai-daily-question';
+import { generateDailyQuestionPrompt } from '@/lib/server/gemini-daily-question';
 import {
   getTodayDailyQuestionRoundId,
   getTodayGuessDateRoundId,
@@ -98,7 +98,7 @@ export const ensureDailyQuestionRoundAction = async (
       return createSuccessState('gameplay.dailyQuestion.ready');
     }
 
-    // Re-check immediately before the paid OpenAI call to narrow the window where two
+    // Re-check immediately before the Gemini call to narrow the window where two
     // partners opening at once both generate a prompt. This does not fully close the
     // race (only a DB advisory lock around generate+insert would); ensure_daily_question_round
     // is idempotent (ON CONFLICT DO NOTHING), so at most one canonical round ever
@@ -118,7 +118,7 @@ export const ensureDailyQuestionRoundAction = async (
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.rpc('ensure_daily_question_round', {
       prompt_locale: parsed.locale,
-      prompt_source: 'openai',
+      prompt_source: 'gemini',
       prompt_text: promptText,
       target_mode: 'daily_question',
       target_round_date: roundDate,

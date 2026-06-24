@@ -36,9 +36,12 @@ Use provider dashboards for real values. Keep this repo, `.env.example`, and doc
 | Supabase anon/publishable key    | Supabase **Project Settings > API Keys** or **Connect** dialog                                    | `<anon-or-publishable-key>`                     | `NEXT_PUBLIC_SUPABASE_ANON_KEY`, Vault `anon_key`                                     |
 | Supabase service role/secret key | Supabase **Project Settings > API Keys**                                                          | `<service-role-or-secret-key>`                  | App `SUPABASE_SERVICE_ROLE_KEY`, Edge Function `SUPABASE_SERVICE_ROLE_KEY`            |
 | Database URL                     | Supabase **Connect** dialog; use a direct or pooler connection string as appropriate for the tool | `postgresql://USER:PASSWORD@HOST:PORT/DATABASE` | `DATABASE_URL` for SQL tooling                                                        |
-| OpenAI API key                   | OpenAI platform project API keys page                                                             | `<openai-api-key>`                              | `OPENAI_API_KEY`                                                                      |
-| Resend API key                   | Resend dashboard: **API Keys**                                                                    | `<resend-api-key>`                              | Edge Function `RESEND_API_KEY`                                                        |
-| Reminder sender email            | Resend verified domain/sender setup                                                               | `reminders@<production-domain>`                 | Edge Function `REMINDER_FROM_EMAIL`                                                   |
+| Gemini API key                   | Google AI Studio: https://aistudio.google.com/apikey (free tier)                                  | `<gemini-api-key>`                              | `GEMINI_API_KEY`                                                                      |
+| SMTP Host                        | Gmail SMTP: `smtp.gmail.com`, or your email provider's SMTP server                                | `smtp.gmail.com`                                | Edge Function `SMTP_HOST`                                                             |
+| SMTP Port                        | Gmail SMTP: `465` (implicit TLS)                                                                  | `465`                                           | Edge Function `SMTP_PORT`                                                             |
+| SMTP Username                    | Gmail: full email address (e.g., `your-email@gmail.com`)                                          | `<smtp-username>`                               | Edge Function `SMTP_USERNAME`                                                         |
+| SMTP Password                    | Gmail: App Password from 2-Step Verification settings                                             | `<smtp-password>`                               | Edge Function `SMTP_PASSWORD`                                                         |
+| Reminder sender email            | Must match `SMTP_USERNAME` (Gmail rewrites mismatched From headers)                               | `<smtp-username>` (same as above)               | Edge Function `REMINDER_FROM_EMAIL`                                                   |
 | Vercel production URL            | Vercel project **Domains** or the production deployment URL                                       | `https://<production-domain>`                   | `NEXT_PUBLIC_SITE_URL`, Edge Function `REMINDER_APP_BASE_URL`, Supabase Auth Site URL |
 
 `NEXT_PUBLIC_*` values are bundled into browser code. The Supabase anon/publishable key is expected
@@ -81,8 +84,10 @@ Configure these GitHub repository secrets before relying on the workflow:
 | `SUPABASE_DB_PASSWORD`  | Database password for the target project |
 | `SUPABASE_PROJECT_ID`   | Supabase project ref passed to `link`    |
 
-The workflow deploys database migrations only. It does not deploy Edge Functions, Edge Function
-secrets, Vault secrets, Vercel configuration, or app hosting changes.
+The workflow deploys database migrations and Edge Functions (`reminder-processor` and `media-sweeper`
+are deployed automatically after migrations complete). It does not deploy Edge Function secrets,
+Vault secrets, Vercel configuration, or app hosting changes. For first-time deployment or function
+changes, use the manual `supabase functions deploy` command as fallback.
 
 Before merging migration changes, verify a clean local rebuild from migrations:
 
@@ -130,7 +135,7 @@ For manual migration deployment, use the same sequence as the workflow:
 
    Never edit `src/lib/supabase/database.types.ts` as a substitute for SQL migrations.
 
-6. Deploy the Edge Functions:
+6. Deploy the Edge Functions (also deployed via CI on merge to main):
 
    ```bash
    supabase functions deploy reminder-processor
@@ -143,8 +148,11 @@ For manual migration deployment, use the same sequence as the workflow:
    supabase secrets set \
      SUPABASE_URL=https://<project-ref>.supabase.co \
      SUPABASE_SERVICE_ROLE_KEY=<service-role-or-secret-key> \
-     RESEND_API_KEY=<resend-api-key> \
-     REMINDER_FROM_EMAIL=reminders@<production-domain> \
+     SMTP_HOST=smtp.gmail.com \
+     SMTP_PORT=465 \
+     SMTP_USERNAME=<smtp-username@gmail.com> \
+     SMTP_PASSWORD=<gmail-app-password> \
+     REMINDER_FROM_EMAIL=<smtp-username@gmail.com> \
      REMINDER_FROM_NAME=PhuocAnh \
      REMINDER_APP_BASE_URL=https://<production-domain> \
      REMINDER_LOCALE=vi \
@@ -192,14 +200,14 @@ Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.
    | `NEXT_PUBLIC_SUPABASE_URL`      | `https://<project-ref>.supabase.co` | same or preview Supabase project URL                      | Browser-bundled                                |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `<anon-or-publishable-key>`         | matching anon/publishable key                             | Browser-bundled                                |
    | `NEXT_PUBLIC_SITE_URL`          | `https://<production-domain>`       | preview origin or production fallback                     | Fallback for generated links                   |
-   | `OPENAI_API_KEY`                | `<openai-api-key>`                  | `<openai-api-key>` or omit if not testing live generation | Server-side only                               |
-   | `OPENAI_DAILY_QUESTION_MODEL`   | `gpt-4o-mini`                       | `gpt-4o-mini`                                             | Optional                                       |
+   | `GEMINI_API_KEY`                | `<gemini-api-key>`                  | `<gemini-api-key>` or omit if not testing live generation | Server-side only                               |
+   | `GEMINI_DAILY_QUESTION_MODEL`   | `gemini-3.5-flash` (optional)       | `gemini-3.5-flash` (optional)                             | Optional; defaults to `gemini-3.5-flash`       |
    | `SUPABASE_SERVICE_ROLE_KEY`     | `<service-role-or-secret-key>`      | matching secret key or omit                               | Server-side only; never expose to browser      |
    | `DATABASE_URL`                  | optional                            | optional                                                  | Tooling only unless app code changes to use it |
 
    Do not set these in hosted Production or Preview environments:
    - `E2E_ENABLE_EMAIL_OTP_HELPER=true`
-   - `OPENAI_DAILY_QUESTION_STUB_RESPONSE`
+   - `DAILY_QUESTION_STUB_RESPONSE`
    - `E2E_BASE_URL`
    - `E2E_RUN_TOKEN`
    - `PLAYWRIGHT_HEADLESS`
@@ -232,7 +240,7 @@ Use [docs/migration-playbook.md](migration-playbook.md) for schema-change rules.
    localized route.
 3. Sign in as a ready user and confirm private `memory-media` images/videos render through signed
    URLs.
-4. Visit `/games/daily-question` and generate a live question when `OPENAI_API_KEY` is configured.
+4. Visit `/games/daily-question` and generate a live question when `GEMINI_API_KEY` is configured.
 5. In Supabase, confirm `phase2-reminder-enqueue`, `phase2-reminder-processor`, and
    `memory-media-sweeper` exist in cron, then run:
 

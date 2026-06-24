@@ -61,7 +61,7 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 - `phase-two-data.ts` — countdowns, future notes, trips, albums, map reads.
 - `phase-three-data.ts` — game rounds and gameplay stats reads.
 - `memory-media.ts` — signs `memory-media` storage URLs.
-- `openai-daily-question.ts` — OpenAI Responses API prompt generation.
+- `gemini-daily-question.ts` — Google Gemini API prompt generation.
 - `nominatim-geocoding.ts` — Nominatim search with per-process cache and rate limits.
 - `site-url.ts` — runtime base-URL resolution from request headers.
 
@@ -78,6 +78,7 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 
 - `server.ts`, `client.ts` — typed server and browser clients.
 - `database.types.ts` — checked-in TypeScript schema mirror; must match SQL migrations.
+- `gemini-daily-question.ts` — Google Gemini API prompt generation for daily-question gameplay.
 
 ## Components (`src/components`)
 
@@ -115,7 +116,7 @@ App-layer mutations, grouped by domain. All return the shared `ActionState` shap
 
 - `migrations/` — authoritative schema, RLS, triggers, RPCs, and storage policies.
 - `functions/reminder-processor/` — Deno Edge Function that claims and delivers reminder rows via
-  Resend; invoked by `pg_cron`.
+  SMTP (Gmail); invoked by `pg_cron`.
 - `functions/media-sweeper/` — Deno Edge Function that deletes orphaned `memory-media` bucket
   objects; invoked by the `memory-media-sweeper` `pg_cron` job (dry-run by default).
 - `config.toml` — local ports; local Edge Runtime is disabled.

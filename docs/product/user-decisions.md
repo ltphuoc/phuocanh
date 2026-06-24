@@ -69,3 +69,9 @@
 
 - Cross-session reveal hardening is considered complete once waiting first-partner sessions update without a manual refresh after the second partner submits for all three live gameplay modes.
 - Current next move: choose another live gameplay mode or hardening slice before expanding gameplay stats.
+
+## 2026-06-24
+
+- Migrated reminder email delivery from Resend to free Gmail SMTP (requires 2-Step Verification + App Password).
+- Migrated daily-question generation from OpenAI (paid, gpt-4o-mini) to Google Gemini free tier (gemini-3.5-flash).
+- Rationale: reduce operational cost and external service dependencies while maintaining same user-facing contracts and prompt quality.

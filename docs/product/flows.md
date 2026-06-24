@@ -490,7 +490,7 @@ Preconditions:
 
 - Countdown or future-note rows exist for a couple with active members and email addresses.
 - Hosted: Vault contains `project_url` and `anon_key` for cron-driven function invocation. Local/CI without Vault: the private fallback store contains those same secret names.
-- The `reminder-processor` Edge Function has its runtime secrets configured, including Resend and Supabase service-role access.
+- The `reminder-processor` Edge Function has its runtime secrets configured, including SMTP credentials and Supabase service-role access.
 
 Steps:
 
@@ -501,13 +501,13 @@ Steps:
 5. The unique key `(kind, source_id, recipient_user_id)` prevents duplicate enqueueing across repeated cron runs.
 6. A second cron job invokes the `reminder-processor` Edge Function through `pg_net`.
 7. The function claims pending deliveries in batches via `claim_reminder_deliveries(...)`.
-8. The function sends summary-only emails through Resend and deep-links back into the app.
-9. Successful sends are marked `sent` with provider metadata.
+8. The function sends summary-only emails through SMTP (Gmail) and deep-links back into the app.
+9. Successful sends are marked `sent`.
 10. Failed sends are re-queued with backoff until `max_attempts` is reached, then marked `failed`.
 
 User-visible errors:
 
-- Reminder emails may arrive late or not at all if Edge Function secrets, Resend, or cron delivery infrastructure are misconfigured.
+- Reminder emails may arrive late or not at all if Edge Function secrets, SMTP (Gmail), or cron delivery infrastructure are misconfigured.
 - Failures do not block app reads or writes; they remain isolated to `reminder_deliveries` retry state.
 
 ## Route Entry Flow

@@ -24,7 +24,7 @@ flowchart LR
   App --> StorageRead["Supabase Storage signed URLs"]
   Actions --> Auth
   Actions --> PG
-  Actions --> OpenAI["OpenAI Responses API"]
+  Actions --> Gemini["Google Gemini Responses API"]
   Actions --> Storage["Supabase Storage bucket: memory-media"]
   Callback --> Auth
   OtpHelper --> Auth
@@ -71,7 +71,7 @@ flowchart LR
 - write directly to couple-scoped tables when that is allowed by RLS, or
 - call SQL RPCs when the mutation owns membership/invite invariants or needs atomic multi-row writes
   (for example, memory row plus media through `update_memory_media`)
-- `/games/daily-question` prompt generation calls the OpenAI Responses API from the server and persists through SQL RPCs only.
+- `/games/daily-question` prompt generation calls the Google Gemini API from the server and persists through SQL RPCs only.
 - Mutations revalidate affected routes after successful writes.
 
 ## Trust Boundaries And Enforcement
@@ -89,10 +89,10 @@ flowchart LR
 - Supabase Auth
 - Supabase Postgres
 - Supabase Storage
-- OpenAI Responses API
+- Google Gemini API for daily-question prompt generation
 - OpenFreeMap and MapLibre GL JS for map display
 - Nominatim through the server-side `/api/geo/search` proxy for place search. The proxy's result cache and per-user / upstream rate limits are per-process (in-memory), so on a multi-instance deploy throttling is best-effort per instance rather than a single global budget; this is acceptable at the current scale and would need a distributed limiter to enforce globally.
-- Resend for reminder email delivery from the `reminder-processor` Edge Function (invoked by `pg_cron` with a shared secret)
+- Gmail SMTP (via denomailer) for reminder email delivery from the `reminder-processor` Edge Function (invoked by `pg_cron` with a shared secret)
 
 There is no live Mapbox integration in the current runtime.
 

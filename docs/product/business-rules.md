@@ -163,7 +163,7 @@ This file is the canonical business-rule reference for the current app. If this 
 - When the couple timezone changes, `update_couple_timezone(...)` clears not-yet-revealed rounds dated today-or-future under the old zone (using each mode's reveal threshold — `daily_question` at 2 answers, `guess_date`/`trivia` at `greatest(active_partner_count, 1)`), so a date shift cannot strand an in-flight round and break reveal. Revealed and past rounds are preserved.
 - Daily-question prompt generation is on demand, not cron-driven.
 - The stored prompt locale is set by the first successful opener for that couple-local day and is reused for both partners.
-- `game_rounds.prompt_source` records `openai` for generated daily-question prompts and `memory` for guess-date and trivia memory clues.
+- `game_rounds.prompt_source` records `openai`, `gemini`, or `memory`; generated daily-question prompts use `openai` or `gemini` while guess-date and trivia memory clues use `memory`.
 - Guess-date round creation is on demand, not cron-driven.
 - A guess-date round is sourced from one existing couple memory selected in SQL: oldest unused by previous couple guess-date rounds, then oldest memory as fallback.
 - Guess-date clues are text-only in this slice and use memory note, then location, then a media/generic fallback.
@@ -288,8 +288,8 @@ This file is the canonical business-rule reference for the current app. If this 
   - database writes fail unexpectedly
 - Daily-question generation can fail if:
   - the authenticated user lacks active couple membership
-  - `OPENAI_API_KEY` is missing
-  - the prompt response is invalid or OpenAI fails
+  - `GEMINI_API_KEY` is missing
+  - the prompt response is invalid or Gemini fails
   - the gameplay round RPC rejects the submission unexpectedly
 - Daily-question answer submit can fail if:
   - the round is missing or outside the member’s couple scope

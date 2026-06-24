@@ -26,7 +26,7 @@ file as the full system spec.
 - Supabase Postgres for schema, RLS, triggers, and RPCs
 - Supabase Storage for private memory media
 - Supabase Edge Function plus cron/RPC queue for reminders
-- OpenAI Responses API for daily-question prompt generation
+- Google Gemini API for daily-question prompt generation
 
 ## Source Of Truth Reminder
 
